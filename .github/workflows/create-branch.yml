@@ -1,5 +1,4 @@
 name: Create Branch on Issue
-
 on:
   issues:
     types: [opened, labeled]
