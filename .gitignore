@@ -63,5 +63,20 @@ claude_history/
 !package.json
 !pom.xml
 !Makefile
+
+# Vite 관련
+.vite/
+vite.config.ts.timestamp-*
+
+# ESLint 캐시
+.eslintcache
+
+# Husky
+.husky/_
+
+# 중요한 md는 허용
 !README.md
-!LICENSE
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE.md
+!docs/**/*.md
