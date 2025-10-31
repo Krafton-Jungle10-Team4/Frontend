@@ -46,10 +46,13 @@ jobs:
             
             const prExists = pullRequests.length > 0;
             console.log(`PR exists: ${prExists}`);
-            return prExists.toString();
+            
+            // ✅ 수정: GitHub Output으로 명시적 설정
+            core.setOutput('exists', prExists ? 'true' : 'false');
+            return prExists;
 
       - name: Create Pull Request
-        if: steps.check-pr.outputs.result == 'false'
+        if: steps.check-pr.outputs.exists == 'false'
         uses: actions/github-script@v7
         env:
           ISSUE_NUMBER: ${{ steps.extract.outputs.ISSUE_NUMBER }}
