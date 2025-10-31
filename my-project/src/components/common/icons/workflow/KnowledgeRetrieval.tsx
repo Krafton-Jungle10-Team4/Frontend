@@ -1,7 +1,7 @@
 import * as React from 'react';
 import data from './KnowledgeRetrieval.json';
-import IconBase from '../IconBase';
-import type { IconData } from '../IconBase';
+import IconBase from '@components/common/icons/IconBase';
+import type { IconData } from '@components/common/icons/IconBase';
 
 const KnowledgeRetrieval = (
   props: React.SVGProps<SVGSVGElement> & {
