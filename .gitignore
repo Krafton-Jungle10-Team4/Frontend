@@ -60,27 +60,6 @@ claude_history/
 !pom.xml
 !Makefile
 
-# Gemini / AI 관련 메모, 로그, 설정
-gemini.md
-gemini_notes.md
-gemini_prompt.md
-*.gemini.md
-
-gemini.json
-gemini_config.json
-*.gemini.json
-
-gemini_logs/
-gemini_history/
-
-.gemini/
-
-gemini_api_key.json
-.gemini_token
-.gemini_auth
-*.gemini.creds
-*api*key*
-
 # Vite 관련
 .vite/
 vite.config.ts.timestamp-*
