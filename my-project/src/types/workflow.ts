@@ -51,6 +51,7 @@ export type CommonNodeType<T = object> = {
   // 기본 속성
   selected?: boolean;
   title: string;
+  desc?: string;
   type: BlockEnum;
   width?: number;
   height?: number;
