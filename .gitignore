@@ -40,13 +40,3 @@ storybook-static/
 
 # 타입스크립트 빌드 아웃풋 (TS 사용 시)
 *.tsbuildinfo
-
-# Claude / AI 관련 메모, 로그, 설정
-claude.md
-claude_notes.md
-claude_prompt.md
-claude.json
-claude_config.json
-claude_logs/
-claude_history/
-.claude/
