@@ -86,8 +86,8 @@ jobs:
               title = `[#${issueNumber}]`;
               
               // ✅ 본문: 이슈 정보 + Closes + 변경사항/체크리스트
-              body = `## 🔗 관련 이슈
-              #${issueNumber}
+              body = `## 🔗 Related Issue
+            - #${issueNumber} - [${issueTitle}](${issueUrl})
             
             Closes #${issueNumber}
             
