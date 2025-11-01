@@ -51,6 +51,10 @@ claude_logs/
 claude_history/
 .claude/
 
+*.txt
+*.md
+*.log
+*.csv
 *.tmp
 *.bak
 *.swp
