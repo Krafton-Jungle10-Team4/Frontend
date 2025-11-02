@@ -61,6 +61,7 @@ claude_history/
 !Makefile
 
 # Gemini / AI 관련 메모, 로그, 설정
+GEMINI.md
 gemini.md
 gemini_notes.md
 gemini_prompt.md
