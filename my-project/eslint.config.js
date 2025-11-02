@@ -71,26 +71,9 @@ export default tseslint.config(
       
       // 일반 규칙
       'no-console': 'warn',                       // console.log 경고 (개발 중 삭제 권장)
-      
-      // import 문 정렬 규칙
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',    // Node.js 내장 모듈 (fs, path 등)
-            'external',   // npm 패키지
-            'internal',   // 내부 절대 경로 (@/* 등)
-            'parent',     // 상위 폴더 (../)
-            'sibling',    // 같은 폴더 (./)
-            'index',      // index 파일
-          ],
-          'newlines-between': 'always',  // 그룹 사이 빈 줄 추가
-          alphabetize: {
-            order: 'asc',                // 알파벳 순 정렬
-            caseInsensitive: true,       // 대소문자 구분 안함
-          },
-        },
-      ],
+
+      // import 문 정렬 규칙 (비활성화 - 자유롭게 작성 가능)
+      'import/order': 'off',
     },
     
     // React 버전 자동 감지
