@@ -6,7 +6,7 @@ import {
   RiLoader2Line,
 } from '@remixicon/react';
 import type { NodeProps } from '@/types/workflow';
-import { BlockEnum, NodeRunningStatus } from '@types/workflow';
+import { BlockEnum, NodeRunningStatus } from '@/types/workflow';
 import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
