@@ -5,6 +5,13 @@ on:
     branches:
       - 'feature/**'
       - 'bugfix/**'
+      - 'fix/**'
+      - 'chore/**'
+      - 'refactor/**'
+      - 'docs/**'
+      - 'hotfix/**'
+      - 'test/**'
+      - 'perf/**'
 
 jobs:
   create-pr:
@@ -21,8 +28,8 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           echo "Branch name: $BRANCH_NAME"
           
-          # feature/issue-12 또는 bugfix/issue-12 형태에서 숫자 추출
-          if [[ $BRANCH_NAME =~ (feature|bugfix)/.*-([0-9]+) ]]; then
+          # feature/issue-12, bugfix/issue-12, fix/issue-12 등 형태에서 숫자 추출
+          if [[ $BRANCH_NAME =~ (feature|bugfix|fix|chore|refactor|docs|hotfix|test|perf)/.*-([0-9]+) ]]; then
             ISSUE_NUM="${BASH_REMATCH[2]}"
             echo "ISSUE_NUMBER=$ISSUE_NUM" >> $GITHUB_OUTPUT
             echo "Found issue number: $ISSUE_NUM"
