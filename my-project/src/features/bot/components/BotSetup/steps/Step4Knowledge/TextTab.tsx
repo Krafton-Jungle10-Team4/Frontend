@@ -7,7 +7,7 @@ interface TextTabProps {
   language: Language;
 }
 
-export function TextTab({ language: _language }: TextTabProps) {
+export function TextTab({ language }: TextTabProps) {
   const { knowledgeText, setKnowledgeText } = useBotSetup();
 
   const translations = {

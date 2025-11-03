@@ -22,9 +22,11 @@ describe('authStore', () => {
       const { setUser, user, isAuthenticated } = useAuthStore.getState();
 
       const testUser: User = {
-        id: 'user-1',
+        id: 1,
         email: 'test@example.com',
         name: 'Test User',
+        profile_image: null,
+        created_at: new Date().toISOString(),
       };
 
       setUser(testUser);
@@ -59,9 +61,11 @@ describe('authStore', () => {
         useAuthStore.getState();
 
       const testUser: User = {
-        id: 'user-1',
+        id: 1,
         email: 'test@example.com',
         name: 'Test User',
+        profile_image: null,
+        created_at: new Date().toISOString(),
       };
 
       setUser(testUser);
@@ -94,9 +98,11 @@ describe('authStore', () => {
       const { setUser, isAuthenticated } = useAuthStore.getState();
 
       const testUser: User = {
-        id: 'user-1',
+        id: 1,
         email: 'test@example.com',
         name: 'Test User',
+        profile_image: null,
+        created_at: new Date().toISOString(),
       };
 
       setUser(testUser);

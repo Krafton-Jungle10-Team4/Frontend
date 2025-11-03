@@ -23,6 +23,7 @@ describe('dashboardStore', () => {
       const testStats: DashboardStats = {
         totalBots: 5,
         activeBots: 3,
+        totalQueries: 800,
         totalMessages: 1000,
         totalErrors: 10,
         avgResponseTime: 1.5,
@@ -39,6 +40,7 @@ describe('dashboardStore', () => {
       const initialStats: DashboardStats = {
         totalBots: 5,
         activeBots: 3,
+        totalQueries: 800,
         totalMessages: 1000,
         totalErrors: 10,
         avgResponseTime: 1.5,
@@ -82,17 +84,18 @@ describe('dashboardStore', () => {
     it('에러 메시지를 설정할 수 있어야 한다', () => {
       const { setError, error } = useDashboardStore.getState();
 
-      const errorMessage = 'Failed to load dashboard data';
-      setError(errorMessage);
+      const testError = new Error('Failed to load dashboard data');
+      setError(testError);
 
-      expect(error).toBe(errorMessage);
+      expect(error).toBe(testError);
     });
 
     it('에러를 초기화할 수 있어야 한다', () => {
       const { setError, clearError, error } = useDashboardStore.getState();
 
-      setError('Some error');
-      expect(error).toBe('Some error');
+      const testError = new Error('Some error');
+      setError(testError);
+      expect(error).toBe(testError);
 
       clearError();
       expect(error).toBeNull();
@@ -104,7 +107,7 @@ describe('dashboardStore', () => {
       setLoading(true);
       expect(isLoading).toBe(true);
 
-      setError('Error occurred');
+      setError(new Error('Error occurred'));
       setLoading(false);
 
       expect(isLoading).toBe(false);
@@ -118,6 +121,7 @@ describe('dashboardStore', () => {
       const testStats: DashboardStats = {
         totalBots: 5,
         activeBots: 3,
+        totalQueries: 800,
         totalMessages: 1000,
         totalErrors: 50,
         avgResponseTime: 1.5,
@@ -136,6 +140,7 @@ describe('dashboardStore', () => {
       const testStats: DashboardStats = {
         totalBots: 10,
         activeBots: 6,
+        totalQueries: 900,
         totalMessages: 1000,
         totalErrors: 10,
         avgResponseTime: 1.5,
@@ -172,6 +177,7 @@ describe('dashboardStore', () => {
       const testStats: DashboardStats = {
         totalBots: 5,
         activeBots: 3,
+        totalQueries: 800,
         totalMessages: 1000,
         totalErrors: 10,
         avgResponseTime: 1.5,
@@ -194,12 +200,12 @@ describe('dashboardStore', () => {
       expect(isLoading).toBe(true);
 
       // 에러 발생
-      const errorMessage = 'Network error';
-      setError(errorMessage);
+      const testError = new Error('Network error');
+      setError(testError);
       setLoading(false);
 
       expect(isLoading).toBe(false);
-      expect(error).toBe(errorMessage);
+      expect(error).toBe(testError);
     });
   });
 });

@@ -12,7 +12,10 @@ export type {
   ViewMode,
   AsyncState,
   ApiResponse,
-} from './types/common.types';
+  GoalType,
+  DescriptionSource,
+  User,
+} from './types';
 
 // Utils are exported from their respective files
 // Constants are exported from their respective files

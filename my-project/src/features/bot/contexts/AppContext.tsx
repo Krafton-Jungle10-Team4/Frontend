@@ -7,8 +7,8 @@ import {
 } from 'react';
 import { createMockBot } from '@/data/mockBots';
 import { createMockActivity } from '@/data/mockActivities';
-import type { Bot } from '@/features/bot/components/BotCard';
-import type { Activity } from '@/features/bot/components/RightSidebar';
+import type { Bot } from '@/features/bot/types/bot.types';
+import type { Activity } from '@/features/activity';
 
 export type Language = 'en' | 'ko';
 

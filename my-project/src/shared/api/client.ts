@@ -1,6 +1,8 @@
 import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosError,
 } from 'axios';
 import { API_BASE_URL, API_TIMEOUT } from '@/shared/constants/apiEndpoints';
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
@@ -46,7 +48,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
@@ -62,7 +64,7 @@ apiKeyClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
@@ -75,8 +77,8 @@ apiKeyClient.interceptors.request.use(
  * JWT 클라이언트 에러 처리
  */
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
     // 401: 인증 실패 -> 로그인 페이지로 리다이렉트
     if (error.response?.status === 401) {
       localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
@@ -94,8 +96,8 @@ apiClient.interceptors.response.use(
  * API Key 클라이언트 에러 처리
  */
 apiKeyClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
     // API Key 관련 에러 처리
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.error(ERROR_MESSAGES.API_KEY.INVALID);

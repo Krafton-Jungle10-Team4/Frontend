@@ -6,6 +6,8 @@
 // UI Types
 export type Language = 'en' | 'ko';
 export type ViewMode = 'grid' | 'list';
+export type GoalType = 'customer-support' | 'ai-assistant' | 'sales' | 'other';
+export type DescriptionSource = 'website' | 'text';
 
 // User Types
 export interface User {
@@ -13,6 +15,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  picture?: string;
   role?: string;
   createdAt?: string;
   updatedAt?: string;

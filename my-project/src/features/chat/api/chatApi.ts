@@ -97,3 +97,20 @@ export const formatChatMessage = (
     timestamp: new Date().toISOString(),
   };
 };
+
+/**
+ * Helper: 에러가 Chat 관련 에러인지 확인
+ */
+export const isChatError = (error: unknown): error is Error => {
+  return error instanceof Error;
+};
+
+/**
+ * Helper: Chat 에러 처리
+ */
+export const handleChatError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
+};

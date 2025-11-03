@@ -78,11 +78,20 @@ export interface SearchResponse {
 // ============================================
 // Chat
 // ============================================
+export interface HealthCheckResponse {
+  status: string;
+  message?: string;
+}
+
 export interface ChatRequest {
   message: string; // [1, 2000] characters
   session_id?: string | null;
+  document_ids?: string[];
   top_k?: number; // [1, 20], default for retrieval
   include_sources?: boolean; // Whether to return sources
+  max_tokens?: number;
+  temperature?: number;
+  stream?: boolean;
 }
 
 export interface Source {

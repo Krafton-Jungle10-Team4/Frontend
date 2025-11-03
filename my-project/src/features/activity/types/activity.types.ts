@@ -5,7 +5,9 @@
 
 export interface Activity {
   id: string;
-  type: 'bot_created' | 'bot_deleted' | 'message_sent' | 'error_occurred';
+  type?: 'bot_created' | 'bot_deleted' | 'message_sent' | 'error_occurred';
+  user?: string;
+  action?: string;
   botId?: string;
   botName?: string;
   message?: string;

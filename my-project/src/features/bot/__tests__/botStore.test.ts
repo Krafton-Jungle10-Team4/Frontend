@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useBotStore } from '../stores/botStore';
+import {
+  useBotStore,
+  selectBotsCount,
+  selectActiveBots,
+} from '../stores/botStore';
 import type { Bot } from '../types/bot.types';
 
 describe('botStore', () => {
@@ -113,7 +117,7 @@ describe('botStore', () => {
 
   describe('Selectors', () => {
     it('selectBotsCount는 정확한 Bot 수를 반환해야 한다', () => {
-      const { addBot, selectBotsCount } = useBotStore.getState();
+      const { addBot } = useBotStore.getState();
 
       const bot1: Bot = {
         id: 'test-bot-1',
@@ -144,7 +148,7 @@ describe('botStore', () => {
     });
 
     it('selectActiveBots는 활성화된 Bot만 반환해야 한다', () => {
-      const { addBot, selectActiveBots } = useBotStore.getState();
+      const { addBot } = useBotStore.getState();
 
       const activeBot: Bot = {
         id: 'active-bot',

@@ -75,3 +75,20 @@ export const documentsApi = {
     await apiKeyClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId));
   },
 };
+
+/**
+ * Helper: 에러가 Document 관련 에러인지 확인
+ */
+export const isDocumentError = (error: unknown): error is Error => {
+  return error instanceof Error;
+};
+
+/**
+ * Helper: Document 에러 처리
+ */
+export const handleDocumentError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected document error occurred';
+};
