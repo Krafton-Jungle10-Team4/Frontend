@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/utils/api';
+import { ApiClient } from '@/shared/utils/api';
 import { toast } from 'sonner';
-import type { Language } from '@/types';
+import type { Language } from '@/shared/types';
 
 interface StepNavigationProps {
   onBack: () => void;

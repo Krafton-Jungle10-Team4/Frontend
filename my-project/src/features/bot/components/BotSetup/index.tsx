@@ -9,14 +9,14 @@
  */
 
 import { BotSetupProvider, useBotSetup } from './BotSetupContext';
-import { LeftSidebar } from '@/components/LeftSidebar';
+import { LeftSidebar } from '@/widgets/navigation';
 import { StepNavigation } from './components/StepNavigation';
 import { ExitDialog } from './components/ExitDialog';
 import { Step1Name } from './steps/Step1Name';
 import { Step2Goal } from './steps/Step2Goal';
 import { Step3Personality } from './steps/Step3Personality';
 import { Step4Knowledge } from './steps/Step4Knowledge';
-import type { Language } from '@/types';
+import type { Language } from '@/shared/types';
 
 interface BotSetupProps {
   onComplete: (botName: string) => void;

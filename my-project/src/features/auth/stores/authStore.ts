@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { STORAGE_KEYS } from '@/constants/storageKeys';
+import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 
 import type { AuthState, User } from '../types/auth.types';
 import { getCurrentUser, googleLogin, logout as logoutApi } from '../api/authApi';

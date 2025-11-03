@@ -1,9 +1,9 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BotPreview } from '../components/BotPreview';
-import { useUIStore } from '@/store/uiStore';
+import { useUIStore } from '@/shared/stores/uiStore';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/features/auth';
 
 export function BotPreviewPage() {
   const navigate = useNavigate();

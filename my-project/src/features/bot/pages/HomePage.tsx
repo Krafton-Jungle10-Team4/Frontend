@@ -12,10 +12,10 @@ import {
   RightSidebar,
   WorkspaceSidebar,
 } from '@/widgets';
-import { SearchFilters } from '@/components/SearchFilters';
+import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
-import { useUserStore } from '@/store/userStore';
-import { useUIStore } from '@/store/uiStore';
+import { useUserStore } from '@/features/auth';
+import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';

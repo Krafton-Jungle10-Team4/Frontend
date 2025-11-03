@@ -1,7 +1,7 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/alert-dialog';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/utils/api';
-import type { Language } from '@/types';
+import { ApiClient } from '@/shared/utils/api';
+import type { Language } from '@/shared/types';
 
 interface ExitDialogProps {
   onBack: () => void;

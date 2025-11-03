@@ -2,7 +2,7 @@
  * Mock activity data for development and testing
  */
 
-import type { Activity } from '../components/RightSidebar';
+import type { Activity } from '@/widgets/navigation/RightSidebar';
 
 export const mockActivities: Activity[] = [
   {

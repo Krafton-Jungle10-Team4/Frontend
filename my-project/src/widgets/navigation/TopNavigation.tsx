@@ -1,8 +1,7 @@
-import { PanelLeft, Languages, User, Settings, Link2, KeyRound, Bug, Palette, LogOut } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
+import { PanelLeft, Languages, Settings, Link2, KeyRound, Bug, Palette, LogOut } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/shared/components/avatar';
+import { Button } from '@/shared/components/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
 
 type Language = 'en' | 'ko';
 

@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/shared/components/button';
+import { Input } from '@/shared/components/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/collapsible';
+import { Checkbox } from '@/shared/components/checkbox';
 import { Plus, Trash2, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useBotSetup } from '../../BotSetupContext';
-import { ApiClient } from '@/utils/api';
-import { isValidUrl } from '@/utils/validation';
-import { generateTempId } from '@/utils/session';
+import { ApiClient } from '@/shared/utils/api';
+import { isValidUrl } from '@/shared/utils/validation';
+import { generateTempId } from '@/shared/utils/session';
 import { toast } from 'sonner';
-import type { Language } from '@/types';
+import type { Language } from '@/shared/types';
 import type { DiscoveredUrl } from '../../types';
 
 interface WebsitesTabProps {

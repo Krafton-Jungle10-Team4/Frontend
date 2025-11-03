@@ -1,7 +1,7 @@
 import * as React from 'react';
 import data from './Answer.json';
-import IconBase from '@components/common/icons/IconBase';
-import type { IconData } from '@components/common/icons/IconBase';
+import IconBase from '@/shared/components/icons/IconBase';
+import type { IconData } from '@/shared/components/icons/IconBase';
 
 const Answer = (
   props: React.SVGProps<SVGSVGElement> & {

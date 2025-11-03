@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/button';
 import { RotateCw, Share2, CheckCircle2, ExternalLink, Puzzle, TestTube } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { Card } from '@/components/ui/card';
+import { Progress } from '@/shared/components/progress';
+import { Card } from '@/shared/components/card';
 import { toast } from 'sonner';
-import type { Language } from '@/types';
+import type { Language } from '@/shared/types';
 
 interface BotPreviewProps {
   botName: string;

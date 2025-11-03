@@ -5,7 +5,7 @@
 
 import { BotCard, type BotCardData } from '../BotCard';
 import { EmptyState } from '../EmptyState';
-import type { Language, ViewMode } from '@/types';
+import type { Language, ViewMode } from '@/shared/types';
 
 interface BotListProps {
   bots: BotCardData[];

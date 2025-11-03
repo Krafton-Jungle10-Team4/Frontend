@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/shared/components/button';
+import { Textarea } from '@/shared/components/textarea';
 import { Headphones, Briefcase, Hand, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/utils/api';
-import { TEXT_LIMITS } from '@/constants/textLimits';
+import { ApiClient } from '@/shared/utils/api';
+import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import { toast } from 'sonner';
-import type { Language } from '@/types';
-import type { GoalType } from '../types';
+import type { Language } from '@/shared/types';
+import type { GoalType } from '@/shared/types';
 
 interface Step2GoalProps {
   language: Language;

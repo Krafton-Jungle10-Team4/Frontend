@@ -2,7 +2,7 @@
  * Formatting utility functions
  */
 
-import type { Language } from '../App';
+import type { Language } from '@/shared/types';
 
 /**
  * Format date to relative time (e.g., "2 hours ago", "3 days ago")

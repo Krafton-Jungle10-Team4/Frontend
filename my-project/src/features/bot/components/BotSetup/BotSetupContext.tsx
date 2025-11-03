@@ -3,9 +3,9 @@
  */
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { isValidUrl } from '@/utils/validation';
-import { generateSessionId } from '@/utils/session';
-import { TEXT_LIMITS } from '@/constants/textLimits';
+import { isValidUrl } from '@/shared/utils/validation';
+import { generateSessionId } from '@/shared/utils/session';
+import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import type { 
   GoalType, 
   DescriptionSource, 

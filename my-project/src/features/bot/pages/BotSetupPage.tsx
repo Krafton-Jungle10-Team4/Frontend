@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { BotSetup } from '../components/BotSetup';
-import { useUIStore } from '@/store/uiStore';
+import { useUIStore } from '@/shared/stores/uiStore';
 
 export function BotSetupPage() {
   const navigate = useNavigate();

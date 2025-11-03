@@ -3,7 +3,7 @@ import { useBotSetup } from '../../BotSetupContext';
 import { WebsitesTab } from './WebsitesTab';
 import { FilesTab } from './FilesTab';
 import { TextTab } from './TextTab';
-import type { Language } from '@/types';
+import type { Language } from '@/shared/types';
 import type { KnowledgeTab } from '../../types';
 
 interface Step4KnowledgeProps {
