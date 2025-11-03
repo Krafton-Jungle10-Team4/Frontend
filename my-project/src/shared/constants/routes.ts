@@ -6,6 +6,7 @@ export const ROUTES = {
   LANDING: '/landing',
   HOME: '/home',
   LOGIN: '/login',
+  AUTH_CALLBACK: '/auth/callback',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
 } as const;

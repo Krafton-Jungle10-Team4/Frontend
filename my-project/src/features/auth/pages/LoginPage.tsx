@@ -1,45 +1,24 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RiArrowLeftLine } from '@remixicon/react';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
 import { ROUTES } from '@/shared/constants/routes';
-import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
 import { useAuth } from '../hooks/useAuth';
 
 /**
- * 로그인 페이지 - 웹 최적화 버전
+ * 로그인 페이지 (SnapAgent OAuth)
  */
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const { redirectToGoogleLogin, isLoading, error } = useAuth();
 
   /**
-   * 구글 로그인 성공 처리
+   * Google OAuth 로그인 시작
    */
-  const handleGoogleLoginSuccess = async (credential: string) => {
-    try {
-      setError(null);
-      await login(credential);
-
-      // 로그인 성공 시 홈으로 이동
-      navigate(ROUTES.HOME);
-    } catch (err) {
-      console.error('Login failed:', err);
-      setError(
-        (err as { message?: string })?.message ||
-          ERROR_MESSAGES.AUTH.GOOGLE_LOGIN_FAILED
-      );
-    }
-  };
-
-  /**
-   * 구글 로그인 실패 처리
-   */
-  const handleGoogleLoginError = (error: Error) => {
-    console.error('Google login error:', error);
-    setError(ERROR_MESSAGES.AUTH.GOOGLE_LOGIN_FAILED);
+  const handleGoogleLogin = () => {
+    // OAuth callback URL (프론트엔드 경로)
+    const callbackUrl = `${window.location.origin}${ROUTES.AUTH_CALLBACK}`;
+    redirectToGoogleLogin(callbackUrl);
   };
 
   return (
@@ -73,17 +52,13 @@ export const LoginPage = () => {
           )}
 
           <div className="space-y-6">
-            <GoogleLoginButton
-              onSuccess={handleGoogleLoginSuccess}
-              onError={handleGoogleLoginError}
-              disabled={isLoading}
-            />
+            <GoogleLoginButton onClick={handleGoogleLogin} disabled={isLoading} />
 
             {isLoading && (
               <div className="text-center text-blue-200">
                 <div className="inline-flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-                  <span>Signing in...</span>
+                  <span>Redirecting to Google...</span>
                 </div>
               </div>
             )}

@@ -39,6 +39,15 @@ export const router = createBrowserRouter([
       // Auth routes - Public
       authRoutes,
 
+      // OAuth Callback - Public (no layout)
+      {
+        path: 'auth/callback',
+        lazy: () =>
+          import('@/features/auth').then((module) => ({
+            Component: module.AuthCallbackPage,
+          })),
+      },
+
       // Bot Setup routes - Public (인증 불필요)
       {
         path: 'setup',
