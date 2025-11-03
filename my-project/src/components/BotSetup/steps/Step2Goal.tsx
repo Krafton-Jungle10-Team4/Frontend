@@ -5,7 +5,7 @@ import { Headphones, Briefcase, Hand, Sparkles, Loader2, ArrowLeft } from 'lucid
 import { useBotSetup } from '../BotSetupContext';
 import { ApiClient } from '../../../utils/api';
 import { TEXT_LIMITS } from '../../../utils/constants';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Language } from '../../../contexts/AppContext';
 import type { GoalType } from '../types';
 

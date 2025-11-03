@@ -8,7 +8,7 @@ import { useBotSetup } from '../../BotSetupContext';
 import { ApiClient } from '../../../../utils/api';
 import { isValidUrl } from '../../../../utils/validation';
 import { generateTempId } from '../../../../utils/session';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Language } from '../../../../contexts/AppContext';
 import type { DiscoveredUrl } from '../../types';
 

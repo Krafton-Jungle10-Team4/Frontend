@@ -5,10 +5,32 @@ import { HomePage } from './pages/HomePage';
 import { BotSetupPage } from './pages/BotSetupPage';
 import { SetupCompletePage } from './pages/SetupCompletePage';
 import { BotPreviewPage } from './pages/BotPreviewPage';
-
+import { LoginPage } from '@pages/LoginPage';
+import { DashboardPage } from '@pages/DashboardPage';
 import WorkflowBuilder from '@/pages/WorkflowBuilder';
+import { ROUTES } from '@constants/routes';
+import { useAuth } from '@hooks/useAuth';
+
+import './App.css';
 
 export type { Language } from './contexts/AppContext';
+
+/**
+ * 인증이 필요한 라우트를 보호하는 컴포넌트
+ */
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to={ROUTES.LOGIN} replace />;
+  }
+
+  return <>{children}</>;
+};
 
 export default function App() {
   return (
@@ -16,21 +38,29 @@ export default function App() {
       <AppProvider>
         <Toaster position="top-center" />
         <Routes>
-          {/* Home - Bot List */}
+          {/* 로그인 페이지 (인증 불필요) */}
+          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+
+          {/* 보호된 라우트들 (인증 필요) */}
+          <Route
+            path={ROUTES.DASHBOARD}
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Bot Setup 관련 라우트 */}
           <Route path="/" element={<HomePage />} />
-          
-          {/* Bot Setup - 4 Steps */}
           <Route path="/setup" element={<BotSetupPage />} />
-          
-          {/* Setup Complete */}
           <Route path="/setup/complete" element={<SetupCompletePage />} />
-          
-          {/* Bot Preview */}
           <Route path="/preview" element={<BotPreviewPage />} />
 
-          {/* WorkflowBuilder를 위한 새 <Route> 추가 */}
+          {/* WorkflowBuilder 라우트 */}
           <Route path="/workflow-builder" element={<WorkflowBuilder />} />
-          
+          <Route path="/workflow" element={<WorkflowBuilder />} />
+
           {/* Fallback - Redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
