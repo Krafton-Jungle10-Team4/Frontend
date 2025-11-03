@@ -1,5 +1,6 @@
 import { Button } from '../../ui/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
 import { ApiClient } from '../../../utils/api';
 import { toast } from 'sonner';
@@ -11,7 +12,11 @@ interface StepNavigationProps {
   language: Language;
 }
 
-export function StepNavigation({ onBack, onComplete, language }: StepNavigationProps) {
+export function StepNavigation({
+  onBack,
+  onComplete,
+  language,
+}: StepNavigationProps) {
   const {
     step,
     setStep,
@@ -48,6 +53,7 @@ export function StepNavigation({ onBack, onComplete, language }: StepNavigationP
   };
 
   const t = translations[language];
+  const navigate = useNavigate();
 
   const handleNext = async () => {
     if (step < 4) {
@@ -73,7 +79,16 @@ export function StepNavigation({ onBack, onComplete, language }: StepNavigationP
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         if (botName.trim()) {
-          onComplete(botName);
+          // onComplete(botName);
+          // Step 4: Train Agent button clicked - Navigate to WorkflowBuilder
+          navigate('/workflow-builder', {
+            state: {
+              botName,
+              goal: selectedGoal === 'other' ? customGoal : selectedGoal,
+              personality: personalityText,
+              knowledge: knowledgeText,
+            },
+          });
         }
       } catch (error) {
         console.error('Bot creation error:', error);
@@ -128,9 +143,9 @@ export function StepNavigation({ onBack, onComplete, language }: StepNavigationP
       <div className="absolute bottom-0 left-0 right-0 px-6 py-6">
         <div className="max-w-md mx-auto flex items-center gap-3">
           {step > 1 && (
-            <Button 
-              onClick={handlePrev} 
-              variant="outline" 
+            <Button
+              onClick={handlePrev}
+              variant="outline"
               className="flex-[2] h-12 border-gray-300"
             >
               <ArrowLeft size={18} />
