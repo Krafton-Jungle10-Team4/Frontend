@@ -1,8 +1,9 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RootLayout } from '@/widgets/layouts/RootLayout';
-import { DashboardLayout } from '@/widgets/layouts/DashboardLayout';
 import { RootErrorBoundary } from '@/widgets/layouts/RootErrorBoundary';
 import { ProtectedRoute, authRoutes } from '@/features/auth';
+import { workflowRoutes } from '@/features/workflow';
+import { dashboardRoutes } from '@/features/dashboard';
 
 /**
  * React Router v7 기반 애플리케이션 라우터 설정
@@ -11,6 +12,7 @@ import { ProtectedRoute, authRoutes } from '@/features/auth';
  * - RootLayout: 전체 앱의 최상위 레이아웃
  *   - Public routes: 인증 불필요 (/, /setup, /preview 등)
  *   - Auth routes: 인증 페이지 (로그인)
+ *   - Workflow routes: 워크플로우 빌더
  *   - Protected routes: 인증 필요 (대시보드 등)
  */
 export const router = createBrowserRouter([
@@ -45,39 +47,18 @@ export const router = createBrowserRouter([
         })),
       },
 
-      // Workflow Builder routes
-      {
-        path: 'workflow-builder',
-        lazy: () => import('@/pages/WorkflowBuilder').then(module => ({
-          Component: module.default
-        })),
-      },
-      {
-        path: 'workflow',
-        lazy: () => import('@/pages/WorkflowBuilder').then(module => ({
-          Component: module.default
-        })),
-      },
-
       // Auth routes
       authRoutes,
+
+      // Workflow routes - Feature 기반
+      workflowRoutes,
 
       // Protected routes - 인증 필요
       {
         element: <ProtectedRoute />,
         children: [
-          {
-            path: 'dashboard',
-            element: <DashboardLayout />,
-            children: [
-              {
-                index: true,
-                lazy: () => import('@/pages/DashboardPage').then(module => ({
-                  Component: module.DashboardPage
-                })),
-              },
-            ],
-          },
+          // Dashboard routes - Feature 기반
+          dashboardRoutes,
         ],
       },
 
