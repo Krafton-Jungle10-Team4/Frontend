@@ -55,16 +55,18 @@ html[data-changing-theme] * {
   font-weight: 400;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
 }
 
 /* System 폰트 (워크플로우 노드 전용) */

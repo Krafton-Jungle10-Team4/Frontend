@@ -66,7 +66,10 @@ export default tseslint.config(
       'react/prop-types': 'off',                  // TypeScript 사용 시 prop-types 불필요
       
       // TypeScript 관련 규칙
-      '@typescript-eslint/no-unused-vars': 'error',  // 사용하지 않는 변수 에러
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }  // _로 시작하는 변수는 무시
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',  // any 타입 사용 경고
       
       // 일반 규칙
