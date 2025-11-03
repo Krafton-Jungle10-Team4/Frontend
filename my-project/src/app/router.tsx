@@ -21,14 +21,25 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <RootErrorBoundary />,
     children: [
-      // Bot Feature routes - Public (인증 불필요)
+      // Root - Redirect to Landing
       {
-        path: 'home',
+        index: true,
+        element: <Navigate to="/landing" replace />,
+      },
+
+      // Landing Page
+      {
+        path: 'landing',
         lazy: () =>
-          import('@/features/bot').then((module) => ({
-            Component: module.HomePage,
+          import('@/features/landing').then((module) => ({
+            Component: module.LandingPage,
           })),
       },
+
+      // Auth routes - Public
+      authRoutes,
+
+      // Bot Setup routes - Public (인증 불필요)
       {
         path: 'setup',
         lazy: () =>
@@ -51,9 +62,6 @@ export const router = createBrowserRouter([
           })),
       },
 
-      // Auth routes
-      authRoutes,
-
       // Workflow routes - Feature 기반
       workflowRoutes,
 
@@ -61,6 +69,15 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          // Home (Bot List) - 인증 필요
+          {
+            path: 'home',
+            lazy: () =>
+              import('@/features/bot').then((module) => ({
+                Component: module.HomePage,
+              })),
+          },
+
           // Dashboard routes - Feature 기반
           dashboardRoutes,
         ],
@@ -69,7 +86,7 @@ export const router = createBrowserRouter([
       // Fallback - 404
       {
         path: '*',
-        element: <Navigate to="/home" replace />,
+        element: <Navigate to="/landing" replace />,
       },
     ],
   },

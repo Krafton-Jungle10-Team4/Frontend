@@ -58,28 +58,38 @@ export const GoogleLoginButton = ({
     const buttonDiv = document.getElementById('google-login-button');
     if (buttonDiv) {
       window.google.accounts.id.renderButton(buttonDiv, {
-        theme: 'outline',
+        theme: 'filled_blue',
         size: 'large',
-        width: 320,
+        width: 400,
         text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
       });
     }
   }, [isGoogleLoaded, onSuccess, onError]);
 
   if (!isGoogleLoaded) {
     return (
-      <div className="flex items-center justify-center py-3">
-        <div className="text-sm text-gray-500">Loading Google Sign-In...</div>
+      <div className="flex items-center justify-center py-4">
+        <div className="flex items-center gap-2 text-blue-200">
+          <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Loading Google Sign-In...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="w-full flex justify-center">
       <div
         id="google-login-button"
-        className={disabled ? 'pointer-events-none opacity-50' : ''}
+        className={`transition-opacity ${disabled ? 'pointer-events-none opacity-50' : ''}`}
       />
+      <style>{`
+        #google-login-button iframe {
+          min-height: 50px !important;
+        }
+      `}</style>
     </div>
   );
 };
