@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSidebar, { SidebarView } from '../components/sidebar/WorkflowSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
 import type { Node, Edge } from '../types/workflow.types';
 import { BlockEnum } from '../types/workflow.types';
+import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
+import { useApp } from '@/features/bot/contexts/AppContext';
 
 /**
  * RAG (Retrieval-Augmented Generation) 워크플로우 샘플
@@ -92,6 +95,32 @@ const sampleEdges: Edge[] = [
   },
 ];
 
+const WorkflowWithChat = () => {
+  const { language } = useApp();
+  const location = useLocation();
+
+  // Get bot data from navigation state (passed from Step 4)
+  const state = location.state as { botName?: string } | null;
+  const botName = state?.botName || 'AI Support Agent';
+
+  return (
+    <div className="flex h-full w-full">
+      {/* Left: Workflow Graph */}
+      <div className="flex-1 relative">
+        <Workflow initialNodes={sampleNodes} initialEdges={sampleEdges} />
+      </div>
+
+      {/* Divider */}
+      <div className="w-px bg-gray-200 dark:bg-gray-700" />
+
+      {/* Right: Chatbot Preview */}
+      <div className="w-96 flex-shrink-0">
+        <ChatPreviewPanel botName={botName} language={language} />
+      </div>
+    </div>
+  );
+};
+
 /**
  * 워크플로우 빌더 페이지
  * Dify 스타일의 사이드바와 멀티뷰 지원
@@ -102,22 +131,20 @@ export const WorkflowBuilderPage = () => {
   const renderContent = () => {
     switch (activeView) {
       case 'flow':
-        return <Workflow initialNodes={sampleNodes} initialEdges={sampleEdges} />;
+        return <WorkflowWithChat />;
       case 'monitoring':
         return <MonitoringView />;
       case 'logs':
         return <LogsView />;
       default:
-        return <Workflow initialNodes={sampleNodes} initialEdges={sampleEdges} />;
+        return <WorkflowWithChat />;
     }
   };
 
   return (
     <div className="h-screen w-screen flex">
       <WorkflowSidebar activeView={activeView} onViewChange={setActiveView} />
-      <div className="flex-1 overflow-hidden">
-        {renderContent()}
-      </div>
+      <div className="flex-1 overflow-hidden">{renderContent()}</div>
     </div>
   );
 };
