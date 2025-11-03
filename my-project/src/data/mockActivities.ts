@@ -10,28 +10,28 @@ export const mockActivities: Activity[] = [
     user: 'John Doe',
     action: 'published a bot named',
     botName: 'Customer Support Bot',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
   },
   {
     id: '2',
     user: 'John Doe',
     action: 'edited',
     botName: 'Sales Assistant',
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
   },
   {
     id: '3',
     user: 'John Doe',
     action: 'deleted a bot named',
     botName: 'Old Bot',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
   },
   {
     id: '4',
     user: 'John Doe',
     action: 'published a bot named',
     botName: 'Content Writer',
-    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
   },
 ];
 
@@ -45,6 +45,6 @@ export function createMockActivity(
     user,
     action,
     botName,
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(),
   };
 }

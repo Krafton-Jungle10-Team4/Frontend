@@ -6,7 +6,7 @@ import { formatFileSize } from '../../../../utils/format';
 import { FILE_UPLOAD } from '../../../../utils/constants';
 import { generateTempId } from '../../../../utils/session';
 import { toast } from 'sonner';
-import type { Language } from '../../../../contexts/AppContext';
+import type { Language } from '@/types';
 import type { FileStatus } from '../../types';
 
 interface FilesTabProps {

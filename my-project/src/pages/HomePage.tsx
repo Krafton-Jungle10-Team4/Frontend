@@ -7,32 +7,63 @@ import { BotCard } from '../components/BotCard';
 import { EmptyState } from '../components/EmptyState';
 import { RightSidebar } from '../components/RightSidebar';
 import { WorkspaceSidebar } from '../components/WorkspaceSidebar';
-import { useApp } from '../contexts/AppContext';
+import { useUserStore } from '../store/userStore';
+import { useUIStore } from '../store/uiStore';
+import { useBotStore } from '../store/botStore';
+import { useActivityStore } from '../store/activityStore';
+import { useMemo } from 'react';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const {
-    userName,
-    isSidebarOpen,
-    setIsSidebarOpen,
-    searchQuery,
-    setSearchQuery,
-    viewMode,
-    setViewMode,
-    language,
-    setLanguage,
-    bots,
-    deleteBot,
-    activities,
-    filteredBots,
-  } = useApp();
+
+  // User store
+  const userName = useUserStore((state) => state.userName);
+
+  // UI store
+  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
+  const searchQuery = useUIStore((state) => state.searchQuery);
+  const setSearchQuery = useUIStore((state) => state.setSearchQuery);
+  const viewMode = useUIStore((state) => state.viewMode);
+  const setViewMode = useUIStore((state) => state.setViewMode);
+  const language = useUIStore((state) => state.language);
+  const setLanguage = useUIStore((state) => state.setLanguage);
+
+  // Bot store
+  const bots = useBotStore((state) => state.bots);
+  const deleteBot = useBotStore((state) => state.deleteBot);
+
+  // Activity store
+  const activities = useActivityStore((state) => state.activities);
+  const addActivity = useActivityStore((state) => state.addActivity);
+
+  // Computed: filtered bots
+  const filteredBots = useMemo(() => {
+    if (!searchQuery) return bots;
+    return bots.filter((bot) =>
+      bot.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [bots, searchQuery]);
 
   const handleCreateBot = () => {
     navigate('/setup');
   };
 
   const handleDeleteBot = (botId: string, botName: string) => {
-    deleteBot(botId, botName);
+    // Delete bot from store
+    deleteBot(botId);
+
+    // Add activity log
+    const translations = {
+      en: { action: 'deleted bot' },
+      ko: { action: '봇을 삭제했습니다' },
+    };
+    addActivity({
+      type: 'bot_deleted',
+      botId,
+      botName,
+      message: `${userName} ${translations[language].action}: ${botName}`,
+    });
   };
 
   const translations = {
@@ -53,7 +84,7 @@ export function HomePage() {
       {/* Workspace Sidebar */}
       <WorkspaceSidebar
         isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={() => setSidebarOpen(false)}
         userName={userName}
         currentPage={t.currentPage}
         language={language}
@@ -68,7 +99,7 @@ export function HomePage() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation */}
         <TopNavigation
-          onToggleSidebar={() => setIsSidebarOpen(true)}
+          onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
           onHomeClick={() => navigate('/')}
           language={language}

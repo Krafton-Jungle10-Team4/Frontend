@@ -1,5 +1,5 @@
 import { Button } from './ui/button';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface EmptyStateProps {
   onCreateBot: () => void;

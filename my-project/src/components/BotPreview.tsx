@@ -4,7 +4,7 @@ import { RotateCw, Share2, CheckCircle2, ExternalLink, Puzzle, TestTube } from '
 import { Progress } from './ui/progress';
 import { Card } from './ui/card';
 import { toast } from 'sonner';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface BotPreviewProps {
   botName: string;
@@ -21,8 +21,8 @@ interface Message {
 
 export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
   // TODO: Get botId from props or context
-  const [botId, setBotId] = useState<string | null>(null); // Backend should provide this
-  const [sessionId, setSessionId] = useState<string>(() => 
+  const [_botId, _setBotId] = useState<string | null>(null); // Backend should provide this
+  const [_sessionId, _setSessionId] = useState<string>(() =>
     `chat_${Date.now()}_${Math.random().toString(36)}`
   );
   
@@ -124,9 +124,9 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     }]);
     setInputValue('');
     setIsTyping(false);
-    
+
     // Generate new session ID for fresh chat
-    setSessionId(`chat_${Date.now()}_${Math.random().toString(36)}`);
+    _setSessionId(`chat_${Date.now()}_${Math.random().toString(36)}`);
   };
 
   const handleSendMessage = async () => {
@@ -284,7 +284,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       // const shareUrl = data.shareUrl;
       
       // Mock share URL
-      const shareUrl = `${window.location.origin}/chat/${botId || 'preview'}`;
+      const shareUrl = `${window.location.origin}/chat/${_botId || 'preview'}`;
       
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);

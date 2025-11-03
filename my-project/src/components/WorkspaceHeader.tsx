@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface WorkspaceHeaderProps {
   onCreateBot: () => void;

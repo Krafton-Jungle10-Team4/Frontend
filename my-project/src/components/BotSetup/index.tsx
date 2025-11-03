@@ -16,7 +16,7 @@ import { Step1Name } from './steps/Step1Name';
 import { Step2Goal } from './steps/Step2Goal';
 import { Step3Personality } from './steps/Step3Personality';
 import { Step4Knowledge } from './steps/Step4Knowledge';
-import type { Language } from '../../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface BotSetupProps {
   onComplete: (botName: string) => void;

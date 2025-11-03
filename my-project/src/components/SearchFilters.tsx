@@ -1,6 +1,6 @@
 import { Search, Grid3x3, List } from 'lucide-react';
 import { Input } from './ui/input';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface SearchFiltersProps {
   searchQuery: string;

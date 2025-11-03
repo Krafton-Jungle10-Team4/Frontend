@@ -1,5 +1,5 @@
 import { Home, Puzzle, BarChart3, CreditCard, Settings, X, ChevronDown } from 'lucide-react';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface WorkspaceSidebarProps {
   isOpen: boolean;

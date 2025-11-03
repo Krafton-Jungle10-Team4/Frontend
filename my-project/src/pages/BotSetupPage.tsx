@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { BotSetup } from '../components/BotSetup';
-import { useApp } from '../contexts/AppContext';
+import { useUIStore } from '../store/uiStore';
 
 export function BotSetupPage() {
   const navigate = useNavigate();
-  const { language } = useApp();
+  const language = useUIStore((state) => state.language);
 
   const handleComplete = (botName: string) => {
     // Navigate to setup complete page with bot name in URL

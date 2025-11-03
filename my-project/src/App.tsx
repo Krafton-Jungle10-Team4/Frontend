@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider } from './contexts/AppContext';
 import { Toaster } from './components/ui/sonner';
 import { HomePage } from './pages/HomePage';
 import { BotSetupPage } from './pages/BotSetupPage';
@@ -13,7 +12,7 @@ import { useAuth } from '@hooks/useAuth';
 
 import './App.css';
 
-export type { Language } from './contexts/AppContext';
+export type { Language } from '@/types';
 
 /**
  * 인증이 필요한 라우트를 보호하는 컴포넌트
@@ -35,36 +34,34 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppProvider>
-        <Toaster position="top-center" />
-        <Routes>
-          {/* 로그인 페이지 (인증 불필요) */}
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+      <Toaster position="top-center" />
+      <Routes>
+        {/* 로그인 페이지 (인증 불필요) */}
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
-          {/* 보호된 라우트들 (인증 필요) */}
-          <Route
-            path={ROUTES.DASHBOARD}
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
+        {/* 보호된 라우트들 (인증 필요) */}
+        <Route
+          path={ROUTES.DASHBOARD}
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Bot Setup 관련 라우트 */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/setup" element={<BotSetupPage />} />
-          <Route path="/setup/complete" element={<SetupCompletePage />} />
-          <Route path="/preview" element={<BotPreviewPage />} />
+        {/* Bot Setup 관련 라우트 */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/setup" element={<BotSetupPage />} />
+        <Route path="/setup/complete" element={<SetupCompletePage />} />
+        <Route path="/preview" element={<BotPreviewPage />} />
 
-          {/* WorkflowBuilder 라우트 */}
-          <Route path="/workflow-builder" element={<WorkflowBuilder />} />
-          <Route path="/workflow" element={<WorkflowBuilder />} />
+        {/* WorkflowBuilder 라우트 */}
+        <Route path="/workflow-builder" element={<WorkflowBuilder />} />
+        <Route path="/workflow" element={<WorkflowBuilder />} />
 
-          {/* Fallback - Redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AppProvider>
+        {/* Fallback - Redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

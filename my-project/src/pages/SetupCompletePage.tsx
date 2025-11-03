@@ -1,11 +1,11 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SetupComplete } from '../components/SetupComplete';
-import { useApp } from '../contexts/AppContext';
+import { useUIStore } from '../store/uiStore';
 
 export function SetupCompletePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { language } = useApp();
+  const language = useUIStore((state) => state.language);
 
   const botName = searchParams.get('name') || 'Bot';
 

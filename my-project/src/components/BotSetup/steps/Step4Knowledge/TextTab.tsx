@@ -1,7 +1,7 @@
 import { Textarea } from '../../../ui/textarea';
 import { useBotSetup } from '../../BotSetupContext';
 import { TEXT_LIMITS } from '../../../../utils/constants';
-import type { Language } from '../../../../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface TextTabProps {
   language: Language;

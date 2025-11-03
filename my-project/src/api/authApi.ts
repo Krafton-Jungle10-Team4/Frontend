@@ -5,7 +5,7 @@ import type {
   AuthResponse,
   LogoutResponse,
   User,
-} from '@types/auth';
+} from '@/types/auth';
 import { API_ENDPOINTS } from '@constants/apiEndpoints';
 import { STORAGE_KEYS } from '@constants/storageKeys';
 

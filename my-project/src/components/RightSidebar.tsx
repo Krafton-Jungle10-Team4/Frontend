@@ -1,15 +1,7 @@
 import { Bot } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Progress } from './ui/progress';
-import type { Language } from '../contexts/AppContext';
-
-export interface Activity {
-  id: string;
-  user: string;
-  action: string;
-  botName?: string;
-  timestamp: string;
-}
+import type { Language, Activity } from '@/types';
 
 interface RightSidebarProps {
   totalBots: number;
@@ -78,13 +70,10 @@ export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'U
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-600">
-                  <span className="text-gray-900">{activity.user}</span>
+                  {activity.message || `${activity.type} - ${activity.botName || ''}`}
                 </p>
-                <p className="text-sm text-gray-600">
-                  {activity.action}{' '}
-                  {activity.botName && (
-                    <span className="text-gray-900">{activity.botName}</span>
-                  )}
+                <p className="text-xs text-gray-400">
+                  {new Date(activity.timestamp).toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US')}
                 </p>
               </div>
             </div>

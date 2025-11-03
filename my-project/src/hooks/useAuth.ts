@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import type { User, AuthState } from '@types/auth';
+import type { User, AuthState } from '@/types/auth';
 import { googleLogin, logout as logoutApi, getCurrentUser } from '@api/authApi';
 import { STORAGE_KEYS } from '@constants/storageKeys';
 

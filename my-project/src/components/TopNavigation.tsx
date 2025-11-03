@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Separator } from './ui/separator';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface TopNavigationProps {
   onToggleSidebar: () => void;

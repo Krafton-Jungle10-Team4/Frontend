@@ -1,7 +1,7 @@
 import { Bot, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { formatTimeAgo } from '../utils/format';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 export interface Bot {
   id: string;

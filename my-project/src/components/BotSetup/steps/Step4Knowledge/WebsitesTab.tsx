@@ -9,7 +9,7 @@ import { ApiClient } from '../../../../utils/api';
 import { isValidUrl } from '../../../../utils/validation';
 import { generateTempId } from '../../../../utils/session';
 import { toast } from 'sonner';
-import type { Language } from '../../../../contexts/AppContext';
+import type { Language } from '@/types';
 import type { DiscoveredUrl } from '../../types';
 
 interface WebsitesTabProps {

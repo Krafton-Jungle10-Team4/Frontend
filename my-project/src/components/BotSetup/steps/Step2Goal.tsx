@@ -6,7 +6,7 @@ import { useBotSetup } from '../BotSetupContext';
 import { ApiClient } from '../../../utils/api';
 import { TEXT_LIMITS } from '../../../utils/constants';
 import { toast } from 'sonner';
-import type { Language } from '../../../contexts/AppContext';
+import type { Language } from '@/types';
 import type { GoalType } from '../types';
 
 interface Step2GoalProps {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Coffee, Check } from 'lucide-react';
 import { Progress } from './ui/progress';
-import type { Language } from '../contexts/AppContext';
+import type { Language } from '@/types';
 
 interface SetupCompleteProps {
   botName: string;
