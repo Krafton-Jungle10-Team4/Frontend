@@ -1,4 +1,4 @@
-import { apiKeyClient } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type {
   ChatRequest as APIChatRequest,
@@ -11,7 +11,7 @@ import type { ChatResponse, ChatMessage } from '../types/chat.types';
  * Chat API (SnapAgent)
  * RAG 기반 채팅 및 문서 검색
  *
- * ⚠️ 주의: API Key 인증 필요 (apiKeyClient 사용)
+ * ⚠️ 주의: JWT Bearer Token 인증 필요 (apiClient 사용)
  */
 export const chatApi = {
   /**
@@ -36,7 +36,7 @@ export const chatApi = {
       stream: options?.stream,
     };
 
-    const { data } = await apiKeyClient.post<APIChatResponse>(
+    const { data } = await apiClient.post<APIChatResponse>(
       API_ENDPOINTS.CHAT.SEND,
       payload
     );
@@ -60,7 +60,7 @@ export const chatApi = {
    * 헬스 체크
    */
   async healthCheck(): Promise<HealthCheckResponse> {
-    const { data } = await apiKeyClient.get<HealthCheckResponse>(
+    const { data } = await apiClient.get<HealthCheckResponse>(
       API_ENDPOINTS.CHAT.HEALTH
     );
     return data;

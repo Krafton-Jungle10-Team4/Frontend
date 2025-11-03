@@ -138,8 +138,8 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         type: 'bot',
         content:
           language === 'ko'
-            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. API 키를 확인해주세요.'
-            : 'Sorry, an error occurred while processing your response. Please check your API key.',
+            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. 로그인 상태를 확인해주세요.'
+            : 'Sorry, an error occurred while processing your response. Please check your login status.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -147,8 +147,8 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
       // 사용자에게 에러 알림
       toast.error(
         language === 'ko'
-          ? 'API 키 인증 오류. 팀 설정에서 API 키를 확인해주세요.'
-          : 'API key authentication error. Please check your API key in team settings.'
+          ? '인증 오류. 로그인 상태를 확인해주세요.'
+          : 'Authentication error. Please check your login status.'
       );
     }
   };
@@ -201,16 +201,16 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         type: 'bot',
         content:
           language === 'ko'
-            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. API 키를 확인해주세요.'
-            : 'Sorry, an error occurred while processing your response. Please check your API key.',
+            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. 로그인 상태를 확인해주세요.'
+            : 'Sorry, an error occurred while processing your response. Please check your login status.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
 
       toast.error(
         language === 'ko'
-          ? 'API 키 인증 오류. 팀 설정에서 API 키를 확인해주세요.'
-          : 'API key authentication error. Please check your API key in team settings.'
+          ? '인증 오류. 로그인 상태를 확인해주세요.'
+          : 'Authentication error. Please check your login status.'
       );
     }
   };

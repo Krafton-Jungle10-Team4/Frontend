@@ -26,7 +26,8 @@ const WorkflowSidebar = ({
   ];
 
   const handleHomeClick = () => {
-    navigate('/');
+    // 로그인된 사용자의 홈 화면 (봇 목록)으로 이동
+    navigate('/home');
   };
 
   return (
