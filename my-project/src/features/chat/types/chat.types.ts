@@ -3,12 +3,15 @@
  * 채팅 관련 타입 정의
  */
 
+import type { Source } from '@/shared/types/api.types';
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
   documentId?: string;
+  sources?: Source[];
 }
 
 export interface ChatRequest {
