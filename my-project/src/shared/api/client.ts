@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import { STORAGE_KEYS } from '@constants/storageKeys';
-import { ERROR_MESSAGES } from '@constants/errorMessages';
+import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
+import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
 /**
  * Axios 클라이언트 인스턴스
