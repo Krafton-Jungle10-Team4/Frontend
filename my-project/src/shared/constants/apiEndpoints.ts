@@ -44,6 +44,16 @@ export const API_ENDPOINTS = {
     API: '/api/v1/health',
   },
 
+  // 봇 관리 (SnapAgent API)
+  BOTS: {
+    LIST: '/api/v1/bots',
+    CREATE: '/api/v1/bots',
+    BY_ID: (id: string) => `/api/v1/bots/${id}`,
+    UPDATE: (id: string) => `/api/v1/bots/${id}`,
+    DELETE: (id: string) => `/api/v1/bots/${id}`,
+    STATUS: (id: string) => `/api/v1/bots/${id}/status`,
+  },
+
   // 레거시 (호환성 유지)
   USERS: {
     LIST: '/users',

@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '@/shared/api/client';
+import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
 
 /**
@@ -25,14 +26,6 @@ function createMockBot(dto: CreateBotDto): Bot {
 }
 
 /**
- * Bot API 엔드포인트
- */
-const ENDPOINTS = {
-  BOTS: '/bots',
-  BOT_BY_ID: (id: string) => `/bots/${id}`,
-} as const;
-
-/**
  * Bot API 함수들
  */
 export const botApi = {
@@ -40,7 +33,9 @@ export const botApi = {
    * 모든 봇 조회
    */
   getAll: async (params?: { search?: string }): Promise<Bot[]> => {
-    const { data } = await apiClient.get<Bot[]>(ENDPOINTS.BOTS, { params });
+    const { data } = await apiClient.get<Bot[]>(API_ENDPOINTS.BOTS.LIST, {
+      params,
+    });
     return data;
   },
 
@@ -48,7 +43,7 @@ export const botApi = {
    * 특정 봇 조회
    */
   getById: async (id: string): Promise<Bot> => {
-    const { data } = await apiClient.get<Bot>(ENDPOINTS.BOT_BY_ID(id));
+    const { data } = await apiClient.get<Bot>(API_ENDPOINTS.BOTS.BY_ID(id));
     return data;
   },
 
@@ -58,7 +53,10 @@ export const botApi = {
    */
   create: async (dto: CreateBotDto): Promise<Bot> => {
     try {
-      const { data } = await apiClient.post<Bot>(ENDPOINTS.BOTS, dto);
+      const { data } = await apiClient.post<Bot>(
+        API_ENDPOINTS.BOTS.CREATE,
+        dto
+      );
       return data;
     } catch (error: any) {
       // 네트워크 연결 실패 시 (백엔드 미구현) Mock 데이터 생성
@@ -86,7 +84,10 @@ export const botApi = {
    * 봇 업데이트
    */
   update: async (id: string, dto: UpdateBotDto): Promise<Bot> => {
-    const { data } = await apiClient.patch<Bot>(ENDPOINTS.BOT_BY_ID(id), dto);
+    const { data } = await apiClient.patch<Bot>(
+      API_ENDPOINTS.BOTS.UPDATE(id),
+      dto
+    );
     return data;
   },
 
@@ -94,7 +95,7 @@ export const botApi = {
    * 봇 삭제
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(ENDPOINTS.BOT_BY_ID(id));
+    await apiClient.delete(API_ENDPOINTS.BOTS.DELETE(id));
   },
 
   /**
@@ -104,9 +105,12 @@ export const botApi = {
     id: string,
     status: 'active' | 'inactive' | 'error'
   ): Promise<Bot> => {
-    const { data } = await apiClient.patch<Bot>(ENDPOINTS.BOT_BY_ID(id), {
-      status,
-    });
+    const { data } = await apiClient.patch<Bot>(
+      API_ENDPOINTS.BOTS.UPDATE(id),
+      {
+        status,
+      }
+    );
     return data;
   },
 } as const;
