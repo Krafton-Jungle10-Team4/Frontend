@@ -9,11 +9,11 @@ interface SetupCompleteProps {
   language: Language;
 }
 
-export function SetupComplete({ botName, onComplete, language }: SetupCompleteProps) {
+export function SetupComplete({ botName: _botName, onComplete, language }: SetupCompleteProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [botId, setBotId] = useState<string | null>(null); // Backend should provide this
+  // const [botId, setBotId] = useState<string | null>(null); // Backend should provide this
 
   const translations = {
     en: {

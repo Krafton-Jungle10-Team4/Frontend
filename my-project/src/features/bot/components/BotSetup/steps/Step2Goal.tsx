@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Button } from '@/shared/components/button';
 import { Textarea } from '@/shared/components/textarea';
 import { Headphones, Briefcase, Hand, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/shared/utils/api';
 import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
@@ -126,8 +124,7 @@ export function Step2Goal({ language }: Step2GoalProps) {
       toast.success(
         language === 'ko' ? '프롬프트가 최적화되었습니다!' : 'Prompt refined successfully!'
       );
-    } catch (error) {
-      console.error('Refine prompt error:', error);
+    } catch {
       toast.error(
         language === 'ko' ? '프롬프트 최적화 실패' : 'Failed to refine prompt'
       );

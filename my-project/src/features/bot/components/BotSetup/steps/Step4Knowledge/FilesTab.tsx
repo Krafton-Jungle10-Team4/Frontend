@@ -38,9 +38,8 @@ export function FilesTab({ language }: FilesTabProps) {
   };
 
   const t = translations[language];
-  
+
   const totalSize = files.reduce((sum, f) => sum + f.file.size, 0);
-  const maxTotalSize = FILE_UPLOAD.MAX_SIZE_MB * 1024 * 1024; // Convert to bytes
 
   const handleFileUpload = async (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
@@ -92,7 +91,6 @@ export function FilesTab({ language }: FilesTabProps) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         toast.error(`Failed to upload ${fileItem.file.name}: ${errorMessage}`);
         setFiles((prev) => prev.filter((f) => f.id !== fileItem.id));
-        console.error('File upload error:', error);
       }
     }
   };
@@ -114,7 +112,7 @@ export function FilesTab({ language }: FilesTabProps) {
       await ApiClient.deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       toast.success(language === 'ko' ? '파일이 삭제되었습니다' : 'File deleted successfully');
-    } catch (error) {
+    } catch {
       // Revert status on error
       setFiles((prev) =>
         prev.map((f) =>
@@ -122,7 +120,6 @@ export function FilesTab({ language }: FilesTabProps) {
         )
       );
       toast.error(language === 'ko' ? '파일 삭제 실패' : 'Failed to delete file');
-      console.error('File delete error:', error);
     }
   };
 
