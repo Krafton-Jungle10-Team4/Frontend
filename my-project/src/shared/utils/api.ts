@@ -20,8 +20,17 @@ export class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
+    // JWT 토큰 가져오기
+    const token = localStorage.getItem('jwt_token');
+    const headers: HeadersInit = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/v1/documents/upload`, {
       method: 'POST',
+      headers,
       body: formData,
     });
 
