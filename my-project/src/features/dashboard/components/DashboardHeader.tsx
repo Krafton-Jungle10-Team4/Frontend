@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { ROUTES } from '@constants/routes';
+import { ROUTES } from '@/shared/constants/routes';
 
 /**
  * 대시보드 헤더 컴포넌트

@@ -1,7 +1,7 @@
-import { Input } from '@/components/ui/input';
+import { Input } from '@/shared/components/input';
 import { useBotSetup } from '../BotSetupContext';
-import { TEXT_LIMITS } from '@/constants/textLimits';
-import type { Language } from '@/types';
+import { TEXT_LIMITS } from '@/shared/constants/textLimits';
+import type { Language } from '@/shared/types';
 
 interface Step1NameProps {
   language: Language;

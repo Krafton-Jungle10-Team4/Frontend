@@ -1,7 +1,7 @@
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/shared/components/textarea';
 import { useBotSetup } from '../../BotSetupContext';
-import { TEXT_LIMITS } from '@/constants/textLimits';
-import type { Language } from '@/types';
+import { TEXT_LIMITS } from '@/shared/constants/textLimits';
+import type { Language } from '@/shared/types';
 
 interface TextTabProps {
   language: Language;

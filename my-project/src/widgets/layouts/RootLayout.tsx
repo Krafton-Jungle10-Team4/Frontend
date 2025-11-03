@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from '@/shared/components/sonner';
 
 /**
  * 애플리케이션의 최상위 레이아웃 컴포넌트

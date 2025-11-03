@@ -1,6 +1,6 @@
-import { apiClient } from '@/api/client';
-import { API_ENDPOINTS } from '@/constants/apiEndpoints';
-import { STORAGE_KEYS } from '@/constants/storageKeys';
+import { apiClient } from '@/shared/api/client';
+import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
+import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 
 import type {
   AuthResponse,

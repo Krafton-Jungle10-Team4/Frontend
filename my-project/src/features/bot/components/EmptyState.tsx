@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import type { Language } from '@/types';
+import { Button } from '@/shared/components/button';
+import type { Language } from '@/shared/types';
 
 interface EmptyStateProps {
   onCreateBot: () => void;

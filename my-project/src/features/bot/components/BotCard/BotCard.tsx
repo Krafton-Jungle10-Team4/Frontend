@@ -1,7 +1,7 @@
 import { Bot as BotIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { formatTimeAgo } from '@/utils/format';
-import type { Language } from '@/types';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
+import { formatTimeAgo } from '@/shared/utils/format';
+import type { Language } from '@/shared/types';
 
 export interface BotCardData {
   id: string;

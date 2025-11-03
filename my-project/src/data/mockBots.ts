@@ -2,7 +2,7 @@
  * Mock bot data for development and testing
  */
 
-import type { Bot } from '../components/BotCard';
+import type { Bot } from '@/features/bot/types/bot.types';
 
 export const mockBots: Bot[] = [
   {

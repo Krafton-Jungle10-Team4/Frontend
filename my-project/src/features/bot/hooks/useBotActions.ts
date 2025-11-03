@@ -7,8 +7,8 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
-import { useUserStore } from '@/store/userStore';
-import { useUIStore } from '@/store/uiStore';
+import { useUserStore } from '@/features/auth';
+import { useUIStore } from '@/shared/stores/uiStore';
 
 /**
  * Bot 관련 액션을 제공하는 커스텀 훅

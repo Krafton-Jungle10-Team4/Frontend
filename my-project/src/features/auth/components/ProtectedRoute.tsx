@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES } from '@/shared/constants/routes';
 
 import { useAuth } from '../hooks/useAuth';
 

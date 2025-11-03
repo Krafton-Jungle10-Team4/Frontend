@@ -3,7 +3,7 @@
  * Bot 관련 모든 API 호출 정의
  */
 
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
 
 /**

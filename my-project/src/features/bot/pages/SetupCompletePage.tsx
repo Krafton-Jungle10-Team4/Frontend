@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SetupComplete } from '../components/SetupComplete';
-import { useUIStore } from '@/store/uiStore';
+import { useUIStore } from '@/shared/stores/uiStore';
 
 /**
  * Bot Setup 완료 페이지

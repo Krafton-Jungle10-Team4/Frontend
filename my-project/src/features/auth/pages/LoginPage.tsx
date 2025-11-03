@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLoginButton } from '@/components/common/GoogleLoginButton';
-import { ROUTES } from '@/constants/routes';
-import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { GoogleLoginButton } from '../components/GoogleLoginButton';
+import { ROUTES } from '@/shared/constants/routes';
+import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
 import { useAuth } from '../hooks/useAuth';
 

@@ -11,6 +11,7 @@ export { useAuth } from './hooks/useAuth';
 
 // Store
 export { useAuthStore } from './stores/authStore';
+export { useUserStore } from './stores/userStore';
 
 // Types
 export type {

@@ -1,11 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/shared/components/button';
+import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@/shared/components/tooltip';
 
 type Language = 'en' | 'ko';
 

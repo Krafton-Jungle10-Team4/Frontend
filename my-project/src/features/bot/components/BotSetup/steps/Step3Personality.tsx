@@ -1,16 +1,16 @@
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/shared/components/input';
+import { Textarea } from '@/shared/components/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/shared/components/select';
 import { useBotSetup } from '../BotSetupContext';
-import { TEXT_LIMITS } from '@/constants/textLimits';
-import type { Language } from '@/types';
-import type { DescriptionSource } from '../types';
+import { TEXT_LIMITS } from '@/shared/constants/textLimits';
+import type { Language } from '@/shared/types';
+import type { DescriptionSource } from '@/shared/types';
 
 interface Step3PersonalityProps {
   language: Language;
