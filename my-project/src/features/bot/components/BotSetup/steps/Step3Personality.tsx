@@ -92,13 +92,13 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
             <Textarea
               value={personalityText}
               onChange={(e) =>
-                setPersonalityText(e.target.value.slice(0, TEXT_LIMITS.PERSONALITY))
+                setPersonalityText(e.target.value.slice(0, TEXT_LIMITS.BOT_PERSONALITY.MAX))
               }
               placeholder={t.personalityPlaceholder}
               className="min-h-[200px] resize-none bg-gray-50 border-gray-200"
             />
             <p className="text-xs text-gray-500 text-right">
-              {TEXT_LIMITS.PERSONALITY - personalityText.length} {t.charactersRemaining}
+              {TEXT_LIMITS.BOT_PERSONALITY.MAX - personalityText.length} {t.charactersRemaining}
             </p>
           </div>
         )}

@@ -1,7 +1,13 @@
-// Common types used across the application
+/**
+ * Common Types
+ * 공통으로 사용되는 타입 정의
+ */
 
+// UI Types
 export type Language = 'en' | 'ko';
+export type ViewMode = 'grid' | 'list';
 
+// User Types
 export interface User {
   id: string;
   email: string;
@@ -12,10 +18,19 @@ export interface User {
   updatedAt?: string;
 }
 
+// Async State
+export interface AsyncState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+// API Response Types
 export interface ApiResponse<T = any> {
+  success: boolean;
   data: T;
   message?: string;
-  status: number;
+  status?: number;
 }
 
 export interface ApiError {
@@ -24,6 +39,7 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
+// Pagination
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -32,6 +48,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Form Types
 export interface SelectOption {
   label: string;
   value: string;

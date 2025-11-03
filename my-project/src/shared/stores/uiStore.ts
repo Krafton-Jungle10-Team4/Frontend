@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Language, ViewMode } from '@/types';
+import type { Language, ViewMode } from '@/shared/types';
 
 interface UIStore {
   // State

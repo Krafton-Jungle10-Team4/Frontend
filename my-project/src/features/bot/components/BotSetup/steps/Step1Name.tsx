@@ -35,7 +35,7 @@ export function Step1Name({ language }: Step1NameProps) {
       <div className="space-y-2">
         <Input
           value={botName}
-          onChange={(e) => setBotName(e.target.value.slice(0, TEXT_LIMITS.BOT_NAME))}
+          onChange={(e) => setBotName(e.target.value.slice(0, TEXT_LIMITS.BOT_NAME.MAX))}
           placeholder={t.placeholder}
           className="w-full h-11 bg-gray-50 border-gray-200"
           autoFocus
