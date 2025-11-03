@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
-import { useUserStore } from '@/features/auth';
+import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 /**
@@ -19,7 +19,8 @@ export function useBotActions() {
   // Stores
   const deleteBot = useBotStore((state) => state.deleteBot);
   const addActivity = useActivityStore((state) => state.addActivity);
-  const userName = useUserStore((state) => state.userName);
+  const user = useAuthStore((state) => state.user);
+  const userName = user?.name || 'User';
   const language = useUIStore((state) => state.language);
 
   /**
