@@ -30,7 +30,9 @@ const IconBase = React.forwardRef<SVGSVGElement, IconBaseProps>(
 
       // Convert attributes to React props
       Object.entries(attributes).forEach(([key, value]) => {
-        const propName = key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+        const propName = key.replace(/-([a-z])/g, (_, letter) =>
+          letter.toUpperCase()
+        );
         svgProps[propName] = value;
       });
 

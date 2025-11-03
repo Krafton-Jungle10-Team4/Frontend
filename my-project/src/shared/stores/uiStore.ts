@@ -38,24 +38,19 @@ export const useUIStore = create<UIStore>()(
           set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 
         // Set sidebar open state
-        setSidebarOpen: (open: boolean) =>
-          set({ isSidebarOpen: open }),
+        setSidebarOpen: (open: boolean) => set({ isSidebarOpen: open }),
 
         // Set search query
-        setSearchQuery: (query: string) =>
-          set({ searchQuery: query }),
+        setSearchQuery: (query: string) => set({ searchQuery: query }),
 
         // Set view mode
-        setViewMode: (mode: ViewMode) =>
-          set({ viewMode: mode }),
+        setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
 
         // Set language
-        setLanguage: (lang: Language) =>
-          set({ language: lang }),
+        setLanguage: (lang: Language) => set({ language: lang }),
 
         // Clear search
-        clearSearch: () =>
-          set({ searchQuery: '' }),
+        clearSearch: () => set({ searchQuery: '' }),
       }),
       {
         name: 'ui-storage',

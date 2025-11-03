@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { API_ENDPOINTS } from '@constants/apiEndpoints';
 import { apiClient } from '@api/client';
@@ -107,6 +108,7 @@ export const ROUTES = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@constants/routes';
@@ -153,6 +155,7 @@ export const SESSION_KEYS = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { STORAGE_KEYS } from '@constants/storageKeys';
 
@@ -205,6 +208,7 @@ export const ERROR_MESSAGES = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { ERROR_MESSAGES } from '@constants/errorMessages';
 
@@ -298,6 +302,7 @@ export const APP_CONFIG = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { APP_CONFIG } from '@constants/config';
 
@@ -308,7 +313,9 @@ if (file.size > APP_CONFIG.UPLOAD.MAX_FILE_SIZE) {
 
 // 비밀번호 유효성 검증
 if (password.length < APP_CONFIG.PASSWORD.MIN_LENGTH) {
-  alert(`비밀번호는 최소 ${APP_CONFIG.PASSWORD.MIN_LENGTH}자 이상이어야 합니다`);
+  alert(
+    `비밀번호는 최소 ${APP_CONFIG.PASSWORD.MIN_LENGTH}자 이상이어야 합니다`
+  );
 }
 ```
 
@@ -323,7 +330,8 @@ if (password.length < APP_CONFIG.PASSWORD.MIN_LENGTH) {
 export const REGEX = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE: /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/,
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+  PASSWORD:
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
   URL: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
   NUMBER_ONLY: /^\d+$/,
   KOREAN: /^[가-힣]+$/,
@@ -331,6 +339,7 @@ export const REGEX = {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { REGEX } from '@constants/regex';
 
@@ -431,8 +440,12 @@ export const ROUTES = {
 ```typescript
 // ✅ 좋은 예: 관련된 상수들을 객체로 그룹화
 export const API_ENDPOINTS = {
-  USERS: { /* ... */ },
-  PRODUCTS: { /* ... */ },
+  USERS: {
+    /* ... */
+  },
+  PRODUCTS: {
+    /* ... */
+  },
 } as const;
 
 // ❌ 나쁜 예: 개별 상수로 흩어져 있음
@@ -455,7 +468,8 @@ export const API_CONFIG = {
 
 ```typescript
 // ❌ 나쁜 예: 하드코딩된 값
-if (file.size > 5242880) { // 5MB
+if (file.size > 5242880) {
+  // 5MB
   alert('파일이 너무 큽니다');
 }
 

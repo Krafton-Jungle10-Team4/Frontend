@@ -1,6 +1,6 @@
 /**
  * BotSetup - Main container for 4-step bot creation wizard
- * 
+ *
  * Refactored structure:
  * - Context API for state management
  * - Separated step components
@@ -48,10 +48,7 @@ function BotSetupContent({ onBack, language }: BotSetupProps) {
       </div>
 
       {/* Step Navigation (Progress Bar & Buttons) */}
-      <StepNavigation
-        onBack={onBack}
-        language={language}
-      />
+      <StepNavigation onBack={onBack} language={language} />
 
       {/* Exit Confirmation Dialog */}
       <ExitDialog onBack={onBack} language={language} />

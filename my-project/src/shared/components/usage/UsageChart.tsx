@@ -1,5 +1,19 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/card';
 import { DailyUsage } from '@/shared/data/mockUsageData';
 
 interface UsageChartProps {
@@ -7,8 +21,11 @@ interface UsageChartProps {
 }
 
 export function UsageChart({ data }: UsageChartProps) {
-  const chartData = data.map(item => ({
-    date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+  const chartData = data.map((item) => ({
+    date: new Date(item.date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    }),
     requests: item.requests,
     tokens: item.tokens,
     cost: item.cost,
@@ -42,7 +59,7 @@ export function UsageChart({ data }: UsageChartProps) {
             <Tooltip
               contentStyle={{
                 backgroundColor: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))'
+                border: '1px solid hsl(var(--border))',
               }}
             />
             <Legend />

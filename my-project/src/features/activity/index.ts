@@ -7,7 +7,12 @@
 export { ActivityList } from './components/ActivityList';
 
 // Store
-export { useActivityStore, selectActivities, selectRecentActivities, selectActivitiesCount } from './stores/activityStore';
+export {
+  useActivityStore,
+  selectActivities,
+  selectRecentActivities,
+  selectActivitiesCount,
+} from './stores/activityStore';
 
 // Types
 export type { Activity } from './types/activity.types';

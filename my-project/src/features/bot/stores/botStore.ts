@@ -58,24 +58,21 @@ export const useBotStore = create<BotStore>()(
         deleteBot: (id: string) =>
           set((state) => ({
             bots: state.bots.filter((bot) => bot.id !== id),
-            selectedBotId: state.selectedBotId === id ? null : state.selectedBotId,
+            selectedBotId:
+              state.selectedBotId === id ? null : state.selectedBotId,
           })),
 
         // Set bots
-        setBots: (bots: Bot[]) =>
-          set({ bots }),
+        setBots: (bots: Bot[]) => set({ bots }),
 
         // Select bot
-        selectBot: (id: string | null) =>
-          set({ selectedBotId: id }),
+        selectBot: (id: string | null) => set({ selectedBotId: id }),
 
         // Alias for selectBot (for backward compatibility)
-        setSelectedBotId: (id: string | null) =>
-          set({ selectedBotId: id }),
+        setSelectedBotId: (id: string | null) => set({ selectedBotId: id }),
 
         // Get bot by ID
-        getBotById: (id: string) =>
-          get().bots.find((bot) => bot.id === id),
+        getBotById: (id: string) => get().bots.find((bot) => bot.id === id),
 
         // Clear all bots
         clearBots: () =>
@@ -115,7 +112,9 @@ export const useBotStore = create<BotStore>()(
 export const selectBots = (state: BotStore) => state.bots;
 export const selectSelectedBotId = (state: BotStore) => state.selectedBotId;
 export const selectSelectedBot = (state: BotStore) =>
-  state.selectedBotId ? state.bots.find((b) => b.id === state.selectedBotId) : null;
+  state.selectedBotId
+    ? state.bots.find((b) => b.id === state.selectedBotId)
+    : null;
 export const selectBotsCount = (state: BotStore) => state.bots.length;
 export const selectActiveBots = (state: BotStore) =>
   state.bots.filter((b) => b.status === 'active');

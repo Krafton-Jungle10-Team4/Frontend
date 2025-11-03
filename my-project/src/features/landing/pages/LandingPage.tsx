@@ -1,5 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { RiRobot2Line, RiArrowRightLine, RiLoginCircleLine } from '@remixicon/react';
+import {
+  RiRobot2Line,
+  RiArrowRightLine,
+  RiLoginCircleLine,
+} from '@remixicon/react';
 import { useAuth } from '@/features/auth';
 
 /**
@@ -125,8 +129,8 @@ export function LandingPage() {
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto drop-shadow-lg">
-                Create powerful AI-driven chatbots with our intuitive workflow builder.
-                No coding required.
+                Create powerful AI-driven chatbots with our intuitive workflow
+                builder. No coding required.
               </p>
             </div>
 
@@ -159,7 +163,8 @@ export function LandingPage() {
                   Visual Workflow
                 </h3>
                 <p className="text-blue-200">
-                  Build complex AI workflows with an intuitive drag-and-drop interface
+                  Build complex AI workflows with an intuitive drag-and-drop
+                  interface
                 </p>
               </div>
 

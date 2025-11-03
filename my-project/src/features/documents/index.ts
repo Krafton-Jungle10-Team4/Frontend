@@ -27,4 +27,8 @@ export type {
 } from './types/document.types';
 
 // API
-export { documentsApi, isDocumentError, handleDocumentError } from './api/documentsApi';
+export {
+  documentsApi,
+  isDocumentError,
+  handleDocumentError,
+} from './api/documentsApi';

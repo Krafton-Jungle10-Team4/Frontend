@@ -86,7 +86,9 @@ const LogsView = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* 헤더 */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">로그 & 어노테이션</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            로그 & 어노테이션
+          </h1>
           <p className="text-gray-600">워크플로우 실행 로그 및 메모 관리</p>
         </div>
 
@@ -95,7 +97,9 @@ const LogsView = () => {
           <div className="lg:col-span-2">
             <Card className="p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">실행 로그</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  실행 로그
+                </h2>
                 <div className="flex gap-2">
                   <button className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
                     필터
@@ -121,7 +125,9 @@ const LogsView = () => {
                     `}
                   >
                     <div className="flex items-start gap-3">
-                      <span className="text-2xl mt-1">{getLevelIcon(log.level)}</span>
+                      <span className="text-2xl mt-1">
+                        {getLevelIcon(log.level)}
+                      </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span
@@ -132,7 +138,9 @@ const LogsView = () => {
                           >
                             {log.level.toUpperCase()}
                           </span>
-                          <span className="text-xs text-gray-500">{log.timestamp}</span>
+                          <span className="text-xs text-gray-500">
+                            {log.timestamp}
+                          </span>
                         </div>
                         <p className="text-sm font-medium text-gray-900 mb-1">
                           {log.message}
@@ -163,12 +171,16 @@ const LogsView = () => {
           {/* 어노테이션 패널 */}
           <div className="lg:col-span-1">
             <Card className="p-4 sticky top-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">어노테이션</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                어노테이션
+              </h2>
 
               {selectedLog ? (
                 <div className="space-y-4">
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-xs text-blue-600 font-medium mb-1">선택된 로그</p>
+                    <p className="text-xs text-blue-600 font-medium mb-1">
+                      선택된 로그
+                    </p>
                     <p className="text-sm text-gray-900">
                       {logs.find((l) => l.id === selectedLog)?.message}
                     </p>
@@ -197,7 +209,9 @@ const LogsView = () => {
                     </h3>
                     <div className="space-y-2">
                       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-xs text-gray-500 mb-1">2025-11-03 14:35</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          2025-11-03 14:35
+                        </p>
                         <p className="text-sm text-gray-700">
                           Rate limit 에러 발생. API 키 확인 필요
                         </p>
@@ -208,9 +222,7 @@ const LogsView = () => {
               ) : (
                 <div className="text-center py-12">
                   <span className="text-4xl mb-2 block">📝</span>
-                  <p className="text-gray-600 text-sm">
-                    로그를 선택하면
-                  </p>
+                  <p className="text-gray-600 text-sm">로그를 선택하면</p>
                   <p className="text-gray-600 text-sm">
                     메모를 작성할 수 있습니다
                   </p>
@@ -222,7 +234,9 @@ const LogsView = () => {
 
         {/* 통계 요약 */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">로그 통계</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            로그 통계
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="p-4">
               <div className="flex items-center gap-3">

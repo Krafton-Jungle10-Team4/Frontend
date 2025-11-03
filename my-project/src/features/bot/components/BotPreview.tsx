@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/shared/components/button';
-import { RotateCw, Share2, CheckCircle2, ExternalLink, Puzzle, TestTube } from 'lucide-react';
+import {
+  RotateCw,
+  Share2,
+  CheckCircle2,
+  ExternalLink,
+  Puzzle,
+  TestTube,
+} from 'lucide-react';
 import { Progress } from '@/shared/components/progress';
 import { Card } from '@/shared/components/card';
 import { toast } from 'sonner';
@@ -22,21 +29,22 @@ interface Message {
 export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
   // TODO: Get botId from props or context
   const [_botId, _setBotId] = useState<string | null>(null); // Backend should provide this
-  const [_sessionId, _setSessionId] = useState<string>(() =>
-    `chat_${Date.now()}_${Math.random().toString(36)}`
+  const [_sessionId, _setSessionId] = useState<string>(
+    () => `chat_${Date.now()}_${Math.random().toString(36)}`
   );
-  
+
   const translations = {
     en: {
       initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
-      botResponse: "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
+      botResponse:
+        "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
       today: 'Today',
       delivered: 'Delivered',
       placeholder: 'Type your message...',
       quickMessages: [
-        "How do I set up my first AI agent?",
-        "Where can I find tutorials or guides?",
-        "I'm having trouble with a feature"
+        'How do I set up my first AI agent?',
+        'Where can I find tutorials or guides?',
+        "I'm having trouble with a feature",
       ],
       ready: 'Your bot is ready!',
       trainingComplete: 'Training complete',
@@ -46,21 +54,23 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       extendBot: 'Extend your bot with Integrations',
       shareBot: 'Share your bot',
       getAccess: 'Get access to more features',
-      premiumDesc: 'Custom branding, human handoff, and role-based access control are available on premium plans.',
+      premiumDesc:
+        'Custom branding, human handoff, and role-based access control are available on premium plans.',
       viewPlans: 'View Plans',
       share: 'Share',
-      continue: 'Continue'
+      continue: 'Continue',
     },
     ko: {
       initialMessage: `안녕하세요! 👋 AI 에이전트 웹 플랫폼 지원팀입니다. 무엇을 도와드릴까요?`,
-      botResponse: '죄송합니다. 현재 미리보기 모드로 요청을 처리할 수 없습니다. 전체 기능을 사용하려면 챗봇을 지식 베이스에 연결해주세요.',
+      botResponse:
+        '죄송합니다. 현재 미리보기 모드로 요청을 처리할 수 없습니다. 전체 기능을 사용하려면 챗봇을 지식 베이스에 연결해주세요.',
       today: '오늘',
       delivered: '전송됨',
       placeholder: '메시지를 입력하세요...',
       quickMessages: [
-        "첫 번째 AI 에이전트는 어떻게 설정하나요?",
-        "튜토리얼이나 가이드는 어디서 찾을 수 있나요?",
-        "기능 사용에 문제가 있습니다"
+        '첫 번째 AI 에이전트는 어떻게 설정하나요?',
+        '튜토리얼이나 가이드는 어디서 찾을 수 있나요?',
+        '기능 사용에 문제가 있습니다',
       ],
       ready: '챗봇이 준비되었습니다!',
       trainingComplete: '학습 완료',
@@ -70,11 +80,12 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       extendBot: '연동으로 챗봇 확장하기',
       shareBot: '챗봇 공유하기',
       getAccess: '더 많은 기능 사용하기',
-      premiumDesc: '커스텀 브랜딩, 상담원 전환, 역할 기반 접근 제어 등이 프리미엄 플랜에서 제공됩니다.',
+      premiumDesc:
+        '커스텀 브랜딩, 상담원 전환, 역할 기반 접근 제어 등이 프리미엄 플랜에서 제공됩니다.',
       viewPlans: '플랜 보기',
       share: '공유',
-      continue: '계속하기'
-    }
+      continue: '계속하기',
+    },
   };
 
   const t = translations[language];
@@ -83,7 +94,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     id: '1',
     type: 'bot',
     content: t.initialMessage,
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -114,14 +125,16 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     // } catch (error) {
     //   console.error('Failed to reset chat:', error);
     // }
-    
+
     // Frontend: Reset local state
-    setMessages([{
-      id: Date.now().toString(),
-      type: 'bot',
-      content: t.initialMessage,
-      timestamp: new Date()
-    }]);
+    setMessages([
+      {
+        id: Date.now().toString(),
+        type: 'bot',
+        content: t.initialMessage,
+        timestamp: new Date(),
+      },
+    ]);
     setInputValue('');
     setIsTyping(false);
 
@@ -134,14 +147,14 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
     // TODO: POST /api/chat
     // Send user message and get bot response
-    // 
+    //
     // Request body: {
     //   botId: string,
     //   sessionId: string,
     //   message: string,
     //   userId?: string  // Optional: if user is logged in
     // }
-    // 
+    //
     // Response: {
     //   messageId: string,
     //   botResponse: string,
@@ -154,13 +167,13 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     // 3. Generate response using AI model
     // 4. Store conversation in database
     // 5. Return bot response
-    
+
     const userMessageContent = inputValue;
     const newMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: userMessageContent,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([...messages, newMessage]);
@@ -180,49 +193,48 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       //     message: userMessageContent
       //   })
       // });
-      // 
+      //
       // if (!response.ok) throw new Error('Chat API failed');
-      // 
+      //
       // const data = await response.json();
-      
+
       // Mock delay to simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setIsTyping(false);
-      
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: t.botResponse, // Replace with: data.botResponse
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, botResponse]);
-      
+      setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
-      
+
       // Show error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
   const handleQuickMessage = async (msg: string) => {
     // TODO: Same as handleSendMessage - POST /api/chat
-    
+
     setInputValue('');
-    
+
     const newMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: msg,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([...messages, newMessage]);
@@ -232,17 +244,16 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
     try {
       // Mock API call - replace with actual API (same endpoint as handleSendMessage)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setIsTyping(false);
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: t.botResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, botResponse]);
-      
+      setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
@@ -252,7 +263,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
   const handleShare = async () => {
     // TODO: POST /api/bots/{botId}/share
     // Generate shareable URL for the bot
-    // 
+    //
     // Request: POST /api/bots/${botId}/share
     // Response: {
     //   shareUrl: string,  // e.g., "https://yourapp.com/chat/abc123"
@@ -271,33 +282,40 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     // 2. Copy URL to clipboard
     // 3. Show success toast
     // 4. Optional: Open URL in new tab
-    
+
     try {
       // Mock API call - replace with actual API
       // const response = await fetch(`/api/bots/${botId}/share`, {
       //   method: 'POST'
       // });
-      // 
+      //
       // if (!response.ok) throw new Error('Share API failed');
-      // 
+      //
       // const data = await response.json();
       // const shareUrl = data.shareUrl;
-      
+
       // Mock share URL
       const shareUrl = `${window.location.origin}/chat/${_botId || 'preview'}`;
-      
+
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
-      
+
       // Show success toast
-      toast.success(language === 'ko' ? '공유 링크가 클립보드에 복사되었습니다!' : 'Share link copied to clipboard!');
-      
+      toast.success(
+        language === 'ko'
+          ? '공유 링크가 클립보드에 복사되었습니다!'
+          : 'Share link copied to clipboard!'
+      );
+
       // Optional: Open in new tab
       // window.open(shareUrl, '_blank');
-      
     } catch (error) {
       console.error('Share error:', error);
-      toast.error(language === 'ko' ? '공유 링크 생성에 실패했습니다' : 'Failed to generate share link');
+      toast.error(
+        language === 'ko'
+          ? '공유 링크 생성에 실패했습니다'
+          : 'Failed to generate share link'
+      );
     }
   };
 
@@ -317,13 +335,19 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                 </div>
                 <h3 className="text-sm">{botName}</h3>
               </div>
-              <button onClick={handleResetChat} className="text-gray-400 hover:text-white transition-colors">
+              <button
+                onClick={handleResetChat}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 <RotateCw size={18} />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-900 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div
+              className="flex-1 overflow-y-auto p-4 bg-gray-900 scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {/* Bot Avatar and Name */}
               <div className="flex flex-col items-center mb-6 mt-4">
                 <div className="w-20 h-20 bg-teal-400 rounded-full flex items-center justify-center mb-3">
@@ -350,18 +374,23 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                     ) : (
                       <div className="flex justify-start gap-2">
                         <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <span className="text-xs text-gray-900">{botInitial}</span>
+                          <span className="text-xs text-gray-900">
+                            {botInitial}
+                          </span>
                         </div>
                         <div className="bg-gray-700 text-white rounded-2xl px-4 py-2 max-w-[80%]">
                           <p className="text-sm">{message.content}</p>
                         </div>
                       </div>
                     )}
-                    {index === messages.length - 1 && message.type === 'user' && (
-                      <div className="text-right mt-1">
-                        <span className="text-xs text-gray-500">{t.delivered}</span>
-                      </div>
-                    )}
+                    {index === messages.length - 1 &&
+                      message.type === 'user' && (
+                        <div className="text-right mt-1">
+                          <span className="text-xs text-gray-500">
+                            {t.delivered}
+                          </span>
+                        </div>
+                      )}
                   </div>
                 ))}
 
@@ -369,12 +398,23 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                 {isTyping && (
                   <div className="flex justify-start gap-2">
                     <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-xs text-gray-900">{botInitial}</span>
+                      <span className="text-xs text-gray-900">
+                        {botInitial}
+                      </span>
                     </div>
                     <div className="bg-gray-700 text-white rounded-2xl px-4 py-3 flex gap-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      ></div>
                     </div>
                   </div>
                 )}
@@ -408,13 +448,25 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                   placeholder={t.placeholder}
                   className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                 />
-                <button 
+                <button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim()}
                   className="text-teal-400 disabled:text-gray-600"
                 >
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </button>
               </div>
@@ -446,14 +498,17 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                 <span className="text-sm text-gray-700">{t.testBot}</span>
               </button>
               <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                <ExternalLink size={18} className="text-gray-600 flex-shrink-0" />
+                <ExternalLink
+                  size={18}
+                  className="text-gray-600 flex-shrink-0"
+                />
                 <span className="text-sm text-gray-700">{t.enterStudio}</span>
               </button>
               <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left">
                 <Puzzle size={18} className="text-gray-600 flex-shrink-0" />
                 <span className="text-sm text-gray-700">{t.extendBot}</span>
               </button>
-              <button 
+              <button
                 onClick={handleShare}
                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
               >
@@ -466,9 +521,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
           {/* Premium Card */}
           <Card className="p-6 bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 shadow-lg">
             <h3 className="mb-3">{t.getAccess}</h3>
-            <p className="text-sm text-gray-700 mb-4">
-              {t.premiumDesc}
-            </p>
+            <p className="text-sm text-gray-700 mb-4">{t.premiumDesc}</p>
             <Button variant="outline" className="w-full bg-white">
               {t.viewPlans}
             </Button>
@@ -476,15 +529,19 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button onClick={handleShare} variant="outline" className="flex-1 gap-2">
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="flex-1 gap-2"
+            >
               <Share2 size={16} />
               {t.share}
             </Button>
-            <Button 
+            <Button
               onClick={() => {
                 // NAVIGATE: Go to main page (workspace with all bots)
                 onContinue();
-              }} 
+              }}
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
             >
               {t.continue}

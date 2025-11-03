@@ -186,7 +186,10 @@ export const useTeamStore = create<TeamStore>()(
 
             set((state) => ({
               apiKeys: state.apiKeys.filter((key) => key.id !== keyId),
-              selectedAPIKey: state.selectedAPIKey?.id === keyId ? null : state.selectedAPIKey,
+              selectedAPIKey:
+                state.selectedAPIKey?.id === keyId
+                  ? null
+                  : state.selectedAPIKey,
               loading: false,
             }));
           } catch (error) {

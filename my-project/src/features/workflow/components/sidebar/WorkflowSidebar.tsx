@@ -11,7 +11,10 @@ export interface WorkflowSidebarProps {
  * 워크플로우 빌더 왼쪽 사이드바 네비게이션
  * Dify 스타일의 메뉴 구조
  */
-const WorkflowSidebar = ({ activeView, onViewChange }: WorkflowSidebarProps) => {
+const WorkflowSidebar = ({
+  activeView,
+  onViewChange,
+}: WorkflowSidebarProps) => {
   const menuItems: { id: SidebarView; label: string; icon: string }[] = [
     { id: 'flow', label: '플로우', icon: '🔀' },
     { id: 'monitoring', label: '모니터링', icon: '📊' },
@@ -22,7 +25,9 @@ const WorkflowSidebar = ({ activeView, onViewChange }: WorkflowSidebarProps) => 
     <div className="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
       {/* 헤더 */}
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800">Workflow Builder</h2>
+        <h2 className="text-lg font-semibold text-gray-800">
+          Workflow Builder
+        </h2>
       </div>
 
       {/* 메뉴 리스트 */}

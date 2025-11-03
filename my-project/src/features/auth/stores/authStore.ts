@@ -75,7 +75,8 @@ export const useAuthStore = create<AuthStore>()(
               error: null,
             });
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Authentication failed';
             set({
               error: errorMessage,
               isLoading: false,
@@ -178,6 +179,7 @@ export const useAuthStore = create<AuthStore>()(
 
 // Selectors
 export const selectUser = (state: AuthStore) => state.user;
-export const selectIsAuthenticated = (state: AuthStore) => state.isAuthenticated;
+export const selectIsAuthenticated = (state: AuthStore) =>
+  state.isAuthenticated;
 export const selectIsLoading = (state: AuthStore) => state.isLoading;
 export const selectError = (state: AuthStore) => state.error;

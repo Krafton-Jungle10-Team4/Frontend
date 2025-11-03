@@ -11,10 +11,14 @@ const HomePage = lazy(() =>
   import('./pages/HomePage').then((module) => ({ default: module.HomePage }))
 );
 const BotSetupPage = lazy(() =>
-  import('./pages/BotSetupPage').then((module) => ({ default: module.BotSetupPage }))
+  import('./pages/BotSetupPage').then((module) => ({
+    default: module.BotSetupPage,
+  }))
 );
 const BotPreviewPage = lazy(() =>
-  import('./pages/BotPreviewPage').then((module) => ({ default: module.BotPreviewPage }))
+  import('./pages/BotPreviewPage').then((module) => ({
+    default: module.BotPreviewPage,
+  }))
 );
 
 /**

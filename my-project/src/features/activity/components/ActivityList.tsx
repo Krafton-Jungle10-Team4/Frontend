@@ -12,7 +12,11 @@ interface ActivityListProps {
   language?: 'en' | 'ko';
 }
 
-export function ActivityList({ activities, userName = 'User', language = 'ko' }: ActivityListProps) {
+export function ActivityList({
+  activities,
+  userName = 'User',
+  language = 'ko',
+}: ActivityListProps) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   if (activities.length === 0) {
@@ -28,14 +32,19 @@ export function ActivityList({ activities, userName = 'User', language = 'ko' }:
       {activities.map((activity) => (
         <div key={activity.id} className="flex gap-3">
           <Avatar className="w-8 h-8 flex-shrink-0">
-            <AvatarFallback className="bg-teal-500 text-white text-xs">{userInitial}</AvatarFallback>
+            <AvatarFallback className="bg-teal-500 text-white text-xs">
+              {userInitial}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-600">
-              {activity.message || `${activity.type} - ${activity.botName || ''}`}
+              {activity.message ||
+                `${activity.type} - ${activity.botName || ''}`}
             </p>
             <p className="text-xs text-gray-400">
-              {new Date(activity.timestamp).toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US')}
+              {new Date(activity.timestamp).toLocaleString(
+                language === 'ko' ? 'ko-KR' : 'en-US'
+              )}
             </p>
           </div>
         </div>

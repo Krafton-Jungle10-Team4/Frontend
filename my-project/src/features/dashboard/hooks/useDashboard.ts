@@ -39,13 +39,7 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     } finally {
       setLoading(false);
     }
-  }, [
-    setLoading,
-    setError,
-    setStats,
-    setActivities,
-    setPerformanceMetrics,
-  ]);
+  }, [setLoading, setError, setStats, setActivities, setPerformanceMetrics]);
 
   /**
    * 통계 데이터만 가져오기

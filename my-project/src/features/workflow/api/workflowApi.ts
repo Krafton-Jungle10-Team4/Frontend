@@ -26,7 +26,9 @@ export const workflowApi = {
   /**
    * 워크플로우 생성
    */
-  create: async (workflow: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkflowData> => {
+  create: async (
+    workflow: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<WorkflowData> => {
     const { data } = await apiClient.post('/workflows', workflow);
     return data;
   },
@@ -52,15 +54,22 @@ export const workflowApi = {
   /**
    * 워크플로우 실행
    */
-  execute: async (id: string, input?: Record<string, unknown>): Promise<unknown> => {
-    const { data } = await apiClient.post(`/workflows/${id}/execute`, { input });
+  execute: async (
+    id: string,
+    input?: Record<string, unknown>
+  ): Promise<unknown> => {
+    const { data } = await apiClient.post(`/workflows/${id}/execute`, {
+      input,
+    });
     return data;
   },
 
   /**
    * 워크플로우 검증
    */
-  validate: async (workflow: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'>): Promise<{
+  validate: async (
+    workflow: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<{
     valid: boolean;
     errors?: string[];
   }> => {

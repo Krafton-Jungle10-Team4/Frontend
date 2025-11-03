@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/shared/components/button';
 import { Input } from '@/shared/components/input';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/shared/components/collapsible';
 import { Checkbox } from '@/shared/components/checkbox';
 import { Trash2, Loader2, ChevronRight } from 'lucide-react';
 import { useBotSetup } from '../../BotSetupContext';
@@ -16,12 +20,8 @@ interface WebsitesTabProps {
 }
 
 export function WebsitesTab({ language }: WebsitesTabProps) {
-  const {
-    websites,
-    setWebsites,
-    isDiscoveringUrls,
-    setIsDiscoveringUrls,
-  } = useBotSetup();
+  const { websites, setWebsites, isDiscoveringUrls, setIsDiscoveringUrls } =
+    useBotSetup();
 
   const [currentWebsiteUrl, setCurrentWebsiteUrl] = useState('');
 
@@ -78,10 +78,10 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
       try {
         // TODO: Replace with real API call when ready
         // await ApiClient.deleteWebsite(id);
-        
+
         // Mock implementation
         await new Promise((resolve) => setTimeout(resolve, 500));
-        
+
         setWebsites(websites.filter((w) => w.id !== id));
         toast.success(t.websiteRemoved);
       } catch {
@@ -153,7 +153,11 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
     );
   };
 
-  const renderUrlTree = (websiteId: string, urls: DiscoveredUrl[], depth: number = 0) => {
+  const renderUrlTree = (
+    websiteId: string,
+    urls: DiscoveredUrl[],
+    depth: number = 0
+  ) => {
     return urls.map((url) => (
       <div key={url.id} style={{ marginLeft: `${depth * 20}px` }}>
         <Collapsible>
@@ -189,7 +193,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
       {/* Website URL Label */}
       <div className="space-y-2">
         <label className="text-sm text-gray-600">{t.websiteUrl}</label>
-        
+
         {/* Add Website Input */}
         <div className="flex gap-2">
           <Input

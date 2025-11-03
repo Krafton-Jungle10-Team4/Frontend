@@ -161,7 +161,8 @@ describe('dashboardStore', () => {
 
   describe('데이터 갱신 시나리오', () => {
     it('데이터 로딩 → 성공 시나리오', () => {
-      const { setLoading, setStats, isLoading, stats } = useDashboardStore.getState();
+      const { setLoading, setStats, isLoading, stats } =
+        useDashboardStore.getState();
 
       // 로딩 시작
       setLoading(true);
@@ -185,7 +186,8 @@ describe('dashboardStore', () => {
     });
 
     it('데이터 로딩 → 실패 시나리오', () => {
-      const { setLoading, setError, isLoading, error } = useDashboardStore.getState();
+      const { setLoading, setError, isLoading, error } =
+        useDashboardStore.getState();
 
       // 로딩 시작
       setLoading(true);

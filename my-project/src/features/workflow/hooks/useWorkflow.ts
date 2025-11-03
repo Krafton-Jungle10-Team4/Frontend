@@ -48,7 +48,10 @@ export function useWorkflow(workflowId?: string) {
   const saveWorkflow = useCallback(
     async (id?: string) => {
       try {
-        const workflowData: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'> = {
+        const workflowData: Omit<
+          WorkflowData,
+          'id' | 'createdAt' | 'updatedAt'
+        > = {
           name: workflowName || 'Untitled Workflow',
           description: workflowDescription,
           nodes,
@@ -75,15 +78,18 @@ export function useWorkflow(workflowId?: string) {
   /**
    * 워크플로우 삭제
    */
-  const deleteWorkflow = useCallback(async (id: string) => {
-    try {
-      await workflowApi.delete(id);
-      reset();
-    } catch (error) {
-      console.error('Failed to delete workflow:', error);
-      throw error;
-    }
-  }, [reset]);
+  const deleteWorkflow = useCallback(
+    async (id: string) => {
+      try {
+        await workflowApi.delete(id);
+        reset();
+      } catch (error) {
+        console.error('Failed to delete workflow:', error);
+        throw error;
+      }
+    },
+    [reset]
+  );
 
   /**
    * 워크플로우 실행
@@ -109,12 +115,13 @@ export function useWorkflow(workflowId?: string) {
    */
   const validateWorkflow = useCallback(async () => {
     try {
-      const workflowData: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'> = {
-        name: workflowName || 'Untitled Workflow',
-        description: workflowDescription,
-        nodes,
-        edges,
-      };
+      const workflowData: Omit<WorkflowData, 'id' | 'createdAt' | 'updatedAt'> =
+        {
+          name: workflowName || 'Untitled Workflow',
+          description: workflowDescription,
+          nodes,
+          edges,
+        };
 
       const result = await workflowApi.validate(workflowData);
       return result;

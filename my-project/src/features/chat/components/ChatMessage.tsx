@@ -17,14 +17,14 @@ export function ChatMessage({ message, language = 'ko' }: ChatMessageProps) {
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`max-w-[70%] rounded-lg p-3 ${
-          isUser
-            ? 'bg-teal-500 text-white'
-            : 'bg-gray-100 text-gray-900'
+          isUser ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-900'
         }`}
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         <p className="text-xs mt-1 opacity-70">
-          {new Date(message.timestamp).toLocaleTimeString(language === 'ko' ? 'ko-KR' : 'en-US')}
+          {new Date(message.timestamp).toLocaleTimeString(
+            language === 'ko' ? 'ko-KR' : 'en-US'
+          )}
         </p>
       </div>
     </div>

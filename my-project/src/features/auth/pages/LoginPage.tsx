@@ -52,7 +52,10 @@ export const LoginPage = () => {
           )}
 
           <div className="space-y-6">
-            <GoogleLoginButton onClick={handleGoogleLogin} disabled={isLoading} />
+            <GoogleLoginButton
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+            />
 
             {isLoading && (
               <div className="text-center text-blue-200">

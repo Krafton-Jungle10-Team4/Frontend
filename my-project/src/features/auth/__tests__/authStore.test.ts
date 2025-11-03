@@ -55,7 +55,8 @@ describe('authStore', () => {
 
   describe('로그아웃', () => {
     it('로그아웃 시 사용자 정보가 초기화되어야 한다', () => {
-      const { setUser, logout, user, isAuthenticated } = useAuthStore.getState();
+      const { setUser, logout, user, isAuthenticated } =
+        useAuthStore.getState();
 
       const testUser: User = {
         id: 'user-1',

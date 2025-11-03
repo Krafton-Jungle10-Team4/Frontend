@@ -29,12 +29,14 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
   const translations = {
     en: {
       title: 'Personality',
-      subtitle: "Share a website or description to shape your bot's tone and appearance.",
+      subtitle:
+        "Share a website or description to shape your bot's tone and appearance.",
       descriptionFrom: 'Description from',
       website: 'Website',
       text: 'Text',
       websiteUrlPlaceholder: 'https://yourwebsite.com',
-      personalityPlaceholder: 'Share FAQs, guides, or any info your agent can use to help',
+      personalityPlaceholder:
+        'Share FAQs, guides, or any info your agent can use to help',
       charactersRemaining: 'characters remaining',
     },
     ko: {
@@ -44,7 +46,8 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
       website: '웹사이트',
       text: '텍스트',
       websiteUrlPlaceholder: 'https://yourwebsite.com',
-      personalityPlaceholder: 'FAQ, 가이드 또는 챗봇이 사용할 수 있는 정보를 공유하세요',
+      personalityPlaceholder:
+        'FAQ, 가이드 또는 챗봇이 사용할 수 있는 정보를 공유하세요',
       charactersRemaining: '자 남음',
     },
   };
@@ -64,7 +67,9 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
           <label className="text-sm text-gray-600">{t.descriptionFrom}</label>
           <Select
             value={descriptionSource}
-            onValueChange={(value: DescriptionSource) => setDescriptionSource(value)}
+            onValueChange={(value: DescriptionSource) =>
+              setDescriptionSource(value)
+            }
           >
             <SelectTrigger className="w-full h-11 bg-white border-gray-200">
               <SelectValue />
@@ -92,13 +97,16 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
             <Textarea
               value={personalityText}
               onChange={(e) =>
-                setPersonalityText(e.target.value.slice(0, TEXT_LIMITS.BOT_PERSONALITY.MAX))
+                setPersonalityText(
+                  e.target.value.slice(0, TEXT_LIMITS.BOT_PERSONALITY.MAX)
+                )
               }
               placeholder={t.personalityPlaceholder}
               className="min-h-[200px] resize-none bg-gray-50 border-gray-200"
             />
             <p className="text-xs text-gray-500 text-right">
-              {TEXT_LIMITS.BOT_PERSONALITY.MAX - personalityText.length} {t.charactersRemaining}
+              {TEXT_LIMITS.BOT_PERSONALITY.MAX - personalityText.length}{' '}
+              {t.charactersRemaining}
             </p>
           </div>
         )}

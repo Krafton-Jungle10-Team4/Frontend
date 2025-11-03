@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/card';
 
 interface StatCardProps {
   title: string;

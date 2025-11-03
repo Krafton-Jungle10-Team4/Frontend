@@ -1,7 +1,22 @@
-import { PanelLeft, Languages, Settings, Link2, KeyRound, Bug, Palette, LogOut } from 'lucide-react';
+import {
+  PanelLeft,
+  Languages,
+  Settings,
+  Link2,
+  KeyRound,
+  Bug,
+  Palette,
+  LogOut,
+} from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import { Button } from '@/shared/components/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/components/dropdown-menu';
 
 type Language = 'en' | 'ko';
 
@@ -14,7 +29,14 @@ interface TopNavigationProps {
   onLanguageChange: (lang: Language) => void;
 }
 
-export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = '', onHomeClick, language, onLanguageChange }: TopNavigationProps) {
+export function TopNavigation({
+  onToggleSidebar,
+  userName = 'User',
+  userEmail = '',
+  onHomeClick,
+  language,
+  onLanguageChange,
+}: TopNavigationProps) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   // TODO: Add userAvatar prop and use it in Avatar component
@@ -29,7 +51,7 @@ export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = 
       changePassword: 'Change password',
       reportBug: 'Report a bug',
       appearance: 'Appearance',
-      signOut: 'Sign out'
+      signOut: 'Sign out',
     },
     ko: {
       workspace: '의 워크스페이스',
@@ -39,8 +61,8 @@ export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = 
       changePassword: '비밀번호 변경',
       reportBug: '버그 신고',
       appearance: '외관',
-      signOut: '로그아웃'
-    }
+      signOut: '로그아웃',
+    },
   };
 
   const t = translations[language];
@@ -58,7 +80,8 @@ export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = 
           onClick={onHomeClick}
           className="hover:text-gray-900 transition-colors truncate hidden sm:inline"
         >
-          {userName}{t.workspace}
+          {userName}
+          {t.workspace}
         </button>
         <span className="text-gray-400 hidden sm:inline">{'>'}</span>
         <span className="font-semibold text-gray-900 truncate">{t.home}</span>
@@ -71,14 +94,18 @@ export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = 
           className="text-sm gap-1 sm:gap-2"
         >
           <Languages size={16} />
-          <span className="hidden sm:inline">{language === 'en' ? '한국어' : 'English'}</span>
+          <span className="hidden sm:inline">
+            {language === 'en' ? '한국어' : 'English'}
+          </span>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="focus:outline-none">
               <Avatar className="w-8 h-8 cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarFallback className="bg-teal-500 text-white">{userInitial}</AvatarFallback>
+                <AvatarFallback className="bg-teal-500 text-white">
+                  {userInitial}
+                </AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
@@ -87,7 +114,9 @@ export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = 
             <div className="p-4 border-b">
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarFallback className="bg-teal-500 text-white">{userInitial}</AvatarFallback>
+                  <AvatarFallback className="bg-teal-500 text-white">
+                    {userInitial}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-sm">{userName}</p>

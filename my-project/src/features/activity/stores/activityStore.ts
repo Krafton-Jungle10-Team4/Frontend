@@ -53,8 +53,7 @@ export const useActivityStore = create<ActivityStore>()(
           }),
 
         // Clear all activities
-        clearActivities: () =>
-          set({ activities: [] }),
+        clearActivities: () => set({ activities: [] }),
 
         // Remove specific activity
         removeActivity: (id: string) =>
@@ -99,6 +98,8 @@ export const useActivityStore = create<ActivityStore>()(
 
 // Selectors
 export const selectActivities = (state: ActivityStore) => state.activities;
-export const selectRecentActivities = (count: number) => (state: ActivityStore) =>
-  state.activities.slice(0, count);
-export const selectActivitiesCount = (state: ActivityStore) => state.activities.length;
+export const selectRecentActivities =
+  (count: number) => (state: ActivityStore) =>
+    state.activities.slice(0, count);
+export const selectActivitiesCount = (state: ActivityStore) =>
+  state.activities.length;

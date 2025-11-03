@@ -25,7 +25,10 @@ export function isValidEmail(email: string): boolean {
 /**
  * Check if file type is allowed
  */
-export function isValidFileType(file: File, allowedTypes: readonly string[]): boolean {
+export function isValidFileType(
+  file: File,
+  allowedTypes: readonly string[]
+): boolean {
   return allowedTypes.includes(file.type);
 }
 
@@ -48,7 +51,10 @@ export function getFileExtension(filename: string): string {
 /**
  * Check if file extension is allowed
  */
-export function isValidFileExtension(filename: string, allowedExtensions: string[]): boolean {
+export function isValidFileExtension(
+  filename: string,
+  allowedExtensions: string[]
+): boolean {
   const ext = getFileExtension(filename).toLowerCase();
   return allowedExtensions.includes(ext);
 }

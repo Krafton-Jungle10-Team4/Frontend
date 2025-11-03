@@ -42,15 +42,18 @@ export function createMockBot(name: string): BotCardData {
   const hour = now.getHours();
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour % 12 || 12;
-  
+
   return {
     id: `bot_${Date.now()}`,
     name,
-    deployedDate: `${displayHour}${ampm} ⏰ on ${now.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })}`,
+    deployedDate: `${displayHour}${ampm} ⏰ on ${now.toLocaleDateString(
+      'en-US',
+      {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }
+    )}`,
     messages: 0,
     messageChange: 'New bot',
     errors: 0,

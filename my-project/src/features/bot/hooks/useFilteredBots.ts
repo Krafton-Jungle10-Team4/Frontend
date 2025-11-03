@@ -52,9 +52,7 @@ export function useFilteredBots(options: UseFilteredBotsOptions = {}) {
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = bots.filter((bot) =>
-        bot.name.toLowerCase().includes(query)
-      );
+      filtered = bots.filter((bot) => bot.name.toLowerCase().includes(query));
     }
 
     // Bot 타입을 BotCardData 타입으로 변환

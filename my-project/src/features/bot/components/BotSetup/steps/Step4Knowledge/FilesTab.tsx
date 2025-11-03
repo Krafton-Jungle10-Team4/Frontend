@@ -50,13 +50,15 @@ export function FilesTab({ language }: FilesTabProps) {
         toast.error(`${file.name}: Unsupported file type`);
         return false;
       }
-      
+
       // Validate file size
       if (!isValidFileSize(file, FILE_UPLOAD.MAX_SIZE_MB)) {
-        toast.error(`${file.name}: File size exceeds ${FILE_UPLOAD.MAX_SIZE_MB}MB`);
+        toast.error(
+          `${file.name}: File size exceeds ${FILE_UPLOAD.MAX_SIZE_MB}MB`
+        );
         return false;
       }
-      
+
       return true;
     });
 
@@ -88,7 +90,8 @@ export function FilesTab({ language }: FilesTabProps) {
 
         toast.success(`${fileItem.file.name} uploaded successfully`);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         toast.error(`Failed to upload ${fileItem.file.name}: ${errorMessage}`);
         setFiles((prev) => prev.filter((f) => f.id !== fileItem.id));
       }
@@ -111,7 +114,11 @@ export function FilesTab({ language }: FilesTabProps) {
     try {
       await ApiClient.deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      toast.success(language === 'ko' ? '파일이 삭제되었습니다' : 'File deleted successfully');
+      toast.success(
+        language === 'ko'
+          ? '파일이 삭제되었습니다'
+          : 'File deleted successfully'
+      );
     } catch {
       // Revert status on error
       setFiles((prev) =>
@@ -119,7 +126,9 @@ export function FilesTab({ language }: FilesTabProps) {
           f.id === fileId ? { ...f, status: 'uploaded' as FileStatus } : f
         )
       );
-      toast.error(language === 'ko' ? '파일 삭제 실패' : 'Failed to delete file');
+      toast.error(
+        language === 'ko' ? '파일 삭제 실패' : 'Failed to delete file'
+      );
     }
   };
 
@@ -135,7 +144,8 @@ export function FilesTab({ language }: FilesTabProps) {
         <Upload className="mx-auto mb-3 text-gray-400" size={36} />
         <p className="text-gray-600 mb-1">{t.dragAndDrop}</p>
         <p className="text-sm text-gray-500">
-          {formatFileSize(totalSize)} / {FILE_UPLOAD.MAX_SIZE_MB} MB. {t.fileUsage}
+          {formatFileSize(totalSize)} / {FILE_UPLOAD.MAX_SIZE_MB} MB.{' '}
+          {t.fileUsage}
         </p>
         <input
           id="file-upload"
@@ -176,7 +186,7 @@ export function FilesTab({ language }: FilesTabProps) {
                       <span className="hidden sm:inline">Uploading...</span>
                     </div>
                   )}
-                  
+
                   {fileItem.status === 'uploaded' && (
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1 text-sm text-green-600">
@@ -192,7 +202,7 @@ export function FilesTab({ language }: FilesTabProps) {
                       </button>
                     </div>
                   )}
-                  
+
                   {fileItem.status === 'deleting' && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Loader2 size={16} className="animate-spin" />

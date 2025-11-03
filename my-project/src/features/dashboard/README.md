@@ -33,17 +33,20 @@ dashboard/
 ## 🎯 주요 기능
 
 ### 1. 통계 대시보드
+
 - **Bot 통계**: 전체/활성 Bot 수, 메시지 처리량
 - **성능 지표**: 평균 응답 시간, 에러율
 - **활동 추이**: 시간대별/일별 활동 그래프
 - **사용량 통계**: API 호출 횟수, 토큰 사용량
 
 ### 2. 실시간 모니터링
+
 - **라이브 지표**: 실시간 업데이트되는 주요 지표
 - **알림**: 임계값 초과 시 알림 표시
 - **상태 표시**: 시스템 상태 실시간 모니터링
 
 ### 3. 데이터 시각화
+
 - **차트**: Chart.js 기반 그래프 시각화
 - **테이블**: 상세 데이터 테이블 뷰
 - **필터링**: 기간별, 타입별 데이터 필터링
@@ -51,45 +54,50 @@ dashboard/
 ## 📦 Public API
 
 ### Components
+
 ```typescript
 import {
-  DashboardHeader,     // 대시보드 헤더
-  DashboardStats,      // 통계 카드
-  DashboardContent,    // 대시보드 콘텐츠
-  StatsCard,           // 개별 통계 카드
-  ActivityChart        // 활동 차트
+  DashboardHeader, // 대시보드 헤더
+  DashboardStats, // 통계 카드
+  DashboardContent, // 대시보드 콘텐츠
+  StatsCard, // 개별 통계 카드
+  ActivityChart, // 활동 차트
 } from '@/features/dashboard';
 ```
 
 ### Hooks
+
 ```typescript
 import {
-  useDashboard,        // 대시보드 상태 및 액션
-  useDashboardStats    // 통계 데이터 조회
+  useDashboard, // 대시보드 상태 및 액션
+  useDashboardStats, // 통계 데이터 조회
 } from '@/features/dashboard';
 ```
 
 ### Store
+
 ```typescript
 import {
-  useDashboardStore    // Dashboard store hook
+  useDashboardStore, // Dashboard store hook
 } from '@/features/dashboard';
 ```
 
 ### Types
+
 ```typescript
 import type {
-  DashboardStats,      // 통계 데이터 타입
-  DashboardState,      // Dashboard store 상태
-  TimeRange,           // 시간 범위
-  ChartData            // 차트 데이터 타입
+  DashboardStats, // 통계 데이터 타입
+  DashboardState, // Dashboard store 상태
+  TimeRange, // 시간 범위
+  ChartData, // 차트 데이터 타입
 } from '@/features/dashboard';
 ```
 
 ### Pages
+
 ```typescript
 import {
-  DashboardPage        // 대시보드 페이지
+  DashboardPage, // 대시보드 페이지
 } from '@/features/dashboard';
 ```
 
@@ -104,6 +112,7 @@ Dashboard Feature는 다음 라우트를 제공합니다:
 ## 🪝 Custom Hooks 사용 예시
 
 ### useDashboard
+
 ```typescript
 function DashboardOverview() {
   const {
@@ -129,6 +138,7 @@ function DashboardOverview() {
 ```
 
 ### useDashboardStats
+
 ```typescript
 function StatsDisplay() {
   const {
@@ -156,6 +166,7 @@ function StatsDisplay() {
 ## 🏪 Store 사용 예시
 
 ### 기본 사용
+
 ```typescript
 function DashboardMetrics() {
   const stats = useDashboardStore((state) => state.stats);
@@ -183,6 +194,7 @@ function DashboardMetrics() {
 ```
 
 ### 에러 처리
+
 ```typescript
 function DashboardWithError() {
   const error = useDashboardStore((state) => state.error);
@@ -204,6 +216,7 @@ function DashboardWithError() {
 ## 📊 통계 카드 예시
 
 ### StatsCard 사용
+
 ```typescript
 function MetricsOverview() {
   const stats = useDashboardStore((state) => state.stats);
@@ -243,6 +256,7 @@ function MetricsOverview() {
 ## 📈 차트 사용 예시
 
 ### ActivityChart
+
 ```typescript
 function ActivityTrend() {
   const [timeRange, setTimeRange] = useState<TimeRange>('last7days');
@@ -268,6 +282,7 @@ function ActivityTrend() {
 ## 🧪 테스트
 
 ### 테스트 실행
+
 ```bash
 # Dashboard Feature 테스트만 실행
 npm test -- dashboard
@@ -280,6 +295,7 @@ npm test -- dashboard --coverage
 ```
 
 ### 테스트 구조
+
 - **dashboardStore.test.ts**: Dashboard store의 모든 기능 테스트
   - 통계 데이터 관리
   - 로딩 상태 관리
@@ -291,6 +307,7 @@ npm test -- dashboard --coverage
 ### 새로운 통계 위젯 추가하기
 
 1. **타입 정의** (`types/dashboard.types.ts`)
+
 ```typescript
 export interface UserActivityStats {
   activeUsers: number;
@@ -305,6 +322,7 @@ export interface DashboardStats {
 ```
 
 2. **컴포넌트 생성** (`components/UserActivityWidget.tsx`)
+
 ```typescript
 export function UserActivityWidget({ data }: { data: UserActivityStats }) {
   return (
@@ -324,6 +342,7 @@ export function UserActivityWidget({ data }: { data: UserActivityStats }) {
 ```
 
 3. **API 추가** (`api/dashboardApi.ts`)
+
 ```typescript
 export const dashboardApi = {
   // ... 기존 함수들
@@ -335,6 +354,7 @@ export const dashboardApi = {
 ```
 
 4. **Hook 생성** (`hooks/useUserActivity.ts`)
+
 ```typescript
 export function useUserActivity() {
   const [data, setData] = useState<UserActivityStats | null>(null);
@@ -360,6 +380,7 @@ export function useUserActivity() {
 ```
 
 5. **Public API 노출** (`index.ts`)
+
 ```typescript
 export { UserActivityWidget } from './components/UserActivityWidget';
 export { useUserActivity } from './hooks/useUserActivity';
@@ -398,16 +419,19 @@ export function useRealtimeDashboard(refreshInterval = 5000) {
 ### 주의사항
 
 ⚠️ **성능 최적화**
+
 - 대량의 데이터 로딩 시 페이지네이션 구현
 - 차트 렌더링 최적화 (React.memo, useMemo 활용)
 - 불필요한 API 호출 방지 (디바운싱, 캐싱)
 
 ⚠️ **데이터 정합성**
+
 - 실시간 업데이트와 수동 갱신 간 충돌 방지
 - 낙관적 업데이트 시 롤백 처리
 - 타임존 고려한 날짜 처리
 
 ⚠️ **UX 고려사항**
+
 - 로딩 상태 명확하게 표시
 - 에러 발생 시 재시도 옵션 제공
 - 데이터 없을 때 적절한 Empty State 표시

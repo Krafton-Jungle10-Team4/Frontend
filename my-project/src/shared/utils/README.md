@@ -58,6 +58,7 @@ export const getRelativeTime = (date: Date): string => {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { formatDate, getRelativeTime } from '@utils/dateFormat';
 
@@ -109,6 +110,7 @@ export const isValidEmail = (email: string): boolean => {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { truncate, formatPhoneNumber } from '@utils/stringUtils';
 
@@ -151,6 +153,7 @@ export const calculatePercentage = (value: number, total: number): number => {
 ```
 
 **사용 예시**:
+
 ```typescript
 import { formatCurrency, formatFileSize } from '@utils/numberFormat';
 
@@ -197,18 +200,22 @@ export const shuffle = <T>(array: T[]): T[] => {
  * 객체 배열을 특정 키로 그룹화
  */
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
-  return array.reduce((result, item) => {
-    const groupKey = String(item[key]);
-    if (!result[groupKey]) {
-      result[groupKey] = [];
-    }
-    result[groupKey].push(item);
-    return result;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (result, item) => {
+      const groupKey = String(item[key]);
+      if (!result[groupKey]) {
+        result[groupKey] = [];
+      }
+      result[groupKey].push(item);
+      return result;
+    },
+    {} as Record<string, T[]>
+  );
 };
 ```
 
 **사용 예시**:
+
 ```typescript
 import { chunk, groupBy } from '@utils/arrayUtils';
 
@@ -239,7 +246,9 @@ export const deepClone = <T>(obj: T): T => {
 /**
  * 객체에서 빈 값 제거
  */
-export const omitEmpty = <T extends Record<string, any>>(obj: T): Partial<T> => {
+export const omitEmpty = <T extends Record<string, any>>(
+  obj: T
+): Partial<T> => {
   return Object.entries(obj).reduce((acc, [key, value]) => {
     if (value !== null && value !== undefined && value !== '') {
       acc[key] = value;
@@ -256,7 +265,7 @@ export const pick = <T extends object, K extends keyof T>(
   keys: K[]
 ): Pick<T, K> => {
   const result = {} as Pick<T, K>;
-  keys.forEach(key => {
+  keys.forEach((key) => {
     if (key in obj) {
       result[key] = obj[key];
     }
@@ -266,6 +275,7 @@ export const pick = <T extends object, K extends keyof T>(
 ```
 
 **사용 예시**:
+
 ```typescript
 import { pick, omitEmpty } from '@utils/objectUtils';
 
@@ -314,6 +324,7 @@ export const throttle = <T extends (...args: any[]) => any>(
 ```
 
 **사용 예시**:
+
 ```typescript
 import { debounce } from '@utils/timing';
 
@@ -340,6 +351,7 @@ utils/
 ## 작성 가이드
 
 ### 1. 순수 함수로 작성
+
 ```typescript
 // ✅ 좋은 예: 순수 함수 (입력이 같으면 출력도 같음)
 export const add = (a: number, b: number): number => {
@@ -355,6 +367,7 @@ export const addToTotal = (value: number): number => {
 ```
 
 ### 2. TypeScript 타입 활용
+
 ```typescript
 // ✅ 제네릭으로 재사용성 향상
 export const groupBy = <T>(array: T[], key: keyof T) => {
@@ -363,6 +376,7 @@ export const groupBy = <T>(array: T[], key: keyof T) => {
 ```
 
 ### 3. JSDoc 주석 작성
+
 ```typescript
 /**
  * 배열의 중복을 제거합니다

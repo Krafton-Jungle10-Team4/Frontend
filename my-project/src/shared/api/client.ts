@@ -1,4 +1,7 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 import { API_BASE_URL, API_TIMEOUT } from '@/shared/constants/apiEndpoints';
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';

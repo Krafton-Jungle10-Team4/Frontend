@@ -18,14 +18,14 @@ export interface ModelData {
 
 export const openAIUsage: ModelData = {
   'gpt-4': [
-    { date: '2025-10-01', requests: 5200, tokens: 195000, cost: 4.50 },
-    { date: '2025-10-08', requests: 5940, tokens: 220000, cost: 5.10 },
+    { date: '2025-10-01', requests: 5200, tokens: 195000, cost: 4.5 },
+    { date: '2025-10-08', requests: 5940, tokens: 220000, cost: 5.1 },
     { date: '2025-10-15', requests: 6180, tokens: 228000, cost: 5.28 },
     { date: '2025-10-22', requests: 5720, tokens: 210000, cost: 4.86 },
     { date: '2025-10-29', requests: 6140, tokens: 226000, cost: 5.23 },
   ],
   'gpt-3.5-turbo': [
-    { date: '2025-10-01', requests: 3250, tokens: 120000, cost: 1.80 },
+    { date: '2025-10-01', requests: 3250, tokens: 120000, cost: 1.8 },
     { date: '2025-10-08', requests: 3780, tokens: 138000, cost: 2.06 },
     { date: '2025-10-15', requests: 3970, tokens: 143000, cost: 2.14 },
     { date: '2025-10-22', requests: 3660, tokens: 132000, cost: 1.98 },
@@ -36,7 +36,7 @@ export const openAIUsage: ModelData = {
 export const geminiUsage: ModelData = {
   'gemini-pro': [
     { date: '2025-10-01', requests: 3820, tokens: 138000, cost: 2.07 },
-    { date: '2025-10-08', requests: 4410, tokens: 160000, cost: 2.40 },
+    { date: '2025-10-08', requests: 4410, tokens: 160000, cost: 2.4 },
     { date: '2025-10-15', requests: 4600, tokens: 167000, cost: 2.51 },
     { date: '2025-10-22', requests: 4250, tokens: 155000, cost: 2.33 },
     { date: '2025-10-29', requests: 4560, tokens: 166000, cost: 2.49 },
@@ -54,7 +54,8 @@ export function calculateSummary(data: DailyUsage[]): UsageSummary {
   const totalRequests = data.reduce((sum, day) => sum + day.requests, 0);
   const totalTokens = data.reduce((sum, day) => sum + day.tokens, 0);
   const totalCost = data.reduce((sum, day) => sum + day.cost, 0);
-  const averageRequestsPerDay = data.length > 0 ? Math.round(totalRequests / data.length) : 0;
+  const averageRequestsPerDay =
+    data.length > 0 ? Math.round(totalRequests / data.length) : 0;
 
   return {
     totalRequests,

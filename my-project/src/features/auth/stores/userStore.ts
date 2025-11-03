@@ -28,8 +28,7 @@ export const useUserStore = create<UserStore>()(
         user: null,
 
         // Set user name (for simple cases)
-        setUserName: (name: string) =>
-          set({ userName: name }),
+        setUserName: (name: string) => set({ userName: name }),
 
         // Set full user object
         setUser: (user: User | null) =>

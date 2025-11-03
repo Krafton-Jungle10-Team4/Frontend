@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Workflow from '../components/WorkflowBuilder';
-import WorkflowSidebar, { SidebarView } from '../components/sidebar/WorkflowSidebar';
+import WorkflowSidebar, {
+  SidebarView,
+} from '../components/sidebar/WorkflowSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
 import type { Node, Edge } from '../types/workflow.types';

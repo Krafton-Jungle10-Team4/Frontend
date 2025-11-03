@@ -12,10 +12,7 @@ interface StepNavigationProps {
   language: Language;
 }
 
-export function StepNavigation({
-  onBack,
-  language,
-}: StepNavigationProps) {
+export function StepNavigation({ onBack, language }: StepNavigationProps) {
   const {
     step,
     setStep,
@@ -64,7 +61,8 @@ export function StepNavigation({
         // CreateBotDto 구성
         const dto: CreateBotDto = {
           name: botName,
-          goal: selectedGoal === 'other' ? customGoal : selectedGoal || undefined,
+          goal:
+            selectedGoal === 'other' ? customGoal : selectedGoal || undefined,
           personality: personalityText || undefined,
           knowledge: knowledgeText ? [knowledgeText] : undefined,
         };
@@ -161,8 +159,8 @@ export function StepNavigation({
                 ? '생성 중...'
                 : 'Creating...'
               : step === 4
-              ? t.trainAgent
-              : t.next}
+                ? t.trainAgent
+                : t.next}
             {!isCreating && <ArrowRight size={18} className="ml-2" />}
           </Button>
         </div>

@@ -62,11 +62,16 @@ export const botApi = {
       return data;
     } catch (error: any) {
       // 네트워크 연결 실패 시 (백엔드 미구현) Mock 데이터 생성
-      if (error.message?.includes('네트워크 연결') || error.code === 'ERR_NETWORK') {
-        console.warn('⚠️ Backend not available, using mock data for bot creation');
+      if (
+        error.message?.includes('네트워크 연결') ||
+        error.code === 'ERR_NETWORK'
+      ) {
+        console.warn(
+          '⚠️ Backend not available, using mock data for bot creation'
+        );
 
         // Mock 지연 시간 추가 (실제 API 호출처럼 보이게)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         const mockBot = createMockBot(dto);
         return mockBot;

@@ -1,4 +1,7 @@
-import type { NodeProps, KnowledgeRetrievalNodeType } from '../../../types/workflow.types';
+import type {
+  NodeProps,
+  KnowledgeRetrievalNodeType,
+} from '../../../types/workflow.types';
 import { memo } from 'react';
 
 /**

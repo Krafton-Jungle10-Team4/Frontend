@@ -16,14 +16,16 @@ export function Step4Knowledge({ language }: Step4KnowledgeProps) {
   const translations = {
     en: {
       title: 'Knowledge',
-      subtitle: 'Add knowledge sources to help your bot answer questions. You can add more later.',
+      subtitle:
+        'Add knowledge sources to help your bot answer questions. You can add more later.',
       websites: 'Websites',
       files: 'Files',
       text: 'Text',
     },
     ko: {
       title: '지식',
-      subtitle: '챗봇이 질문에 답변할 수 있도록 지식 소스를 추가하세요. 나중에 더 추가할 수 있습니다.',
+      subtitle:
+        '챗봇이 질문에 답변할 수 있도록 지식 소스를 추가하세요. 나중에 더 추가할 수 있습니다.',
       websites: '웹사이트',
       files: '파일',
       text: '텍스트',
@@ -32,7 +34,11 @@ export function Step4Knowledge({ language }: Step4KnowledgeProps) {
 
   const t = translations[language];
 
-  const tabs: Array<{ key: KnowledgeTab; label: string; icon: React.ElementType }> = [
+  const tabs: Array<{
+    key: KnowledgeTab;
+    label: string;
+    icon: React.ElementType;
+  }> = [
     { key: 'websites', label: t.websites, icon: Link },
     { key: 'files', label: t.files, icon: Upload },
     { key: 'text', label: t.text, icon: FileText },

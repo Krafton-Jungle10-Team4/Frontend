@@ -21,7 +21,9 @@ export const authApi = {
    */
   redirectToGoogleLogin: (redirectUri?: string): void => {
     const loginUrl = `${apiClient.defaults.baseURL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`;
-    const url = redirectUri ? `${loginUrl}?redirect_uri=${encodeURIComponent(redirectUri)}` : loginUrl;
+    const url = redirectUri
+      ? `${loginUrl}?redirect_uri=${encodeURIComponent(redirectUri)}`
+      : loginUrl;
     window.location.href = url;
   },
 
@@ -30,7 +32,9 @@ export const authApi = {
    * @param callbackUrl callback URL (쿼리 파라미터 포함)
    * @returns JWT 토큰 (성공 시) 또는 null (실패 시)
    */
-  handleAuthCallback: (callbackUrl: string = window.location.href): string | null => {
+  handleAuthCallback: (
+    callbackUrl: string = window.location.href
+  ): string | null => {
     const url = new URL(callbackUrl);
     const token = url.searchParams.get('token');
     const error = url.searchParams.get('error');

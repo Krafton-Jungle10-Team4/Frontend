@@ -4,7 +4,11 @@ import { Tabs, TabsList, TabsTrigger } from '@/shared/components/tabs';
 import { StatCard } from '@/shared/components/usage/UsageStats';
 import { UsageChart } from '@/shared/components/usage/UsageChart';
 import { ModelSelector } from '@/shared/components/usage/ModelSelector';
-import { openAIUsage, geminiUsage, calculateSummary } from '@/shared/data/mockUsageData';
+import {
+  openAIUsage,
+  geminiUsage,
+  calculateSummary,
+} from '@/shared/data/mockUsageData';
 
 /**
  * 모니터링 뷰 - API 사용량 및 비용 통계
@@ -13,13 +17,16 @@ const MonitoringView = () => {
   const [selectedProvider, setSelectedProvider] = useState('openai');
   const [selectedModel, setSelectedModel] = useState('gpt-4');
 
-  const currentProviderData = selectedProvider === 'openai' ? openAIUsage : geminiUsage;
+  const currentProviderData =
+    selectedProvider === 'openai' ? openAIUsage : geminiUsage;
   const models = Object.keys(currentProviderData);
 
   // 프로바이더 변경시 첫 번째 모델로 자동 선택
   const handleProviderChange = (provider: string) => {
     setSelectedProvider(provider);
-    const newModels = Object.keys(provider === 'openai' ? openAIUsage : geminiUsage);
+    const newModels = Object.keys(
+      provider === 'openai' ? openAIUsage : geminiUsage
+    );
     setSelectedModel(newModels[0]);
   };
 
@@ -31,7 +38,9 @@ const MonitoringView = () => {
       <div className="border-b">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl">Usage</h1>
-          <p className="text-muted-foreground">Monitor your API usage and costs</p>
+          <p className="text-muted-foreground">
+            Monitor your API usage and costs
+          </p>
         </div>
       </div>
 

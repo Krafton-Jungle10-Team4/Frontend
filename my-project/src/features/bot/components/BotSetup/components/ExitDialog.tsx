@@ -1,4 +1,13 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/components/alert-dialog';
 import { useBotSetup } from '../BotSetupContext';
 import type { Language } from '@/shared/types';
 
@@ -13,7 +22,8 @@ export function ExitDialog({ onBack, language }: ExitDialogProps) {
   const translations = {
     en: {
       title: 'Are you sure you want to exit?',
-      message: 'Uploaded files, websites, and text information will be deleted.',
+      message:
+        'Uploaded files, websites, and text information will be deleted.',
       yes: 'Yes',
       no: 'No',
     },
@@ -31,7 +41,7 @@ export function ExitDialog({ onBack, language }: ExitDialogProps) {
     try {
       // TODO: Replace with real API call when ready
       // await ApiClient.cleanupKnowledge(sessionId);
-      
+
       // Mock implementation
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch {

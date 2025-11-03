@@ -1,5 +1,10 @@
 import { Bot as BotIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/components/dropdown-menu';
 import { formatTimeAgo } from '@/shared/utils/format';
 import type { Language } from '@/shared/types';
 
@@ -21,22 +26,27 @@ interface BotCardProps {
   language: Language;
 }
 
-export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardProps) {
+export function BotCard({
+  bot,
+  onDelete,
+  viewMode = 'grid',
+  language,
+}: BotCardProps) {
   const translations = {
     en: {
       created: 'Created',
       messages: 'Messages',
       errors: 'Errors',
       edit: 'Edit',
-      delete: 'Delete'
+      delete: 'Delete',
     },
     ko: {
       created: '생성:',
       messages: '메시지',
       errors: '오류',
       edit: '수정',
-      delete: '삭제'
-    }
+      delete: '삭제',
+    },
   };
 
   const t = translations[language];
@@ -50,18 +60,26 @@ export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardP
               <BotIcon className="text-white" size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-gray-900 text-sm sm:text-base truncate">{bot.name}</h3>
+              <h3 className="text-gray-900 text-sm sm:text-base truncate">
+                {bot.name}
+              </h3>
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
             </div>
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <div>
-                <div className="text-sm text-gray-600 mb-1">{bot.messages} {t.messages}</div>
-                <div className="text-xs text-green-600">{bot.messageChange}</div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {bot.messages} {t.messages}
+                </div>
+                <div className="text-xs text-green-600">
+                  {bot.messageChange}
+                </div>
               </div>
               <div>
-                <div className="text-sm text-gray-600 mb-1">{bot.errors} {t.errors}</div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {bot.errors} {t.errors}
+                </div>
                 <div className="text-xs text-gray-500">{bot.errorStatus}</div>
               </div>
             </div>
@@ -99,7 +117,9 @@ export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardP
             <BotIcon className="text-white" size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-gray-900 text-sm sm:text-base truncate">{bot.name}</h3>
+            <h3 className="text-gray-900 text-sm sm:text-base truncate">
+              {bot.name}
+            </h3>
             <p className="text-xs sm:text-sm text-gray-500 truncate">
               {t.created} {formatTimeAgo(bot.createdAt, language)}
             </p>
@@ -128,11 +148,15 @@ export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardP
       </div>
       <div className="grid grid-cols-2 gap-6">
         <div>
-          <div className="text-sm text-gray-600 mb-1">{bot.messages} {t.messages}</div>
+          <div className="text-sm text-gray-600 mb-1">
+            {bot.messages} {t.messages}
+          </div>
           <div className="text-xs text-green-600">{bot.messageChange}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-600 mb-1">{bot.errors} {t.errors}</div>
+          <div className="text-sm text-gray-600 mb-1">
+            {bot.errors} {t.errors}
+          </div>
           <div className="text-xs text-gray-500">{bot.errorStatus}</div>
         </div>
       </div>

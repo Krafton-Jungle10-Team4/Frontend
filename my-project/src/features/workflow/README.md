@@ -43,12 +43,14 @@ workflow/
 ## 🎯 주요 기능
 
 ### 1. 워크플로우 빌더
+
 - **드래그 앤 드롭**: React Flow 기반 노드 배치 및 연결
 - **실시간 편집**: 노드 및 엣지 실시간 수정
 - **자동 레이아웃**: 워크플로우 자동 정렬 및 최적화
 - **Undo/Redo**: 작업 취소 및 재실행
 
 ### 2. 노드 타입
+
 - **Start**: 워크플로우 시작 노드
 - **End**: 워크플로우 종료 노드
 - **LLM**: 대형 언어 모델 노드 (GPT-4, Claude 등)
@@ -58,6 +60,7 @@ workflow/
 - **If/Else**: 조건 분기 노드
 
 ### 3. 워크플로우 실행
+
 - **시뮬레이션**: 워크플로우 실행 미리보기
 - **디버깅**: 각 노드별 실행 결과 확인
 - **로그**: 실행 과정 상세 로그 기록
@@ -65,49 +68,54 @@ workflow/
 ## 📦 Public API
 
 ### Components
+
 ```typescript
 import {
-  WorkflowBuilder,      // 워크플로우 빌더 메인 컴포넌트
-  StartNode,            // 시작 노드
-  EndNode,              // 종료 노드
-  LLMNode,              // LLM 노드
+  WorkflowBuilder, // 워크플로우 빌더 메인 컴포넌트
+  StartNode, // 시작 노드
+  EndNode, // 종료 노드
+  LLMNode, // LLM 노드
   KnowledgeRetrievalNode, // 검색 노드
-  CustomEdge            // 커스텀 엣지
+  CustomEdge, // 커스텀 엣지
 } from '@/features/workflow';
 ```
 
 ### Hooks
+
 ```typescript
 import {
-  useWorkflow,          // 워크플로우 상태 및 액션
-  useWorkflowNodes,     // 노드 관리
-  useWorkflowEdges      // 엣지 관리
+  useWorkflow, // 워크플로우 상태 및 액션
+  useWorkflowNodes, // 노드 관리
+  useWorkflowEdges, // 엣지 관리
 } from '@/features/workflow';
 ```
 
 ### Store
+
 ```typescript
 import {
-  useWorkflowStore      // Workflow store hook
+  useWorkflowStore, // Workflow store hook
 } from '@/features/workflow';
 ```
 
 ### Types
+
 ```typescript
 import type {
-  Node,                 // 노드 타입
-  Edge,                 // 엣지 타입
-  BlockEnum,            // 노드 종류 열거형
-  WorkflowState,        // Workflow store 상태
-  LLMConfig,            // LLM 설정
-  RetrievalConfig       // 검색 설정
+  Node, // 노드 타입
+  Edge, // 엣지 타입
+  BlockEnum, // 노드 종류 열거형
+  WorkflowState, // Workflow store 상태
+  LLMConfig, // LLM 설정
+  RetrievalConfig, // 검색 설정
 } from '@/features/workflow';
 ```
 
 ### Pages
+
 ```typescript
 import {
-  WorkflowBuilderPage   // 워크플로우 빌더 페이지
+  WorkflowBuilderPage, // 워크플로우 빌더 페이지
 } from '@/features/workflow';
 ```
 
@@ -123,6 +131,7 @@ Workflow Feature는 다음 라우트를 제공합니다:
 ## 🪝 Custom Hooks 사용 예시
 
 ### useWorkflow
+
 ```typescript
 function WorkflowEditor() {
   const {
@@ -159,6 +168,7 @@ function WorkflowEditor() {
 ```
 
 ### useWorkflowNodes
+
 ```typescript
 function NodeManager() {
   const {
@@ -187,6 +197,7 @@ function NodeManager() {
 ```
 
 ### useWorkflowEdges
+
 ```typescript
 function EdgeManager() {
   const {
@@ -222,6 +233,7 @@ function EdgeManager() {
 ## 🏪 Store 사용 예시
 
 ### 기본 사용
+
 ```typescript
 function WorkflowCanvas() {
   const nodes = useWorkflowStore((state) => state.nodes);
@@ -241,6 +253,7 @@ function WorkflowCanvas() {
 ```
 
 ### 선택된 노드 관리
+
 ```typescript
 function NodeProperties() {
   const selectedNode = useWorkflowStore((state) => state.selectedNode);
@@ -265,6 +278,7 @@ function NodeProperties() {
 ## 🎨 노드 타입별 사용 예시
 
 ### Start Node
+
 ```typescript
 const startNode: Node = {
   id: 'start-1',
@@ -279,6 +293,7 @@ const startNode: Node = {
 ```
 
 ### LLM Node
+
 ```typescript
 const llmNode: Node = {
   id: 'llm-1',
@@ -300,6 +315,7 @@ const llmNode: Node = {
 ```
 
 ### Knowledge Retrieval Node
+
 ```typescript
 const retrievalNode: Node = {
   id: 'retrieval-1',
@@ -320,6 +336,7 @@ const retrievalNode: Node = {
 ## 🧪 테스트
 
 ### 테스트 실행
+
 ```bash
 # Workflow Feature 테스트만 실행
 npm test -- workflow
@@ -332,6 +349,7 @@ npm test -- workflow --coverage
 ```
 
 ### 테스트 구조
+
 - **workflowStore.test.ts**: Workflow store의 모든 기능 테스트
   - 노드/엣지 추가/삭제/업데이트
   - 노드 선택 관리
@@ -342,6 +360,7 @@ npm test -- workflow --coverage
 ### 새로운 노드 타입 추가하기
 
 1. **타입 정의** (`types/workflow.types.ts`)
+
 ```typescript
 export enum BlockEnum {
   // ... 기존 타입들
@@ -356,6 +375,7 @@ export interface DatabaseNodeData extends BaseNodeData {
 ```
 
 2. **노드 컴포넌트 생성** (`components/nodes/DatabaseNode.tsx`)
+
 ```typescript
 export function DatabaseNode({ data }: NodeProps<DatabaseNodeData>) {
   return (
@@ -376,6 +396,7 @@ export function DatabaseNode({ data }: NodeProps<DatabaseNodeData>) {
 ```
 
 3. **노드 타입 등록** (`components/WorkflowBuilder/index.tsx`)
+
 ```typescript
 const nodeTypes = {
   custom: CustomNode,
@@ -384,6 +405,7 @@ const nodeTypes = {
 ```
 
 4. **Public API 노출** (`index.ts`)
+
 ```typescript
 export { DatabaseNode } from './components/nodes/DatabaseNode';
 export type { DatabaseNodeData } from './types/workflow.types';
@@ -393,7 +415,10 @@ export type { DatabaseNodeData } from './types/workflow.types';
 
 ```typescript
 // utils/workflowValidation.ts
-export function validateWorkflow(nodes: Node[], edges: Edge[]): ValidationResult {
+export function validateWorkflow(
+  nodes: Node[],
+  edges: Edge[]
+): ValidationResult {
   const errors: string[] = [];
 
   // Start 노드 확인
@@ -428,16 +453,19 @@ export function validateWorkflow(nodes: Node[], edges: Edge[]): ValidationResult
 ### 주의사항
 
 ⚠️ **성능 최적화**
+
 - 많은 노드(100+)가 있을 때 React Flow 성능 저하 가능
 - 노드 렌더링 최적화 (React.memo 사용)
 - 엣지 애니메이션 신중하게 사용
 
 ⚠️ **상태 관리**
+
 - 워크플로우 자동 저장 구현 권장
 - 실행 취소/재실행 히스토리 관리
 - 로컬 스토리지 또는 서버 동기화
 
 ⚠️ **타입 안정성**
+
 - 노드 데이터 타입 엄격하게 관리
 - 런타임 타입 검증 구현
 - 워크플로우 직렬화/역직렬화 검증

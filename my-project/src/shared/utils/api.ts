@@ -27,7 +27,9 @@ export class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+      throw new Error(
+        errorData.message || `Upload failed with status ${response.status}`
+      );
     }
 
     return response.json();
@@ -37,9 +39,12 @@ export class ApiClient {
    * Delete a file from the server
    */
   static async deleteFile(documentId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}`, {
-      method: 'DELETE',
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/documents/${documentId}`,
+      {
+        method: 'DELETE',
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Delete failed');
@@ -77,7 +82,9 @@ export class ApiClient {
   /**
    * Refine a prompt using LLM
    */
-  static async refinePrompt(prompt: string): Promise<{ refinedPrompt: string }> {
+  static async refinePrompt(
+    prompt: string
+  ): Promise<{ refinedPrompt: string }> {
     const response = await fetch(`${API_BASE_URL}/api/refine-prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -152,7 +159,9 @@ export class ApiClient {
     isComplete: boolean;
     estimatedTimeRemaining?: number;
   }> {
-    const response = await fetch(`${API_BASE_URL}/api/bots/${botId}/training-status`);
+    const response = await fetch(
+      `${API_BASE_URL}/api/bots/${botId}/training-status`
+    );
 
     if (!response.ok) {
       throw new Error('Failed to get training status');

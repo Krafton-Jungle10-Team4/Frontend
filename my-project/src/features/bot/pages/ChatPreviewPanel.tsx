@@ -21,28 +21,30 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
   const translations = {
     en: {
       initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
-      botResponse: "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
+      botResponse:
+        "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
       today: 'Today',
       delivered: 'Delivered',
       placeholder: 'Type your message...',
       quickMessages: [
-        "How do I set up my first AI agent?",
-        "Where can I find tutorials or guides?",
-        "I'm having trouble with a feature"
+        'How do I set up my first AI agent?',
+        'Where can I find tutorials or guides?',
+        "I'm having trouble with a feature",
       ],
     },
     ko: {
       initialMessage: `안녕하세요! 👋 AI 에이전트 웹 플랫폼 지원팀입니다. 무엇을 도와드릴까요?`,
-      botResponse: '죄송합니다. 현재 미리보기 모드로 요청을 처리할 수 없습니다. 전체 기능을 사용하려면 챗봇을 지식 베이스에 연결해주세요.',
+      botResponse:
+        '죄송합니다. 현재 미리보기 모드로 요청을 처리할 수 없습니다. 전체 기능을 사용하려면 챗봇을 지식 베이스에 연결해주세요.',
       today: '오늘',
       delivered: '전송됨',
       placeholder: '메시지를 입력하세요...',
       quickMessages: [
-        "첫 번째 AI 에이전트는 어떻게 설정하나요?",
-        "튜토리얼이나 가이드는 어디서 찾을 수 있나요?",
-        "기능 사용에 문제가 있습니다"
+        '첫 번째 AI 에이전트는 어떻게 설정하나요?',
+        '튜토리얼이나 가이드는 어디서 찾을 수 있나요?',
+        '기능 사용에 문제가 있습니다',
       ],
-    }
+    },
   };
 
   const t = translations[language];
@@ -51,7 +53,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
     id: '1',
     type: 'bot',
     content: t.initialMessage,
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -68,12 +70,14 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
   }, [messages, isTyping]);
 
   const handleResetChat = () => {
-    setMessages([{
-      id: Date.now().toString(),
-      type: 'bot',
-      content: t.initialMessage,
-      timestamp: new Date()
-    }]);
+    setMessages([
+      {
+        id: Date.now().toString(),
+        type: 'bot',
+        content: t.initialMessage,
+        timestamp: new Date(),
+      },
+    ]);
     setInputValue('');
     setIsTyping(false);
   };
@@ -86,7 +90,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
       id: Date.now().toString(),
       type: 'user',
       content: userMessageContent,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([...messages, newMessage]);
@@ -94,18 +98,17 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
     setIsTyping(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setIsTyping(false);
-      
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: t.botResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, botResponse]);
-      
+      setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
@@ -114,29 +117,28 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
 
   const handleQuickMessage = async (msg: string) => {
     setInputValue('');
-    
+
     const newMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: msg,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([...messages, newMessage]);
     setIsTyping(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setIsTyping(false);
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: t.botResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, botResponse]);
-      
+      setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
@@ -155,13 +157,19 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
           </div>
           <h3 className="text-sm">{botName}</h3>
         </div>
-        <button onClick={handleResetChat} className="text-gray-400 hover:text-white transition-colors">
+        <button
+          onClick={handleResetChat}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
           <RotateCw size={18} />
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-900 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div
+        className="flex-1 overflow-y-auto p-4 bg-gray-900 scrollbar-hide"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         {/* Bot Avatar and Name */}
         <div className="flex flex-col items-center mb-6 mt-4">
           <div className="w-20 h-20 bg-teal-400 rounded-full flex items-center justify-center mb-3">
@@ -210,9 +218,18 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
                 <span className="text-xs text-gray-900">{botInitial}</span>
               </div>
               <div className="bg-gray-700 text-white rounded-2xl px-4 py-3 flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                ></div>
               </div>
             </div>
           )}
@@ -246,13 +263,25 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
             placeholder={t.placeholder}
             className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
           />
-          <button 
+          <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim()}
             className="text-teal-400 disabled:text-gray-600"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>

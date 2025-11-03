@@ -76,6 +76,7 @@ export const CheckIcon = ({ size = 24, color = 'currentColor' }) => (
 ```
 
 **사용 예시**:
+
 ```typescript
 import { CheckIcon } from '@assets/icons/CheckIcon';
 
@@ -101,7 +102,11 @@ import { CheckIcon } from '@assets/icons/CheckIcon';
 }
 
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 ```
 
@@ -117,6 +122,7 @@ body {
 ```
 
 **사용 예시**:
+
 ```typescript
 import countries from '@assets/data/countries.json';
 
@@ -178,14 +184,15 @@ export const ResponsiveLogo = () => {
 
 ### 권장 포맷
 
-| 용도 | 포맷 | 이유 |
-|------|------|------|
-| 로고, 아이콘 | SVG | 확대해도 깨지지 않음, 파일 크기 작음 |
-| 사진 | JPG/WebP | 적절한 압축으로 품질 유지 |
-| 투명 배경 필요 | PNG/WebP | 알파 채널 지원 |
-| 애니메이션 | GIF/WebP/MP4 | WebP가 GIF보다 용량 작음 |
+| 용도           | 포맷         | 이유                                 |
+| -------------- | ------------ | ------------------------------------ |
+| 로고, 아이콘   | SVG          | 확대해도 깨지지 않음, 파일 크기 작음 |
+| 사진           | JPG/WebP     | 적절한 압축으로 품질 유지            |
+| 투명 배경 필요 | PNG/WebP     | 알파 채널 지원                       |
+| 애니메이션     | GIF/WebP/MP4 | WebP가 GIF보다 용량 작음             |
 
 ### 이미지 최적화 도구
+
 - [TinyPNG](https://tinypng.com/) - PNG/JPG 압축
 - [SVGO](https://github.com/svg/svgo) - SVG 최적화
 - [Squoosh](https://squoosh.app/) - 다양한 포맷 변환 및 압축
@@ -205,6 +212,7 @@ export const ResponsiveLogo = () => {
 ## public vs assets 폴더
 
 ### `src/assets/` (추천)
+
 - **빌드 시 최적화됨** (압축, 해시 파일명)
 - import로 사용
 - Vite/Webpack이 처리
@@ -215,6 +223,7 @@ import logo from '@assets/images/logo.svg';
 ```
 
 ### `public/`
+
 - **빌드 시 그대로 복사**
 - 절대 경로로 사용
 - 최적화 없음
@@ -224,6 +233,7 @@ import logo from '@assets/images/logo.svg';
 ```
 
 **선택 기준**:
+
 - ✅ `src/assets/`: 대부분의 경우 (import로 관리)
 - ✅ `public/`: index.html에서 직접 참조하는 파일 (favicon, robots.txt 등)
 
@@ -277,6 +287,7 @@ export const Icons = () => (
 ## 작성 가이드
 
 ### 1. 파일 네이밍
+
 ```
 ✅ 좋은 예:
 - user-avatar.png
@@ -290,6 +301,7 @@ export const Icons = () => (
 ```
 
 ### 2. 폴더 구조
+
 ```
 ✅ 용도별로 분류:
 assets/
@@ -302,6 +314,7 @@ assets/
 ```
 
 ### 3. 이미지 최적화
+
 ```typescript
 // ✅ WebP 포맷 사용 (브라우저 지원 시)
 <picture>
@@ -354,15 +367,18 @@ declare module '*.json' {
 ## 유용한 리소스
 
 ### 무료 이미지
+
 - [Unsplash](https://unsplash.com/)
 - [Pexels](https://www.pexels.com/)
 - [Pixabay](https://pixabay.com/)
 
 ### 무료 아이콘
+
 - [Heroicons](https://heroicons.com/)
 - [Feather Icons](https://feathericons.com/)
 - [React Icons](https://react-icons.github.io/react-icons/)
 
 ### 무료 폰트
+
 - [Google Fonts](https://fonts.google.com/)
 - [눈누](https://noonnu.cc/) - 한글 폰트

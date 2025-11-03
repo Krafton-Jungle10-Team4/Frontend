@@ -1,4 +1,7 @@
-import type { APIErrorResponse, HTTPValidationError } from '@/shared/types/api.types';
+import type {
+  APIErrorResponse,
+  HTTPValidationError,
+} from '@/shared/types/api.types';
 import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
 /**
@@ -26,7 +29,10 @@ export const handleAPIError = (error: any): never => {
     };
 
     // Validation 에러 처리 (422)
-    if (typeof data.detail === 'object' && Array.isArray((data.detail as any).detail)) {
+    if (
+      typeof data.detail === 'object' &&
+      Array.isArray((data.detail as any).detail)
+    ) {
       const validationError = data.detail as HTTPValidationError;
       const errorMessages = validationError.detail
         .map((err) => `${err.loc.join('.')}: ${err.msg}`)
@@ -37,7 +43,9 @@ export const handleAPIError = (error: any): never => {
 
     // 일반 에러 메시지
     const message =
-      typeof data.detail === 'string' ? data.detail : ERROR_MESSAGES.COMMON.UNKNOWN;
+      typeof data.detail === 'string'
+        ? data.detail
+        : ERROR_MESSAGES.COMMON.UNKNOWN;
 
     throw new APIError(status, message, data);
   }

@@ -54,12 +54,17 @@ export const useDocumentStore = create<DocumentStore>()(
           set({ loading: true, error: null, uploadProgress: 0 });
 
           try {
-            const response = await documentsApi.uploadDocument(file, (progressEvent) => {
-              if (progressEvent.total) {
-                const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                set({ uploadProgress: progress });
+            const response = await documentsApi.uploadDocument(
+              file,
+              (progressEvent) => {
+                if (progressEvent.total) {
+                  const progress = Math.round(
+                    (progressEvent.loaded * 100) / progressEvent.total
+                  );
+                  set({ uploadProgress: progress });
+                }
               }
-            });
+            );
 
             // Convert API response to frontend format
             const newDocument: Document = {
@@ -146,7 +151,9 @@ export const useDocumentStore = create<DocumentStore>()(
 
             // Update in documents list if exists
             set((state) => ({
-              documents: state.documents.map((doc) => (doc.id === id ? document : doc)),
+              documents: state.documents.map((doc) =>
+                doc.id === id ? document : doc
+              ),
               selectedDocument: document,
               loading: false,
             }));
@@ -169,9 +176,11 @@ export const useDocumentStore = create<DocumentStore>()(
             await documentsApi.deleteDocument(id);
 
             set((state) => ({
-              documents: state.documents.filter(doc => doc.id !== id),
+              documents: state.documents.filter((doc) => doc.id !== id),
               selectedDocument:
-                state.selectedDocument?.id === id ? null : state.selectedDocument,
+                state.selectedDocument?.id === id
+                  ? null
+                  : state.selectedDocument,
               loading: false,
             }));
           } catch (error) {
@@ -207,7 +216,8 @@ export const useDocumentStore = create<DocumentStore>()(
         // Internal setters
         setLoading: (loading: boolean) => set({ loading }),
         setError: (error: Error | null) => set({ error }),
-        setUploadProgress: (progress: number) => set({ uploadProgress: progress }),
+        setUploadProgress: (progress: number) =>
+          set({ uploadProgress: progress }),
       }),
       {
         name: 'document-storage',
@@ -225,8 +235,10 @@ export const useDocumentStore = create<DocumentStore>()(
 
 // Selectors
 export const selectDocuments = (state: DocumentStore) => state.documents;
-export const selectSelectedDocument = (state: DocumentStore) => state.selectedDocument;
+export const selectSelectedDocument = (state: DocumentStore) =>
+  state.selectedDocument;
 export const selectSearchQuery = (state: DocumentStore) => state.searchQuery;
-export const selectUploadProgress = (state: DocumentStore) => state.uploadProgress;
+export const selectUploadProgress = (state: DocumentStore) =>
+  state.uploadProgress;
 export const selectIsLoading = (state: DocumentStore) => state.loading;
 export const selectError = (state: DocumentStore) => state.error;

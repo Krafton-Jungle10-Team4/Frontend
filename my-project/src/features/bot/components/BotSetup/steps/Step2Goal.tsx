@@ -1,6 +1,13 @@
 import { Button } from '@/shared/components/button';
 import { Textarea } from '@/shared/components/textarea';
-import { Headphones, Briefcase, Hand, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
+import {
+  Headphones,
+  Briefcase,
+  Hand,
+  Sparkles,
+  Loader2,
+  ArrowLeft,
+} from 'lucide-react';
 import { useBotSetup } from '../BotSetupContext';
 import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import { toast } from 'sonner';
@@ -14,8 +21,8 @@ interface Step2GoalProps {
 const goalIcons = {
   'customer-support': Headphones,
   'ai-assistant': Briefcase,
-  'sales': Hand,
-  'other': Sparkles,
+  sales: Hand,
+  other: Sparkles,
 };
 
 export function Step2Goal({ language }: Step2GoalProps) {
@@ -33,8 +40,10 @@ export function Step2Goal({ language }: Step2GoalProps) {
   const translations = {
     en: {
       title: 'Goal',
-      subtitleSelect: "Select your bot's primary goal so we can tailor its behavior.",
-      subtitleCustom: "Describe your bot's primary goal so we can tailor its behavior.",
+      subtitleSelect:
+        "Select your bot's primary goal so we can tailor its behavior.",
+      subtitleCustom:
+        "Describe your bot's primary goal so we can tailor its behavior.",
       customerSupport: 'Customer Support',
       customerSupportDesc: 'Fix problems and help users along the way',
       aiAssistant: 'AI Assistant',
@@ -118,11 +127,14 @@ export function Step2Goal({ language }: Step2GoalProps) {
 
       // Mock implementation for now
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      const refined = customGoal.trim() + '\n\n[This is a refined version from the LLM]';
+      const refined =
+        customGoal.trim() + '\n\n[This is a refined version from the LLM]';
       setCustomGoal(refined.slice(0, TEXT_LIMITS.BOT_GOAL.MAX));
 
       toast.success(
-        language === 'ko' ? '프롬프트가 최적화되었습니다!' : 'Prompt refined successfully!'
+        language === 'ko'
+          ? '프롬프트가 최적화되었습니다!'
+          : 'Prompt refined successfully!'
       );
     } catch {
       toast.error(
@@ -170,9 +182,7 @@ export function Step2Goal({ language }: Step2GoalProps) {
                     />
                   </div>
                   <div>
-                    <h3 className="mb-1 text-gray-900">
-                      {goal.label}
-                    </h3>
+                    <h3 className="mb-1 text-gray-900">{goal.label}</h3>
                     <p className="text-sm text-gray-600">{goal.description}</p>
                   </div>
                 </div>
@@ -222,7 +232,8 @@ export function Step2Goal({ language }: Step2GoalProps) {
             />
             <div className="flex items-center justify-end">
               <p className="text-xs text-gray-500">
-                {TEXT_LIMITS.BOT_GOAL.MAX - customGoal.length} {t.charactersRemaining}
+                {TEXT_LIMITS.BOT_GOAL.MAX - customGoal.length}{' '}
+                {t.charactersRemaining}
               </p>
             </div>
           </div>

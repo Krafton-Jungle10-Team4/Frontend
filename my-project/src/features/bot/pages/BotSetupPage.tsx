@@ -10,10 +10,5 @@ export function BotSetupPage() {
     navigate('/');
   };
 
-  return (
-    <BotSetup
-      onBack={handleBack}
-      language={language}
-    />
-  );
+  return <BotSetup onBack={handleBack} language={language} />;
 }

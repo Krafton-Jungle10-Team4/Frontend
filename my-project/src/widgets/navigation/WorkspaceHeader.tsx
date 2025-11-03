@@ -17,7 +17,13 @@ interface WorkspaceHeaderProps {
   language: Language;
 }
 
-export function WorkspaceHeader({ onCreateBot, userName = 'User', botCount = 0, maxBots = 5, language }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({
+  onCreateBot,
+  userName = 'User',
+  botCount = 0,
+  maxBots = 5,
+  language,
+}: WorkspaceHeaderProps) {
   const userInitial = userName.charAt(0).toUpperCase();
   const isLimitReached = botCount >= maxBots;
 
@@ -26,14 +32,14 @@ export function WorkspaceHeader({ onCreateBot, userName = 'User', botCount = 0, 
       workspace: "'s Workspace",
       createBot: '+ Create Bot',
       limitTooltip: 'You have reached the limit of bots you can create.',
-      deleteInstruction: 'Please delete the bot and try again.'
+      deleteInstruction: 'Please delete the bot and try again.',
     },
     ko: {
       workspace: '의 워크스페이스',
       createBot: '+ 챗봇 생성',
       limitTooltip: '생성 가능한 챗봇 개수를 초과했습니다.',
-      deleteInstruction: '챗봇을 삭제한 후 다시 시도해주세요.'
-    }
+      deleteInstruction: '챗봇을 삭제한 후 다시 시도해주세요.',
+    },
   };
 
   const t = translations[language];
@@ -44,12 +50,17 @@ export function WorkspaceHeader({ onCreateBot, userName = 'User', botCount = 0, 
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl flex-shrink-0"></div>
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl truncate">{userName}{t.workspace}</h1>
+            <h1 className="text-lg sm:text-xl truncate">
+              {userName}
+              {t.workspace}
+            </h1>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <Avatar className="w-8 h-8 sm:w-10 sm:h-10 hidden sm:flex">
-            <AvatarFallback className="bg-teal-500 text-white">{userInitial}</AvatarFallback>
+            <AvatarFallback className="bg-teal-500 text-white">
+              {userInitial}
+            </AvatarFallback>
           </Avatar>
           <TooltipProvider>
             <Tooltip>

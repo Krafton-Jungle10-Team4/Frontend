@@ -9,7 +9,11 @@ interface SetupCompleteProps {
   language: Language;
 }
 
-export function SetupComplete({ botName: _botName, onComplete, language }: SetupCompleteProps) {
+export function SetupComplete({
+  botName: _botName,
+  onComplete,
+  language,
+}: SetupCompleteProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
@@ -28,7 +32,7 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
       description: 'Personalizing your agent with your content.',
       finishedTraining: 'Finished training',
       mayTakeTime: 'This may take some time',
-      sitBackRelax: 'Sit back and relax while we set your bot up for you.'
+      sitBackRelax: 'Sit back and relax while we set your bot up for you.',
     },
     ko: {
       steps: [
@@ -42,8 +46,8 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
       description: '콘텐츠로 챗봇을 개인화하는 중입니다.',
       finishedTraining: '학습 완료',
       mayTakeTime: '시간이 다소 걸릴 수 있습니다',
-      sitBackRelax: '챗봇을 설정하는 동안 편히 쉬세요.'
-    }
+      sitBackRelax: '챗봇을 설정하는 동안 편히 쉬세요.',
+    },
   };
 
   const t = translations[language];
@@ -91,7 +95,7 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
     // ===== MOCK IMPLEMENTATION (REPLACE WITH REAL API) =====
     // Progress animation
     const progressInterval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
@@ -102,7 +106,7 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
 
     // Step progression
     const stepInterval = setInterval(() => {
-      setCurrentStep(prev => {
+      setCurrentStep((prev) => {
         if (prev >= t.steps.length - 1) {
           clearInterval(stepInterval);
           return prev;
@@ -132,9 +136,7 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
       <div className="w-full max-w-md px-4">
         <div className="text-center mb-12">
           <h1 className="text-3xl mb-4">{t.title}</h1>
-          <p className="text-gray-600">
-            {t.description}
-          </p>
+          <p className="text-gray-600">{t.description}</p>
         </div>
 
         <div className="space-y-8">
@@ -158,9 +160,7 @@ export function SetupComplete({ botName: _botName, onComplete, language }: Setup
           <div className="text-center pt-8">
             <Coffee size={48} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 mb-2">{t.mayTakeTime}</p>
-            <p className="text-sm text-gray-500">
-              {t.sitBackRelax}
-            </p>
+            <p className="text-sm text-gray-500">{t.sitBackRelax}</p>
           </div>
         </div>
       </div>

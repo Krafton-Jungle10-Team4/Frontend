@@ -39,9 +39,9 @@ styles/
 
 /* 기본 타이포그래피 */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-primary);
@@ -50,18 +50,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.2;
   margin-bottom: 1rem;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.5rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1rem; }
+h1 {
+  font-size: 2.5rem;
+}
+h2 {
+  font-size: 2rem;
+}
+h3 {
+  font-size: 1.75rem;
+}
+h4 {
+  font-size: 1.5rem;
+}
+h5 {
+  font-size: 1.25rem;
+}
+h6 {
+  font-size: 1rem;
+}
 
 a {
   color: var(--color-primary);
@@ -193,13 +210,15 @@ a:hover {
 
 /* 테마 전환 애니메이션 */
 * {
-  transition: background-color var(--transition-normal),
-              color var(--transition-normal),
-              border-color var(--transition-normal);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal),
+    border-color var(--transition-normal);
 }
 ```
 
 **사용 예시 (React)**:
+
 ```typescript
 const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -222,59 +241,137 @@ const App = () => {
 /* src/styles/utilities.css */
 
 /* Flexbox */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: var(--spacing-sm); }
-.gap-4 { gap: var(--spacing-md); }
+.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.gap-2 {
+  gap: var(--spacing-sm);
+}
+.gap-4 {
+  gap: var(--spacing-md);
+}
 
 /* Grid */
-.grid { display: grid; }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid {
+  display: grid;
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
 
 /* 간격 */
-.m-0 { margin: 0; }
-.m-2 { margin: var(--spacing-sm); }
-.m-4 { margin: var(--spacing-md); }
-.p-0 { padding: 0; }
-.p-2 { padding: var(--spacing-sm); }
-.p-4 { padding: var(--spacing-md); }
+.m-0 {
+  margin: 0;
+}
+.m-2 {
+  margin: var(--spacing-sm);
+}
+.m-4 {
+  margin: var(--spacing-md);
+}
+.p-0 {
+  padding: 0;
+}
+.p-2 {
+  padding: var(--spacing-sm);
+}
+.p-4 {
+  padding: var(--spacing-md);
+}
 
 /* 텍스트 */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-.font-bold { font-weight: 700; }
-.font-semibold { font-weight: 600; }
-.font-normal { font-weight: 400; }
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-normal {
+  font-weight: 400;
+}
 
 /* 색상 */
-.text-primary { color: var(--color-primary); }
-.text-danger { color: var(--color-danger); }
-.bg-primary { background-color: var(--bg-primary); }
-.bg-secondary { background-color: var(--bg-secondary); }
+.text-primary {
+  color: var(--color-primary);
+}
+.text-danger {
+  color: var(--color-danger);
+}
+.bg-primary {
+  background-color: var(--bg-primary);
+}
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
 
 /* 보더 */
-.border { border: 1px solid var(--border-color); }
-.border-0 { border: none; }
-.rounded-sm { border-radius: var(--border-radius-sm); }
-.rounded-md { border-radius: var(--border-radius-md); }
-.rounded-lg { border-radius: var(--border-radius-lg); }
-.rounded-full { border-radius: var(--border-radius-full); }
+.border {
+  border: 1px solid var(--border-color);
+}
+.border-0 {
+  border: none;
+}
+.rounded-sm {
+  border-radius: var(--border-radius-sm);
+}
+.rounded-md {
+  border-radius: var(--border-radius-md);
+}
+.rounded-lg {
+  border-radius: var(--border-radius-lg);
+}
+.rounded-full {
+  border-radius: var(--border-radius-full);
+}
 
 /* 그림자 */
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
 
 /* 표시/숨김 */
-.hidden { display: none; }
-.visible { visibility: visible; }
-.invisible { visibility: hidden; }
+.hidden {
+  display: none;
+}
+.visible {
+  visibility: visible;
+}
+.invisible {
+  visibility: hidden;
+}
 ```
 
 ### 5. 애니메이션
@@ -328,7 +425,8 @@ const App = () => {
 
 /* 펄스 (알림 뱃지) */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -342,7 +440,8 @@ const App = () => {
 
 /* 바운스 */
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -403,6 +502,7 @@ const App = () => {
 ```
 
 **사용 예시**:
+
 ```scss
 .container {
   @include flex-center;
@@ -425,11 +525,11 @@ const App = () => {
 
 ```typescript
 // src/main.tsx
-import './styles/variables.css';    // 1. 변수 먼저
-import './styles/global.css';       // 2. 전역 스타일
-import './styles/theme.css';        // 3. 테마
-import './styles/utilities.css';    // 4. 유틸리티
-import './styles/animations.css';   // 5. 애니메이션
+import './styles/variables.css'; // 1. 변수 먼저
+import './styles/global.css'; // 2. 전역 스타일
+import './styles/theme.css'; // 3. 테마
+import './styles/utilities.css'; // 4. 유틸리티
+import './styles/animations.css'; // 5. 애니메이션
 ```
 
 ## CSS Modules 사용 예시 (컴포넌트별 스타일)
@@ -461,6 +561,7 @@ import './styles/animations.css';   // 5. 애니메이션
 ```
 
 **사용 예시**:
+
 ```typescript
 import styles from './Button.module.css';
 
@@ -497,6 +598,7 @@ export const Button = ({ variant = 'primary', children }) => {
 ## 작성 가이드
 
 ### 1. CSS 변수 활용
+
 ```css
 /* ✅ 좋은 예: CSS 변수 사용 */
 .button {
@@ -512,21 +614,29 @@ export const Button = ({ variant = 'primary', children }) => {
 ```
 
 ### 2. 네이밍 컨벤션 (BEM)
+
 ```css
 /* Block */
-.card { }
+.card {
+}
 
 /* Element (블록 내부 요소) */
-.card__header { }
-.card__body { }
-.card__footer { }
+.card__header {
+}
+.card__body {
+}
+.card__footer {
+}
 
 /* Modifier (변형) */
-.card--highlighted { }
-.card--disabled { }
+.card--highlighted {
+}
+.card--disabled {
+}
 ```
 
 ### 3. 컴포넌트 스타일 분리
+
 ```
 ✅ 컴포넌트별 스타일: CSS Modules 사용
    src/components/Button/Button.module.css

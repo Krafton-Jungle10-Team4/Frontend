@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { createMockBot } from '@/data/mockBots';
 import { createMockActivity } from '@/data/mockActivities';
 import type { Bot } from '@/features/bot/components/BotCard';
@@ -63,7 +69,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   // Filter bots based on search query
-  const filteredBots = bots.filter(bot =>
+  const filteredBots = bots.filter((bot) =>
     bot.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -71,7 +77,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addBot = (botName: string) => {
     const translations = {
       en: { action: 'published a bot named' },
-      ko: { action: '봇을 발행했습니다' }
+      ko: { action: '봇을 발행했습니다' },
     };
 
     const newBot = createMockBot(botName);
@@ -87,11 +93,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Delete a bot
   const deleteBot = (botId: string, botName: string) => {
-    setBots(bots.filter(bot => bot.id !== botId));
+    setBots(bots.filter((bot) => bot.id !== botId));
 
     const translations = {
       en: { action: 'deleted a bot named', timestamp: 'just now' },
-      ko: { action: '봇을 삭제했습니다', timestamp: '방금 전' }
+      ko: { action: '봇을 삭제했습니다', timestamp: '방금 전' },
     };
 
     const newActivity: Activity = {
@@ -99,7 +105,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user: userName,
       action: translations[language].action,
       botName: botName,
-      timestamp: translations[language].timestamp
+      timestamp: translations[language].timestamp,
     };
 
     setActivities([newActivity, ...activities]);

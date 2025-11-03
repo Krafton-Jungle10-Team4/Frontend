@@ -42,16 +42,21 @@ export function HomePage() {
   const activities = useActivityStore((state) => state.activities);
 
   // Custom hooks
-  const { bots: filteredBots, totalCount, isEmpty, hasResults } = useFilteredBots({ searchQuery });
+  const {
+    bots: filteredBots,
+    totalCount,
+    isEmpty,
+    hasResults,
+  } = useFilteredBots({ searchQuery });
   const { handleCreateBot, handleDeleteBot } = useBotActions();
 
   const translations = {
     en: {
-      currentPage: 'Home'
+      currentPage: 'Home',
     },
     ko: {
-      currentPage: '홈'
-    }
+      currentPage: '홈',
+    },
   };
 
   const t = translations[language];

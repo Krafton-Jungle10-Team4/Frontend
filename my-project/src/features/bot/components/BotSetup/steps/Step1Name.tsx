@@ -13,7 +13,8 @@ export function Step1Name({ language }: Step1NameProps) {
   const translations = {
     en: {
       title: 'Setup',
-      subtitle: "We'll guide you through four quick steps. First, name your bot.",
+      subtitle:
+        "We'll guide you through four quick steps. First, name your bot.",
       placeholder: 'What should we call your bot?',
     },
     ko: {
@@ -35,7 +36,9 @@ export function Step1Name({ language }: Step1NameProps) {
       <div className="space-y-2">
         <Input
           value={botName}
-          onChange={(e) => setBotName(e.target.value.slice(0, TEXT_LIMITS.BOT_NAME.MAX))}
+          onChange={(e) =>
+            setBotName(e.target.value.slice(0, TEXT_LIMITS.BOT_NAME.MAX))
+          }
           placeholder={t.placeholder}
           className="w-full h-11 bg-gray-50 border-gray-200"
           autoFocus

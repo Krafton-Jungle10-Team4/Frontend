@@ -13,7 +13,13 @@ interface RightSidebarProps {
   language: Language;
 }
 
-export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'User', language }: RightSidebarProps) {
+export function RightSidebar({
+  totalBots,
+  activities,
+  maxBots = 5,
+  userName = 'User',
+  language,
+}: RightSidebarProps) {
   const usagePercentage = Math.round((totalBots / maxBots) * 100);
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -24,7 +30,7 @@ export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'U
       used: 'used',
       of: 'of',
       recentActivity: 'Recent Activity',
-      viewAll: 'View All'
+      viewAll: 'View All',
     },
     ko: {
       bots: '챗봇',
@@ -32,8 +38,8 @@ export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'U
       used: '사용 중',
       of: '/',
       recentActivity: '최근 활동',
-      viewAll: '모두 보기'
-    }
+      viewAll: '모두 보기',
+    },
   };
 
   const t = translations[language];
@@ -47,11 +53,15 @@ export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'U
             <Bot size={16} className="text-gray-600" />
             <span className="text-sm text-gray-900">{t.bots}</span>
           </div>
-          <button className="text-sm text-gray-600 hover:text-gray-900">{t.manage}</button>
+          <button className="text-sm text-gray-600 hover:text-gray-900">
+            {t.manage}
+          </button>
         </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">{totalBots} {t.of} {maxBots} {t.used}</span>
+            <span className="text-gray-600">
+              {totalBots} {t.of} {maxBots} {t.used}
+            </span>
             <span className="text-gray-900">{usagePercentage}%</span>
           </div>
           <Progress value={usagePercentage} className="h-2" />
@@ -62,20 +72,27 @@ export function RightSidebar({ totalBots, activities, maxBots = 5, userName = 'U
       <div>
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-gray-900">{t.recentActivity}</span>
-          <button className="text-sm text-gray-600 hover:text-gray-900">{t.viewAll}</button>
+          <button className="text-sm text-gray-600 hover:text-gray-900">
+            {t.viewAll}
+          </button>
         </div>
         <div className="space-y-4">
           {activities.slice(0, 3).map((activity) => (
             <div key={activity.id} className="flex gap-3">
               <Avatar className="w-8 h-8 flex-shrink-0">
-                <AvatarFallback className="bg-teal-500 text-white text-xs">{userInitial}</AvatarFallback>
+                <AvatarFallback className="bg-teal-500 text-white text-xs">
+                  {userInitial}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-600">
-                  {activity.message || `${activity.type} - ${activity.botName || ''}`}
+                  {activity.message ||
+                    `${activity.type} - ${activity.botName || ''}`}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date(activity.timestamp).toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US')}
+                  {new Date(activity.timestamp).toLocaleString(
+                    language === 'ko' ? 'ko-KR' : 'en-US'
+                  )}
                 </p>
               </div>
             </div>

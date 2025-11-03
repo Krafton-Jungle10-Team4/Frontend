@@ -257,7 +257,8 @@ describe('workflowStore', () => {
 
   describe('Node 삭제 시 연결된 Edge 처리', () => {
     it('Node 삭제 시 연결된 Edge도 함께 삭제되어야 한다', () => {
-      const { addNode, addEdge, deleteNode, nodes, edges } = useWorkflowStore.getState();
+      const { addNode, addEdge, deleteNode, nodes, edges } =
+        useWorkflowStore.getState();
 
       // Node 추가
       addNode({

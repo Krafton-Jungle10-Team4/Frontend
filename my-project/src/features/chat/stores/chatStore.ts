@@ -151,7 +151,8 @@ export const useChatStore = create<ChatStore>()(
 export const selectMessages = (state: ChatStore) => state.messages;
 export const selectSessionId = (state: ChatStore) => state.sessionId;
 export const selectIsTyping = (state: ChatStore) => state.isTyping;
-export const selectCurrentDocumentId = (state: ChatStore) => state.currentDocumentId;
+export const selectCurrentDocumentId = (state: ChatStore) =>
+  state.currentDocumentId;
 export const selectIsLoading = (state: ChatStore) => state.loading;
 export const selectError = (state: ChatStore) => state.error;
 
@@ -159,5 +160,6 @@ export const selectError = (state: ChatStore) => state.error;
 export const selectLastMessage = (state: ChatStore) =>
   state.messages.length > 0 ? state.messages[state.messages.length - 1] : null;
 
-export const selectMessagesByRole = (role: 'user' | 'assistant') => (state: ChatStore) =>
-  state.messages.filter(msg => msg.role === role);
+export const selectMessagesByRole =
+  (role: 'user' | 'assistant') => (state: ChatStore) =>
+    state.messages.filter((msg) => msg.role === role);
