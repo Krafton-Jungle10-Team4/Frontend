@@ -2,19 +2,18 @@ import { Button } from '@/shared/components/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/shared/utils/api';
+import { useCreateBot } from '../../../hooks/useCreateBot';
+import type { CreateBotDto } from '../../../types/bot.types';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
 
 interface StepNavigationProps {
   onBack: () => void;
-  onComplete: (botName: string) => void;
   language: Language;
 }
 
 export function StepNavigation({
   onBack,
-  onComplete,
   language,
 }: StepNavigationProps) {
   const {
@@ -24,16 +23,14 @@ export function StepNavigation({
     botName,
     selectedGoal,
     customGoal,
-    descriptionSource,
-    websiteUrl,
     personalityText,
     knowledgeText,
-    sessionId,
-    showCustomInput,
     setShowCustomInput,
     hasAnyData,
     setShowExitDialog,
   } = useBotSetup();
+
+  const { createBot, isCreating } = useCreateBot();
 
   const translations = {
     en: {
@@ -64,32 +61,32 @@ export function StepNavigation({
     } else {
       // Step 4: Train Agent button clicked
       try {
-        // TODO: Replace with real API call when ready
-        // const data = await ApiClient.createBot({
-        //   name: botName,
-        //   goal: selectedGoal === 'other' ? customGoal : selectedGoal || '',
-        //   descriptionSource,
-        //   websiteUrl: descriptionSource === 'website' ? websiteUrl : undefined,
-        //   personalityText: descriptionSource === 'text' ? personalityText : undefined,
-        //   knowledgeText,
-        //   sessionId,
-        // });
+        // CreateBotDto 구성
+        const dto: CreateBotDto = {
+          name: botName,
+          goal: selectedGoal === 'other' ? customGoal : selectedGoal || undefined,
+          personality: personalityText || undefined,
+          knowledge: knowledgeText ? [knowledgeText] : undefined,
+        };
 
-        // Mock implementation
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // 봇 생성 API 호출
+        const newBot = await createBot(dto);
 
-        if (botName.trim()) {
-          // onComplete(botName);
-          // Step 4: Train Agent button clicked - Navigate to WorkflowBuilder
-          navigate('/workflow-builder', {
-            state: {
-              botName,
-              goal: selectedGoal === 'other' ? customGoal : selectedGoal,
-              personality: personalityText,
-              knowledge: knowledgeText,
-            },
-          });
-        }
+        // 성공 메시지
+        toast.success(
+          language === 'ko' ? '봇이 생성되었습니다' : 'Bot created successfully'
+        );
+
+        // Workflow 화면으로 이동 (botId 포함)
+        navigate('/workflow', {
+          state: {
+            botId: newBot.id,
+            botName: newBot.name,
+            goal: selectedGoal === 'other' ? customGoal : selectedGoal,
+            personality: personalityText,
+            knowledge: knowledgeText,
+          },
+        });
       } catch (error) {
         console.error('Bot creation error:', error);
         toast.error(
@@ -154,13 +151,19 @@ export function StepNavigation({
 
           <Button
             onClick={handleNext}
-            disabled={!isStepValid(step)}
+            disabled={!isStepValid(step) || isCreating}
             className={`h-12 bg-teal-500 hover:bg-teal-600 text-white ${
               step > 1 ? 'flex-[8]' : 'w-full'
             }`}
           >
-            {step === 4 ? t.trainAgent : t.next}
-            <ArrowRight size={18} className="ml-2" />
+            {isCreating
+              ? language === 'ko'
+                ? '생성 중...'
+                : 'Creating...'
+              : step === 4
+              ? t.trainAgent
+              : t.next}
+            {!isCreating && <ArrowRight size={18} className="ml-2" />}
           </Button>
         </div>
       </div>
