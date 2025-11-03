@@ -5,16 +5,18 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { LeftSidebar } from '@/components/LeftSidebar';
-import { TopNavigation } from '@/components/TopNavigation';
-import { WorkspaceHeader } from '@/components/WorkspaceHeader';
+import {
+  LeftSidebar,
+  TopNavigation,
+  WorkspaceHeader,
+  RightSidebar,
+  WorkspaceSidebar,
+} from '@/widgets';
 import { SearchFilters } from '@/components/SearchFilters';
 import { BotList } from '../components/BotList';
-import { RightSidebar } from '@/components/RightSidebar';
-import { WorkspaceSidebar } from '@/components/WorkspaceSidebar';
 import { useUserStore } from '@/store/userStore';
 import { useUIStore } from '@/store/uiStore';
-import { useActivityStore } from '@/store/activityStore';
+import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';
 

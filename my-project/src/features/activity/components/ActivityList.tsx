@@ -3,7 +3,7 @@
  * 활동 내역 리스트
  */
 
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { Activity } from '../types/activity.types';
 
 interface ActivityListProps {

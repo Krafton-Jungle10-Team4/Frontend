@@ -45,6 +45,7 @@ export { isBot } from './types/bot.types';
 export { HomePage } from './pages/HomePage';
 export { BotSetupPage } from './pages/BotSetupPage';
 export { BotPreviewPage } from './pages/BotPreviewPage';
+export { SetupCompletePage } from './pages/SetupCompletePage';
 
 // ============= Routes =============
 export { botRoutes } from './routes';

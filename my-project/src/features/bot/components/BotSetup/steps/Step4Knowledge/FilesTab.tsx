@@ -1,10 +1,10 @@
 import { Upload, X, Loader2, FileIcon, CheckCircle2 } from 'lucide-react';
 import { useBotSetup } from '../../BotSetupContext';
 import { ApiClient } from '@/utils/api';
-import { isValidFileType, isValidFileSize } from '../../../../utils/validation';
-import { formatFileSize } from '../../../../utils/format';
-import { FILE_UPLOAD } from '../../../../utils/constants';
-import { generateTempId } from '../../../../utils/session';
+import { isValidFileType, isValidFileSize } from '@/utils/validation';
+import { formatFileSize } from '@/utils/format';
+import { FILE_UPLOAD } from '@/utils/constants';
+import { generateTempId } from '@/utils/session';
 import { toast } from 'sonner';
 import type { Language } from '@/types';
 import type { FileStatus } from '../../types';
