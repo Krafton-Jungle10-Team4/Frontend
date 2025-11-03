@@ -55,6 +55,14 @@ jobs:
         working-directory: my-project
         run: npm run type-check
 
+      - name: Run tests
+        working-directory: my-project
+        run: npm run test:run
+
+      - name: Generate coverage report
+        working-directory: my-project
+        run: npm run test:coverage
+
       - name: Build application
         working-directory: my-project
         run: npm run build
