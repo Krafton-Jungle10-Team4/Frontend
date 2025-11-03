@@ -46,7 +46,7 @@ export function normalizeAttrs(attrs: Attrs = {}): Attrs {
         delete acc.class;
         break;
       case 'style':
-        (acc.style as any) = val.split(';').reduce((prev, next) => {
+        acc.style = val.split(';').reduce((prev, next) => {
           const pairs = next?.split(':');
 
           if (pairs[0] && pairs[1]) {
@@ -69,8 +69,8 @@ export function normalizeAttrs(attrs: Attrs = {}): Attrs {
 export function generate(
   node: AbstractNode,
   key: string,
-  rootProps?: { [key: string]: any } | false
-): any {
+  rootProps?: Record<string, unknown> | false
+): React.ReactElement {
   if (!rootProps) {
     return React.createElement(
       node.name,
