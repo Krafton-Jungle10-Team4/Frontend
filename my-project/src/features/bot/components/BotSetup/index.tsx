@@ -19,12 +19,11 @@ import { Step4Knowledge } from './steps/Step4Knowledge';
 import type { Language } from '@/shared/types';
 
 interface BotSetupProps {
-  onComplete: (botName: string) => void;
   onBack: () => void;
   language: Language;
 }
 
-function BotSetupContent({ onComplete, onBack, language }: BotSetupProps) {
+function BotSetupContent({ onBack, language }: BotSetupProps) {
   const { step } = useBotSetup();
 
   const renderStep = () => {
@@ -52,7 +51,6 @@ function BotSetupContent({ onComplete, onBack, language }: BotSetupProps) {
       {/* Step Navigation (Progress Bar & Buttons) */}
       <StepNavigation
         onBack={onBack}
-        onComplete={onComplete}
         language={language}
       />
 
