@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, ExternalLink } from 'lucide-react';
 import { chatApi, formatChatMessage } from '@/features/chat/api/chatApi';
 import { toast } from 'sonner';
+import type { Source } from '@/shared/types/api.types';
 
 interface Message {
   id: string;
   type: 'bot' | 'user';
   content: string;
   timestamp: Date;
+  sources?: Source[];
 }
 
 interface ChatPreviewPanelProps {
@@ -125,31 +127,57 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         type: 'bot',
         content: response.message.content,
         timestamp: new Date(response.message.timestamp),
+        sources: response.message.sources,
       };
 
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
-      console.error('Chat error:', error);
+      console.error('Chat API error:', error);
+
+      // 에러 메시지 구체화
+      let errorText =
+        language === 'ko'
+          ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
+          : 'Sorry, an error occurred while processing your response.';
+
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+
+        // 에러 타입별 메시지 커스터마이징
+        if (error.message.includes('401') || error.message.includes('403')) {
+          errorText =
+            language === 'ko'
+              ? '로그인이 필요합니다. 다시 로그인해주세요.'
+              : 'Authentication required. Please log in again.';
+        } else if (error.message.includes('404')) {
+          errorText =
+            language === 'ko'
+              ? 'API 엔드포인트를 찾을 수 없습니다.'
+              : 'API endpoint not found.';
+        } else if (error.message.includes('500')) {
+          errorText =
+            language === 'ko'
+              ? '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+              : 'Server error. Please try again later.';
+        }
+      }
 
       // 에러 시 폴백 응답
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content:
-          language === 'ko'
-            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. 로그인 상태를 확인해주세요.'
-            : 'Sorry, an error occurred while processing your response. Please check your login status.',
+        content: errorText,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
 
       // 사용자에게 에러 알림
-      toast.error(
-        language === 'ko'
-          ? '인증 오류. 로그인 상태를 확인해주세요.'
-          : 'Authentication error. Please check your login status.'
-      );
+      toast.error(errorText);
     }
   };
 
@@ -190,28 +218,54 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         type: 'bot',
         content: response.message.content,
         timestamp: new Date(response.message.timestamp),
+        sources: response.message.sources,
       };
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
-      console.error('Chat error:', error);
+      console.error('Chat API error:', error);
+
+      // 에러 메시지 구체화
+      let errorText =
+        language === 'ko'
+          ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
+          : 'Sorry, an error occurred while processing your response.';
+
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+
+        // 에러 타입별 메시지 커스터마이징
+        if (error.message.includes('401') || error.message.includes('403')) {
+          errorText =
+            language === 'ko'
+              ? '로그인이 필요합니다. 다시 로그인해주세요.'
+              : 'Authentication required. Please log in again.';
+        } else if (error.message.includes('404')) {
+          errorText =
+            language === 'ko'
+              ? 'API 엔드포인트를 찾을 수 없습니다.'
+              : 'API endpoint not found.';
+        } else if (error.message.includes('500')) {
+          errorText =
+            language === 'ko'
+              ? '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+              : 'Server error. Please try again later.';
+        }
+      }
 
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content:
-          language === 'ko'
-            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. 로그인 상태를 확인해주세요.'
-            : 'Sorry, an error occurred while processing your response. Please check your login status.',
+        content: errorText,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
 
-      toast.error(
-        language === 'ko'
-          ? '인증 오류. 로그인 상태를 확인해주세요.'
-          : 'Authentication error. Please check your login status.'
-      );
+      toast.error(errorText);
     }
   };
 
@@ -260,7 +314,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
               {message.type === 'user' ? (
                 <div className="flex justify-end">
                   <div className="bg-teal-400 text-gray-900 rounded-2xl px-4 py-2 max-w-[80%]">
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ) : (
@@ -268,8 +322,41 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
                   <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-xs text-gray-900">{botInitial}</span>
                   </div>
-                  <div className="bg-gray-700 text-white rounded-2xl px-4 py-2 max-w-[80%]">
-                    <p className="text-sm">{message.content}</p>
+                  <div className="max-w-[80%]">
+                    <div className="bg-gray-700 text-white rounded-2xl px-4 py-2">
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    </div>
+                    {/* Sources Display */}
+                    {message.sources && message.sources.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-gray-400 px-2">
+                          {language === 'ko' ? '출처:' : 'Sources:'}
+                        </p>
+                        {message.sources.map((source, idx) => (
+                          <div
+                            key={source.chunk_id}
+                            className="bg-gray-800 rounded-lg px-3 py-2 text-xs"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="text-gray-300 font-medium mb-1">
+                                  {source.metadata?.filename || `Document ${idx + 1}`}
+                                </p>
+                                <p className="text-gray-400 line-clamp-2">
+                                  {source.content}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 text-teal-400">
+                                <span className="text-xs">
+                                  {Math.round(source.similarity_score * 100)}%
+                                </span>
+                                <ExternalLink size={12} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

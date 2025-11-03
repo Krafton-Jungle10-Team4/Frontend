@@ -45,7 +45,7 @@ export const chatApi = {
     const chatMessage: ChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       role: 'assistant',
-      content: data.message,
+      content: data.response, // 백엔드는 'response' 필드 사용
       timestamp: new Date().toISOString(),
       sources: data.sources,
     };
