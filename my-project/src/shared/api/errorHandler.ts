@@ -1,4 +1,5 @@
 import type { APIErrorResponse, HTTPValidationError } from '@/shared/types/api.types';
+import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
 /**
  * 커스텀 API 에러 클래스
@@ -24,7 +25,7 @@ export const handleAPIError = (error: any): never => {
       data: APIErrorResponse;
     };
 
-    // Validation 에러 처리
+    // Validation 에러 처리 (422)
     if (typeof data.detail === 'object' && Array.isArray((data.detail as any).detail)) {
       const validationError = data.detail as HTTPValidationError;
       const errorMessages = validationError.detail
@@ -35,18 +36,23 @@ export const handleAPIError = (error: any): never => {
     }
 
     // 일반 에러 메시지
-    const message = typeof data.detail === 'string' ? data.detail : 'An error occurred';
+    const message =
+      typeof data.detail === 'string' ? data.detail : ERROR_MESSAGES.COMMON.UNKNOWN;
 
     throw new APIError(status, message, data);
   }
 
   // 네트워크 에러
   if (error.request) {
-    throw new APIError(0, 'Network error: Unable to reach server', error);
+    throw new APIError(0, ERROR_MESSAGES.NETWORK.CONNECTION_ERROR, error);
   }
 
   // 기타 에러
-  throw new APIError(500, error.message || 'Unknown error occurred', error);
+  throw new APIError(
+    500,
+    error.message || ERROR_MESSAGES.COMMON.UNKNOWN,
+    error
+  );
 };
 
 /**
@@ -61,5 +67,5 @@ export const getErrorMessage = (error: unknown): string => {
     return error.message;
   }
 
-  return 'An unexpected error occurred';
+  return ERROR_MESSAGES.COMMON.UNKNOWN;
 };
