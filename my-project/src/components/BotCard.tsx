@@ -1,9 +1,9 @@
-import { Bot, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { formatTimeAgo } from '../utils/format';
 import type { Language } from '@/types';
 
-export interface Bot {
+export interface BotCardData {
   id: string;
   name: string;
   deployedDate: string;
@@ -15,7 +15,7 @@ export interface Bot {
 }
 
 interface BotCardProps {
-  bot: Bot;
+  bot: BotCardData;
   onDelete: (botId: string, botName: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
@@ -47,7 +47,7 @@ export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardP
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Bot className="text-white" size={20} />
+              <BotIcon className="text-white" size={20} />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-gray-900 text-sm sm:text-base truncate">{bot.name}</h3>
@@ -96,7 +96,7 @@ export function BotCard({ bot, onDelete, viewMode = 'grid', language }: BotCardP
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Bot className="text-white" size={20} />
+            <BotIcon className="text-white" size={20} />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-gray-900 text-sm sm:text-base truncate">{bot.name}</h3>
