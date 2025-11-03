@@ -2,7 +2,9 @@
  * 앱 라우트 경로
  */
 export const ROUTES = {
-  HOME: '/',
+  ROOT: '/',
+  LANDING: '/landing',
+  HOME: '/home',
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',

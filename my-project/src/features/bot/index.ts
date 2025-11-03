@@ -41,11 +41,7 @@ export type {
 } from './types/bot.types';
 export { isBot } from './types/bot.types';
 
-// ============= Pages (for Router only) =============
-export { HomePage } from './pages/HomePage';
-export { BotSetupPage } from './pages/BotSetupPage';
-export { BotPreviewPage } from './pages/BotPreviewPage';
-export { SetupCompletePage } from './pages/SetupCompletePage';
-
 // ============= Routes =============
 export { botRoutes } from './routes';
+
+// Note: Pages are lazy-loaded through routes, not exported directly to avoid bundle issues

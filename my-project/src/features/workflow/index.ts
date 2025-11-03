@@ -29,8 +29,7 @@ export type {
 
 export { BlockEnum, NodeRunningStatus } from './types/workflow.types';
 
-// Pages (Router에서만 사용)
-export { WorkflowBuilderPage } from './pages/WorkflowBuilderPage';
-
 // Routes (Router에서만 사용)
 export { workflowRoutes } from './routes';
+
+// Note: Pages are lazy-loaded through routes, not exported directly to avoid bundle issues
