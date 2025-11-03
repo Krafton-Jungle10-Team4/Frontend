@@ -20,8 +20,10 @@ interface BotStore {
   deleteBot: (id: string) => void;
   setBots: (bots: Bot[]) => void;
   selectBot: (id: string | null) => void;
+  setSelectedBotId: (id: string | null) => void; // Alias for selectBot
   getBotById: (id: string) => Bot | undefined;
   clearBots: () => void;
+  reset: () => void;
 
   // Internal
   setLoading: (loading: boolean) => void;
@@ -67,6 +69,10 @@ export const useBotStore = create<BotStore>()(
         selectBot: (id: string | null) =>
           set({ selectedBotId: id }),
 
+        // Alias for selectBot (for backward compatibility)
+        setSelectedBotId: (id: string | null) =>
+          set({ selectedBotId: id }),
+
         // Get bot by ID
         getBotById: (id: string) =>
           get().bots.find((bot) => bot.id === id),
@@ -76,6 +82,15 @@ export const useBotStore = create<BotStore>()(
           set({
             bots: [],
             selectedBotId: null,
+            error: null,
+          }),
+
+        // Reset to initial state
+        reset: () =>
+          set({
+            bots: [],
+            selectedBotId: null,
+            loading: false,
             error: null,
           }),
 

@@ -12,7 +12,7 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     stats,
     activities,
     performanceMetrics,
-    loading,
+    isLoading,
     error,
     setStats,
     setActivities,

@@ -1,10 +1,4 @@
-import { useState } from 'react';
 import Workflow from '@/components/common/workflow';
-import WorkflowSidebar, {
-  type SidebarView,
-} from '@/components/workflow-builder/WorkflowSidebar';
-import MonitoringView from '@/components/workflow-builder/views/MonitoringView';
-import LogsView from '@/components/workflow-builder/views/LogsView';
 import type { Node, Edge } from '@/types/workflow';
 import { BlockEnum } from '@/types/workflow';
 
@@ -98,32 +92,9 @@ const sampleEdges: Edge[] = [
  * 워크플로우 빌더 페이지
  */
 const WorkflowBuilder = () => {
-  const [activeView, setActiveView] = useState<SidebarView>('flow');
-
-  const renderView = () => {
-    switch (activeView) {
-      case 'flow':
-        return (
-          <div className="h-full w-full">
-            <Workflow initialNodes={sampleNodes} initialEdges={sampleEdges} />
-          </div>
-        );
-      case 'monitoring':
-        return <MonitoringView />;
-      case 'logs':
-        return <LogsView />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="h-screen w-screen flex">
-      {/* 왼쪽 사이드바 */}
-      <WorkflowSidebar activeView={activeView} onViewChange={setActiveView} />
-
-      {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 overflow-hidden">{renderView()}</div>
+    <div className="h-screen w-screen">
+      <Workflow initialNodes={sampleNodes} initialEdges={sampleEdges} />
     </div>
   );
 };
