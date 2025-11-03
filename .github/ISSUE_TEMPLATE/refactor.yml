@@ -1,0 +1,31 @@
+name: "🧹 Refactor"
+description: "기존 코드 구조 개선 또는 리팩터링 작업"
+title: "[REFACTOR] "
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: "리팩터링 대상"
+      description: "어떤 부분의 코드를 리팩터링하려고 하나요?"
+      placeholder: "예: user_service.py의 데이터 처리 로직"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: "리팩터링 이유"
+      description: "왜 리팩터링이 필요한가요?"
+      placeholder: "예: 함수가 너무 길고 중복 코드가 많음"
+    validations:
+      required: true
+
+  - type: textarea
+    id: plan
+    attributes:
+      label: "리팩터링 계획"
+      description: "어떤 방식으로 개선할 예정인가요?"
+      placeholder: "예: 공통 로직을 헬퍼 함수로 분리하고, 단위 테스트 추가 예정"
+    validations:
+      required: false
