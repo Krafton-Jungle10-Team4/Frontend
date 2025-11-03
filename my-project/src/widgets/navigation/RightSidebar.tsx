@@ -1,6 +1,6 @@
 import { Bot } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
-import { Progress } from '@/shared/components/ui/progress';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import type { Activity } from '@/features/activity';
 
 type Language = 'en' | 'ko';

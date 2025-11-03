@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BotPreview } from '../components/BotPreview';
 import { useUIStore } from '@/store/uiStore';
 import { useBotStore } from '../stores/botStore';
-import { useActivityStore } from '@/store/activityStore';
+import { useActivityStore } from '@/features/activity';
 import { useUserStore } from '@/store/userStore';
 
 export function BotPreviewPage() {

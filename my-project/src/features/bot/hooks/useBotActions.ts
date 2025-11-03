@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../stores/botStore';
-import { useActivityStore } from '@/store/activityStore';
+import { useActivityStore } from '@/features/activity';
 import { useUserStore } from '@/store/userStore';
 import { useUIStore } from '@/store/uiStore';
 
