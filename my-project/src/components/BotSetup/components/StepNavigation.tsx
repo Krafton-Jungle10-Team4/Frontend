@@ -2,7 +2,7 @@ import { Button } from '../../ui/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useBotSetup } from '../BotSetupContext';
 import { ApiClient } from '../../../utils/api';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Language } from '../../../contexts/AppContext';
 
 interface StepNavigationProps {

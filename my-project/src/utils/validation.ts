@@ -25,7 +25,7 @@ export function isValidEmail(email: string): boolean {
 /**
  * Check if file type is allowed
  */
-export function isValidFileType(file: File, allowedTypes: string[]): boolean {
+export function isValidFileType(file: File, allowedTypes: readonly string[]): boolean {
   return allowedTypes.includes(file.type);
 }
 

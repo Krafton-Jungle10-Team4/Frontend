@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { RotateCw, Share2, CheckCircle2, ExternalLink, Puzzle, TestTube } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { Card } from './ui/card';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Language } from '../contexts/AppContext';
 
 interface BotPreviewProps {
