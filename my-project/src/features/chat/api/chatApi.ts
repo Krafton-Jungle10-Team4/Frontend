@@ -1,84 +1,69 @@
-/**
- * Chat API Client
- * 채팅 관련 API 호출 함수들
- */
-
-import { API_BASE_URL } from '@/shared/utils/constants';
+import { apiKeyClient } from '@/shared/api/client';
+import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type {
-  ChatRequest,
-  ChatResponse,
-  ChatHealthResponse,
-  ChatMessage
-} from '../types/chat.types';
+  ChatRequest as APIChatRequest,
+  ChatResponse as APIChatResponse,
+  HealthCheckResponse,
+} from '@/shared/types/api.types';
+import type { ChatResponse, ChatMessage } from '../types/chat.types';
 
-const CHAT_BASE = `${API_BASE_URL}/api/v1/chat`;
-
+/**
+ * Chat API (SnapAgent)
+ * RAG 기반 채팅 및 문서 검색
+ *
+ * ⚠️ 주의: API Key 인증 필요 (apiKeyClient 사용)
+ */
 export const chatApi = {
   /**
-   * 채팅 메시지 전송
+   * 채팅 메시지 전송 (RAG 기반)
    */
-  async sendMessage(message: string, documentId?: string, sessionId?: string): Promise<ChatResponse> {
-    const payload: ChatRequest = {
+  async sendMessage(
+    message: string,
+    documentIds?: string[],
+    sessionId?: string,
+    options?: {
+      max_tokens?: number;
+      temperature?: number;
+      stream?: boolean;
+    }
+  ): Promise<ChatResponse> {
+    const payload: APIChatRequest = {
       message,
-      documentId,
-      sessionId,
+      document_ids: documentIds,
+      session_id: sessionId,
+      max_tokens: options?.max_tokens,
+      temperature: options?.temperature,
+      stream: options?.stream,
     };
 
-    const response = await fetch(CHAT_BASE, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const { data } = await apiKeyClient.post<APIChatResponse>(
+      API_ENDPOINTS.CHAT.SEND,
+      payload
+    );
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || `Chat failed: ${response.statusText}`);
-    }
+    // API 응답을 프론트엔드 포맷으로 변환
+    const chatMessage: ChatMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      role: 'assistant',
+      content: data.message,
+      timestamp: new Date().toISOString(),
+      sources: data.sources,
+    };
 
-    const data = await response.json();
-
-    // 응답 형식 정규화
     return {
-      message: data.message || {
-        id: `msg_${Date.now()}`,
-        role: 'assistant',
-        content: data.content || data.response || '',
-        timestamp: new Date().toISOString(),
-        documentId,
-      },
-      sessionId: data.sessionId || sessionId || `session_${Date.now()}`,
+      message: chatMessage,
+      sessionId: data.session_id,
     };
   },
 
   /**
    * 헬스 체크
    */
-  async healthCheck(): Promise<ChatHealthResponse> {
-    const response = await fetch(`${CHAT_BASE}/health`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      // 헬스 체크 실패는 서비스 unhealthy로 처리
-      return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-      };
-    }
-
-    const data = await response.json();
-
-    // 응답 형식 정규화
-    return {
-      status: data.status || 'healthy',
-      timestamp: data.timestamp || new Date().toISOString(),
-      version: data.version,
-    };
+  async healthCheck(): Promise<HealthCheckResponse> {
+    const { data } = await apiKeyClient.get<HealthCheckResponse>(
+      API_ENDPOINTS.CHAT.HEALTH
+    );
+    return data;
   },
 
   /**
@@ -100,32 +85,17 @@ export const chatApi = {
   },
 };
 
-// Helper functions
-export const formatChatMessage = (content: string, role: 'user' | 'assistant' = 'user'): ChatMessage => {
+/**
+ * Helper: 사용자 메시지 포맷팅
+ */
+export const formatChatMessage = (
+  content: string,
+  role: 'user' | 'assistant' | 'system' = 'user'
+): ChatMessage => {
   return {
     id: `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`,
     role,
     content,
     timestamp: new Date().toISOString(),
   };
-};
-
-export const isChatError = (error: any): boolean => {
-  return error.message?.includes('Chat') || error.message?.includes('chat');
-};
-
-export const handleChatError = (error: any): string => {
-  console.error('Chat API Error:', error);
-
-  if (error.message?.includes('network')) {
-    return '네트워크 연결을 확인해주세요.';
-  }
-  if (error.message?.includes('timeout')) {
-    return '요청 시간이 초과되었습니다. 다시 시도해주세요.';
-  }
-  if (error.message?.includes('unauthorized')) {
-    return '인증이 필요합니다. 다시 로그인해주세요.';
-  }
-
-  return '채팅 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
 };
