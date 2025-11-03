@@ -14,7 +14,7 @@ import {
 } from '@/widgets';
 import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
-import { useUserStore } from '@/features/auth';
+import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
@@ -23,8 +23,10 @@ import { useBotActions } from '../hooks/useBotActions';
 export function HomePage() {
   const navigate = useNavigate();
 
-  // User store
-  const userName = useUserStore((state) => state.userName);
+  // Auth store - 실제 로그인한 사용자 정보
+  const user = useAuthStore((state) => state.user);
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || '';
 
   // UI store
   const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
@@ -76,6 +78,7 @@ export function HomePage() {
         <TopNavigation
           onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
+          userEmail={userEmail}
           onHomeClick={() => navigate('/')}
           language={language}
           onLanguageChange={setLanguage}

@@ -8,17 +8,14 @@ type Language = 'en' | 'ko';
 interface TopNavigationProps {
   onToggleSidebar: () => void;
   userName?: string;
+  userEmail?: string;
   onHomeClick?: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
 }
 
-export function TopNavigation({ onToggleSidebar, userName = 'User', onHomeClick, language, onLanguageChange }: TopNavigationProps) {
+export function TopNavigation({ onToggleSidebar, userName = 'User', userEmail = '', onHomeClick, language, onLanguageChange }: TopNavigationProps) {
   const userInitial = userName.charAt(0).toUpperCase();
-
-  // BACKEND: Fetch user email and avatar from user profile API
-  // TODO: Replace with actual user data from GET /api/user/profile
-  const userEmail = 'pjg1234@gmail.com';
 
   // TODO: Add userAvatar prop and use it in Avatar component
   // const userAvatar = user?.avatar;
