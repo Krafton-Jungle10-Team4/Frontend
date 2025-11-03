@@ -16,5 +16,7 @@ export { useActivityStore, selectActivities, selectRecentActivities, selectActiv
 
 export { useUserStore, selectUserName, selectUser, selectIsLoggedIn } from './userStore';
 
+export { useAuthStore, selectUser as selectAuthUser, selectIsAuthenticated, selectIsLoading as selectAuthLoading, selectError as selectAuthError } from './authStore';
+
 // Types
 export type { AsyncState } from '@/types';
