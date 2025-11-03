@@ -121,7 +121,7 @@ export function Step2Goal({ language }: Step2GoalProps) {
       // Mock implementation for now
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const refined = customGoal.trim() + '\n\n[This is a refined version from the LLM]';
-      setCustomGoal(refined.slice(0, TEXT_LIMITS.CUSTOM_GOAL));
+      setCustomGoal(refined.slice(0, TEXT_LIMITS.BOT_GOAL.MAX));
 
       toast.success(
         language === 'ko' ? '프롬프트가 최적화되었습니다!' : 'Prompt refined successfully!'
@@ -218,14 +218,14 @@ export function Step2Goal({ language }: Step2GoalProps) {
             <Textarea
               value={customGoal}
               onChange={(e) =>
-                setCustomGoal(e.target.value.slice(0, TEXT_LIMITS.CUSTOM_GOAL))
+                setCustomGoal(e.target.value.slice(0, TEXT_LIMITS.BOT_GOAL.MAX))
               }
               placeholder={t.customGoalPlaceholder}
               className="min-h-[200px] resize-none bg-gray-50 border-gray-200"
             />
             <div className="flex items-center justify-end">
               <p className="text-xs text-gray-500">
-                {TEXT_LIMITS.CUSTOM_GOAL - customGoal.length} {t.charactersRemaining}
+                {TEXT_LIMITS.BOT_GOAL.MAX - customGoal.length} {t.charactersRemaining}
               </p>
             </div>
           </div>

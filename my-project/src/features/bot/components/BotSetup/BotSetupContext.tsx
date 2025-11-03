@@ -109,29 +109,29 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
   const isStepValid = (stepNumber: number): boolean => {
     switch (stepNumber) {
       case 1:
-        return botName.trim().length > 0 && botName.trim().length <= TEXT_LIMITS.BOT_NAME;
-      
+        return botName.trim().length > 0 && botName.trim().length <= TEXT_LIMITS.BOT_NAME.MAX;
+
       case 2:
         if (selectedGoal === null) return false;
         if (selectedGoal === 'other') {
-          return customGoal.trim().length > 0 && customGoal.trim().length <= TEXT_LIMITS.CUSTOM_GOAL;
+          return customGoal.trim().length > 0 && customGoal.trim().length <= TEXT_LIMITS.BOT_GOAL.MAX;
         }
         return true;
-      
+
       case 3:
         if (descriptionSource === 'website') {
           return websiteUrl.trim().length > 0 && isValidUrl(websiteUrl.trim());
         }
-        return personalityText.trim().length > 0 && personalityText.trim().length <= TEXT_LIMITS.PERSONALITY;
-      
+        return personalityText.trim().length > 0 && personalityText.trim().length <= TEXT_LIMITS.BOT_PERSONALITY.MAX;
+
       case 4:
         // At least one knowledge source
         return (
           files.some(f => f.status === 'uploaded') ||
           websites.some(w => w.discovered) ||
-          (knowledgeText.trim().length > 0 && knowledgeText.trim().length <= TEXT_LIMITS.KNOWLEDGE)
+          (knowledgeText.trim().length > 0 && knowledgeText.trim().length <= TEXT_LIMITS.KNOWLEDGE_TEXT.MAX)
         );
-      
+
       default:
         return false;
     }

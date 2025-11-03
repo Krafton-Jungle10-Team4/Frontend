@@ -28,13 +28,13 @@ export function TextTab({ language }: TextTabProps) {
       <Textarea
         value={knowledgeText}
         onChange={(e) =>
-          setKnowledgeText(e.target.value.slice(0, TEXT_LIMITS.KNOWLEDGE))
+          setKnowledgeText(e.target.value.slice(0, TEXT_LIMITS.KNOWLEDGE_TEXT.MAX))
         }
         placeholder={t.placeholder}
         className="min-h-[250px] resize-none bg-gray-50 border-gray-200"
       />
       <p className="text-xs text-gray-500 text-right">
-        {TEXT_LIMITS.KNOWLEDGE - knowledgeText.length} {t.charactersRemaining}
+        {TEXT_LIMITS.KNOWLEDGE_TEXT.MAX - knowledgeText.length} {t.charactersRemaining}
       </p>
     </div>
   );
