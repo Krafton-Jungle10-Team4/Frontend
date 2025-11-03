@@ -2,9 +2,9 @@
  * Mock bot data for development and testing
  */
 
-import type { Bot } from '@/features/bot/types/bot.types';
+import type { BotCardData } from '@/features/bot/components/BotCard/BotCard';
 
-export const mockBots: Bot[] = [
+export const mockBots: BotCardData[] = [
   {
     id: '1',
     name: 'Customer Support Bot',
@@ -37,7 +37,7 @@ export const mockBots: Bot[] = [
   },
 ];
 
-export function createMockBot(name: string): Bot {
+export function createMockBot(name: string): BotCardData {
   const now = new Date();
   const hour = now.getHours();
   const ampm = hour >= 12 ? 'PM' : 'AM';

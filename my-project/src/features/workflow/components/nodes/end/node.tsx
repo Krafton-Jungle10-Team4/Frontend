@@ -1,4 +1,4 @@
-import type { NodeProps, EndNodeType } from '../../types/workflow.types';
+import type { NodeProps, EndNodeType } from '../../../types/workflow.types';
 import { memo } from 'react';
 
 /**

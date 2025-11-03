@@ -25,6 +25,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@features/*": ["src/features/*"],
+      "@widgets/*": ["src/widgets/*"],
+      "@shared/*": ["src/shared/*"],
+      "@app/*": ["src/app/*"],
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"],
       "@hooks/*": ["src/hooks/*"],

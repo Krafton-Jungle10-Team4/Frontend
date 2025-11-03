@@ -5,6 +5,8 @@ export type DashboardStats = {
   totalBots: number;
   activeBots: number;
   totalQueries: number;
+  totalMessages: number;
+  totalErrors: number;
   avgResponseTime: number;
 };
 

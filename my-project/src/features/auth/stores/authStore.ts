@@ -19,6 +19,8 @@ interface AuthStore extends AuthState {
   refreshAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
   reset: () => void;
 }
 
@@ -123,6 +125,12 @@ export const useAuthStore = create<AuthStore>()(
 
         // 로딩 상태 설정
         setLoading: (isLoading) => set({ isLoading }),
+
+        // 에러 설정
+        setError: (error) => set({ error }),
+
+        // 에러 초기화
+        clearError: () => set({ error: null }),
 
         // 상태 초기화
         reset: () => set({

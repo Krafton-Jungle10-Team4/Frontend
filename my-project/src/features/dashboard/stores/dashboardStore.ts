@@ -19,7 +19,7 @@ interface DashboardState {
   performanceMetrics: PerformanceMetric[];
 
   // 로딩 상태
-  loading: boolean;
+  isLoading: boolean;
   error: Error | null;
 
   // Actions - 통계
@@ -33,8 +33,9 @@ interface DashboardState {
   setPerformanceMetrics: (metrics: PerformanceMetric[]) => void;
 
   // Actions - 로딩 상태
-  setLoading: (loading: boolean) => void;
+  setLoading: (isLoading: boolean) => void;
   setError: (error: Error | null) => void;
+  clearError: () => void;
 
   // Actions - 초기화
   reset: () => void;
@@ -47,7 +48,7 @@ const initialState = {
   stats: null,
   activities: [],
   performanceMetrics: [],
-  loading: false,
+  isLoading: false,
   error: null,
 };
 
@@ -74,9 +75,11 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   setPerformanceMetrics: (performanceMetrics) => set({ performanceMetrics }),
 
   // 로딩 상태
-  setLoading: (loading) => set({ loading }),
+  setLoading: (isLoading) => set({ isLoading }),
 
   setError: (error) => set({ error }),
+
+  clearError: () => set({ error: null }),
 
   // 초기화
   reset: () => set(initialState),
