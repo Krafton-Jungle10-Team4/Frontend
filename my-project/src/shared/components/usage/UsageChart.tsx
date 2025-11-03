@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DailyUsage } from '@/data/mockUsageData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
+import { DailyUsage } from '@/shared/data/mockUsageData';
 
 interface UsageChartProps {
   data: DailyUsage[];
