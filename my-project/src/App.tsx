@@ -4,11 +4,11 @@ import { HomePage } from './pages/HomePage';
 import { BotSetupPage } from './pages/BotSetupPage';
 import { SetupCompletePage } from './pages/SetupCompletePage';
 import { BotPreviewPage } from './pages/BotPreviewPage';
-import { LoginPage } from '@pages/LoginPage';
+import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@pages/DashboardPage';
 import WorkflowBuilder from '@/pages/WorkflowBuilder';
 import { ROUTES } from '@constants/routes';
-import { useAuth } from '@hooks/useAuth';
+import { useAuth } from '@/features/auth';
 
 import './App.css';
 

@@ -1,9 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RootLayout } from '@/widgets/layouts/RootLayout';
-import { AuthLayout } from '@/widgets/layouts/AuthLayout';
 import { DashboardLayout } from '@/widgets/layouts/DashboardLayout';
 import { RootErrorBoundary } from '@/widgets/layouts/RootErrorBoundary';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ProtectedRoute, authRoutes } from '@/features/auth';
 
 /**
  * React Router v7 기반 애플리케이션 라우터 설정
@@ -61,18 +60,7 @@ export const router = createBrowserRouter([
       },
 
       // Auth routes
-      {
-        path: 'login',
-        element: <AuthLayout />,
-        children: [
-          {
-            index: true,
-            lazy: () => import('@/pages/LoginPage').then(module => ({
-              Component: module.LoginPage
-            })),
-          },
-        ],
-      },
+      authRoutes,
 
       // Protected routes - 인증 필요
       {
