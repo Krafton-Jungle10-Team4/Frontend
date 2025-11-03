@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+my-project/node_modules
+
+# Testing
+my-project/coverage
+my-project/.vitest
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.github
+
+# Documentation (optional, 배포에 포함하고 싶으면 제거)
+*.md
+!README.md
+
+# Scripts
+scripts
+
+# Dev files
+dev_md
