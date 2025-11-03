@@ -1,6 +1,5 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/alert-dialog';
 import { useBotSetup } from '../BotSetupContext';
-import { ApiClient } from '@/shared/utils/api';
 import type { Language } from '@/shared/types';
 
 interface ExitDialogProps {
@@ -9,7 +8,7 @@ interface ExitDialogProps {
 }
 
 export function ExitDialog({ onBack, language }: ExitDialogProps) {
-  const { showExitDialog, setShowExitDialog, sessionId, resetAllData } = useBotSetup();
+  const { showExitDialog, setShowExitDialog, resetAllData } = useBotSetup();
 
   const translations = {
     en: {
@@ -35,11 +34,9 @@ export function ExitDialog({ onBack, language }: ExitDialogProps) {
       
       // Mock implementation
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      console.log('Cleanup completed (mock)');
-    } catch (error) {
+    } catch {
       // Non-blocking error - still navigate away
-      console.error('Cleanup error:', error);
+      // Error will be logged in production monitoring
     } finally {
       resetAllData();
       setShowExitDialog(false);

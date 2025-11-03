@@ -11,16 +11,14 @@ export const activityApi = {
    */
   async getActivities(): Promise<Activity[]> {
     // TODO: 백엔드 API 추가 후 구현
-    console.warn('getActivities is not implemented yet');
     return [];
   },
 
   /**
    * 활동 내역 삭제 (추후 구현)
    */
-  async deleteActivity(id: string): Promise<{ success: boolean }> {
+  async deleteActivity(_id: string): Promise<{ success: boolean }> {
     // TODO: 백엔드 API 추가 후 구현
-    console.warn('deleteActivity is not implemented yet');
     return { success: true };
   },
 };

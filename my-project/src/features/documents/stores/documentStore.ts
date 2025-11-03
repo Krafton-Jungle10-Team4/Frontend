@@ -39,7 +39,7 @@ interface DocumentStore extends AsyncState<Document[]> {
 export const useDocumentStore = create<DocumentStore>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set, _get) => ({
         // Initial state
         data: null,
         documents: [],

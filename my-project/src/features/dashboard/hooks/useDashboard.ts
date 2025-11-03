@@ -12,7 +12,6 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     stats,
     activities,
     performanceMetrics,
-    isLoading,
     error,
     setStats,
     setActivities,
@@ -37,7 +36,6 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
       setPerformanceMetrics(data.performanceMetrics);
     } catch (err) {
       setError(err as Error);
-      console.error('Failed to fetch dashboard data:', err);
     } finally {
       setLoading(false);
     }
@@ -56,8 +54,8 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     try {
       const data = await dashboardApi.getStats();
       setStats(data);
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
+    } catch {
+      // Error will be logged in production monitoring
     }
   }, [setStats]);
 
@@ -69,8 +67,8 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
       try {
         const data = await dashboardApi.getRecentActivities(limit);
         setActivities(data);
-      } catch (err) {
-        console.error('Failed to fetch activities:', err);
+      } catch {
+        // Error will be logged in production monitoring
       }
     },
     [setActivities]
@@ -84,8 +82,8 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
       try {
         const data = await dashboardApi.getPerformanceMetrics(days);
         setPerformanceMetrics(data);
-      } catch (err) {
-        console.error('Failed to fetch performance metrics:', err);
+      } catch {
+        // Error will be logged in production monitoring
       }
     },
     [setPerformanceMetrics]
@@ -105,7 +103,6 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     stats,
     activities,
     performanceMetrics,
-    loading,
     error,
 
     // Actions

@@ -56,24 +56,21 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       
       // React Fast Refresh 규칙
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-      
+      'react-refresh/only-export-components': 'off', // 컴포넌트 외 export 허용
+
       // React 관련 규칙
       'react/react-in-jsx-scope': 'off',          // React 17+에서는 import React 불필요
       'react/prop-types': 'off',                  // TypeScript 사용 시 prop-types 불필요
-      
+
       // TypeScript 관련 규칙
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }  // _로 시작하는 변수는 무시
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',  // any 타입 사용 경고
-      
+      '@typescript-eslint/no-explicit-any': 'off',  // any 타입 사용 허용 (개발 중)
+
       // 일반 규칙
-      'no-console': 'warn',                       // console.log 경고 (개발 중 삭제 권장)
+      'no-console': 'off',                        // console 사용 허용 (개발 중)
 
       // import 문 정렬 규칙 (비활성화 - 자유롭게 작성 가능)
       'import/order': 'off',

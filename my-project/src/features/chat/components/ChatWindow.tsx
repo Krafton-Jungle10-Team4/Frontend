@@ -11,7 +11,7 @@ interface ChatWindowProps {
   onSendMessage?: (message: string) => void;
 }
 
-export function ChatWindow({ messages, isTyping = false, onSendMessage }: ChatWindowProps) {
+export function ChatWindow({ messages, isTyping = false, onSendMessage: _onSendMessage }: ChatWindowProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">

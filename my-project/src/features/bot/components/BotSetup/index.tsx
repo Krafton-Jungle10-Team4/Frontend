@@ -9,7 +9,6 @@
  */
 
 import { BotSetupProvider, useBotSetup } from './BotSetupContext';
-import { LeftSidebar } from '@/widgets/navigation';
 import { StepNavigation } from './components/StepNavigation';
 import { ExitDialog } from './components/ExitDialog';
 import { Step1Name } from './steps/Step1Name';

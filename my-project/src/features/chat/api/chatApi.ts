@@ -69,18 +69,16 @@ export const chatApi = {
   /**
    * 채팅 히스토리 조회 (추후 구현)
    */
-  async getChatHistory(sessionId: string): Promise<ChatMessage[]> {
+  async getChatHistory(_sessionId: string): Promise<ChatMessage[]> {
     // TODO: 백엔드 API 추가 후 구현
-    console.warn('getChatHistory is not implemented yet');
     return [];
   },
 
   /**
    * 세션 초기화 (추후 구현)
    */
-  async clearSession(sessionId: string): Promise<{ success: boolean }> {
+  async clearSession(_sessionId: string): Promise<{ success: boolean }> {
     // TODO: 백엔드 API 추가 후 구현
-    console.warn('clearSession is not implemented yet');
     return { success: true };
   },
 };
