@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
     children: [
       // Bot Feature routes - Public (인증 불필요)
       {
-        index: true,
+        path: 'home',
         lazy: () =>
           import('@/features/bot').then((module) => ({
             Component: module.HomePage,
@@ -69,7 +69,7 @@ export const router = createBrowserRouter([
       // Fallback - 404
       {
         path: '*',
-        element: <Navigate to="/" replace />,
+        element: <Navigate to="/home" replace />,
       },
     ],
   },

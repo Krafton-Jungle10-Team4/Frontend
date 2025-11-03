@@ -50,7 +50,7 @@ export default function App() {
         />
 
         {/* Bot Setup 관련 라우트 */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/setup" element={<BotSetupPage />} />
         <Route path="/setup/complete" element={<SetupCompletePage />} />
         <Route path="/preview" element={<BotPreviewPage />} />
@@ -59,7 +59,7 @@ export default function App() {
         <Route path="/workflow" element={<WorkflowBuilderPage />} />
 
         {/* Fallback - Redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
   );

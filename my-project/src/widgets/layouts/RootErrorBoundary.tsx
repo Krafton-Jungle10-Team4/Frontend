@@ -15,14 +15,13 @@ export function RootErrorBoundary() {
           <div className="text-center">
             <h1 className="text-6xl font-bold text-gray-900">404</h1>
             <p className="mt-4 text-xl text-gray-600">페이지를 찾을 수 없습니다</p>
-            <p className="mt-2 text-sm text-gray-500">
-              요청하신 페이지가 존재하지 않거나 이동되었습니다.
-            </p>
-            <Link
-              to="/"
-              className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
-            >
-              홈으로 돌아가기
+                            <p className="mt-2 text-sm text-gray-500">
+                              요청하신 페이지가 존재하지 않거나 이동되었습니다.
+                            </p>
+                            <Link
+                              to="/home"
+                              className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+                            >              홈으로 돌아가기
             </Link>
           </div>
         </div>
@@ -59,7 +58,7 @@ export function RootErrorBoundary() {
               일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
             </p>
             <Link
-              to="/"
+              to="/home"
               className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
             >
               홈으로 돌아가기
@@ -87,7 +86,7 @@ export function RootErrorBoundary() {
             페이지 새로고침
           </button>
           <Link
-            to="/"
+            to="/home"
             className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
           >
             홈으로 돌아가기
