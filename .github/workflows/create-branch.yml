@@ -2,49 +2,66 @@ name: Create Branch on Issue
 
 on:
   issues:
-    types: [opened]  
+    types: [opened]
 
 jobs:
   create-branch:
     if: |
-      contains(github.event.issue.labels.*.name, 'feature') || 
-      contains(github.event.issue.labels.*.name, 'bug')
+      startsWith(github.event.issue.title, '[FEATURE]') ||
+      startsWith(github.event.issue.title, '[BUG]') ||
+      startsWith(github.event.issue.title, '[REFACTOR]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: develop
-      
+
       - name: Create branch
+        shell: bash
         run: |
+          set -euo pipefail
+
           ISSUE_NUMBER=${{ github.event.issue.number }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
+
+          # 접두사 제거 후 슬러그 변환
+          CLEAN_TITLE=$(echo "$ISSUE_TITLE" \
+            | sed 's/\[FEATURE\]//I' \
+            | sed 's/\[BUG\]//I' \
+            | sed 's/\[REFACTOR\]//I' \
+            | sed 's/^ *//' \
+            | tr '[:upper:]' '[:lower:]')
           
-          # [FEATURE] 또는 [BUG] 제거하고 소문자로 변환
-          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | sed 's/\[FEATURE\]//I' | sed 's/\[BUG\]//I' | sed 's/^ *//' | tr '[:upper:]' '[:lower:]')
+          BRANCH_SUFFIX=$(echo "$CLEAN_TITLE" \
+            | sed 's/ /-/g' \
+            | sed 's/[^a-z0-9-]//g' \
+            | sed 's/--*/-/g' \
+            | cut -c1-50)
           
-          # 공백을 하이픈으로, 특수문자 제거
-          BRANCH_SUFFIX=$(echo "$CLEAN_TITLE" | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g' | sed 's/--*/-/g' | cut -c1-50)
-          
-          # 브랜치명 결정
-          if [[ "${{ contains(github.event.issue.labels.*.name, 'feature') }}" == "true" ]]; then
-            BRANCH_NAME="feature/${BRANCH_SUFFIX}-${ISSUE_NUMBER}"
-          elif [[ "${{ contains(github.event.issue.labels.*.name, 'bug') }}" == "true" ]]; then
-            BRANCH_NAME="bugfix/${BRANCH_SUFFIX}-${ISSUE_NUMBER}"
+          if echo "$ISSUE_TITLE" | grep -qi "\[FEATURE\]"; then
+            PREFIX="feature"
+          elif echo "$ISSUE_TITLE" | grep -qi "\[BUG\]"; then
+            PREFIX="bugfix"
+          elif echo "$ISSUE_TITLE" | grep -qi "\[REFACTOR\]"; then
+            PREFIX="refactor"
+          else
+            PREFIX="task"
           fi
+          
+          BRANCH_NAME="${PREFIX}/${BRANCH_SUFFIX}-${ISSUE_NUMBER}"
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b $BRANCH_NAME
-          git push origin $BRANCH_NAME
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
           
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-      
+
       - name: Comment on issue
         uses: actions/github-script@v7
         env:
