@@ -105,12 +105,9 @@ export const botApi = {
     id: string,
     status: 'active' | 'inactive' | 'error'
   ): Promise<Bot> => {
-    const { data } = await apiClient.patch<Bot>(
-      API_ENDPOINTS.BOTS.UPDATE(id),
-      {
-        status,
-      }
-    );
+    const { data } = await apiClient.patch<Bot>(API_ENDPOINTS.BOTS.UPDATE(id), {
+      status,
+    });
     return data;
   },
 } as const;

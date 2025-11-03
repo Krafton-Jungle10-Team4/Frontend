@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "type-check": "tsc --noEmit",
     "prepare": "husky",
+    "pre-commit": "lint-staged",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

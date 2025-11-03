@@ -23,7 +23,7 @@ export class ApiClient {
     // JWT 토큰 가져오기
     const token = localStorage.getItem('jwt_token');
     const headers: HeadersInit = {};
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
