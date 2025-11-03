@@ -31,3 +31,4 @@ export { authRoutes } from './routes';
 
 // Pages (Router에서만 사용)
 export { LoginPage } from './pages/LoginPage';
+export { AuthCallbackPage } from './pages/AuthCallbackPage';

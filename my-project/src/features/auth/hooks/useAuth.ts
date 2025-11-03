@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 
 /**
- * 인증 관련 커스텀 훅
- * Zustand authStore의 wrapper로 기존 API 호환성 유지
+ * 인증 관련 커스텀 훅 (SnapAgent OAuth)
+ * Zustand authStore의 wrapper
  */
 export const useAuth = () => {
   const store = useAuthStore();
@@ -16,12 +16,18 @@ export const useAuth = () => {
   }, []);
 
   return {
+    // State
     user: store.user,
-    accessToken: store.accessToken,
+    jwtToken: store.jwtToken,
     isAuthenticated: store.isAuthenticated,
     isLoading: store.isLoading,
     error: store.error,
-    login: store.login,
+
+    // Actions (OAuth 방식)
+    redirectToGoogleLogin: store.redirectToGoogleLogin,
+    handleAuthCallback: store.handleAuthCallback,
     logout: store.logout,
+    setError: store.setError,
+    clearError: store.clearError,
   };
 };
