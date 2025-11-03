@@ -1,6 +1,12 @@
 /**
- * Auth Store
+ * Auth Store (SnapAgent OAuth)
  * 인증 상태 관리 (Zustand)
+ *
+ * OAuth 사용 흐름:
+ * 1. redirectToGoogleLogin() 호출 → Google 로그인 페이지로 이동
+ * 2. OAuth callback URL로 리다이렉트 (토큰 포함)
+ * 3. handleAuthCallback() 호출 → 토큰 추출 및 저장
+ * 4. 사용자 정보 자동 조회
  */
 
 import { create } from 'zustand';
@@ -8,13 +14,15 @@ import { devtools, persist } from 'zustand/middleware';
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 
 import type { AuthState, User } from '../types/auth.types';
-import { getCurrentUser, googleLogin, logout as logoutApi } from '../api/authApi';
+import { mapUserResponseToUser } from '../types/auth.types';
+import { authApi } from '../api/authApi';
 
 interface AuthStore extends AuthState {
   error: string | null;
 
   // Actions
-  login: (idToken: string) => Promise<void>;
+  redirectToGoogleLogin: (redirectUri?: string) => void;
+  handleAuthCallback: (callbackUrl?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
@@ -26,7 +34,7 @@ interface AuthStore extends AuthState {
 
 const initialState: AuthState = {
   user: null,
-  accessToken: null,
+  jwtToken: null,
   isAuthenticated: false,
   isLoading: true,
 };
@@ -39,27 +47,40 @@ export const useAuthStore = create<AuthStore>()(
         ...initialState,
         error: null,
 
-        // 로그인
-        login: async (idToken: string) => {
-          set({ isLoading: true, error: null });
-          try {
-            const response = await googleLogin(idToken);
+        // Google OAuth 로그인 페이지로 리다이렉트
+        redirectToGoogleLogin: (redirectUri?: string) => {
+          authApi.redirectToGoogleLogin(redirectUri);
+        },
 
-            // googleLogin이 이미 localStorage에 저장하므로 중복 저장 불필요
+        // OAuth callback 처리
+        handleAuthCallback: async (callbackUrl?: string) => {
+          set({ isLoading: true, error: null });
+
+          try {
+            const token = authApi.handleAuthCallback(callbackUrl);
+
+            if (!token) {
+              throw new Error('OAuth callback failed: No token received');
+            }
+
+            // 사용자 정보 조회
+            const userResponse = await authApi.getCurrentUser();
+            const user = mapUserResponseToUser(userResponse);
+
             set({
-              user: response.user,
-              accessToken: response.accessToken,
+              user,
+              jwtToken: token,
               isAuthenticated: true,
               isLoading: false,
               error: null,
             });
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Login failed';
+            const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
             set({
               error: errorMessage,
               isLoading: false,
               user: null,
-              accessToken: null,
+              jwtToken: null,
               isAuthenticated: false,
             });
             throw error;
@@ -69,15 +90,14 @@ export const useAuthStore = create<AuthStore>()(
         // 로그아웃
         logout: async () => {
           try {
-            await logoutApi();
+            await authApi.logout();
           } catch (error) {
             console.error('Logout API failed:', error);
           } finally {
             // 에러가 발생해도 로컬 상태는 정리
-            // logoutApi가 이미 localStorage를 정리하므로 중복 제거 불필요
             set({
               user: null,
-              accessToken: null,
+              jwtToken: null,
               isAuthenticated: false,
               isLoading: false,
               error: null,
@@ -87,18 +107,21 @@ export const useAuthStore = create<AuthStore>()(
 
         // 인증 상태 복원 (페이지 새로고침 시)
         refreshAuth: async () => {
-          const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-          if (!token) {
+          if (!authApi.hasValidToken()) {
             set({ isLoading: false });
             return;
           }
 
+          const token = localStorage.getItem(STORAGE_KEYS.JWT_TOKEN);
           set({ isLoading: true });
+
           try {
-            const user = await getCurrentUser();
+            const userResponse = await authApi.getCurrentUser();
+            const user = mapUserResponseToUser(userResponse);
+
             set({
               user,
-              accessToken: token,
+              jwtToken: token,
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -106,13 +129,11 @@ export const useAuthStore = create<AuthStore>()(
           } catch (error) {
             console.error('Auth refresh failed:', error);
             // 토큰이 유효하지 않으면 정리
-            localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+            await authApi.logout();
 
             set({
               user: null,
-              accessToken: null,
+              jwtToken: null,
               isAuthenticated: false,
               isLoading: false,
               error: null,
@@ -133,17 +154,18 @@ export const useAuthStore = create<AuthStore>()(
         clearError: () => set({ error: null }),
 
         // 상태 초기화
-        reset: () => set({
-          ...initialState,
-          error: null,
-          isLoading: false,
-        }),
+        reset: () =>
+          set({
+            ...initialState,
+            error: null,
+            isLoading: false,
+          }),
       }),
       {
         name: 'auth-storage',
         partialize: (state) => ({
           user: state.user,
-          accessToken: state.accessToken,
+          jwtToken: state.jwtToken,
           isAuthenticated: state.isAuthenticated,
         }),
       }

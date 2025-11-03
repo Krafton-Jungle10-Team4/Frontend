@@ -1,5 +1,8 @@
+import type { UserResponse } from '@/shared/types/api.types';
+
 /**
- * 사용자 역할
+ * 사용자 역할 (프론트엔드용)
+ * SnapAgent API에는 role이 없으므로 프론트엔드에서 관리
  */
 export enum UserRole {
   ADMIN = 'admin',
@@ -8,17 +11,30 @@ export enum UserRole {
 }
 
 /**
- * 사용자 기본 정보
+ * 사용자 기본 정보 (SnapAgent API 기반)
  */
 export interface User {
-  id: string;
+  id: number;
   email: string;
-  name: string;
-  picture?: string; // 프로필 이미지
-  role: UserRole;
-  createdAt: string;
-  updatedAt: string;
+  name: string | null;
+  profile_image: string | null;
+  created_at: string;
+  role?: UserRole; // 프론트엔드에서 관리 (선택)
 }
+
+/**
+ * UserResponse를 User로 변환
+ */
+export const mapUserResponseToUser = (response: UserResponse): User => {
+  return {
+    id: response.id,
+    email: response.email,
+    name: response.name,
+    profile_image: response.profile_image,
+    created_at: response.created_at,
+    role: UserRole.USER, // 기본값
+  };
+};
 
 /**
  * 구글 로그인 응답 (구글에서 받는 데이터)
@@ -73,11 +89,11 @@ export interface LogoutResponse {
 }
 
 /**
- * 인증 상태
+ * 인증 상태 (SnapAgent 기반)
  */
 export interface AuthState {
   user: User | null;
-  accessToken: string | null;
+  jwtToken: string | null; // JWT Token (SnapAgent)
   isAuthenticated: boolean;
   isLoading: boolean;
 }
