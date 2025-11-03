@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/shared/components/card';
+import { Textarea } from '@/shared/components/textarea';
 
 /**
  * 로그 & 어노테이션 뷰

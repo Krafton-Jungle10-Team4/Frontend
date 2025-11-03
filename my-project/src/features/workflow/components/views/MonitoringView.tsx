@@ -1,10 +1,10 @@
 import { useState, memo } from 'react';
 import { DollarSign, Activity, Zap } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { StatCard } from '@/components/usage/UsageStats';
-import { UsageChart } from '@/components/usage/UsageChart';
-import { ModelSelector } from '@/components/usage/ModelSelector';
-import { openAIUsage, geminiUsage, calculateSummary } from '@/data/mockUsageData';
+import { Tabs, TabsList, TabsTrigger } from '@/shared/components/tabs';
+import { StatCard } from '@/shared/components/usage/UsageStats';
+import { UsageChart } from '@/shared/components/usage/UsageChart';
+import { ModelSelector } from '@/shared/components/usage/ModelSelector';
+import { openAIUsage, geminiUsage, calculateSummary } from '@/shared/data/mockUsageData';
 
 /**
  * 모니터링 뷰 - API 사용량 및 비용 통계

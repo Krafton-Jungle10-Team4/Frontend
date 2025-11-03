@@ -56,7 +56,6 @@ export default function App() {
         <Route path="/preview" element={<BotPreviewPage />} />
 
         {/* WorkflowBuilder 라우트 */}
-        <Route path="/workflow-builder" element={<WorkflowBuilderPage />} />
         <Route path="/workflow" element={<WorkflowBuilderPage />} />
 
         {/* Fallback - Redirect to home */}
