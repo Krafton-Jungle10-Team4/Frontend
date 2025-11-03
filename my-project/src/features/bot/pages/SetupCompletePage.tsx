@@ -14,7 +14,8 @@ export function SetupCompletePage() {
   const botName = searchParams.get('name') || 'Bot';
 
   const handleComplete = () => {
-    navigate(`/preview?name=${encodeURIComponent(botName)}`);
+    // 봇 생성 완료 후 Workflow 화면으로 이동
+    navigate('/workflow', { state: { botName } });
   };
 
   return (

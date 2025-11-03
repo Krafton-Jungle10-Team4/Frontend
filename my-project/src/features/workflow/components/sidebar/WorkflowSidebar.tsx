@@ -1,4 +1,6 @@
 import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Home } from 'lucide-react';
 
 export type SidebarView = 'flow' | 'monitoring' | 'logs';
 
@@ -15,11 +17,17 @@ const WorkflowSidebar = ({
   activeView,
   onViewChange,
 }: WorkflowSidebarProps) => {
+  const navigate = useNavigate();
+
   const menuItems: { id: SidebarView; label: string; icon: string }[] = [
     { id: 'flow', label: '플로우', icon: '🔀' },
     { id: 'monitoring', label: '모니터링', icon: '📊' },
     { id: 'logs', label: '로그 & 어노테이션', icon: '📝' },
   ];
+
+  const handleHomeClick = () => {
+    navigate('/');
+  };
 
   return (
     <div className="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
@@ -32,6 +40,23 @@ const WorkflowSidebar = ({
 
       {/* 메뉴 리스트 */}
       <nav className="flex-1 p-2">
+        {/* 홈 버튼 */}
+        <button
+          onClick={handleHomeClick}
+          className="
+            w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2
+            transition-colors duration-150
+            text-gray-700 hover:bg-gray-50
+          "
+        >
+          <Home size={20} className="text-gray-600" />
+          <span className="text-sm">홈</span>
+        </button>
+
+        {/* 구분선 */}
+        <div className="border-t border-gray-200 my-2" />
+
+        {/* 기존 메뉴 항목들 */}
         {menuItems.map((item) => (
           <button
             key={item.id}

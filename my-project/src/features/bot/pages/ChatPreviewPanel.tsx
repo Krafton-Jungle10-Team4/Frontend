@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
+import { chatApi, formatChatMessage } from '@/features/chat/api/chatApi';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -59,6 +61,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -98,20 +101,55 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
     setIsTyping(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 실제 Chat API 호출
+      const response = await chatApi.sendMessage(
+        userMessageContent,
+        undefined, // documentIds - 필요시 전달
+        sessionId || undefined, // sessionId
+        {
+          max_tokens: 1000,
+          temperature: 0.7,
+        }
+      );
+
+      // 세션 ID 저장 (첫 응답 시)
+      if (response.sessionId && !sessionId) {
+        setSessionId(response.sessionId);
+      }
 
       setIsTyping(false);
 
+      // API 응답을 Message 형식으로 변환
       const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: response.message.id,
         type: 'bot',
-        content: t.botResponse,
-        timestamp: new Date(),
+        content: response.message.content,
+        timestamp: new Date(response.message.timestamp),
       };
+
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
+
+      // 에러 시 폴백 응답
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content:
+          language === 'ko'
+            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. API 키를 확인해주세요.'
+            : 'Sorry, an error occurred while processing your response. Please check your API key.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+
+      // 사용자에게 에러 알림
+      toast.error(
+        language === 'ko'
+          ? 'API 키 인증 오류. 팀 설정에서 API 키를 확인해주세요.'
+          : 'API key authentication error. Please check your API key in team settings.'
+      );
     }
   };
 
@@ -129,19 +167,51 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
     setIsTyping(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 실제 Chat API 호출
+      const response = await chatApi.sendMessage(
+        msg,
+        undefined,
+        sessionId || undefined,
+        {
+          max_tokens: 1000,
+          temperature: 0.7,
+        }
+      );
+
+      // 세션 ID 저장 (첫 응답 시)
+      if (response.sessionId && !sessionId) {
+        setSessionId(response.sessionId);
+      }
 
       setIsTyping(false);
+
       const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: response.message.id,
         type: 'bot',
-        content: t.botResponse,
-        timestamp: new Date(),
+        content: response.message.content,
+        timestamp: new Date(response.message.timestamp),
       };
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
       setIsTyping(false);
       console.error('Chat error:', error);
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content:
+          language === 'ko'
+            ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다. API 키를 확인해주세요.'
+            : 'Sorry, an error occurred while processing your response. Please check your API key.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+
+      toast.error(
+        language === 'ko'
+          ? 'API 키 인증 오류. 팀 설정에서 API 키를 확인해주세요.'
+          : 'API key authentication error. Please check your API key in team settings.'
+      );
     }
   };
 
