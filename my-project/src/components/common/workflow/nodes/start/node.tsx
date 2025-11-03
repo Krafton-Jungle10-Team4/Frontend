@@ -5,7 +5,7 @@ import { memo } from 'react';
  * Start 노드
  * 워크플로우의 시작점
  */
-const StartNode = ({ data }: NodeProps<StartNodeType>) => {
+const StartNode = ({ data: _data }: NodeProps<StartNodeType>) => {
   return (
     <div className="px-3 py-1">
       <div className="system-xs-regular text-text-tertiary text-center">
