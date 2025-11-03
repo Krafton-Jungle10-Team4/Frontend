@@ -67,7 +67,14 @@ export const useChatStore = create<ChatStore>()(
           const docId = documentId || get().currentDocumentId || undefined;
           const { sessionId } = get();
 
-          const response = await chatApi.sendMessage(trimmedMessage, docId, sessionId || undefined);
+          // Convert single documentId to array for new API
+          const documentIds = docId ? [docId] : undefined;
+
+          const response = await chatApi.sendMessage(
+            trimmedMessage,
+            documentIds,
+            sessionId || undefined
+          );
 
           // Update session ID if new
           if (response.sessionId && response.sessionId !== sessionId) {

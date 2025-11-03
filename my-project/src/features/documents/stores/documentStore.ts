@@ -54,19 +54,22 @@ export const useDocumentStore = create<DocumentStore>()(
           set({ loading: true, error: null, uploadProgress: 0 });
 
           try {
-            // Simulate upload progress
-            const progressInterval = setInterval(() => {
-              const current = get().uploadProgress;
-              if (current < 90) {
-                set({ uploadProgress: current + 10 });
+            const response = await documentsApi.uploadDocument(file, (progressEvent) => {
+              if (progressEvent.total) {
+                const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                set({ uploadProgress: progress });
               }
-            }, 200);
+            });
 
-            const response = await documentsApi.upload(file);
-            clearInterval(progressInterval);
-            set({ uploadProgress: 100 });
-
-            const newDocument = response.document;
+            // Convert API response to frontend format
+            const newDocument: Document = {
+              id: response.document_id,
+              filename: response.filename,
+              size: response.file_size,
+              mimeType: response.file_type,
+              uploadedAt: response.upload_date,
+              metadata: { chunk_count: response.chunk_count },
+            };
 
             // Add to documents list
             set((state) => ({
@@ -91,10 +94,28 @@ export const useDocumentStore = create<DocumentStore>()(
           set({ loading: true, error: null, searchQuery: query });
 
           try {
-            const response = await documentsApi.search(query);
+            const response = await documentsApi.searchDocuments({
+              query,
+              top_k: 10,
+            });
+
+            // Convert API response to frontend format
+            const documents: Document[] = response.results.map((result) => ({
+              id: result.document_id,
+              filename: result.filename,
+              size: 0, // Not provided in search response
+              mimeType: result.file_type,
+              uploadedAt: result.upload_date,
+              metadata: {
+                chunk_id: result.chunk_id,
+                similarity_score: result.similarity_score,
+                content: result.content,
+              },
+            }));
+
             set({
-              documents: response.documents,
-              data: response.documents,
+              documents,
+              data: documents,
               loading: false,
             });
           } catch (error) {
@@ -111,13 +132,21 @@ export const useDocumentStore = create<DocumentStore>()(
           set({ loading: true, error: null });
 
           try {
-            const document = await documentsApi.getDocument(id);
+            const response = await documentsApi.getDocument(id);
+
+            // Convert API response to frontend format
+            const document: Document = {
+              id: response.document_id,
+              filename: response.filename,
+              size: response.file_size,
+              mimeType: response.file_type,
+              uploadedAt: response.upload_date,
+              metadata: { chunk_count: response.chunk_count },
+            };
 
             // Update in documents list if exists
             set((state) => ({
-              documents: state.documents.map(doc =>
-                doc.id === id ? document : doc
-              ),
+              documents: state.documents.map((doc) => (doc.id === id ? document : doc)),
               selectedDocument: document,
               loading: false,
             }));
