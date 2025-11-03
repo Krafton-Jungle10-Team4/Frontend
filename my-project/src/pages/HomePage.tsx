@@ -1,17 +1,22 @@
+/**
+ * HomePage - Container Component
+ * Bot 목록 페이지의 Container 컴포넌트
+ * 상태 관리와 비즈니스 로직을 담당하고, Presentational 컴포넌트에 props를 전달
+ */
+
 import { useNavigate } from 'react-router-dom';
 import { LeftSidebar } from '../components/LeftSidebar';
 import { TopNavigation } from '../components/TopNavigation';
 import { WorkspaceHeader } from '../components/WorkspaceHeader';
 import { SearchFilters } from '../components/SearchFilters';
-import { BotCard } from '../components/BotCard';
-import { EmptyState } from '../components/EmptyState';
+import { BotList } from '../components/BotList';
 import { RightSidebar } from '../components/RightSidebar';
 import { WorkspaceSidebar } from '../components/WorkspaceSidebar';
 import { useUserStore } from '../store/userStore';
 import { useUIStore } from '../store/uiStore';
-import { useBotStore } from '../store/botStore';
 import { useActivityStore } from '../store/activityStore';
-import { useMemo } from 'react';
+import { useFilteredBots } from '../hooks/useFilteredBots';
+import { useBotActions } from '../hooks/useBotActions';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -29,50 +34,18 @@ export function HomePage() {
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
 
-  // Bot store
-  const bots = useBotStore((state) => state.bots);
-  const deleteBot = useBotStore((state) => state.deleteBot);
-
   // Activity store
   const activities = useActivityStore((state) => state.activities);
-  const addActivity = useActivityStore((state) => state.addActivity);
 
-  // Computed: filtered bots
-  const filteredBots = useMemo(() => {
-    if (!searchQuery) return bots;
-    return bots.filter((bot) =>
-      bot.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [bots, searchQuery]);
-
-  const handleCreateBot = () => {
-    navigate('/setup');
-  };
-
-  const handleDeleteBot = (botId: string, botName: string) => {
-    // Delete bot from store
-    deleteBot(botId);
-
-    // Add activity log
-    const translations = {
-      en: { action: 'deleted bot' },
-      ko: { action: '봇을 삭제했습니다' },
-    };
-    addActivity({
-      type: 'bot_deleted',
-      botId,
-      botName,
-      message: `${userName} ${translations[language].action}: ${botName}`,
-    });
-  };
+  // Custom hooks
+  const { bots: filteredBots, totalCount, isEmpty, hasResults } = useFilteredBots({ searchQuery });
+  const { handleCreateBot, handleDeleteBot } = useBotActions();
 
   const translations = {
     en: {
-      noBotsFound: 'No bots found matching',
       currentPage: 'Home'
     },
     ko: {
-      noBotsFound: '와 일치하는 봇이 없습니다',
       currentPage: '홈'
     }
   };
@@ -110,7 +83,7 @@ export function HomePage() {
         <WorkspaceHeader
           onCreateBot={handleCreateBot}
           userName={userName}
-          botCount={bots.length}
+          botCount={totalCount}
           maxBots={5}
           language={language}
         />
@@ -128,34 +101,22 @@ export function HomePage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Bots List */}
           <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-            {bots.length === 0 ? (
-              <EmptyState onCreateBot={handleCreateBot} language={language} />
-            ) : filteredBots.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-                <p className="text-sm sm:text-base text-center px-4">{language === 'en' ? `No bots found matching "${searchQuery}"` : `"${searchQuery}"${t.noBotsFound}`}</p>
-              </div>
-            ) : (
-              <div className={viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-                : 'flex flex-col gap-4'
-              }>
-                {filteredBots.map((bot) => (
-                  <BotCard
-                    key={bot.id}
-                    bot={bot}
-                    onDelete={handleDeleteBot}
-                    viewMode={viewMode}
-                    language={language}
-                  />
-                ))}
-              </div>
-            )}
+            <BotList
+              bots={filteredBots}
+              searchQuery={searchQuery}
+              viewMode={viewMode}
+              language={language}
+              isEmpty={isEmpty}
+              hasResults={hasResults}
+              onDelete={handleDeleteBot}
+              onCreateBot={handleCreateBot}
+            />
           </div>
 
           {/* Right Sidebar - Hidden on mobile and tablet */}
           <div className="hidden xl:block">
             <RightSidebar
-              totalBots={bots.length}
+              totalBots={totalCount}
               activities={activities}
               maxBots={5}
               userName={userName}
