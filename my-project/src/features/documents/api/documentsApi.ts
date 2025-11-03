@@ -1,4 +1,4 @@
-import { apiKeyClient } from '@/shared/api/client';
+import { apiClient, apiKeyClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type {
   DocumentUploadResponse,
@@ -6,28 +6,46 @@ import type {
   SearchRequest,
   SearchResponse,
 } from '@/shared/types/api.types';
+import { validateFile } from '@/shared/utils/fileValidation';
 
 /**
  * Documents API (SnapAgent)
  * 문서 업로드, 검색, 삭제 (RAG 처리)
- *
- * ⚠️ 주의: API Key 인증 필요 (apiKeyClient 사용)
  */
 export const documentsApi = {
   /**
    * 문서 업로드
+   *
+   * 인증: JWT Bearer Token (로그인 필수)
+   * 엔드포인트: POST /api/v1/documents/upload
+   * Content-Type: multipart/form-data
+   *
+   * 파일 제약사항:
+   * - 최대 크기: 10MB
+   * - 허용 확장자: PDF, TXT, DOCX
+   * - 빈 파일 업로드 불가
+   *
    * @param file 업로드할 파일
    * @param onUploadProgress 업로드 진행률 콜백 (선택)
    * @returns DocumentUploadResponse
+   * @throws Error 파일 유효성 검증 실패 또는 업로드 오류
    */
   uploadDocument: async (
     file: File,
     onUploadProgress?: (progressEvent: any) => void
   ): Promise<DocumentUploadResponse> => {
+    // 1. 파일 유효성 검증
+    const validation = validateFile(file);
+    if (!validation.isValid) {
+      throw new Error(validation.error);
+    }
+
+    // 2. FormData 생성
     const formData = new FormData();
     formData.append('file', file);
 
-    const { data } = await apiKeyClient.post<DocumentUploadResponse>(
+    // 3. JWT 인증으로 업로드 (apiClient 사용)
+    const { data } = await apiClient.post<DocumentUploadResponse>(
       API_ENDPOINTS.DOCUMENTS.UPLOAD,
       formData,
       {
