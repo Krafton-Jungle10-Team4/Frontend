@@ -22,7 +22,7 @@ export const mockBots: BotCardData[] = [
     messages: 856,
     messageChange: '+85% from last 7 days',
     errors: 2,
-    errorStatus: 'No change',
+    errorStatus: '변화 없음',
     createdAt: new Date('2024-10-28T09:00:00'),
   },
   {
@@ -32,7 +32,7 @@ export const mockBots: BotCardData[] = [
     messages: 543,
     messageChange: '+45% from last 7 days',
     errors: 0,
-    errorStatus: 'No errors',
+    errorStatus: '오류 없음',
     createdAt: new Date('2024-10-25T14:00:00'),
   },
 ];
@@ -55,9 +55,9 @@ export function createMockBot(name: string): BotCardData {
       }
     )}`,
     messages: 0,
-    messageChange: 'New bot',
+    messageChange: '새 봇',
     errors: 0,
-    errorStatus: 'No errors',
+    errorStatus: '오류 없음',
     createdAt: now,
   };
 }

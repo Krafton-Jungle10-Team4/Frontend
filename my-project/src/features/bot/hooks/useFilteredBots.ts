@@ -33,7 +33,7 @@ function convertToBotCardData(bot: Bot): BotCardData {
     messages: bot.messagesCount,
     messageChange: '+12%', // TODO: 실제 데이터로 대체
     errors: bot.errorsCount,
-    errorStatus: bot.status === 'error' ? 'Error' : 'No errors',
+    errorStatus: bot.status === 'error' ? '오류' : '오류 없음',
     createdAt: new Date(bot.createdAt),
   };
 }
