@@ -50,6 +50,14 @@ export function HomePage() {
   } = useFilteredBots({ searchQuery });
   const { handleCreateBot, handleDeleteBot } = useBotActions();
 
+  // Bot 카드 클릭 시 워크플로우 페이지로 이동
+  const handleBotClick = (botId: string) => {
+    const bot = filteredBots.find((b) => b.id === botId);
+    navigate(`/workflow/${botId}`, {
+      state: { botName: bot?.name || 'Bot' },
+    });
+  };
+
   const translations = {
     en: {
       currentPage: 'Home',
@@ -120,6 +128,7 @@ export function HomePage() {
               hasResults={hasResults}
               onDelete={handleDeleteBot}
               onCreateBot={handleCreateBot}
+              onBotClick={handleBotClick}
             />
           </div>
 

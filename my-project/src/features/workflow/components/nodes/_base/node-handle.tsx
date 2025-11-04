@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { BlockEnum, NodeRunningStatus } from '../../../types/workflow.types';
+import { BlockEnum } from '../../../types/workflow.types';
 import type { CommonNodeType } from '../../../types/workflow.types';
 import clsx from 'clsx';
 
@@ -24,16 +24,9 @@ export const NodeTargetHandle = memo(
         type="target"
         position={Position.Left}
         className={clsx(
-          'z-[1] !h-4 !w-4 !rounded-none !border-none !bg-transparent !outline-none',
-          'after:absolute after:left-1.5 after:top-1 after:h-2 after:w-0.5 after:bg-workflow-link-line-handle',
-          'transition-all hover:scale-125',
-          data._runningStatus === NodeRunningStatus.Succeeded &&
-            'after:bg-workflow-link-line-success-handle',
-          data._runningStatus === NodeRunningStatus.Failed &&
-            'after:bg-workflow-link-line-error-handle',
-          data._runningStatus === NodeRunningStatus.Exception &&
-            'after:bg-workflow-link-line-failure-handle',
-          !connected && 'after:opacity-0',
+          'z-[1] !h-3 !w-3 !rounded-full !border-2 !border-gray-400 !bg-white !outline-none shadow-md',
+          'transition-all hover:scale-125 hover:!border-blue-500 hover:!bg-blue-100',
+          connected && '!border-teal-500 !bg-teal-100',
           data.type === BlockEnum.Start && 'opacity-0',
           handleClassName
         )}
@@ -58,16 +51,9 @@ export const NodeSourceHandle = memo(
         type="source"
         position={Position.Right}
         className={clsx(
-          'group/handle z-[1] !h-4 !w-4 !rounded-none !border-none !bg-transparent !outline-none',
-          'after:absolute after:right-1.5 after:top-1 after:h-2 after:w-0.5 after:bg-workflow-link-line-handle',
-          'transition-all hover:scale-125',
-          data._runningStatus === NodeRunningStatus.Succeeded &&
-            'after:bg-workflow-link-line-success-handle',
-          data._runningStatus === NodeRunningStatus.Failed &&
-            'after:bg-workflow-link-line-error-handle',
-          data._runningStatus === NodeRunningStatus.Exception &&
-            'after:bg-workflow-link-line-failure-handle',
-          !connected && 'after:opacity-0',
+          'z-[1] !h-3 !w-3 !rounded-full !border-2 !border-gray-400 !bg-white !outline-none shadow-md',
+          'transition-all hover:scale-125 hover:!border-blue-500 hover:!bg-blue-100',
+          connected && '!border-teal-500 !bg-teal-100',
           handleClassName
         )}
         isConnectable={true}

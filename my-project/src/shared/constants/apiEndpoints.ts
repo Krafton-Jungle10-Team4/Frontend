@@ -2,8 +2,9 @@
  * API 엔드포인트 상수
  */
 
-// SnapAgent API Base URL
-export const API_BASE_URL = 'https://api.snapagent.shop';
+// SnapAgent API Base URL - 환경변수에서 가져오기
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://api.snapagent.shop';
 export const API_TIMEOUT = 30000; // 30초
 
 export const API_ENDPOINTS = {
