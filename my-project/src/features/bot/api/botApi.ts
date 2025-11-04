@@ -13,6 +13,11 @@ import type { BotResponse, CreateBotRequest } from '@/shared/types/api.types';
  * (snake_case → camelCase)
  */
 function transformBotResponse(apiResponse: BotResponse): Bot {
+  // createdAt이 null이면 updatedAt 사용, 둘 다 없으면 현재 시간
+  const fallbackDate = new Date().toISOString();
+  const createdAt = apiResponse.created_at || apiResponse.updated_at || fallbackDate;
+  const updatedAt = apiResponse.updated_at || apiResponse.created_at || fallbackDate;
+
   return {
     id: apiResponse.id,
     name: apiResponse.name,
@@ -21,8 +26,8 @@ function transformBotResponse(apiResponse: BotResponse): Bot {
     status: apiResponse.status as Bot['status'],
     messagesCount: apiResponse.messages_count,
     errorsCount: apiResponse.errors_count,
-    createdAt: apiResponse.created_at,
-    updatedAt: apiResponse.updated_at || new Date().toISOString(),
+    createdAt,
+    updatedAt,
   };
 }
 

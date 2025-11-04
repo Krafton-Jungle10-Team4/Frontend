@@ -9,6 +9,7 @@ import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { botApi } from '../api/botApi';
 
 /**
  * Bot 관련 액션을 제공하는 커스텀 훅
@@ -34,22 +35,45 @@ export function useBotActions() {
    * Bot 삭제 및 활동 로그 추가
    */
   const handleDeleteBot = useCallback(
-    (botId: string, botName: string) => {
-      // Delete bot from store
-      deleteBot(botId);
+    async (botId: string, botName: string) => {
+      try {
+        // 1. 백엔드 API 호출하여 DB에서 삭제
+        await botApi.delete(botId);
 
-      // Add activity log
-      const translations = {
-        en: { action: 'deleted bot' },
-        ko: { action: '봇을 삭제했습니다' },
-      };
+        // 2. 로컬 스토어에서도 삭제
+        deleteBot(botId);
 
-      addActivity({
-        type: 'bot_deleted',
-        botId,
-        botName,
-        message: `${userName} ${translations[language].action}: ${botName}`,
-      });
+        // 3. 활동 로그 추가
+        const translations = {
+          en: { action: 'deleted bot' },
+          ko: { action: '봇을 삭제했습니다' },
+        };
+
+        addActivity({
+          type: 'bot_deleted',
+          botId,
+          botName,
+          message: `${userName} ${translations[language].action}: ${botName}`,
+        });
+      } catch (error) {
+        console.error('Failed to delete bot:', error);
+
+        // 에러 발생 시에도 로컬에서 삭제 (백엔드가 없거나 네트워크 오류인 경우)
+        deleteBot(botId);
+
+        // 오류 활동 로그 추가
+        const translations = {
+          en: { action: 'attempted to delete bot' },
+          ko: { action: '봇 삭제를 시도했습니다' },
+        };
+
+        addActivity({
+          type: 'bot_deleted',
+          botId,
+          botName,
+          message: `${userName} ${translations[language].action}: ${botName} (offline)`,
+        });
+      }
     },
     [deleteBot, addActivity, userName, language]
   );
