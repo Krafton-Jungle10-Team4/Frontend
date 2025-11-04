@@ -48,7 +48,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('ko');
   const [bots, setBots] = useState<Bot[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
 

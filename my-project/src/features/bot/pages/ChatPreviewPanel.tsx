@@ -345,7 +345,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
                               <div className="flex-1">
                                 <p className="text-gray-700 font-medium mb-1">
                                   {source.metadata?.filename ||
-                                    `Document ${idx + 1}`}
+                                    (language === 'ko' ? `문서 ${idx + 1}` : `Document ${idx + 1}`)}
                                 </p>
                                 <p className="text-gray-600 line-clamp-2">
                                   {source.content}
