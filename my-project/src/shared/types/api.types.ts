@@ -128,3 +128,32 @@ export interface HTTPValidationError {
 export interface APIErrorResponse {
   detail: string | HTTPValidationError;
 }
+
+// ============================================
+// Bot
+// ============================================
+export enum BotGoal {
+  CustomerSupport = 'customer-support',
+  AiAssistant = 'ai-assistant',
+  Sales = 'sales',
+  Other = 'other',
+}
+
+export interface CreateBotRequest {
+  name: string; // 1-100 characters
+  goal: BotGoal;
+  personality: string; // max 2000 characters
+  knowledge: string[]; // document_ids
+}
+
+export interface BotResponse {
+  id: string; // Format: bot_{timestamp}_{random_hex}
+  name: string;
+  description: string | null;
+  avatar: string | null;
+  status: 'active' | 'inactive' | 'training';
+  messages_count: number;
+  errors_count: number;
+  created_at: string; // ISO 8601
+  updated_at: string | null; // ISO 8601
+}
