@@ -14,7 +14,7 @@ import type {
   FileItem,
 } from './types';
 
-interface BotSetupContextType {
+export interface BotSetupContextType {
   // Step 1: Name
   botName: string;
   setBotName: (name: string) => void;
