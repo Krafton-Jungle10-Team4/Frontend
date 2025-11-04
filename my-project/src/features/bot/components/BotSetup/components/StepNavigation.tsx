@@ -3,7 +3,7 @@ import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
 import { useCreateBot } from '../../../hooks/useCreateBot';
-import type { CreateBotDto } from '../../../types/bot.types';
+import { buildCreateBotDto } from '../../../utils/botSetupHelpers';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
 
@@ -13,11 +13,11 @@ interface StepNavigationProps {
 }
 
 export function StepNavigation({ onBack, language }: StepNavigationProps) {
+  const context = useBotSetup();
   const {
     step,
     setStep,
     isStepValid,
-    botName,
     selectedGoal,
     customGoal,
     personalityText,
@@ -25,7 +25,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     setShowCustomInput,
     hasAnyData,
     setShowExitDialog,
-  } = useBotSetup();
+  } = context;
 
   const { createBot, isCreating } = useCreateBot();
 
@@ -58,14 +58,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     } else {
       // Step 4: Train Agent button clicked
       try {
-        // CreateBotDto 구성
-        const dto: CreateBotDto = {
-          name: botName,
-          goal:
-            selectedGoal === 'other' ? customGoal : selectedGoal || undefined,
-          personality: personalityText || undefined,
-          knowledge: knowledgeText ? [knowledgeText] : undefined,
-        };
+        const dto = buildCreateBotDto(context);
 
         // 봇 생성 API 호출
         const newBot = await createBot(dto);
