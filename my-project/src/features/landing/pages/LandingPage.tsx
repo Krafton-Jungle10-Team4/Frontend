@@ -40,13 +40,13 @@ export function LandingPage() {
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
       {/* Animated Space Background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900">
+      <div className="fixed inset-0 bg-gradient-to-b from-gray-900 to-teal-900">
         {/* Stars Layer 1 - Small stars */}
         <div className="absolute inset-0 opacity-50">
           {[...Array(50)].map((_, i) => (
             <div
               key={`star1-${i}`}
-              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+              className="absolute w-1 h-1 bg-teal-300 rounded-full animate-pulse"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -62,7 +62,7 @@ export function LandingPage() {
           {[...Array(30)].map((_, i) => (
             <div
               key={`star2-${i}`}
-              className="absolute w-1.5 h-1.5 bg-blue-200 rounded-full animate-pulse"
+              className="absolute w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -78,7 +78,7 @@ export function LandingPage() {
           {[...Array(20)].map((_, i) => (
             <div
               key={`star3-${i}`}
-              className="absolute w-2 h-2 bg-purple-200 rounded-full animate-pulse"
+              className="absolute w-2 h-2 bg-teal-500 rounded-full animate-pulse"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -107,21 +107,21 @@ export function LandingPage() {
         </div>
 
         {/* Nebula effect */}
-        <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-radial from-teal-400/20 via-transparent to-transparent blur-3xl" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col">
         {/* Header */}
-        <header className="w-full px-6 py-4 flex justify-between items-center backdrop-blur-sm bg-white/5">
+        <header className="w-full px-6 py-4 flex justify-between items-center backdrop-blur-sm bg-black/20">
           <div className="flex items-center gap-2">
-            <RiRobot2Line className="h-8 w-8 text-blue-400" />
-            <span className="text-2xl font-bold text-white">BotBuilder</span>
+            <RiRobot2Line className="h-8 w-8 text-teal-400" />
+            <span className="text-2xl font-bold text-white">SnapAgent</span>
           </div>
           <button
             onClick={handleAuthAction}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 text-white transition-colors hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex items-center gap-2 px-4 py-2 text-white transition-colors hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isAuthenticated ? (
               <RiLogoutCircleLine className="h-5 w-5" />
@@ -140,14 +140,14 @@ export function LandingPage() {
             {/* Hero Section */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
-                Build Intelligent
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-pulse">
-                  AI Chatbots
+                지능형 AI 챗봇을
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-teal-500 animate-pulse">
+                  만들어보세요
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto drop-shadow-lg">
-                Create powerful AI-driven chatbots with our intuitive workflow
-                builder. No coding required.
+              <p className="text-xl md:text-2xl text-teal-100 max-w-2xl mx-auto drop-shadow-lg">
+                직관적인 워크플로우 빌더로 강력한 AI 챗봇을 제작하세요.
+                코딩이 필요 없습니다.
               </p>
             </div>
 
@@ -155,9 +155,9 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <button
                 onClick={handleGetStarted}
-                className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-semibold text-lg shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all transform hover:scale-105"
+                className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-teal-500/50 hover:shadow-teal-500/70 transition-all transform hover:scale-105"
               >
-                Get Started
+                시작하기
                 <RiArrowRightLine className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
@@ -166,46 +166,46 @@ export function LandingPage() {
                 }}
                 className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl font-semibold text-lg border-2 border-white/30 hover:border-white/50 transition-all"
               >
-                Learn More
+                더 알아보기
               </button>
             </div>
 
             {/* Features Grid */}
             <div className="grid md:grid-cols-3 gap-6 pt-16">
-              <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
+              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
+                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
                   <span className="text-2xl">🎯</span>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  Visual Workflow
+                  시각적 워크플로우
                 </h3>
-                <p className="text-blue-200">
-                  Build complex AI workflows with an intuitive drag-and-drop
-                  interface
+                <p className="text-teal-200">
+                  직관적인 드래그 앤 드롭 인터페이스로 복잡한 AI 워크플로우를
+                  구축하세요
                 </p>
               </div>
 
-              <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
+              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
+                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
                   <span className="text-2xl">⚡</span>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  Lightning Fast
+                  빠른 실행 속도
                 </h3>
-                <p className="text-purple-200">
-                  Deploy your chatbot instantly and start engaging with users
+                <p className="text-teal-200">
+                  챗봇을 즉시 배포하고 사용자와 소통을 시작하세요
                 </p>
               </div>
 
-              <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 hover:shadow-xl hover:shadow-pink-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
+              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
+                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
                   <span className="text-2xl">📊</span>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  Real-time Analytics
+                  실시간 분석
                 </h3>
-                <p className="text-pink-200">
-                  Monitor usage, costs, and performance with detailed analytics
+                <p className="text-teal-200">
+                  상세한 분석으로 사용량, 비용 및 성능을 모니터링하세요
                 </p>
               </div>
             </div>
@@ -213,8 +213,8 @@ export function LandingPage() {
         </main>
 
         {/* Footer */}
-        <footer className="w-full px-6 py-8 text-center text-blue-200 text-sm backdrop-blur-sm bg-white/5">
-          <p>&copy; 2024 BotBuilder. All rights reserved.</p>
+        <footer className="w-full px-6 py-8 text-center text-teal-200 text-sm backdrop-blur-sm bg-black/20">
+          <p>&copy; 2025 SnapAgent. All rights reserved.</p>
         </footer>
       </div>
 
