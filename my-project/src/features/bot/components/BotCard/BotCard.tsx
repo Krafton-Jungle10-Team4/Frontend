@@ -23,6 +23,7 @@ export interface BotCardData {
 interface BotCardProps {
   bot: BotCardData;
   onDelete: (botId: string, botName: string) => void;
+  onEdit?: (botId: string) => void;
   onClick?: (botId: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
@@ -31,6 +32,7 @@ interface BotCardProps {
 export function BotCard({
   bot,
   onDelete,
+  onEdit,
   onClick,
   viewMode = 'grid',
   language,
@@ -118,6 +120,7 @@ export function BotCard({
                 onSelect={(event) => {
                   event.stopPropagation();
                   setSuppressNextClick(true);
+                  onEdit?.(bot.id);
                 }}
               >
                 <Pencil size={16} />
@@ -175,6 +178,7 @@ export function BotCard({
               onSelect={(event) => {
                 event.stopPropagation();
                 setSuppressNextClick(true);
+                onEdit?.(bot.id);
               }}
             >
               <Pencil size={16} />

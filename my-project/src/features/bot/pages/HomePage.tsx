@@ -61,6 +61,14 @@ export function HomePage() {
     });
   };
 
+  // Bot 수정 버튼 클릭 시 워크플로우 페이지로 이동
+  const handleBotEdit = (botId: string) => {
+    const bot = filteredBots.find((b) => b.id === botId);
+    navigate(`/workflow/${botId}`, {
+      state: { botName: bot?.name || 'Bot' },
+    });
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -141,6 +149,7 @@ export function HomePage() {
               isEmpty={isEmpty}
               hasResults={hasResults}
               onDelete={handleDeleteBot}
+              onEdit={handleBotEdit}
               onCreateBot={handleCreateBot}
               onBotClick={handleBotClick}
             />
