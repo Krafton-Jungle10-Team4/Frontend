@@ -51,7 +51,11 @@ const ContextMenu = ({
   const nodeTypes = [
     { type: BlockEnum.Start, label: 'Start Node', icon: '▶️' },
     { type: BlockEnum.LLM, label: 'LLM Node', icon: '🤖' },
-    { type: BlockEnum.KnowledgeRetrieval, label: 'Knowledge Retrieval', icon: '📚' },
+    {
+      type: BlockEnum.KnowledgeRetrieval,
+      label: 'Knowledge Retrieval',
+      icon: '📚',
+    },
     { type: BlockEnum.End, label: 'End Node', icon: '🏁' },
   ];
 

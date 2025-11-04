@@ -272,9 +272,9 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
   const botInitial = botName.charAt(0).toUpperCase();
 
   return (
-    <div className="h-full bg-gray-900 flex flex-col">
+    <div className="h-full bg-gray-100 flex flex-col">
       {/* Chat Header */}
-      <div className="bg-gray-900 text-white p-4 flex items-center justify-between border-b border-gray-700">
+      <div className="bg-white text-gray-800 p-4 flex items-center justify-between border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center">
             <span className="text-xs text-gray-900">{botInitial}</span>
@@ -283,7 +283,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         </div>
         <button
           onClick={handleResetChat}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-500 hover:text-gray-800 transition-colors"
         >
           <RotateCw size={18} />
         </button>
@@ -291,7 +291,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
 
       {/* Messages */}
       <div
-        className="flex-1 overflow-y-auto p-4 bg-gray-900 scrollbar-hide"
+        className="flex-1 overflow-y-auto p-4 bg-gray-50 scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {/* Bot Avatar and Name */}
@@ -299,7 +299,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
           <div className="w-20 h-20 bg-teal-400 rounded-full flex items-center justify-center mb-3">
             <span className="text-2xl text-gray-900">{botInitial}</span>
           </div>
-          <p className="text-white text-sm">{botName}</p>
+          <p className="text-gray-800 text-sm">{botName}</p>
         </div>
 
         {/* Today Label */}
@@ -314,7 +314,9 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
               {message.type === 'user' ? (
                 <div className="flex justify-end">
                   <div className="bg-teal-400 text-gray-900 rounded-2xl px-4 py-2 max-w-[80%]">
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.content}
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -323,30 +325,33 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
                     <span className="text-xs text-gray-900">{botInitial}</span>
                   </div>
                   <div className="max-w-[80%]">
-                    <div className="bg-gray-700 text-white rounded-2xl px-4 py-2">
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <div className="bg-white text-gray-800 rounded-2xl px-4 py-2 border border-gray-200">
+                      <p className="text-sm whitespace-pre-wrap">
+                        {message.content}
+                      </p>
                     </div>
                     {/* Sources Display */}
                     {message.sources && message.sources.length > 0 && (
                       <div className="mt-2 space-y-1">
-                        <p className="text-xs text-gray-400 px-2">
+                        <p className="text-xs text-gray-500 px-2">
                           {language === 'ko' ? '출처:' : 'Sources:'}
                         </p>
                         {message.sources.map((source, idx) => (
                           <div
                             key={source.chunk_id}
-                            className="bg-gray-800 rounded-lg px-3 py-2 text-xs"
+                            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
-                                <p className="text-gray-300 font-medium mb-1">
-                                  {source.metadata?.filename || `Document ${idx + 1}`}
+                                <p className="text-gray-700 font-medium mb-1">
+                                  {source.metadata?.filename ||
+                                    `Document ${idx + 1}`}
                                 </p>
-                                <p className="text-gray-400 line-clamp-2">
+                                <p className="text-gray-600 line-clamp-2">
                                   {source.content}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-1 text-teal-400">
+                              <div className="flex items-center gap-1 text-teal-500">
                                 <span className="text-xs">
                                   {Math.round(source.similarity_score * 100)}%
                                 </span>
@@ -374,17 +379,17 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
               <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                 <span className="text-xs text-gray-900">{botInitial}</span>
               </div>
-              <div className="bg-gray-700 text-white rounded-2xl px-4 py-3 flex gap-1">
+              <div className="bg-white text-gray-800 rounded-2xl px-4 py-3 flex gap-1 border border-gray-200">
                 <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
                   style={{ animationDelay: '0ms' }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
                   style={{ animationDelay: '150ms' }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
                   style={{ animationDelay: '300ms' }}
                 ></div>
               </div>
@@ -401,7 +406,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
               <button
                 key={idx}
                 onClick={() => handleQuickMessage(msg)}
-                className="w-full text-left px-4 py-2.5 bg-transparent border border-teal-400 text-teal-400 rounded-2xl text-sm hover:bg-teal-400 hover:bg-opacity-10 transition-colors"
+                className="w-full text-left px-4 py-2.5 bg-transparent border border-teal-400 text-teal-400 rounded-2xl text-sm hover:bg-teal-400 hover:text-white transition-colors"
               >
                 {msg}
               </button>
@@ -411,19 +416,19 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-gray-900 border-t border-gray-700">
-        <div className="flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2">
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder={t.placeholder}
-            className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
+            className="flex-1 bg-transparent text-gray-800 text-sm outline-none placeholder-gray-500"
           />
           <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim()}
-            className="text-teal-400 disabled:text-gray-600"
+            className="text-teal-500 disabled:text-gray-400"
           >
             <svg
               width="20"

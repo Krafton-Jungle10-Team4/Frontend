@@ -155,7 +155,10 @@ export const WorkflowBuilderPage = () => {
 
   return (
     <div className="h-screen w-screen flex">
-      <WorkflowSlimSidebar activeView={activeView} onViewChange={setActiveView} />
+      <WorkflowSlimSidebar
+        activeView={activeView}
+        onViewChange={setActiveView}
+      />
       <div className="flex-1 overflow-hidden">{renderContent()}</div>
     </div>
   );
