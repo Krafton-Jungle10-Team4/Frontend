@@ -95,7 +95,7 @@ export function HomePage() {
 
       {/* Left Sidebar - Hidden on mobile */}
       <div className="hidden lg:block">
-        <LeftSidebar onLogoClick={() => navigate('/')} />
+        <LeftSidebar onLogoClick={() => navigate('/home')} />
       </div>
 
       {/* Main Content */}
@@ -105,7 +105,7 @@ export function HomePage() {
           onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
           userEmail={userEmail}
-          onHomeClick={() => navigate('/')}
+          onHomeClick={() => navigate('/home')}
           language={language}
           onLanguageChange={setLanguage}
           onLogout={handleLogout}
