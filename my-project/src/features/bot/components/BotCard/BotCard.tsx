@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Bot as BotIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -34,6 +35,8 @@ export function BotCard({
   viewMode = 'grid',
   language,
 }: BotCardProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [suppressNextClick, setSuppressNextClick] = useState(false);
   const translations = {
     en: {
       created: 'Created',
@@ -54,6 +57,13 @@ export function BotCard({
   const t = translations[language];
 
   const handleCardClick = () => {
+    if (suppressNextClick) {
+      setSuppressNextClick(false);
+      return;
+    }
+    if (isMenuOpen) {
+      return;
+    }
     onClick?.(bot.id);
   };
 
@@ -93,7 +103,7 @@ export function BotCard({
               </div>
             </div>
           </div>
-          <DropdownMenu>
+          <DropdownMenu onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
                 className="p-1 text-gray-400 hover:text-gray-600 rounded ml-4"
@@ -103,13 +113,23 @@ export function BotCard({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="gap-2">
+              <DropdownMenuItem
+                className="gap-2"
+                onSelect={(event) => {
+                  event.stopPropagation();
+                  setSuppressNextClick(true);
+                }}
+              >
                 <Pencil size={16} />
                 {t.edit}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 text-red-600"
-                onClick={() => onDelete(bot.id, bot.name)}
+                onSelect={(event) => {
+                  event.stopPropagation();
+                  setSuppressNextClick(true);
+                  onDelete(bot.id, bot.name);
+                }}
               >
                 <Trash2 size={16} />
                 {t.delete}
@@ -140,7 +160,7 @@ export function BotCard({
             </p>
           </div>
         </div>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setIsMenuOpen}>
           <DropdownMenuTrigger asChild>
             <button
               className="p-1 text-gray-400 hover:text-gray-600 rounded"
@@ -149,14 +169,24 @@ export function BotCard({
               <MoreVertical size={18} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="gap-2">
-              <Pencil size={16} />
-              {t.edit}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 text-red-600"
-              onClick={() => onDelete(bot.id, bot.name)}
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            className="gap-2"
+            onSelect={(event) => {
+              event.stopPropagation();
+              setSuppressNextClick(true);
+            }}
+          >
+            <Pencil size={16} />
+            {t.edit}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="gap-2 text-red-600"
+            onSelect={(event) => {
+              event.stopPropagation();
+              setSuppressNextClick(true);
+              onDelete(bot.id, bot.name);
+            }}
             >
               <Trash2 size={16} />
               {t.delete}

@@ -204,6 +204,17 @@ const WorkflowInner = ({ initialNodes, initialEdges }: WorkflowProps) => {
       </ReactFlow>
 
       {contextMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={closeContextMenu}
+          onContextMenu={(event) => {
+            event.preventDefault();
+            closeContextMenu();
+          }}
+        />
+      )}
+
+      {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
