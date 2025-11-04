@@ -6,6 +6,25 @@
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
+import type { BotResponse, CreateBotRequest } from '@/shared/types/api.types';
+
+/**
+ * API 응답 → 프론트엔드 Bot 타입 변환
+ * (snake_case → camelCase)
+ */
+function transformBotResponse(apiResponse: BotResponse): Bot {
+  return {
+    id: apiResponse.id,
+    name: apiResponse.name,
+    description: apiResponse.description || undefined,
+    avatar: apiResponse.avatar || undefined,
+    status: apiResponse.status as Bot['status'],
+    messagesCount: apiResponse.messages_count,
+    errorsCount: apiResponse.errors_count,
+    createdAt: apiResponse.created_at,
+    updatedAt: apiResponse.updated_at || new Date().toISOString(),
+  };
+}
 
 /**
  * Mock 봇 생성 헬퍼 함수 (백엔드 미구현 시 사용)
@@ -49,15 +68,25 @@ export const botApi = {
 
   /**
    * 봇 생성
-   * 백엔드가 없을 경우 Mock 데이터 반환
+   * API 명세서 기준 요청/응답 처리
    */
   create: async (dto: CreateBotDto): Promise<Bot> => {
     try {
-      const { data } = await apiClient.post<Bot>(
+      // CreateBotDto → CreateBotRequest 변환
+      const request: CreateBotRequest = {
+        name: dto.name,
+        goal: dto.goal as any, // BotGoal enum으로 변환됨
+        personality: dto.personality || '',
+        knowledge: dto.knowledge || [],
+      };
+
+      const { data } = await apiClient.post<BotResponse>(
         API_ENDPOINTS.BOTS.CREATE,
-        dto
+        request
       );
-      return data;
+
+      // BotResponse → Bot 변환 (snake_case → camelCase)
+      return transformBotResponse(data);
     } catch (error: any) {
       // 네트워크 연결 실패 시 (백엔드 미구현) Mock 데이터 생성
       if (
