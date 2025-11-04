@@ -7,7 +7,7 @@ export function BotSetupPage() {
   const language = useUIStore((state) => state.language);
 
   const handleBack = () => {
-    navigate('/');
+    navigate('/home');
   };
 
   return <BotSetup onBack={handleBack} language={language} />;
