@@ -25,6 +25,7 @@ interface AuthStore extends AuthState {
   handleAuthCallback: (callbackUrl?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  loginWithMockUser: () => void; // Mock 로그인 (로컬 개발용)
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
@@ -108,6 +109,12 @@ export const useAuthStore = create<AuthStore>()(
 
         // 인증 상태 복원 (페이지 새로고침 시)
         refreshAuth: async () => {
+          // Mock 모드인 경우 바로 완료
+          if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+            set({ isLoading: false });
+            return;
+          }
+
           if (!authApi.hasValidToken()) {
             set({ isLoading: false });
             return;
@@ -140,6 +147,28 @@ export const useAuthStore = create<AuthStore>()(
               error: null,
             });
           }
+        },
+
+        // Mock 로그인 (로컬 개발용)
+        loginWithMockUser: () => {
+          const mockUser: User = {
+            id: 999,
+            email: 'developer@localhost.com',
+            name: 'Local Developer',
+            profile_image: null,
+            created_at: new Date().toISOString(),
+          };
+
+          set({
+            user: mockUser,
+            jwtToken: 'mock-jwt-token',
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+
+          // Mock 토큰 저장
+          localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, 'mock-jwt-token');
         },
 
         // 사용자 정보 설정

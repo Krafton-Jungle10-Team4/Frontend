@@ -16,6 +16,13 @@ export const workflowRoutes: RouteObject = {
         })),
     },
     {
+      path: ':botId',
+      lazy: () =>
+        import('./pages/WorkflowBuilderPage').then((module) => ({
+          Component: module.WorkflowBuilderPage,
+        })),
+    },
+    {
       path: 'builder',
       lazy: () =>
         import('./pages/WorkflowBuilderPage').then((module) => ({

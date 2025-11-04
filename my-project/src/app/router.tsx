@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
-          // Home (Bot List) - 인증 필요
+          // Home - Bot 목록 페이지
           {
             path: 'home',
             lazy: () =>
@@ -86,7 +86,6 @@ export const router = createBrowserRouter([
                 Component: module.HomePage,
               })),
           },
-
           // Dashboard routes - Feature 기반
           dashboardRoutes,
         ],

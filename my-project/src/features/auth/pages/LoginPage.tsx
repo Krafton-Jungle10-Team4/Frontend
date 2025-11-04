@@ -4,6 +4,7 @@ import { GoogleLoginButton } from '../components/GoogleLoginButton';
 import { ROUTES } from '@/shared/constants/routes';
 
 import { useAuth } from '../hooks/useAuth';
+import { useAuthStore } from '../stores/authStore';
 
 /**
  * 로그인 페이지 (SnapAgent OAuth)
@@ -11,6 +12,10 @@ import { useAuth } from '../hooks/useAuth';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { redirectToGoogleLogin, isLoading, error } = useAuth();
+  const loginWithMockUser = useAuthStore((state) => state.loginWithMockUser);
+
+  // Mock 모드 확인
+  const useMockAuth = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
 
   /**
    * Google OAuth 로그인 시작
@@ -19,6 +24,14 @@ export const LoginPage = () => {
     // OAuth callback URL (프론트엔드 경로)
     const callbackUrl = `${window.location.origin}${ROUTES.AUTH_CALLBACK}`;
     redirectToGoogleLogin(callbackUrl);
+  };
+
+  /**
+   * Mock 로그인 (로컬 개발용)
+   */
+  const handleMockLogin = () => {
+    loginWithMockUser();
+    navigate(ROUTES.HOME);
   };
 
   return (
@@ -56,6 +69,28 @@ export const LoginPage = () => {
               onClick={handleGoogleLogin}
               disabled={isLoading}
             />
+
+            {/* Mock 로그인 버튼 (로컬 개발용) */}
+            {useMockAuth && (
+              <div className="space-y-3">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white/10 px-4 text-blue-200">
+                      Local Development
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleMockLogin}
+                  className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 font-medium text-white transition-all hover:from-purple-600 hover:to-pink-600 hover:shadow-lg"
+                >
+                  🚀 Mock Login (Developer Mode)
+                </button>
+              </div>
+            )}
 
             {isLoading && (
               <div className="text-center text-blue-200">

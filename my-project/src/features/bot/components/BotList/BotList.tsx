@@ -16,6 +16,7 @@ interface BotListProps {
   hasResults: boolean;
   onDelete: (botId: string, botName: string) => void;
   onCreateBot: () => void;
+  onBotClick?: (botId: string) => void;
 }
 
 /**
@@ -33,6 +34,7 @@ export function BotList({
   hasResults,
   onDelete,
   onCreateBot,
+  onBotClick,
 }: BotListProps) {
   const translations = {
     en: {
@@ -77,6 +79,7 @@ export function BotList({
           key={bot.id}
           bot={bot}
           onDelete={onDelete}
+          onClick={onBotClick}
           viewMode={viewMode}
           language={language}
         />

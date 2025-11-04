@@ -6,7 +6,7 @@ import WorkflowSidebar, {
 } from '../components/sidebar/WorkflowSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
-import type { Node, Edge } from '../types/workflow.types';
+import type { Node, Edge, CommonNodeType } from '../types/workflow.types';
 import { BlockEnum } from '../types/workflow.types';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
@@ -35,7 +35,10 @@ const sampleNodes: Node[] = [
       desc: '관련 문서 검색',
       dataset: 'Product Documentation',
       retrievalMode: 'Semantic Search',
-    },
+    } as CommonNodeType<{
+      dataset?: string;
+      retrievalMode?: string;
+    }>,
   },
   {
     id: '3',
@@ -50,7 +53,10 @@ const sampleNodes: Node[] = [
         name: 'GPT-4',
       },
       prompt: '검색된 문서를 기반으로 사용자 질문에 답변하세요.',
-    },
+    } as CommonNodeType<{
+      model?: { provider: string; name: string };
+      prompt?: string;
+    }>,
   },
   {
     id: '4',

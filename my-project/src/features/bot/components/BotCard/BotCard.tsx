@@ -22,6 +22,7 @@ export interface BotCardData {
 interface BotCardProps {
   bot: BotCardData;
   onDelete: (botId: string, botName: string) => void;
+  onClick?: (botId: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
 }
@@ -29,6 +30,7 @@ interface BotCardProps {
 export function BotCard({
   bot,
   onDelete,
+  onClick,
   viewMode = 'grid',
   language,
 }: BotCardProps) {
@@ -51,9 +53,16 @@ export function BotCard({
 
   const t = translations[language];
 
+  const handleCardClick = () => {
+    onClick?.(bot.id);
+  };
+
   if (viewMode === 'list') {
     return (
-      <div className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow">
+      <div
+        className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleCardClick}
+      >
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -86,7 +95,10 @@ export function BotCard({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-1 text-gray-400 hover:text-gray-600 rounded ml-4">
+              <button
+                className="p-1 text-gray-400 hover:text-gray-600 rounded ml-4"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreVertical size={18} />
               </button>
             </DropdownMenuTrigger>
@@ -110,7 +122,10 @@ export function BotCard({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow">
+    <div
+      className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -127,7 +142,10 @@ export function BotCard({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 text-gray-400 hover:text-gray-600 rounded">
+            <button
+              className="p-1 text-gray-400 hover:text-gray-600 rounded"
+              onClick={(e) => e.stopPropagation()}
+            >
               <MoreVertical size={18} />
             </button>
           </DropdownMenuTrigger>
