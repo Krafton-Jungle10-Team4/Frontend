@@ -3,6 +3,7 @@ import {
   RiRobot2Line,
   RiArrowRightLine,
   RiLoginCircleLine,
+  RiLogoutCircleLine,
 } from '@remixicon/react';
 import { useAuth } from '@/features/auth';
 
@@ -12,7 +13,7 @@ import { useAuth } from '@/features/auth';
  */
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout, isLoading } = useAuth();
 
   const handleGetStarted = () => {
     // 로그인되어 있으면 홈으로, 아니면 로그인 페이지로
@@ -23,8 +24,17 @@ export function LandingPage() {
     }
   };
 
-  const handleLogin = () => {
-    navigate('/login');
+  const handleAuthAction = async () => {
+    if (isAuthenticated) {
+      try {
+        await logout();
+        navigate('/landing');
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -109,11 +119,18 @@ export function LandingPage() {
             <span className="text-2xl font-bold text-white">BotBuilder</span>
           </div>
           <button
-            onClick={handleLogin}
-            className="flex items-center gap-2 px-4 py-2 text-white hover:text-blue-300 transition-colors"
+            onClick={handleAuthAction}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 text-white transition-colors hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <RiLoginCircleLine className="h-5 w-5" />
-            <span className="font-medium">Login</span>
+            {isAuthenticated ? (
+              <RiLogoutCircleLine className="h-5 w-5" />
+            ) : (
+              <RiLoginCircleLine className="h-5 w-5" />
+            )}
+            <span className="font-medium">
+              {isAuthenticated ? '로그아웃' : '로그인'}
+            </span>
           </button>
         </header>
 

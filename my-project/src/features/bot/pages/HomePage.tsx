@@ -14,7 +14,7 @@ import {
 } from '@/widgets';
 import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
-import { useAuthStore } from '@/features/auth';
+import { useAuth, useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
@@ -25,8 +25,11 @@ export function HomePage() {
 
   // Auth store - 실제 로그인한 사용자 정보
   const user = useAuthStore((state) => state.user);
+  const resetAuthStore = useAuthStore((state) => state.reset);
   const userName = user?.name || 'User';
   const userEmail = user?.email || '';
+
+  const { logout } = useAuth();
 
   // UI store
   const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
@@ -53,9 +56,19 @@ export function HomePage() {
   // Bot 카드 클릭 시 워크플로우 페이지로 이동
   const handleBotClick = (botId: string) => {
     const bot = filteredBots.find((b) => b.id === botId);
-    navigate(`/workflow/${botId}`, {
-      state: { botName: bot?.name || 'Bot' },
+    navigate('/workflow', {
+      state: { botId, botName: bot?.name || 'Bot' },
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      resetAuthStore();
+      navigate('/landing');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const translations = {
@@ -95,6 +108,7 @@ export function HomePage() {
           onHomeClick={() => navigate('/')}
           language={language}
           onLanguageChange={setLanguage}
+          onLogout={handleLogout}
         />
 
         {/* Workspace Header */}

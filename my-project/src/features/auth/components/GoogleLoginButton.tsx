@@ -14,8 +14,10 @@ export const GoogleLoginButton = ({
 }: GoogleLoginButtonProps) => {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label="Google 계정으로 로그인"
       className={`
         group relative w-full flex items-center justify-center gap-3
         rounded-xl bg-white px-6 py-3.5
