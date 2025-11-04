@@ -103,7 +103,7 @@ export const LoginPage = () => {
             <header className="space-y-2 text-center">
               <h1 className="text-3xl font-bold text-white">Welcome back</h1>
               <p className="text-sm text-blue-200">
-                Sign in to continue to BotBuilder
+                Sign in to continue to SnapAgent
               </p>
             </header>
 
