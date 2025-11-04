@@ -169,24 +169,24 @@ export function BotCard({
               <MoreVertical size={18} />
             </button>
           </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            className="gap-2"
-            onSelect={(event) => {
-              event.stopPropagation();
-              setSuppressNextClick(true);
-            }}
-          >
-            <Pencil size={16} />
-            {t.edit}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="gap-2 text-red-600"
-            onSelect={(event) => {
-              event.stopPropagation();
-              setSuppressNextClick(true);
-              onDelete(bot.id, bot.name);
-            }}
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="gap-2"
+              onSelect={(event) => {
+                event.stopPropagation();
+                setSuppressNextClick(true);
+              }}
+            >
+              <Pencil size={16} />
+              {t.edit}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2 text-red-600"
+              onSelect={(event) => {
+                event.stopPropagation();
+                setSuppressNextClick(true);
+                onDelete(bot.id, bot.name);
+              }}
             >
               <Trash2 size={16} />
               {t.delete}

@@ -62,30 +62,24 @@ const WorkflowInner = ({ initialNodes, initialEdges }: WorkflowProps) => {
   );
 
   // 노드 우클릭 핸들러
-  const onNodeContextMenu: NodeMouseHandler = useCallback(
-    (event, node) => {
-      event.preventDefault();
-      setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-        nodeId: node.id,
-      });
-    },
-    []
-  );
+  const onNodeContextMenu: NodeMouseHandler = useCallback((event, node) => {
+    event.preventDefault();
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      nodeId: node.id,
+    });
+  }, []);
 
   // 엣지 우클릭 핸들러
-  const onEdgeContextMenu: EdgeMouseHandler = useCallback(
-    (event, edge) => {
-      event.preventDefault();
-      setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-        edgeId: edge.id,
-      });
-    },
-    []
-  );
+  const onEdgeContextMenu: EdgeMouseHandler = useCallback((event, edge) => {
+    event.preventDefault();
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      edgeId: edge.id,
+    });
+  }, []);
 
   // 캔버스 우클릭 핸들러 (노드 추가)
   const onPaneContextMenu = useCallback(
