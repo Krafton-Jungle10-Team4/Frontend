@@ -76,15 +76,35 @@ apiKeyClient.interceptors.request.use(
 /**
  * JWT 클라이언트 에러 처리
  */
+// 무한 루프 방지 플래그
+let isRedirecting = false;
+
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
     // 401: 인증 실패 -> 로그인 페이지로 리다이렉트
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isRedirecting) {
+      isRedirecting = true;
+
+      // 로컬 스토리지 정리
       localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER);
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      localStorage.removeItem(STORAGE_KEYS.TEAM);
+      localStorage.removeItem(STORAGE_KEYS.API_KEY);
+
+      // 로그인 페이지가 아닐 때만 리다이렉트
+      if (
+        window.location.pathname !== '/login' &&
+        window.location.pathname !== '/auth/callback'
+      ) {
+        console.warn('🚨 401 Unauthorized - Redirecting to login');
+        // 약간의 지연을 두고 리다이렉트 (진행 중인 요청 취소 시간 확보)
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
+      } else {
+        // 로그인/콜백 페이지에서는 플래그만 리셋
+        isRedirecting = false;
       }
     }
 

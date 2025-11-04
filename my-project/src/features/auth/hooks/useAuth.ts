@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useAuthStore } from '../stores/authStore';
 
@@ -8,10 +8,16 @@ import { useAuthStore } from '../stores/authStore';
  */
 export const useAuth = () => {
   const store = useAuthStore();
+  const isRefreshing = useRef(false);
 
-  // 컴포넌트 마운트 시 인증 상태 복원
+  // 컴포넌트 마운트 시 인증 상태 복원 (중복 호출 방지)
   useEffect(() => {
-    store.refreshAuth();
+    if (!isRefreshing.current && store.isLoading) {
+      isRefreshing.current = true;
+      store.refreshAuth().finally(() => {
+        isRefreshing.current = false;
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
