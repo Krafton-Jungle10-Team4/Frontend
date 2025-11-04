@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import Workflow from '../components/WorkflowBuilder';
-import WorkflowSidebar, {
-  SidebarView,
-} from '../components/sidebar/WorkflowSidebar';
+import WorkflowSlimSidebar, {
+  type SidebarView,
+} from '../components/sidebar/WorkflowSlimSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
 import type { Node, Edge, CommonNodeType } from '../types/workflow.types';
@@ -155,7 +155,7 @@ export const WorkflowBuilderPage = () => {
 
   return (
     <div className="h-screen w-screen flex">
-      <WorkflowSidebar activeView={activeView} onViewChange={setActiveView} />
+      <WorkflowSlimSidebar activeView={activeView} onViewChange={setActiveView} />
       <div className="flex-1 overflow-hidden">{renderContent()}</div>
     </div>
   );
