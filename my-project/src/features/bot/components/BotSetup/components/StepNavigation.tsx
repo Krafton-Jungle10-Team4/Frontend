@@ -60,8 +60,37 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
       try {
         const dto = buildCreateBotDto(context);
 
+        // 🔍 백엔드로 전달되는 데이터 확인
+        console.log('📤 [Bot Creation] DTO to Backend:', dto);
+        console.log('📋 [Bot Creation] Context Data:', {
+          botName: context.botName,
+          selectedGoal: context.selectedGoal,
+          customGoal: context.customGoal,
+          descriptionSource: context.descriptionSource,
+          personalityText: context.personalityText,
+          websiteUrl: context.websiteUrl,
+          uploadedFiles: context.files
+            .filter((f) => f.status === 'uploaded')
+            .map((f) => ({
+              id: f.id,
+              file: f.file,
+              status: f.status,
+            })),
+        });
+
         // 봇 생성 API 호출
         const newBot = await createBot(dto);
+
+        // 🔍 백엔드 응답 데이터 확인
+        console.log('📥 [Bot Creation] Response from Backend:', newBot);
+        console.log('✅ [Bot Creation] Created Bot Info:', {
+          id: newBot.id,
+          name: newBot.name,
+          status: newBot.status,
+          messagesCount: newBot.messagesCount,
+          errorsCount: newBot.errorsCount,
+          createdAt: newBot.createdAt,
+        });
 
         // 성공 메시지
         toast.success(
