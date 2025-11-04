@@ -35,20 +35,27 @@ export const authApi = {
   handleAuthCallback: (
     callbackUrl: string = window.location.href
   ): string | null => {
+    console.log('🔍 [OAuth Callback] Processing callback URL:', callbackUrl);
+
     const url = new URL(callbackUrl);
     const token = url.searchParams.get('token');
     const error = url.searchParams.get('error');
 
+    console.log('🔑 [OAuth Callback] Token parameter:', token ? '✅ Found' : '❌ Not found');
+    console.log('❌ [OAuth Callback] Error parameter:', error || 'None');
+
     if (error) {
-      console.error('OAuth callback error:', error);
+      console.error('❌ [OAuth Callback] OAuth error:', error);
       return null;
     }
 
     if (token) {
+      console.log('✅ [OAuth Callback] Storing JWT token in localStorage');
       localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, token);
       return token;
     }
 
+    console.warn('⚠️ [OAuth Callback] No token found in callback URL');
     return null;
   },
 

@@ -115,8 +115,16 @@ export const useAuthStore = create<AuthStore>()(
             return;
           }
 
+          // JWT 토큰이 없으면 인증되지 않은 상태로 설정
           if (!authApi.hasValidToken()) {
-            set({ isLoading: false });
+            console.log('🔑 No JWT token found - User not authenticated');
+            set({
+              user: null,
+              jwtToken: null,
+              isAuthenticated: false,
+              isLoading: false,
+              error: null,
+            });
             return;
           }
 
@@ -124,6 +132,7 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: true });
 
           try {
+            console.log('🔄 Refreshing auth state with token...');
             const userResponse = await authApi.getCurrentUser();
             const user = mapUserResponseToUser(userResponse);
 
@@ -134,10 +143,15 @@ export const useAuthStore = create<AuthStore>()(
               isLoading: false,
               error: null,
             });
+            console.log('✅ Auth state refreshed successfully');
           } catch (error) {
-            console.error('Auth refresh failed:', error);
-            // 토큰이 유효하지 않으면 정리
-            await authApi.logout();
+            console.error('❌ Auth refresh failed:', error);
+
+            // 로컬 스토리지만 정리 (logout API 호출하지 않음 - 무한 루프 방지)
+            localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            localStorage.removeItem(STORAGE_KEYS.TEAM);
+            localStorage.removeItem(STORAGE_KEYS.API_KEY);
 
             set({
               user: null,
