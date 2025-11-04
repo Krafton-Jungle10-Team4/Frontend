@@ -27,6 +27,7 @@ interface TopNavigationProps {
   onHomeClick?: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
+  onLogout?: () => Promise<void> | void;
 }
 
 export function TopNavigation({
@@ -36,6 +37,7 @@ export function TopNavigation({
   onHomeClick,
   language,
   onLanguageChange,
+  onLogout,
 }: TopNavigationProps) {
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -148,10 +150,17 @@ export function TopNavigation({
                 <span className="text-sm">{t.appearance}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <LogOut size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.signOut}</span>
-              </DropdownMenuItem>
+              {onLogout && (
+                <DropdownMenuItem
+                  className="px-4 py-2 cursor-pointer text-red-600 focus:text-red-600"
+                  onClick={() => {
+                    void onLogout();
+                  }}
+                >
+                  <LogOut size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.signOut}</span>
+                </DropdownMenuItem>
+              )}
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
