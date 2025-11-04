@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSidebar, {
   SidebarView,
@@ -105,11 +105,15 @@ const sampleEdges: Edge[] = [
 
 const WorkflowWithChat = () => {
   const { language } = useApp();
+  const { botId } = useParams<{ botId: string }>();
   const location = useLocation();
 
-  // Get bot data from navigation state (passed from Step 4)
+  // Get bot data from URL params and navigation state
   const state = location.state as { botName?: string } | null;
   const botName = state?.botName || 'AI Support Agent';
+
+  // 🔍 Bot ID 확인
+  console.log('📍 [Workflow] Current Bot ID:', botId);
 
   return (
     <div className="flex h-full w-full">

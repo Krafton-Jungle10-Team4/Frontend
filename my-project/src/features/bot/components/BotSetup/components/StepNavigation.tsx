@@ -98,9 +98,8 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
         );
 
         // Workflow 화면으로 이동 (botId 포함)
-        navigate('/workflow', {
+        navigate(`/workflow/${newBot.id}`, {
           state: {
-            botId: newBot.id,
             botName: newBot.name,
             goal: selectedGoal === 'other' ? customGoal : selectedGoal,
             personality: personalityText,
