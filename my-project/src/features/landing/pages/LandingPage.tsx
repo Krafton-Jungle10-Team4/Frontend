@@ -19,7 +19,8 @@ export function LandingPage() {
     // 로그인되어 있으면 홈으로, 아니면 로그인 페이지로
     if (isAuthenticated) {
       navigate('/home');
-    } else {
+    }
+    else {
       navigate('/login');
     }
   };
@@ -29,10 +30,12 @@ export function LandingPage() {
       try {
         await logout();
         navigate('/landing');
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Logout failed:', error);
       }
-    } else {
+    }
+    else {
       navigate('/login');
     }
   };
@@ -98,7 +101,7 @@ export function LandingPage() {
               style={{
                 left: `${20 + Math.random() * 60}%`,
                 top: `-100px`,
-                transform: 'rotate(45deg)',
+                transform: 'rotate(135deg)',
                 animation: `shooting ${5 + i * 2}s linear infinite`,
                 animationDelay: `${i * 3}s`,
               }}
@@ -140,14 +143,13 @@ export function LandingPage() {
             {/* Hero Section */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
-                지능형 AI 챗봇을
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-teal-500 animate-pulse">
+                지능형 AI Agent를
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 animate-pulse">
                   만들어보세요
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-teal-100 max-w-2xl mx-auto drop-shadow-lg">
-                직관적인 워크플로우 빌더로 강력한 AI 챗봇을 제작하세요.
-                코딩이 필요 없습니다.
+              <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto drop-shadow-lg">
+                직관적인 Workflow Builder로 강력한 Agent을 제작하세요.
               </p>
             </div>
 
@@ -164,7 +166,8 @@ export function LandingPage() {
                 onClick={() => {
                   // Scroll to features section (나중에 추가 가능)
                 }}
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl font-semibold text-lg border-2 border-white/30 hover:border-white/50 transition-all"
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl font-semibold text-lg  │
+│        border-2 border-white/30 hover:border-white/50 transition-all"
               >
                 더 알아보기
               </button>
@@ -177,10 +180,10 @@ export function LandingPage() {
                   <span className="text-2xl">🎯</span>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  시각적 워크플로우
+                  시각적 Workflow
                 </h3>
-                <p className="text-teal-200">
-                  직관적인 드래그 앤 드롭 인터페이스로 복잡한 AI 워크플로우를
+                <p className="text-gray-400">
+                  직관적인 드래그 앤 드롭 인터페이스로 복잡한 AI Workflow를 손쉽게 
                   구축하세요
                 </p>
               </div>
@@ -190,10 +193,10 @@ export function LandingPage() {
                   <span className="text-2xl">⚡</span>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  빠른 실행 속도
+                  빠른 배포
                 </h3>
-                <p className="text-teal-200">
-                  챗봇을 즉시 배포하고 사용자와 소통을 시작하세요
+                <p className="text-gray-400">
+                  Agent를 즉시 배포하고 사용자와 소통을 시작하세요
                 </p>
               </div>
 
@@ -204,7 +207,7 @@ export function LandingPage() {
                 <h3 className="text-lg font-semibold text-white mb-2">
                   실시간 분석
                 </h3>
-                <p className="text-teal-200">
+                <p className="text-gray-400">
                   상세한 분석으로 사용량, 비용 및 성능을 모니터링하세요
                 </p>
               </div>
@@ -223,7 +226,7 @@ export function LandingPage() {
         @keyframes shooting {
           0% {
             opacity: 0;
-            transform: translateY(0) translateX(0) rotate(45deg);
+            transform: translateY(0) translateX(0) rotate(135deg);
           }
           10% {
             opacity: 1;
@@ -233,7 +236,7 @@ export function LandingPage() {
           }
           100% {
             opacity: 0;
-            transform: translateY(100vh) translateX(100vh) rotate(45deg);
+            transform: translateY(100vh) translateX(100vh) rotate(135deg);
           }
         }
       `}</style>
