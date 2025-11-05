@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { RiArrowLeftLine } from '@remixicon/react';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
+import { LoginForm } from '../components/LoginForm';
 import { ROUTES } from '@/shared/constants/routes';
 
 import { useAuth } from '../hooks/useAuth';
@@ -12,6 +13,7 @@ import { useAuthStore } from '../stores/authStore';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { redirectToGoogleLogin, isLoading, error } = useAuth();
+  const login = useAuthStore((state) => state.login);
   const loginWithMockUser = useAuthStore((state) => state.loginWithMockUser);
 
   const useMockAuth = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
@@ -19,6 +21,11 @@ export const LoginPage = () => {
   const handleGoogleLogin = () => {
     const callbackUrl = `${window.location.origin}${ROUTES.AUTH_CALLBACK}`;
     redirectToGoogleLogin(callbackUrl);
+  };
+
+  const handleEmailLogin = async (email: string, password: string) => {
+    await login(email, password);
+    navigate(ROUTES.HOME);
   };
 
   const handleMockLogin = () => {
@@ -130,6 +137,26 @@ export const LoginPage = () => {
             )}
 
             <div className="space-y-6">
+              {/* 일반 로그인 폼 */}
+              <LoginForm
+                onSubmit={handleEmailLogin}
+                isLoading={isLoading}
+                error={error}
+              />
+
+              {/* 구분선 */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/20" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white/10 px-4 text-teal-200">
+                    또는
+                  </span>
+                </div>
+              </div>
+
+              {/* Google 로그인 */}
               <GoogleLoginButton
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
@@ -161,7 +188,7 @@ export const LoginPage = () => {
                 <div className="text-center text-teal-200">
                   <div className="inline-flex items-center gap-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-teal-400 border-t-transparent" />
-                    <span>Google로 리디렉션 중...</span>
+                    <span>로그인 중...</span>
                   </div>
                 </div>
               )}

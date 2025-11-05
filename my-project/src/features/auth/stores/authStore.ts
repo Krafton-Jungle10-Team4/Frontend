@@ -23,6 +23,8 @@ interface AuthStore extends AuthState {
   // Actions
   redirectToGoogleLogin: (redirectUri?: string) => void;
   handleAuthCallback: (callbackUrl?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   loginWithMockUser: () => void; // Mock 로그인 (로컬 개발용)
@@ -78,6 +80,64 @@ export const useAuthStore = create<AuthStore>()(
           } catch (error) {
             const errorMessage =
               error instanceof Error ? error.message : 'Authentication failed';
+            set({
+              error: errorMessage,
+              isLoading: false,
+              user: null,
+              jwtToken: null,
+              isAuthenticated: false,
+            });
+            throw error;
+          }
+        },
+
+        // 일반 로그인 (이메일/비밀번호)
+        login: async (email: string, password: string) => {
+          set({ isLoading: true, error: null });
+
+          try {
+            const response = await authApi.login({ email, password });
+            const user = mapUserResponseToUser(response.user);
+
+            set({
+              user,
+              jwtToken: response.access_token,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Login failed';
+            set({
+              error: errorMessage,
+              isLoading: false,
+              user: null,
+              jwtToken: null,
+              isAuthenticated: false,
+            });
+            throw error;
+          }
+        },
+
+        // 회원가입
+        register: async (email: string, password: string, name: string) => {
+          set({ isLoading: true, error: null });
+
+          try {
+            const response = await authApi.register({ email, password, name });
+            const user = mapUserResponseToUser(response.user);
+
+            set({
+              user,
+              jwtToken: response.access_token,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Registration failed';
             set({
               error: errorMessage,
               isLoading: false,

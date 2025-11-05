@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 import type { UserResponse } from '@/shared/types/api.types';
+import type { LoginRequest, RegisterRequest, TokenResponse } from '../types/auth.types';
 
 /**
  * Auth API (SnapAgent)
@@ -97,5 +98,39 @@ export const authApi = {
    */
   hasValidToken: (): boolean => {
     return !!localStorage.getItem(STORAGE_KEYS.JWT_TOKEN);
+  },
+
+  /**
+   * 일반 로그인 (이메일/비밀번호)
+   * @param credentials 로그인 정보
+   * @returns TokenResponse
+   */
+  login: async (credentials: LoginRequest): Promise<TokenResponse> => {
+    const { data } = await apiClient.post<TokenResponse>(
+      API_ENDPOINTS.AUTH.LOGIN,
+      credentials
+    );
+
+    // JWT 토큰 저장
+    localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, data.access_token);
+
+    return data;
+  },
+
+  /**
+   * 회원가입
+   * @param userInfo 회원가입 정보
+   * @returns TokenResponse
+   */
+  register: async (userInfo: RegisterRequest): Promise<TokenResponse> => {
+    const { data } = await apiClient.post<TokenResponse>(
+      API_ENDPOINTS.AUTH.REGISTER,
+      userInfo
+    );
+
+    // JWT 토큰 저장
+    localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, data.access_token);
+
+    return data;
   },
 };
