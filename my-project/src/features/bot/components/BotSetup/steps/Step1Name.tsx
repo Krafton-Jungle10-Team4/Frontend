@@ -40,7 +40,7 @@ export function Step1Name({ language }: Step1NameProps) {
             setBotName(e.target.value.slice(0, TEXT_LIMITS.BOT_NAME.MAX))
           }
           placeholder={t.placeholder}
-          className="w-full h-11 bg-gray-50 border-gray-200"
+          className="w-full h-11 bg-gray-50 border-gray-200 px-3"
           autoFocus
         />
       </div>
