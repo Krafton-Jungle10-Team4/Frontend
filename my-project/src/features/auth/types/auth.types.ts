@@ -89,6 +89,32 @@ export interface LogoutResponse {
 }
 
 /**
+ * 일반 로그인 요청 (이메일/비밀번호)
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * 회원가입 요청
+ */
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+/**
+ * 토큰 응답 (로그인/회원가입 성공 시)
+ */
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: UserResponse;
+}
+
+/**
  * 인증 상태 (SnapAgent 기반)
  */
 export interface AuthState {
