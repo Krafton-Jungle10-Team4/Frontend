@@ -89,7 +89,7 @@ export function Step3Personality({ language }: Step3PersonalityProps) {
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
               placeholder={t.websiteUrlPlaceholder}
-              className="w-full h-11 bg-gray-50 border-gray-200"
+              className="w-full h-11 bg-gray-50 border-gray-200 px-3"
             />
           </div>
         ) : (

@@ -201,7 +201,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
             value={currentWebsiteUrl}
             onChange={(e) => setCurrentWebsiteUrl(e.target.value)}
             placeholder="https://example.com"
-            className="flex-1 h-11 bg-gray-50 border-gray-200"
+            className="flex-1 h-11 bg-gray-50 border-gray-200 px-3"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
