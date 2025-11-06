@@ -50,6 +50,7 @@ claude_config.json
 claude_logs/
 claude_history/
 .claude/
+.mcp.json
 
 *.tmp
 *.bak
