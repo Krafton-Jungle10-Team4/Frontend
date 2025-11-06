@@ -19,13 +19,17 @@ export const LoginPage = () => {
   const useMockAuth = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
 
   const handleGoogleLogin = () => {
-    const callbackUrl = `${window.location.origin}${ROUTES.AUTH_CALLBACK}`;
-    redirectToGoogleLogin(callbackUrl);
+    redirectToGoogleLogin();
   };
 
   const handleEmailLogin = async (email: string, password: string) => {
-    await login(email, password);
-    navigate(ROUTES.HOME);
+    try {
+      await login(email, password);
+      navigate(ROUTES.HOME);
+    } catch (error) {
+      // 에러는 authStore에서 처리됨
+      console.error('Login failed:', error);
+    }
   };
 
   const handleMockLogin = () => {

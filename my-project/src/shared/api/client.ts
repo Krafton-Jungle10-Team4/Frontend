@@ -1,17 +1,19 @@
-import axios, {
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-  type AxiosResponse,
-  type AxiosError,
+import axios from 'axios';
+import type {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
 } from 'axios';
-import { API_BASE_URL, API_TIMEOUT } from '@/shared/constants/apiEndpoints';
+import { API_BASE_URL, API_TIMEOUT, API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys';
 import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 import { handleAPIError } from './errorHandler';
 
 /**
  * JWT Bearer Token 인증용 클라이언트
- * 사용: User 관련 엔드포인트, Team 관리
+ * - Access Token: localStorage 저장 (15분 유효)
+ * - Refresh Token: httpOnly 쿠키 자동 관리 (7일 유효)
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -19,6 +21,7 @@ export const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // httpOnly 쿠키 송수신 필수
 });
 
 /**
@@ -38,11 +41,15 @@ export const apiKeyClient: AxiosInstance = axios.create({
 // ============================================
 
 /**
- * JWT 토큰 자동 삽입
+ * JWT Access Token 자동 삽입
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem(STORAGE_KEYS.JWT_TOKEN);
+    console.log('📤 [Request]', config.method?.toUpperCase(), config.url);
+    console.log('📤 [Request] withCredentials:', config.withCredentials);
+    console.log('📤 [Request] Has token:', !!token);
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -70,41 +77,130 @@ apiKeyClient.interceptors.request.use(
 );
 
 // ============================================
-// Response Interceptors
+// Response Interceptors - Token Refresh Logic
 // ============================================
 
+// 토큰 갱신 상태 관리
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
 /**
- * JWT 클라이언트 에러 처리
+ * 대기 중인 요청 큐 처리
  */
-// 무한 루프 방지 플래그
-let isRedirecting = false;
+const processQueue = (error: AxiosError | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
+/**
+ * 로그아웃 처리 (로컬 스토리지 정리 + 리다이렉트)
+ */
+const handleLogout = () => {
+  localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.USER);
+  localStorage.removeItem(STORAGE_KEYS.TEAM);
+  localStorage.removeItem(STORAGE_KEYS.API_KEY);
+
+  // 레거시 키 정리
+  localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+
+  // 로그인 페이지로 리다이렉트 (로그인/콜백 페이지 제외)
+  if (
+    window.location.pathname !== '/login' &&
+    window.location.pathname !== '/auth/callback'
+  ) {
+    console.warn('🚨 Session expired - Redirecting to login');
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 100);
+  }
+};
+
+/**
+ * JWT 응답 인터셉터: 자동 토큰 갱신
+ */
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  (error: AxiosError) => {
-    // 401: 인증 실패 -> 로그인 페이지로 리다이렉트
-    if (error.response?.status === 401 && !isRedirecting) {
-      isRedirecting = true;
+  (response: AxiosResponse) => {
+    console.log('📥 [Response]', response.status, response.config.url);
+    console.log('📥 [Response] Set-Cookie:', response.headers['set-cookie'] || 'None');
+    return response;
+  },
+  async (error: AxiosError) => {
+    console.error('❌ [Response Error]', error.response?.status, error.config?.url);
+    console.error('❌ [Error Details]', error.response?.data);
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-      // 로컬 스토리지 정리
-      localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      localStorage.removeItem(STORAGE_KEYS.TEAM);
-      localStorage.removeItem(STORAGE_KEYS.API_KEY);
+    // 401 에러이고, 재시도하지 않았으며, 인증 관련 엔드포인트가 아닌 경우
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url &&
+      !originalRequest.url.includes(API_ENDPOINTS.AUTH.REFRESH) &&
+      !originalRequest.url.includes(API_ENDPOINTS.AUTH.LOGIN) &&
+      !originalRequest.url.includes(API_ENDPOINTS.AUTH.REGISTER)
+    ) {
+      // 토큰 갱신 중이면 대기열에 추가
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
 
-      // 로그인 페이지가 아닐 때만 리다이렉트
-      if (
-        window.location.pathname !== '/login' &&
-        window.location.pathname !== '/auth/callback'
-      ) {
-        console.warn('🚨 401 Unauthorized - Redirecting to login');
-        // 약간의 지연을 두고 리다이렉트 (진행 중인 요청 취소 시간 확보)
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 100);
-      } else {
-        // 로그인/콜백 페이지에서는 플래그만 리셋
-        isRedirecting = false;
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Refresh Token으로 Access Token 갱신 (httpOnly 쿠키 자동 전송)
+        const { data } = await axios.post<{ access_token: string }>(
+          `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+
+        const newToken = data.access_token;
+        localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, newToken);
+
+        // 대기 중인 요청들 처리
+        processQueue(null, newToken);
+
+        // 원래 요청 재시도
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        }
+
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh Token도 만료 → 로그아웃
+        processQueue(refreshError as AxiosError, null);
+        handleLogout();
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
@@ -118,10 +214,8 @@ apiClient.interceptors.response.use(
 apiKeyClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    // API Key 관련 에러 처리
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.error(ERROR_MESSAGES.API_KEY.INVALID);
-      // TODO: API Key 재설정 UI로 안내
     }
 
     return Promise.reject(handleAPIError(error));
