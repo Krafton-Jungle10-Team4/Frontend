@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     GOOGLE_CALLBACK: '/api/v1/auth/google/callback',
     LOGIN: '/api/v1/auth/login',
     REGISTER: '/api/v1/auth/register',
+    REFRESH: '/api/v1/auth/refresh',
     ME: '/api/v1/auth/me',
     LOGOUT: '/api/v1/auth/logout',
   },
