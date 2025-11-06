@@ -17,10 +17,16 @@ import type { LoginRequest, RegisterRequest, TokenResponse } from '../types/auth
 export const authApi = {
   /**
    * Google OAuth 로그인 시작
-   * 백엔드에서 자체적으로 redirect_uri를 관리하므로 프론트엔드에서는 별도로 전달하지 않음
+   * 현재 프론트엔드 URL을 백엔드에 전달해서 로그인 후 여기로 돌아오도록 함
    */
   redirectToGoogleLogin: (): void => {
-    const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`;
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}?redirect_uri=${encodeURIComponent(callbackUrl)}`;
+
+    console.log('🔐 [Google Login] Origin:', window.location.origin);
+    console.log('🔐 [Google Login] Callback URL:', callbackUrl);
+    console.log('🔐 [Google Login] Full URL:', loginUrl);
+
     window.location.href = loginUrl;
   },
 
