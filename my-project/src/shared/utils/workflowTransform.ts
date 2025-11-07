@@ -4,11 +4,7 @@
  */
 
 import type { Node, Edge } from '@/shared/types/workflow.types';
-import type {
-  BackendNode,
-  BackendEdge,
-  BackendWorkflow,
-} from '@/shared/types/workflowTransform.types';
+import type { BackendWorkflow } from '@/shared/types/workflowTransform.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 
 /**
@@ -30,18 +26,17 @@ export const transformToBackend = (
 
         // LLM 노드 변환
         ...(node.data.type === BlockEnum.LLM && {
-          model: (node.data as { model?: { name: string } }).model?.name || 'gpt-4',
-          prompt_template: (node.data as { prompt?: string }).prompt || '',
-          temperature: (node.data as { temperature?: number }).temperature || 0.7,
-          max_tokens: (node.data as { maxTokens?: number }).maxTokens || 500,
+          model: (node.data as any).model?.name || 'gpt-4',
+          prompt_template: (node.data as any).prompt || '',
+          temperature: (node.data as any).temperature || 0.7,
+          max_tokens: (node.data as any).maxTokens || 500,
         }),
 
         // Knowledge Retrieval 노드 변환
         ...(node.data.type === BlockEnum.KnowledgeRetrieval && {
-          dataset_id: (node.data as { dataset?: string }).dataset || '',
-          mode: ((node.data as { retrievalMode?: string }).retrievalMode?.toLowerCase() ||
-            'semantic') as 'semantic' | 'keyword' | 'hybrid',
-          top_k: (node.data as { topK?: number }).topK || 5,
+          dataset_id: (node.data as any).dataset || '',
+          mode: ((node.data as any).retrievalMode?.toLowerCase() || 'semantic') as any,
+          top_k: (node.data as any).topK || 5,
         }),
       },
     })),
@@ -101,8 +96,8 @@ export const transformFromBackend = (
       target: edge.target,
       type: edge.type || 'custom',
       data: {
-        sourceType: edge.data.source_type,
-        targetType: edge.data.target_type,
+        sourceType: edge.data.source_type as BlockEnum,
+        targetType: edge.data.target_type as BlockEnum,
       },
     })),
   };
