@@ -22,7 +22,7 @@ export const SaveButton = () => {
       setIsValidating(false);
 
       if (!isValid) {
-        toast.error('워크플로우 검증 실패');
+        // 검증 오류는 ValidationPanel에서 표시되므로 토스트 제거
         return;
       }
 

@@ -26,7 +26,6 @@ import ContextMenu from './ContextMenu';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { useHistoryStore } from '../../stores/historyStore';
 import { SaveButton } from '../SaveButton';
-import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 import { UndoRedoButtons } from '../UndoRedoButtons';
 import { NodeConfigPanel } from '../NodeConfigPanel';
 import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
@@ -77,8 +76,8 @@ const WorkflowInner = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
 
-  // 실시간 검증 활성화
-  useRealtimeValidation(true);
+  // 실시간 검증 비활성화
+  useRealtimeValidation(false);
 
   // 키보드 단축키 (Undo/Redo)
   useKeyboardShortcuts();
@@ -260,8 +259,7 @@ const WorkflowInner = () => {
           <SaveButton />
         </div>
 
-        {/* 검증 패널 */}
-        <ValidationPanel />
+        {/* 검증 패널 제거 */}
 
         <ReactFlow
           nodes={nodes}
