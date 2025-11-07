@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/api/client';
-import type { WorkflowData } from '../types/workflow.types';
+import type { WorkflowData } from '@/shared/types/workflow.types';
 
 /**
  * Workflow API

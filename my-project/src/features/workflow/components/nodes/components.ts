@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { BlockEnum } from '../../types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import StartNode from './start/node';
 import LLMNode from './llm/node';
 import EndNode from './end/node';

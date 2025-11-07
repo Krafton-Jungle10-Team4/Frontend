@@ -5,8 +5,8 @@ import {
   RiErrorWarningFill,
   RiLoader2Line,
 } from '@remixicon/react';
-import type { NodeProps } from '../../../types/workflow.types';
-import { NodeRunningStatus } from '../../../types/workflow.types';
+import type { NodeProps } from '@/shared/types/workflow.types';
+import { NodeRunningStatus } from '@/shared/types/workflow.types';
 import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
