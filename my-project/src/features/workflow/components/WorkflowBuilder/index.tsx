@@ -24,9 +24,13 @@ import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
 import { useWorkflowStore } from '../../stores/workflowStore';
+import { useHistoryStore } from '../../stores/historyStore';
 import { SaveButton } from '../SaveButton';
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
+import { UndoRedoButtons } from '../UndoRedoButtons';
+import { NodeConfigPanel } from '../NodeConfigPanel';
 import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -65,13 +69,19 @@ const WorkflowInner = () => {
     setNodes,
     setEdges,
     loadWorkflow,
+    selectNode,
   } = useWorkflowStore();
+
+  const { push } = useHistoryStore();
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
 
   // 실시간 검증 활성화
   useRealtimeValidation(true);
+
+  // 키보드 단축키 (Undo/Redo)
+  useKeyboardShortcuts();
 
   // 워크플로우 로드
   useEffect(() => {
@@ -83,16 +93,20 @@ const WorkflowInner = () => {
   // React Flow 상태 변경 핸들러
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      setNodes(applyNodeChanges(changes, nodes));
+      const newNodes = applyNodeChanges(changes, nodes);
+      setNodes(newNodes);
+      push(newNodes, edges);
     },
-    [nodes, setNodes]
+    [nodes, edges, setNodes, push]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      setEdges(applyEdgeChanges(changes, edges));
+      const newEdges = applyEdgeChanges(changes, edges);
+      setEdges(newEdges);
+      push(nodes, newEdges);
     },
-    [edges, setEdges]
+    [nodes, edges, setEdges, push]
   );
 
   // 노드 연결 처리
@@ -101,6 +115,14 @@ const WorkflowInner = () => {
       setEdges((eds) => addEdge({ ...connection, type: 'custom' }, eds));
     },
     [setEdges]
+  );
+
+  // 노드 클릭 핸들러 (선택)
+  const onNodeClick: NodeMouseHandler = useCallback(
+    (event, node) => {
+      selectNode(node.id);
+    },
+    [selectNode]
   );
 
   // 노드 우클릭 핸들러
@@ -226,38 +248,47 @@ const WorkflowInner = () => {
   }
 
   return (
-    <div className="h-full w-full relative">
-      {/* 저장 버튼 */}
-      <SaveButton />
+    <div className="h-full w-full flex">
+      {/* 메인 캔버스 영역 */}
+      <div className="flex-1 relative">
+        {/* 상단 툴바 */}
+        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
+          {/* Undo/Redo 버튼 */}
+          <UndoRedoButtons />
 
-      {/* 검증 패널 */}
-      <ValidationPanel />
+          {/* 저장 버튼 */}
+          <SaveButton />
+        </div>
 
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeContextMenu={onNodeContextMenu}
-        onEdgeContextMenu={onEdgeContextMenu}
-        onPaneContextMenu={onPaneContextMenu}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-        minZoom={0.25}
-        maxZoom={2}
-        defaultEdgeOptions={{
-          type: 'custom',
-        }}
-      >
-        <Background
-          gap={14}
-          size={2}
-          className="bg-workflow-canvas-workflow-bg"
-          color="var(--color-workflow-canvas-workflow-dot-color)"
-        />
-      </ReactFlow>
+        {/* 검증 패널 */}
+        <ValidationPanel />
+
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onNodeContextMenu={onNodeContextMenu}
+          onEdgeContextMenu={onEdgeContextMenu}
+          onPaneContextMenu={onPaneContextMenu}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          minZoom={0.25}
+          maxZoom={2}
+          defaultEdgeOptions={{
+            type: 'custom',
+          }}
+        >
+          <Background
+            gap={14}
+            size={2}
+            className="bg-workflow-canvas-workflow-bg"
+            color="var(--color-workflow-canvas-workflow-dot-color)"
+          />
+        </ReactFlow>
 
       {contextMenu && (
         <div
@@ -284,6 +315,12 @@ const WorkflowInner = () => {
           }
         />
       )}
+      </div>
+
+      {/* 우측 노드 설정 패널 */}
+      <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
+        <NodeConfigPanel />
+      </div>
     </div>
   );
 };

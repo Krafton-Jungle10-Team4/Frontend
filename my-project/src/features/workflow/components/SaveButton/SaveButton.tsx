@@ -39,7 +39,6 @@ export const SaveButton = () => {
     <Button
       onClick={handleSave}
       disabled={isSaving || isValidating}
-      className="absolute top-4 right-4 z-10"
     >
       {isSaving ? '저장 중...' : isValidating ? '검증 중...' : '저장'}
     </Button>
