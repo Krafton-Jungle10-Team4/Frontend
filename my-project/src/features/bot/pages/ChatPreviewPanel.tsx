@@ -421,7 +421,11 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                handleSendMessage();
+              }
+            }}
             placeholder={t.placeholder}
             className="flex-1 bg-transparent text-gray-800 text-sm outline-none placeholder-gray-500"
           />
