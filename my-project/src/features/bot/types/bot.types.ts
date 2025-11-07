@@ -31,6 +31,10 @@ export interface CreateBotDto {
   description?: string;
   personality?: string;
   knowledge?: string[];
+  workflow?: {
+    nodes: Node[];
+    edges: Edge[];
+  };
 }
 
 export interface UpdateBotDto {

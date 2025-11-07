@@ -5,7 +5,11 @@
 
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
-import { transformFromBackend } from '@/shared/utils/workflowTransform';
+import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
+import {
+  transformFromBackend,
+  transformToBackend,
+} from '@/shared/utils/workflowTransform';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
 import type { BotResponse, CreateBotRequest } from '@/shared/types/api.types';
 
@@ -72,10 +76,13 @@ export const botApi = {
    * 특정 봇 조회
    */
   getById: async (id: string): Promise<Bot> => {
-    const { data } = await apiClient.get<BotResponse>(
+    // 백엔드 응답 구조: { data: BotResponse }
+    const { data } = await apiClient.get<{ data: BotResponse }>(
       API_ENDPOINTS.BOTS.BY_ID(id)
     );
-    return transformBotResponse(data);
+
+    // 실제 봇 데이터는 data.data에 위치
+    return transformBotResponse(data.data);
   },
 
   /**
@@ -91,6 +98,20 @@ export const botApi = {
         personality: dto.personality || '',
         knowledge: dto.knowledge || [],
       };
+
+      // workflow가 제공되면 백엔드 스키마로 변환하여 추가
+      if (dto.workflow) {
+        request.workflow = transformToBackend(
+          dto.workflow.nodes,
+          dto.workflow.edges
+        );
+      } else {
+        // workflow가 없으면 기본 구조 사용
+        request.workflow = transformToBackend(
+          DEFAULT_WORKFLOW.nodes,
+          DEFAULT_WORKFLOW.edges
+        );
+      }
 
       // 백엔드 응답 구조: { data: BotResponse }
       const response = await apiClient.post<{ data: BotResponse }>(
@@ -117,6 +138,10 @@ export const botApi = {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         const mockBot = createMockBot(dto);
+
+        // Mock 봇에도 기본 workflow 추가
+        mockBot.workflow = dto.workflow || DEFAULT_WORKFLOW;
+
         return mockBot;
       }
 
