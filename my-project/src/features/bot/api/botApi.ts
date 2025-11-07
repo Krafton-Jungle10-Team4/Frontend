@@ -5,6 +5,7 @@
 
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
+import { transformFromBackend } from '@/shared/utils/workflowTransform';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
 import type { BotResponse, CreateBotRequest } from '@/shared/types/api.types';
 
@@ -28,6 +29,10 @@ function transformBotResponse(apiResponse: BotResponse): Bot {
     errorsCount: apiResponse.errors_count,
     createdAt,
     updatedAt,
+    // workflow 필드 변환 (백엔드 스키마 → 프론트 스키마)
+    workflow: apiResponse.workflow
+      ? transformFromBackend(apiResponse.workflow)
+      : null,
   };
 }
 
@@ -67,8 +72,10 @@ export const botApi = {
    * 특정 봇 조회
    */
   getById: async (id: string): Promise<Bot> => {
-    const { data } = await apiClient.get<Bot>(API_ENDPOINTS.BOTS.BY_ID(id));
-    return data;
+    const { data } = await apiClient.get<BotResponse>(
+      API_ENDPOINTS.BOTS.BY_ID(id)
+    );
+    return transformBotResponse(data);
   },
 
   /**

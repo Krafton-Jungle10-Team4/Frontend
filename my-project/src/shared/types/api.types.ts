@@ -2,6 +2,8 @@
  * API 공통 타입 정의
  */
 
+import type { BackendWorkflow } from './workflowTransform.types';
+
 // ============================================
 // User & Auth
 // ============================================
@@ -156,4 +158,7 @@ export interface BotResponse {
   errors_count: number;
   created_at: string; // ISO 8601
   updated_at: string | null; // ISO 8601
+
+  // 워크플로우 (백엔드 JSONB 스키마 - snake_case)
+  workflow?: BackendWorkflow | null;
 }
