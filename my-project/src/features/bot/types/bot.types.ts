@@ -3,6 +3,8 @@
  * Bot 관련 모든 타입 정의
  */
 
+import type { Node, Edge } from '@/shared/types/workflow.types';
+
 // ============= Bot Entity Types =============
 export interface Bot {
   id: string;
@@ -14,6 +16,12 @@ export interface Bot {
   errorsCount: number;
   createdAt: string;
   updatedAt: string;
+
+  // 워크플로우 (프론트엔드 스키마 - 이미 변환됨)
+  workflow?: {
+    nodes: Node[];
+    edges: Edge[];
+  } | null;
 }
 
 // ============= Bot DTO Types =============
