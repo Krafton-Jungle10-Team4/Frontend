@@ -72,10 +72,13 @@ export const transformFromBackend = (
 
         // LLM 노드 변환
         ...(node.type === 'llm' && {
-          model: {
-            provider: extractProvider(node.data.model || ''),
-            name: node.data.model || 'gpt-4',
-          },
+          model:
+            typeof node.data.model === 'object' && node.data.model !== null
+              ? node.data.model
+              : {
+                  provider: extractProvider(node.data.model || ''),
+                  name: node.data.model || 'gpt-4',
+                },
           prompt: node.data.prompt_template || '',
           temperature: node.data.temperature || 0.7,
           maxTokens: node.data.max_tokens || 500,

@@ -15,13 +15,13 @@ interface WorkflowState {
   validationWarnings: string[];
 
   // 노드 관리
-  setNodes: (nodes: Node[]) => void;
+  setNodes: (nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => void;
   addNode: (node: Node) => void;
   updateNode: (id: string, data: Partial<Node['data']>) => void;
   deleteNode: (id: string) => void;
 
   // 엣지 관리
-  setEdges: (edges: Edge[]) => void;
+  setEdges: (edgesOrUpdater: Edge[] | ((edges: Edge[]) => Edge[])) => void;
   addEdge: (edge: Edge) => void;
   deleteEdge: (id: string) => void;
 
@@ -63,7 +63,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   ...initialState,
 
   // 노드 관리
-  setNodes: (nodes) => set({ nodes }),
+  setNodes: (nodesOrUpdater) => {
+    if (typeof nodesOrUpdater === 'function') {
+      set((state) => ({ nodes: nodesOrUpdater(state.nodes) }));
+    } else {
+      set({ nodes: nodesOrUpdater });
+    }
+  },
 
   addNode: (node) => {
     const currentState = get();
@@ -88,7 +94,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     })),
 
   // 엣지 관리
-  setEdges: (edges) => set({ edges }),
+  setEdges: (edgesOrUpdater) => {
+    if (typeof edgesOrUpdater === 'function') {
+      set((state) => ({ edges: edgesOrUpdater(state.edges) }));
+    } else {
+      set({ edges: edgesOrUpdater });
+    }
+  },
 
   addEdge: (edge) =>
     set((state) => ({

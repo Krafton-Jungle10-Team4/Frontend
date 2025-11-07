@@ -72,11 +72,22 @@ export const NodeConfigPanel = () => {
           <div>
             <Label>모델</Label>
             <LLMModelSelect
-              value={(node.data as LLMNodeType).model?.name}
+              value={
+                typeof (node.data as LLMNodeType).model === 'object'
+                  ? (node.data as LLMNodeType).model?.name
+                  : (node.data as LLMNodeType).model
+              }
               onChange={(modelName) => {
                 const currentModel = (node.data as LLMNodeType).model;
+                const currentProvider =
+                  typeof currentModel === 'object'
+                    ? currentModel?.provider
+                    : modelName.startsWith('gpt')
+                      ? 'OpenAI'
+                      : 'Anthropic';
+
                 handleUpdate('model', {
-                  ...currentModel,
+                  provider: currentProvider || 'OpenAI',
                   name: modelName,
                 });
               }}
