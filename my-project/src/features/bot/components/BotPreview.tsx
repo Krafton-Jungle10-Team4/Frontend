@@ -444,7 +444,11 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
                 <input
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      handleSendMessage();
+                    }
+                  }}
                   placeholder={t.placeholder}
                   className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                 />

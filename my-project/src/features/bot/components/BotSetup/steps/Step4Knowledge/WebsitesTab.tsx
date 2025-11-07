@@ -203,7 +203,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
             placeholder="https://example.com"
             className="flex-1 h-11 bg-gray-50 border-gray-200 px-3"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 handleAddWebsite();
               }
