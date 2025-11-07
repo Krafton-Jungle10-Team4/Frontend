@@ -65,10 +65,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // 노드 관리
   setNodes: (nodes) => set({ nodes }),
 
-  addNode: (node) =>
-    set((state) => ({
-      nodes: [...state.nodes, node],
-    })),
+  addNode: (node) => {
+    const currentState = get();
+    const newNodes = [...currentState.nodes, node];
+    set({ nodes: newNodes });
+  },
 
   updateNode: (id, data) =>
     set((state) => ({
