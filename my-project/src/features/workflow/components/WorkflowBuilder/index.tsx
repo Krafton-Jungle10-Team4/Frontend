@@ -25,6 +25,8 @@ import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { SaveButton } from '../SaveButton';
+import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
+import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -67,6 +69,9 @@ const WorkflowInner = () => {
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
+
+  // 실시간 검증 활성화
+  useRealtimeValidation(true);
 
   // 워크플로우 로드
   useEffect(() => {
@@ -222,8 +227,11 @@ const WorkflowInner = () => {
 
   return (
     <div className="h-full w-full relative">
-      {/* 저장 버튼 추가 */}
+      {/* 저장 버튼 */}
       <SaveButton />
+
+      {/* 검증 패널 */}
+      <ValidationPanel />
 
       <ReactFlow
         nodes={nodes}
