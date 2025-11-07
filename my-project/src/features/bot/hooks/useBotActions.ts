@@ -55,10 +55,31 @@ export function useBotActions() {
           botName,
           message: `${userName} ${translations[language].action}: ${botName}`,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to delete bot:', error);
 
-        // 에러 발생 시에도 로컬에서 삭제 (백엔드가 없거나 네트워크 오류인 경우)
+        // 404 에러 처리: 봇이 이미 삭제됨 (정상 처리)
+        if (error?.response?.status === 404) {
+          // 로컬 스토어에서 삭제
+          deleteBot(botId);
+
+          // 이미 삭제된 봇으로 간주하여 성공 메시지 표시
+          const translations = {
+            en: { action: 'removed bot (already deleted)' },
+            ko: { action: '봇을 제거했습니다 (이미 삭제됨)' },
+          };
+
+          addActivity({
+            type: 'bot_deleted',
+            botId,
+            botName,
+            message: `${userName} ${translations[language].action}: ${botName}`,
+          });
+
+          return; // 정상 종료
+        }
+
+        // 네트워크 에러 또는 기타 에러 처리
         deleteBot(botId);
 
         // 오류 활동 로그 추가
