@@ -85,13 +85,17 @@ export const botApi = {
         knowledge: dto.knowledge || [],
       };
 
-      const { data } = await apiClient.post<BotResponse>(
+      // 백엔드 응답 구조: { data: BotResponse }
+      const response = await apiClient.post<{ data: BotResponse }>(
         API_ENDPOINTS.BOTS.CREATE,
         request
       );
 
+      // 🔧 수정: response.data.data에서 실제 BotResponse 추출
+      const botData = response.data.data;
+
       // BotResponse → Bot 변환 (snake_case → camelCase)
-      return transformBotResponse(data);
+      return transformBotResponse(botData);
     } catch (error: any) {
       // 네트워크 연결 실패 시 (백엔드 미구현) Mock 데이터 생성
       if (
