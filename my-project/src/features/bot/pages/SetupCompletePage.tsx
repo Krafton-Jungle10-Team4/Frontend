@@ -28,7 +28,7 @@ export function SetupCompletePage() {
     }
 
     // 봇 생성 완료 후 Workflow 화면으로 이동
-    navigate(`/workflow/${botId}`, { state: { botName } });
+    navigate(`/bot/${botId}/workflow`, { state: { botName } });
   };
 
   return (

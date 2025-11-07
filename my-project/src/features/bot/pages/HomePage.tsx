@@ -56,7 +56,7 @@ export function HomePage() {
   // Bot 카드 클릭 시 워크플로우 페이지로 이동
   const handleBotClick = (botId: string) => {
     const bot = filteredBots.find((b) => b.id === botId);
-    navigate(`/workflow/${botId}`, {
+    navigate(`/bot/${botId}/workflow`, {
       state: { botName: bot?.name || 'Bot' },
     });
   };
@@ -64,7 +64,7 @@ export function HomePage() {
   // Bot 수정 버튼 클릭 시 워크플로우 페이지로 이동
   const handleBotEdit = (botId: string) => {
     const bot = filteredBots.find((b) => b.id === botId);
-    navigate(`/workflow/${botId}`, {
+    navigate(`/bot/${botId}/workflow`, {
       state: { botName: bot?.name || 'Bot' },
     });
   };

@@ -124,9 +124,13 @@ import {
 Workflow Feature는 다음 라우트를 제공합니다:
 
 ```typescript
-/workflow              → WorkflowBuilderPage (빌더 메인)
-/workflow/builder      → WorkflowBuilderPage (빌더 메인)
+/bot/:botId/workflow   → WorkflowBuilderPage (특정 봇의 워크플로우 빌더)
 ```
+
+**URL 구조 변경 (2025-01-08)**
+- 이전: `/workflow/:botId`
+- 현재: `/bot/:botId/workflow`
+- 변경 이유: RESTful 원칙에 부합하는 리소스 중심 URL 구조로 개선
 
 ## 🪝 Custom Hooks 사용 예시
 
