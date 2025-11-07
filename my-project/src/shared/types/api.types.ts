@@ -146,6 +146,7 @@ export interface CreateBotRequest {
   goal: BotGoal;
   personality: string; // max 2000 characters
   knowledge: string[]; // document_ids
+  workflow?: BackendWorkflow;
 }
 
 export interface BotResponse {
