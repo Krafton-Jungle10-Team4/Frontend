@@ -103,8 +103,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   loadWorkflow: async (botId: string) => {
     set({ isLoading: true });
     try {
-      console.log(`[workflowStore] loadWorkflow called for botId: ${botId}`);
-      set({ nodes: [], edges: [] });
+      const { botApi } = await import('@/features/bot/api/botApi');
+      const bot = await botApi.getById(botId);
+
+      if (bot.workflow) {
+        const { nodes, edges } = bot.workflow;
+        set({ nodes, edges });
+      } else {
+        set({ nodes: [], edges: [] });
+      }
     } catch (error) {
       console.error('Failed to load workflow:', error);
       throw error;
@@ -118,11 +125,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({ isSaving: true });
     try {
       const { nodes, edges } = get();
-
-      console.log(`[workflowStore] saveWorkflow called for botId: ${botId}`, {
-        nodes,
-        edges,
-      });
+      const { workflowApi } = await import('../../workflow/api/workflowApi');
+      await workflowApi.saveBotWorkflow(botId, nodes, edges);
     } catch (error) {
       console.error('Failed to save workflow:', error);
       throw error;
@@ -136,17 +140,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const { nodes, edges } = get();
 
     try {
-      console.log('[workflowStore] validateWorkflow called', { nodes, edges });
-
-      const errors: string[] = [];
-      const warnings: string[] = [];
-
-      if (nodes.length === 0) {
-        errors.push('노드가 없습니다');
-      }
-
-      set({ validationErrors: errors, validationWarnings: warnings });
-      return errors.length === 0;
+      const { workflowApi } = await import('../../workflow/api/workflowApi');
+      const result = await workflowApi.validate(nodes, edges);
+      set({
+        validationErrors: result.errors,
+        validationWarnings: result.warnings,
+      });
+      return result.is_valid;
     } catch (error) {
       console.error('Failed to validate workflow:', error);
       return false;
@@ -158,24 +158,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const { nodes, edges } = get();
 
     try {
-      console.log(`[workflowStore] validateBotWorkflow called for botId: ${botId}`, {
-        nodes,
-        edges,
+      const { workflowApi } = await import('../../workflow/api/workflowApi');
+      const result = await workflowApi.validateBotWorkflow(botId, nodes, edges);
+      set({
+        validationErrors: result.errors,
+        validationWarnings: result.warnings,
       });
-
-      const errors: string[] = [];
-      const warnings: string[] = [];
-
-      if (nodes.length === 0) {
-        errors.push('노드가 없습니다');
-      }
-
-      if (!botId) {
-        errors.push('Bot ID가 필요합니다');
-      }
-
-      set({ validationErrors: errors, validationWarnings: warnings });
-      return errors.length === 0;
+      return result.is_valid;
     } catch (error) {
       console.error('Failed to validate bot workflow:', error);
       return false;

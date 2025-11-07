@@ -24,6 +24,7 @@ import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
 import { useWorkflowStore } from '../../stores/workflowStore';
+import { SaveButton } from '../SaveButton';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -220,7 +221,10 @@ const WorkflowInner = () => {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
+      {/* 저장 버튼 추가 */}
+      <SaveButton />
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
