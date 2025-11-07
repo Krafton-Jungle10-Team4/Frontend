@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { BlockEnum } from '../../../types/workflow.types';
-import type { CommonNodeType } from '../../../types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
+import type { CommonNodeType } from '@/shared/types/workflow.types';
 import clsx from 'clsx';
 
 type NodeHandleProps = {

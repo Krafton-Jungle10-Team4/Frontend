@@ -6,8 +6,8 @@ import WorkflowSlimSidebar, {
 } from '../components/sidebar/WorkflowSlimSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
-import type { Node, Edge, CommonNodeType } from '../types/workflow.types';
-import { BlockEnum } from '../types/workflow.types';
+import type { Node, Edge, CommonNodeType } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 

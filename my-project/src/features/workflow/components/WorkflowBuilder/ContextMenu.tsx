@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { BlockEnum } from '../../types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 
 interface ContextMenuProps {
   x: number;

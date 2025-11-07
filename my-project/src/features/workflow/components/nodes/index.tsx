@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import type { NodeProps } from '@xyflow/react';
-import type { CommonNodeType } from '../../types/workflow.types';
+import type { CommonNodeType } from '@/shared/types/workflow.types';
 import { NodeComponentMap } from './components';
 import BaseNode from './_base/node';
 

@@ -4,8 +4,8 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useWorkflowStore } from '../stores/workflowStore';
-import type { Node, Edge } from '../types/workflow.types';
-import { BlockEnum } from '../types/workflow.types';
+import type { Node, Edge } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 
 describe('workflowStore', () => {
   beforeEach(() => {

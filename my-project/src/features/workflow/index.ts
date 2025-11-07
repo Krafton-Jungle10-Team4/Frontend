@@ -25,9 +25,9 @@ export type {
   EndNodeType,
   KnowledgeRetrievalNodeType,
   WorkflowData,
-} from './types/workflow.types';
+} from '@/shared/types/workflow.types';
 
-export { BlockEnum, NodeRunningStatus } from './types/workflow.types';
+export { BlockEnum, NodeRunningStatus } from '@/shared/types/workflow.types';
 
 // Routes (Router에서만 사용)
 export { workflowRoutes } from './routes';

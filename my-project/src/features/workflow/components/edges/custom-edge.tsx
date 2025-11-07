@@ -1,8 +1,8 @@
 import { memo, useMemo } from 'react';
 import type { EdgeProps } from '@xyflow/react';
 import { BaseEdge, Position, getBezierPath } from '@xyflow/react';
-import type { CommonEdgeType } from '../../types/workflow.types';
-import { NodeRunningStatus } from '../../types/workflow.types';
+import type { CommonEdgeType } from '@/shared/types/workflow.types';
+import { NodeRunningStatus } from '@/shared/types/workflow.types';
 
 /**
  *  노드 실행 상태에 따른 엣지 색상 반환

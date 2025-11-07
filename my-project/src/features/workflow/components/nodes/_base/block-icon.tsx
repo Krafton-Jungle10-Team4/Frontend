@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { BlockEnum } from '../../../types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import Home from '../../icons/Home';
 import Llm from '../../icons/Llm';
 import Answer from '../../icons/Answer';

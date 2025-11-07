@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { workflowApi } from '../api/workflowApi';
-import type { WorkflowData } from '../types/workflow.types';
+import type { WorkflowData } from '@/shared/types/workflow.types';
 
 /**
  * Workflow 커스텀 Hook

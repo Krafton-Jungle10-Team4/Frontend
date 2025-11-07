@@ -15,8 +15,8 @@ import type {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import type { Node, Edge } from '../../types/workflow.types';
-import { BlockEnum } from '../../types/workflow.types';
+import type { Node, Edge } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
