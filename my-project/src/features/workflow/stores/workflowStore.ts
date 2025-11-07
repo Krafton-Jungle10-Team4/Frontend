@@ -1,49 +1,42 @@
 import { create } from 'zustand';
-import type { Node, Edge } from '@xyflow/react';
+import type { Node, Edge } from '@/shared/types/workflow.types';
 
 /**
  * Workflow Store 상태 타입
  */
 interface WorkflowState {
-  // 노드 및 엣지
+  // 상태
   nodes: Node[];
   edges: Edge[];
+  selectedNodeId: string | null;
+  isLoading: boolean;
+  isSaving: boolean;
+  validationErrors: string[];
+  validationWarnings: string[];
 
-  // 선택된 노드/엣지
-  selectedNode: Node | null;
-  selectedEdge: Edge | null;
-
-  // 워크플로우 메타데이터
-  workflowName: string;
-  workflowDescription: string;
-
-  // 실행 상태
-  isRunning: boolean;
-
-  // Actions - 노드 관리
+  // 노드 관리
   setNodes: (nodes: Node[]) => void;
   addNode: (node: Node) => void;
-  updateNode: (id: string, data: Partial<Node>) => void;
+  updateNode: (id: string, data: Partial<Node['data']>) => void;
   deleteNode: (id: string) => void;
 
-  // Actions - 엣지 관리
+  // 엣지 관리
   setEdges: (edges: Edge[]) => void;
   addEdge: (edge: Edge) => void;
-  updateEdge: (id: string, data: Partial<Edge>) => void;
   deleteEdge: (id: string) => void;
 
-  // Actions - 선택 관리
-  selectNode: (node: Node | null) => void;
-  selectEdge: (edge: Edge | null) => void;
+  // 워크플로우 CRUD
+  loadWorkflow: (botId: string) => Promise<void>;
+  saveWorkflow: (botId: string) => Promise<void>;
 
-  // Actions - 워크플로우 메타데이터
-  setWorkflowName: (name: string) => void;
-  setWorkflowDescription: (description: string) => void;
+  // 검증 (두 가지 방식)
+  validateWorkflow: () => Promise<boolean>; // 일반 검증 (실시간 검증용)
+  validateBotWorkflow: (botId: string) => Promise<boolean>; // 봇 전용 검증 (저장 전)
 
-  // Actions - 실행 상태
-  setIsRunning: (isRunning: boolean) => void;
+  // 선택
+  selectNode: (id: string | null) => void;
 
-  // Actions - 초기화
+  // 리셋
   reset: () => void;
 }
 
@@ -53,19 +46,20 @@ interface WorkflowState {
 const initialState = {
   nodes: [],
   edges: [],
-  selectedNode: null,
-  selectedEdge: null,
-  workflowName: '',
-  workflowDescription: '',
-  isRunning: false,
+  selectedNodeId: null,
+  isLoading: false,
+  isSaving: false,
+  validationErrors: [],
+  validationWarnings: [],
 };
 
 /**
  * Workflow Store
  *
- * React Flow 기반 워크플로우 빌더의 상태 관리
+ * React Flow 기반 워크플로우 빌더의 상태 관리 및 API 통합
  */
-export const useWorkflowStore = create<WorkflowState>((set) => ({
+export const useWorkflowStore = create<WorkflowState>((set, get) => ({
+  // 초기 상태
   ...initialState,
 
   // 노드 관리
@@ -79,7 +73,7 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   updateNode: (id, data) =>
     set((state) => ({
       nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, ...data } : node
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
       ),
     })),
 
@@ -89,7 +83,7 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
       edges: state.edges.filter(
         (edge) => edge.source !== id && edge.target !== id
       ),
-      selectedNode: state.selectedNode?.id === id ? null : state.selectedNode,
+      selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
     })),
 
   // 엣지 관리
@@ -100,33 +94,97 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
       edges: [...state.edges, edge],
     })),
 
-  updateEdge: (id, data) =>
-    set((state) => ({
-      edges: state.edges.map((edge) =>
-        edge.id === id ? { ...edge, ...data } : edge
-      ),
-    })),
-
   deleteEdge: (id) =>
     set((state) => ({
       edges: state.edges.filter((edge) => edge.id !== id),
-      selectedEdge: state.selectedEdge?.id === id ? null : state.selectedEdge,
     })),
 
-  // 선택 관리
-  selectNode: (node) => set({ selectedNode: node }),
+  // 워크플로우 불러오기
+  loadWorkflow: async (botId: string) => {
+    set({ isLoading: true });
+    try {
+      console.log(`[workflowStore] loadWorkflow called for botId: ${botId}`);
+      set({ nodes: [], edges: [] });
+    } catch (error) {
+      console.error('Failed to load workflow:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-  selectEdge: (edge) => set({ selectedEdge: edge }),
+  // 워크플로우 저장
+  saveWorkflow: async (botId: string) => {
+    set({ isSaving: true });
+    try {
+      const { nodes, edges } = get();
 
-  // 워크플로우 메타데이터
-  setWorkflowName: (name) => set({ workflowName: name }),
+      console.log(`[workflowStore] saveWorkflow called for botId: ${botId}`, {
+        nodes,
+        edges,
+      });
+    } catch (error) {
+      console.error('Failed to save workflow:', error);
+      throw error;
+    } finally {
+      set({ isSaving: false });
+    }
+  },
 
-  setWorkflowDescription: (description) =>
-    set({ workflowDescription: description }),
+  // 일반 검증 (실시간 검증용 - 팀 권한 체크 없음)
+  validateWorkflow: async () => {
+    const { nodes, edges } = get();
 
-  // 실행 상태
-  setIsRunning: (isRunning) => set({ isRunning }),
+    try {
+      console.log('[workflowStore] validateWorkflow called', { nodes, edges });
 
-  // 초기화
+      const errors: string[] = [];
+      const warnings: string[] = [];
+
+      if (nodes.length === 0) {
+        errors.push('노드가 없습니다');
+      }
+
+      set({ validationErrors: errors, validationWarnings: warnings });
+      return errors.length === 0;
+    } catch (error) {
+      console.error('Failed to validate workflow:', error);
+      return false;
+    }
+  },
+
+  // 봇 전용 검증 (저장 전 - 팀 권한/봇 존재 여부 체크)
+  validateBotWorkflow: async (botId: string) => {
+    const { nodes, edges } = get();
+
+    try {
+      console.log(`[workflowStore] validateBotWorkflow called for botId: ${botId}`, {
+        nodes,
+        edges,
+      });
+
+      const errors: string[] = [];
+      const warnings: string[] = [];
+
+      if (nodes.length === 0) {
+        errors.push('노드가 없습니다');
+      }
+
+      if (!botId) {
+        errors.push('Bot ID가 필요합니다');
+      }
+
+      set({ validationErrors: errors, validationWarnings: warnings });
+      return errors.length === 0;
+    } catch (error) {
+      console.error('Failed to validate bot workflow:', error);
+      return false;
+    }
+  },
+
+  // 선택
+  selectNode: (id) => set({ selectedNodeId: id }),
+
+  // 리셋
   reset: () => set(initialState),
 }));
