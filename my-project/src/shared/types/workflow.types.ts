@@ -107,6 +107,8 @@ export type LLMNodeType = CommonNodeType<{
     name: string;
   };
   prompt?: string;
+  temperature?: number;
+  maxTokens?: number;
 }>;
 
 /**
@@ -123,6 +125,7 @@ export type KnowledgeRetrievalNodeType = CommonNodeType<{
   type: BlockEnum.KnowledgeRetrieval;
   dataset?: string;
   retrievalMode?: string;
+  topK?: number;
 }>;
 
 /**
