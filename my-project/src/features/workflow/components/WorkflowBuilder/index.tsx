@@ -1,17 +1,20 @@
 import { memo, useCallback, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
   Background,
   ReactFlowProvider,
-  useNodesState,
-  useEdgesState,
   addEdge,
   useReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
 import type {
   Connection,
   NodeMouseHandler,
   EdgeMouseHandler,
+  NodeChange,
+  EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -20,6 +23,7 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
+import { useWorkflowStore } from '../../stores/workflowStore';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -32,8 +36,8 @@ const edgeTypes = {
 };
 
 export type WorkflowProps = {
-  initialNodes: Node[];
-  initialEdges: Edge[];
+  initialNodes?: Node[];
+  initialEdges?: Edge[];
 };
 
 interface ContextMenuState {
@@ -47,11 +51,43 @@ interface ContextMenuState {
  * Workflow 컴포넌트 (내부)
  * React Flow를 래핑하여 워크플로우 캔버스를 제공
  */
-const WorkflowInner = ({ initialNodes, initialEdges }: WorkflowProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+const WorkflowInner = () => {
+  const { botId } = useParams<{ botId: string }>();
+
+  // Zustand 스토어 사용
+  const {
+    nodes,
+    edges,
+    isLoading,
+    setNodes,
+    setEdges,
+    loadWorkflow,
+  } = useWorkflowStore();
+
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
+
+  // 워크플로우 로드
+  useEffect(() => {
+    if (botId) {
+      loadWorkflow(botId);
+    }
+  }, [botId, loadWorkflow]);
+
+  // React Flow 상태 변경 핸들러
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setNodes(applyNodeChanges(changes, nodes));
+    },
+    [nodes, setNodes]
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      setEdges(applyEdgeChanges(changes, edges));
+    },
+    [edges, setEdges]
+  );
 
   // 노드 연결 처리
   const onConnect = useCallback(
@@ -160,14 +196,28 @@ const WorkflowInner = ({ initialNodes, initialEdges }: WorkflowProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        setNodes((nds) => nds.filter((node) => !node.selected));
-        setEdges((eds) => eds.filter((edge) => !edge.selected));
+        setNodes(nodes.filter((node) => !node.selected));
+        setEdges(edges.filter((edge) => !edge.selected));
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [setNodes, setEdges]);
+  }, [nodes, edges, setNodes, setEdges]);
+
+  // 로딩 상태 UI
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            워크플로우를 불러오는 중...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full">
@@ -246,10 +296,10 @@ function getNodeDescription(nodeType: BlockEnum): string {
  * Workflow 컴포넌트 (외부)
  * ReactFlowProvider로 래핑하여 컨텍스트 제공
  */
-const Workflow = (props: WorkflowProps) => {
+const Workflow = () => {
   return (
     <ReactFlowProvider>
-      <WorkflowInner {...props} />
+      <WorkflowInner />
     </ReactFlowProvider>
   );
 };
