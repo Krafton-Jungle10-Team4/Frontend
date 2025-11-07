@@ -58,6 +58,24 @@ export const API_ENDPOINTS = {
     STATUS: (id: string) => `/api/v1/bots/${id}/status`,
   },
 
+  // 워크플로우 관리 (SnapAgent API)
+  WORKFLOWS: {
+    // 노드 타입 관련
+    NODE_TYPES: '/api/v1/workflows/node-types',
+    NODE_TYPE_DETAIL: (type: string) => `/api/v1/workflows/node-types/${type}`,
+
+    // 모델 관련
+    MODELS: '/api/v1/workflows/models',
+
+    // 검증
+    VALIDATE: '/api/v1/workflows/validate',
+
+    // 봇 워크플로우 관련
+    BOT_WORKFLOW: (botId: string) => `/api/v1/workflows/bots/${botId}/workflow`,
+    BOT_WORKFLOW_VALIDATE: (botId: string) =>
+      `/api/v1/workflows/bots/${botId}/workflow/validate`,
+  },
+
   // 레거시 (호환성 유지)
   USERS: {
     LIST: '/users',
