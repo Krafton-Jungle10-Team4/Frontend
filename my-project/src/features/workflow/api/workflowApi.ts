@@ -66,6 +66,20 @@ export const workflowApi = {
     edges: Edge[]
   ): Promise<void> => {
     const payload = transformToBackend(nodes, edges);
+
+    // 🔍 개발 중 검증: payload 출력
+    console.log('🔍 [saveBotWorkflow] Payload:', JSON.stringify(payload, null, 2));
+
+    // Knowledge Retrieval 노드만 필터링하여 확인
+    const krNodes = payload.nodes.filter((n) => n.type === 'knowledge-retrieval');
+    console.log(
+      '🔍 [KR Nodes]:',
+      krNodes.map((n) => ({
+        id: n.id,
+        document_ids: n.data.document_ids,
+      }))
+    );
+
     await apiClient.put(API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW(botId), payload);
   },
 

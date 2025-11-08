@@ -128,6 +128,7 @@ export type KnowledgeRetrievalNodeType = CommonNodeType<{
   dataset?: string;
   retrievalMode?: string;
   topK?: number;
+  documentIds?: string[];
 }>;
 
 /**

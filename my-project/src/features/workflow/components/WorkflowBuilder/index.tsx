@@ -221,6 +221,8 @@ const WorkflowInner = () => {
           ...(nodeType === BlockEnum.KnowledgeRetrieval && {
             dataset: 'Dataset',
             retrievalMode: 'Semantic Search',
+            topK: 5,
+            documentIds: [],
           }),
         },
       };
@@ -234,6 +236,16 @@ const WorkflowInner = () => {
   // 키보드 이벤트 (Delete/Backspace)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isInputElement =
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.isContentEditable;
+
+      if (isInputElement) {
+        return;
+      }
+
       if (event.key === 'Delete' || event.key === 'Backspace') {
         setNodes(nodes.filter((node) => !node.selected));
         setEdges(edges.filter((edge) => !edge.selected));
