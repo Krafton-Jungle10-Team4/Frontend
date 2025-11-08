@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bot as BotIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,6 @@ export interface BotCardData {
 interface BotCardProps {
   bot: BotCardData;
   onDelete: (botId: string, botName: string) => void;
-  onEdit?: (botId: string) => void;
   onClick?: (botId: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
@@ -32,7 +31,6 @@ interface BotCardProps {
 export function BotCard({
   bot,
   onDelete,
-  onEdit,
   onClick,
   viewMode = 'grid',
   language,
@@ -44,14 +42,12 @@ export function BotCard({
       created: 'Created',
       messages: 'Messages',
       errors: 'Errors',
-      edit: 'Edit',
       delete: 'Delete',
     },
     ko: {
       created: '생성:',
       messages: '메시지',
       errors: '오류',
-      edit: '수정',
       delete: '삭제',
     },
   };
@@ -116,17 +112,6 @@ export function BotCard({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                className="gap-2"
-                onSelect={(event) => {
-                  event.stopPropagation();
-                  setSuppressNextClick(true);
-                  onEdit?.(bot.id);
-                }}
-              >
-                <Pencil size={16} />
-                {t.edit}
-              </DropdownMenuItem>
-              <DropdownMenuItem
                 className="gap-2 text-red-600"
                 onSelect={(event) => {
                   event.stopPropagation();
@@ -173,17 +158,6 @@ export function BotCard({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              className="gap-2"
-              onSelect={(event) => {
-                event.stopPropagation();
-                setSuppressNextClick(true);
-                onEdit?.(bot.id);
-              }}
-            >
-              <Pencil size={16} />
-              {t.edit}
-            </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 text-red-600"
               onSelect={(event) => {
