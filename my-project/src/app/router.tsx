@@ -88,6 +88,14 @@ export const router = createBrowserRouter([
           },
           // Dashboard routes - Feature 기반
           dashboardRoutes,
+          // Deployment routes - 배포 관리
+          {
+            path: 'deployment/:botId',
+            lazy: () =>
+              import('@/features/deployment').then((module) => ({
+                Component: module.DeploymentPage,
+              })),
+          },
         ],
       },
 
