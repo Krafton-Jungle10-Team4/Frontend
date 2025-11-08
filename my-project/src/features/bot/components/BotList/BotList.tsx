@@ -15,7 +15,6 @@ interface BotListProps {
   isEmpty: boolean;
   hasResults: boolean;
   onDelete: (botId: string, botName: string) => void;
-  onEdit?: (botId: string) => void;
   onCreateBot: () => void;
   onBotClick?: (botId: string) => void;
 }
@@ -34,7 +33,6 @@ export function BotList({
   isEmpty,
   hasResults,
   onDelete,
-  onEdit,
   onCreateBot,
   onBotClick,
 }: BotListProps) {
@@ -81,7 +79,6 @@ export function BotList({
           key={bot.id}
           bot={bot}
           onDelete={onDelete}
-          onEdit={onEdit}
           onClick={onBotClick}
           viewMode={viewMode}
           language={language}
