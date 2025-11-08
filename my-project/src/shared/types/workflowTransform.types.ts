@@ -23,6 +23,7 @@ export interface BackendNode {
     dataset_id?: string;
     mode?: 'semantic' | 'keyword' | 'hybrid';
     top_k?: number;
+    document_ids?: string[];
   };
 }
 

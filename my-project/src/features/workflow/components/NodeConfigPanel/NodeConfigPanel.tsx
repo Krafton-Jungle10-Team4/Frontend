@@ -6,6 +6,7 @@
  */
 
 import { useWorkflowStore } from '../../stores/workflowStore';
+import { useDocumentStore } from '@/features/documents/stores/documentStore';
 import { LLMModelSelect } from './LLMModelSelect';
 import { Input } from '@shared/components/input';
 import { Textarea } from '@shared/components/textarea';
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/components/select';
+import { MultiSelect } from '@shared/components/multi-select';
 import {
   BlockEnum,
   type LLMNodeType,
@@ -25,20 +27,28 @@ import {
 
 export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const { documents } = useDocumentStore();
 
-  // 이제 조건부 렌더링으로 처리되므로 selectedNodeId는 항상 존재
-  if (!selectedNodeId) return null;
-
+  // Hook은 항상 최상단에서 호출 (조건부 return 이전)
   const node = nodes.find((n) => n.id === selectedNodeId);
+  const isLLMNode = node?.data.type === BlockEnum.LLM;
+  const isKnowledgeRetrievalNode =
+    node?.data.type === BlockEnum.KnowledgeRetrieval;
+
+  // 조건부 return은 모든 Hook 이후에
+  if (!selectedNodeId) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        노드를 선택하세요
+      </div>
+    );
+  }
+
   if (!node) return null;
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId, { [field]: value });
   };
-
-  const isLLMNode = node.data.type === BlockEnum.LLM;
-  const isKnowledgeRetrievalNode =
-    node.data.type === BlockEnum.KnowledgeRetrieval;
 
   return (
     <div className="p-4 space-y-4">
@@ -67,11 +77,10 @@ export const NodeConfigPanel = () => {
           <div>
             <Label>모델</Label>
             <LLMModelSelect
-              value={
-                typeof (node.data as LLMNodeType).model === 'object'
-                  ? (node.data as LLMNodeType).model?.name
-                  : (node.data as LLMNodeType).model
-              }
+              value={(() => {
+                const model = (node.data as LLMNodeType).model;
+                return typeof model === 'object' ? model.name : model;
+              })()}
               onChange={(modelName) => {
                 const currentModel = (node.data as LLMNodeType).model;
                 const currentProvider =
@@ -168,6 +177,32 @@ export const NodeConfigPanel = () => {
                 handleUpdate('topK', parseInt(e.target.value, 10))
               }
             />
+          </div>
+
+          <div>
+            <Label htmlFor="documentIds">문서 선택 (선택사항)</Label>
+            <MultiSelect
+              id="documentIds"
+              value={
+                (node.data as KnowledgeRetrievalNodeType).documentIds || []
+              }
+              onChange={(selectedIds: string[]) => {
+                // 항상 새 배열로 전달 (참조 변경 보장)
+                handleUpdate('documentIds', selectedIds);
+              }}
+              options={documents.map((doc) => ({
+                value: doc.id,
+                label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB)`,
+              }))}
+              placeholder="검색할 문서를 선택하세요..."
+              emptyMessage="문서가 없습니다. 먼저 문서를 업로드해주세요."
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              선택된 문서:{' '}
+              {(node.data as KnowledgeRetrievalNodeType).documentIds?.length ||
+                0}
+              개
+            </p>
           </div>
         </>
       )}
