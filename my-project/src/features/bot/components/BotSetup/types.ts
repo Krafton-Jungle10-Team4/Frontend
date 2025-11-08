@@ -8,7 +8,6 @@ export type GoalType =
   | 'sales'
   | 'other'
   | null;
-export type DescriptionSource = 'website' | 'text';
 export type KnowledgeTab = 'websites' | 'files' | 'text';
 export type FileStatus = 'uploading' | 'uploaded' | 'deleting';
 
@@ -41,11 +40,6 @@ export interface BotSetupData {
   customGoal: string;
 
   // Step 3
-  descriptionSource: DescriptionSource;
-  websiteUrl: string;
-  personalityText: string;
-
-  // Step 4
   websites: Website[];
   files: FileItem[];
   knowledgeText: string;

@@ -13,7 +13,6 @@ import { StepNavigation } from './components/StepNavigation';
 import { ExitDialog } from './components/ExitDialog';
 import { Step1Name } from './steps/Step1Name';
 import { Step2Goal } from './steps/Step2Goal';
-import { Step3Personality } from './steps/Step3Personality';
 import { Step4Knowledge } from './steps/Step4Knowledge';
 import type { Language } from '@/shared/types';
 
@@ -32,8 +31,6 @@ function BotSetupContent({ onBack, language }: BotSetupProps) {
       case 2:
         return <Step2Goal language={language} />;
       case 3:
-        return <Step3Personality language={language} />;
-      case 4:
         return <Step4Knowledge language={language} />;
       default:
         return null;
