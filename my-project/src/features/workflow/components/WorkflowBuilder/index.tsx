@@ -31,6 +31,13 @@ import { UndoRedoButtons } from '../UndoRedoButtons';
 import { NodeConfigPanel } from '../NodeConfigPanel';
 import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
+import { PublishDropdown } from '../PublishDropdown';
+import {
+  EmbedWebsiteDialog,
+  ApiReferenceDialog,
+  useDeploymentStore,
+} from '@features/deployment';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -77,6 +84,14 @@ const WorkflowInner = () => {
 
   const { push } = useHistoryStore();
 
+  // 배포 다이얼로그 상태
+  const {
+    isEmbedDialogOpen,
+    isApiDialogOpen,
+    closeEmbedDialog,
+    closeApiDialog,
+  } = useDeploymentStore();
+
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
 
@@ -85,6 +100,9 @@ const WorkflowInner = () => {
 
   // 키보드 단축키 (Undo/Redo)
   useKeyboardShortcuts();
+
+  // 게시하기 단축키 (Cmd/Ctrl+Shift+P, E)
+  useWorkflowShortcuts(botId || '');
 
   // 워크플로우 로드
   useEffect(() => {
@@ -279,7 +297,7 @@ const WorkflowInner = () => {
           {/* Undo/Redo 버튼 */}
           <UndoRedoButtons />
 
-          {/* Preview & 저장 버튼 */}
+          {/* Preview & 저장 & 게시하기 버튼 */}
           <div className="flex items-center gap-2">
             {/* Preview 버튼 */}
             <button
@@ -301,6 +319,9 @@ const WorkflowInner = () => {
             </button>
 
             <SaveButton />
+
+            {/* 게시하기 드롭다운 */}
+            {botId && <PublishDropdown botId={botId} />}
           </div>
         </div>
 
@@ -366,6 +387,22 @@ const WorkflowInner = () => {
         <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
           <NodeConfigPanel />
         </div>
+      )}
+
+      {/* 배포 관련 다이얼로그 */}
+      {botId && (
+        <>
+          <EmbedWebsiteDialog
+            botId={botId}
+            isOpen={isEmbedDialogOpen}
+            onClose={closeEmbedDialog}
+          />
+          <ApiReferenceDialog
+            botId={botId}
+            isOpen={isApiDialogOpen}
+            onClose={closeApiDialog}
+          />
+        </>
       )}
     </div>
   );

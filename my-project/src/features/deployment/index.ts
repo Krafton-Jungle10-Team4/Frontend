@@ -38,5 +38,9 @@ export {
   DEPLOYMENT_STATUS_COLORS,
 } from './types/deployment';
 
+// ============= Components =============
+export { EmbedWebsiteDialog } from './components/EmbedWebsiteDialog';
+export { ApiReferenceDialog } from './components/ApiReferenceDialog';
+
 // ============= Pages =============
 export { DeploymentPage } from './pages/DeploymentPage';
