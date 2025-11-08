@@ -39,6 +39,7 @@ export {
 } from './types/deployment';
 
 // ============= Components =============
+export { EmbedCodeDisplay } from './components/EmbedCodeDisplay';
 export { EmbedWebsiteDialog } from './components/EmbedWebsiteDialog';
 export { ApiReferenceDialog } from './components/ApiReferenceDialog';
 

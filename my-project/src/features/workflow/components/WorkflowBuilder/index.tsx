@@ -33,11 +33,7 @@ import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
 import { PublishDropdown } from '../PublishDropdown';
-import {
-  EmbedWebsiteDialog,
-  ApiReferenceDialog,
-  useDeploymentStore,
-} from '@features/deployment';
+import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -84,13 +80,7 @@ const WorkflowInner = () => {
 
   const { push } = useHistoryStore();
 
-  // 배포 다이얼로그 상태
-  const {
-    isEmbedDialogOpen,
-    isApiDialogOpen,
-    closeEmbedDialog,
-    closeApiDialog,
-  } = useDeploymentStore();
+  // Deployment store는 다이얼로그 컴포넌트 내부에서 사용됨
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const { screenToFlowPosition } = useReactFlow();
@@ -392,16 +382,8 @@ const WorkflowInner = () => {
       {/* 배포 관련 다이얼로그 */}
       {botId && (
         <>
-          <EmbedWebsiteDialog
-            botId={botId}
-            isOpen={isEmbedDialogOpen}
-            onClose={closeEmbedDialog}
-          />
-          <ApiReferenceDialog
-            botId={botId}
-            isOpen={isApiDialogOpen}
-            onClose={closeApiDialog}
-          />
+          <EmbedWebsiteDialog botId={botId} />
+          <ApiReferenceDialog botId={botId} />
         </>
       )}
     </div>

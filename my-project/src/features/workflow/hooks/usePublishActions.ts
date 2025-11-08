@@ -13,7 +13,6 @@ export function usePublishActions(botId: string) {
     openEmbedDialog,
     openApiDialog,
     updateStatus,
-    fetchDeployment,
   } = useDeploymentStore();
 
   const { saveWorkflow } = useWorkflowStore();

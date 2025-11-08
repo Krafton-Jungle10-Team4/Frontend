@@ -41,12 +41,9 @@ export const ApiReferenceDialog: FC<ApiReferenceDialogProps> = ({
             <p className="text-gray-600 dark:text-gray-400">
               API 참조 문서가 여기에 표시됩니다. (Phase 4에서 구현 예정)
             </p>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Bot ID: {botId}
-            </p>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+}
