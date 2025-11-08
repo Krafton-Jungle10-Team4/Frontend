@@ -270,7 +270,7 @@ const WorkflowInner = () => {
       <div className="h-full w-full flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-600">
             워크플로우를 불러오는 중...
           </p>
         </div>
@@ -279,9 +279,9 @@ const WorkflowInner = () => {
   }
 
   return (
-    <div className="h-full w-full flex">
+    <div className="h-full w-full flex bg-gray-50">
       {/* 메인 캔버스 영역 */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-gray-50">
         {/* 상단 툴바 */}
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
           {/* Undo/Redo 버튼 */}
@@ -292,7 +292,7 @@ const WorkflowInner = () => {
             {/* Preview 버튼 */}
             <button
               onClick={toggleChatVisibility}
-              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 shadow-sm"
+              className="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
               title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
             >
               {isChatVisible ? (

@@ -83,7 +83,7 @@ export function HomePage() {
   const t = translations[language];
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-background">
       {/* Workspace Sidebar */}
       <WorkspaceSidebar
         isOpen={isSidebarOpen}

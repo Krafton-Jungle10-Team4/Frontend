@@ -68,7 +68,7 @@ export const WorkflowBuilderPage = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex">
+    <div className="h-screen w-screen flex bg-gray-50">
       <WorkflowSlimSidebar
         activeView={activeView}
         onViewChange={setActiveView}
