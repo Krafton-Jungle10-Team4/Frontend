@@ -41,11 +41,29 @@ export const handleAPIError = (error: any): never => {
       throw new APIError(status, errorMessages, validationError);
     }
 
-    // 일반 에러 메시지
-    const message =
-      typeof data.detail === 'string'
-        ? data.detail
-        : ERROR_MESSAGES.COMMON.UNKNOWN;
+    // 일반 에러 메시지 (다양한 백엔드 응답 형식 지원)
+    let message: string;
+
+    // 1. FastAPI 표준 형식: data.detail (문자열)
+    if (typeof data.detail === 'string') {
+      message = data.detail;
+    }
+    // 2. 중첩된 message 객체: data.message.message
+    else if (
+      typeof data.message === 'object' &&
+      data.message !== null &&
+      typeof (data.message as any).message === 'string'
+    ) {
+      message = (data.message as any).message;
+    }
+    // 3. 단순 message 문자열: data.message
+    else if (typeof data.message === 'string') {
+      message = data.message;
+    }
+    // 4. 폴백: 알 수 없는 오류
+    else {
+      message = ERROR_MESSAGES.COMMON.UNKNOWN;
+    }
 
     throw new APIError(status, message, data);
   }
