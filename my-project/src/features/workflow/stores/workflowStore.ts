@@ -13,6 +13,7 @@ interface WorkflowState {
   isSaving: boolean;
   validationErrors: string[];
   validationWarnings: string[];
+  isChatVisible: boolean;
 
   // 노드 관리
   setNodes: (nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => void;
@@ -36,6 +37,9 @@ interface WorkflowState {
   // 선택
   selectNode: (id: string | null) => void;
 
+  // UI 제어
+  toggleChatVisibility: () => void;
+
   // 리셋
   reset: () => void;
 }
@@ -51,6 +55,7 @@ const initialState = {
   isSaving: false,
   validationErrors: [],
   validationWarnings: [],
+  isChatVisible: false,
 };
 
 /**
@@ -186,6 +191,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   // 선택
   selectNode: (id) => set({ selectedNodeId: id }),
+
+  // UI 제어
+  toggleChatVisibility: () =>
+    set((state) => ({ isChatVisible: !state.isChatVisible })),
 
   // 리셋
   reset: () => set(initialState),

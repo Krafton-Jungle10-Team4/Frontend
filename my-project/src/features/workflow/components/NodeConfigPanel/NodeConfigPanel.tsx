@@ -26,13 +26,8 @@ import {
 export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
 
-  if (!selectedNodeId) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        노드를 선택하세요
-      </div>
-    );
-  }
+  // 이제 조건부 렌더링으로 처리되므로 selectedNodeId는 항상 존재
+  if (!selectedNodeId) return null;
 
   const node = nodes.find((n) => n.id === selectedNodeId);
   if (!node) return null;

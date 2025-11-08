@@ -8,11 +8,13 @@ import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
+import { useWorkflowStore } from '../stores/workflowStore';
 
 const WorkflowWithChat = () => {
   const { language } = useApp();
   const { botId } = useParams<{ botId: string }>();
   const location = useLocation();
+  const { isChatVisible } = useWorkflowStore();
 
   // Get bot data from URL params and navigation state
   const state = location.state as { botName?: string } | null;
@@ -29,13 +31,18 @@ const WorkflowWithChat = () => {
         <Workflow />
       </div>
 
-      {/* Divider */}
-      <div className="w-px bg-gray-200 dark:bg-gray-700" />
+      {/* Right: Chatbot Preview (Preview 버튼 클릭 시에만 표시) */}
+      {isChatVisible && (
+        <>
+          {/* Divider */}
+          <div className="w-px bg-gray-200 dark:bg-gray-700" />
 
-      {/* Right: Chatbot Preview */}
-      <div className="w-96 flex-shrink-0">
-        <ChatPreviewPanel botName={botName} language={language} />
-      </div>
+          {/* Chatbot Preview */}
+          <div className="w-96 flex-shrink-0">
+            <ChatPreviewPanel botName={botName} language={language} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
