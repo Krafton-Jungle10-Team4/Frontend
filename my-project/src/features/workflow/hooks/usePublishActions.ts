@@ -10,9 +10,12 @@ import { useWorkflowStore } from '../stores/workflowStore';
 
 export function usePublishActions(botId: string) {
   const {
+    deployment,
     openEmbedDialog,
     openApiDialog,
     updateStatus,
+    createOrUpdateDeployment,
+    widgetConfig,
   } = useDeploymentStore();
 
   const { saveWorkflow } = useWorkflowStore();
@@ -20,25 +23,40 @@ export function usePublishActions(botId: string) {
   /**
    * 업데이트 게시
    * - 워크플로우 저장
-   * - 배포 상태를 'published'로 변경
-   *
-   * Note: updateStatus 내부에서 fetchDeployment를 호출하므로
-   * 여기서 별도로 fetchDeployment를 호출하지 않음 (중복 요청 방지)
+   * - 배포가 없으면 자동 생성, 있으면 상태만 변경
    */
   const publishUpdate = useCallback(async () => {
     try {
       // 1. 워크플로우 저장
       await saveWorkflow(botId);
 
-      // 2. 배포 상태를 'published'로 변경 (내부에서 fetchDeployment 자동 호출)
-      await updateStatus(botId, 'published');
+      // 2. Deployment 존재 여부 확인
+      const currentDeployment = useDeploymentStore.getState().deployment;
 
-      toast.success('배포가 업데이트되었습니다');
-    } catch (error) {
+      if (!currentDeployment) {
+        // Deployment가 없으면 기본 설정으로 생성
+        await createOrUpdateDeployment(botId, {
+          status: 'published',
+          allowed_domains: [],
+          widget_config: widgetConfig,
+        });
+        toast.success('배포가 생성되었습니다');
+      } else {
+        // Deployment가 있으면 상태만 업데이트
+        await updateStatus(botId, 'published');
+        toast.success('배포가 업데이트되었습니다');
+      }
+    } catch (error: any) {
       console.error('Failed to publish update:', error);
-      toast.error('배포 업데이트에 실패했습니다');
+
+      // 404 에러 처리
+      if (error.response?.status === 404) {
+        toast.error('배포를 먼저 생성해주세요');
+      } else {
+        toast.error('배포 업데이트에 실패했습니다');
+      }
     }
-  }, [botId, saveWorkflow, updateStatus]);
+  }, [botId, saveWorkflow, updateStatus, createOrUpdateDeployment, widgetConfig]);
 
   /**
    * 앱 실행

@@ -137,11 +137,19 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    console.error('❌ [Response Error]', error.response?.status, error.config?.url);
-    console.error('❌ [Error Details]', error.response?.data);
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+
+    // deployment 404는 정상 상황이므로 에러 로그 생략
+    const isDeploymentNotFound =
+      error.response?.status === 404 &&
+      originalRequest.url?.includes('/deployment');
+
+    if (!isDeploymentNotFound) {
+      console.error('❌ [Response Error]', error.response?.status, error.config?.url);
+      console.error('❌ [Error Details]', error.response?.data);
+    }
 
     // 401 에러이고, 재시도하지 않았으며, 인증 관련 엔드포인트가 아닌 경우
     if (

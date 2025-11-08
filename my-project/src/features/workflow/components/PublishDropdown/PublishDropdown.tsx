@@ -3,7 +3,7 @@
  * Dify 스타일 게시하기 드롭다운 메뉴
  */
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronDown, Play, Code, Compass, FileCode } from 'lucide-react';
 import {
   DropdownMenu,
@@ -72,13 +72,20 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     apiReference,
   } = usePublishActions(botId);
 
-  // 컴포넌트 마운트 시 배포 정보 로드
-  useEffect(() => {
-    fetchDeployment(botId);
-  }, [botId, fetchDeployment]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  // 드롭다운이 열릴 때만 배포 정보 로드
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open && !hasFetched) {
+      fetchDeployment(botId);
+      setHasFetched(true);
+    }
+  };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="default"
