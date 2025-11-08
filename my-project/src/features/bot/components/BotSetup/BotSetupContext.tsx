@@ -3,12 +3,10 @@
  */
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { isValidUrl } from '@/shared/utils/validation';
 import { generateSessionId } from '@/shared/utils/session';
 import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import type {
   GoalType,
-  DescriptionSource,
   KnowledgeTab,
   Website,
   FileItem,
@@ -27,15 +25,7 @@ export interface BotSetupContextType {
   showCustomInput: boolean;
   setShowCustomInput: (show: boolean) => void;
 
-  // Step 3: Personality
-  descriptionSource: DescriptionSource;
-  setDescriptionSource: (source: DescriptionSource) => void;
-  websiteUrl: string;
-  setWebsiteUrl: (url: string) => void;
-  personalityText: string;
-  setPersonalityText: (text: string) => void;
-
-  // Step 4: Knowledge
+  // Step 3: Knowledge
   knowledgeTab: KnowledgeTab;
   setKnowledgeTab: (tab: KnowledgeTab) => void;
   websites: Website[];
@@ -83,13 +73,7 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
   const [customGoal, setCustomGoal] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  // Step 3: Personality
-  const [descriptionSource, setDescriptionSource] =
-    useState<DescriptionSource>('website');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [personalityText, setPersonalityText] = useState('');
-
-  // Step 4: Knowledge
+  // Step 3: Knowledge
   const [knowledgeTab, setKnowledgeTab] = useState<KnowledgeTab>('websites');
   const [websites, setWebsites] = useState<Website[]>([]);
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -130,15 +114,6 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
         return true;
 
       case 3:
-        if (descriptionSource === 'website') {
-          return websiteUrl.trim().length > 0 && isValidUrl(websiteUrl.trim());
-        }
-        return (
-          personalityText.trim().length > 0 &&
-          personalityText.trim().length <= TEXT_LIMITS.BOT_PERSONALITY.MAX
-        );
-
-      case 4:
         // At least one knowledge source
         return (
           files.some((f) => f.status === 'uploaded') ||
@@ -165,9 +140,6 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
     setSelectedGoal(null);
     setCustomGoal('');
     setShowCustomInput(false);
-    setDescriptionSource('website');
-    setWebsiteUrl('');
-    setPersonalityText('');
     setKnowledgeTab('websites');
     setWebsites([]);
     setFiles([]);
@@ -190,14 +162,6 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
     setShowCustomInput,
 
     // Step 3
-    descriptionSource,
-    setDescriptionSource,
-    websiteUrl,
-    setWebsiteUrl,
-    personalityText,
-    setPersonalityText,
-
-    // Step 4
     knowledgeTab,
     setKnowledgeTab,
     websites,

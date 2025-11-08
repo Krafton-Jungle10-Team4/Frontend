@@ -17,9 +17,6 @@ export function buildCreateBotDto(context: BotSetupContextType): CreateBotDto {
     botName,
     selectedGoal,
     customGoal,
-    personalityText,
-    websiteUrl,
-    descriptionSource,
     files,
   } = context;
 
@@ -34,24 +31,15 @@ export function buildCreateBotDto(context: BotSetupContextType): CreateBotDto {
     goal = selectedGoal; // 'customer-support', 'ai-assistant', 'sales'
   }
 
-  // 2. Personality 결정
-  let personality: string;
-  if (descriptionSource === 'website') {
-    personality = `Learn from website: ${websiteUrl.trim()}`;
-  } else {
-    personality = personalityText.trim();
-  }
-
-  // 3. Knowledge: 업로드된 파일의 document_id 수집
+  // 2. Knowledge: 업로드된 파일의 document_id 수집
   const documentIds = files
     .filter((f: FileItem) => f.status === 'uploaded')
     .map((f: FileItem) => f.id);
 
-  // 4. CreateBotDto 생성
+  // 3. CreateBotDto 생성
   return {
     name: botName.trim(),
     goal,
-    personality,
     knowledge: documentIds,
   };
 }
@@ -95,19 +83,6 @@ export function validateBotSetupData(context: BotSetupContextType): {
     errors.push('Goal is required');
   } else if (context.selectedGoal === 'other' && !context.customGoal.trim()) {
     errors.push('Custom goal is required');
-  }
-
-  // Personality 검증
-  if (context.descriptionSource === 'website') {
-    if (!context.websiteUrl.trim()) {
-      errors.push('Website URL is required');
-    }
-  } else {
-    if (!context.personalityText.trim()) {
-      errors.push('Personality text is required');
-    } else if (context.personalityText.trim().length > 2000) {
-      errors.push('Personality text must be less than 2000 characters');
-    }
   }
 
   // Knowledge 검증 (최소 1개 이상)

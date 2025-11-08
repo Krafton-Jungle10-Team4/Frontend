@@ -20,7 +20,6 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     isStepValid,
     selectedGoal,
     customGoal,
-    personalityText,
     knowledgeText,
     setShowCustomInput,
     hasAnyData,
@@ -50,13 +49,13 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
   const navigate = useNavigate();
 
   const handleNext = async () => {
-    if (step < 4) {
+    if (step < 3) {
       setStep(step + 1);
       if (step === 2) {
         setShowCustomInput(false);
       }
     } else {
-      // Step 4: Train Agent button clicked
+      // Step 3: Train Agent button clicked
       try {
         const dto = buildCreateBotDto(context);
 
@@ -66,9 +65,6 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
           botName: context.botName,
           selectedGoal: context.selectedGoal,
           customGoal: context.customGoal,
-          descriptionSource: context.descriptionSource,
-          personalityText: context.personalityText,
-          websiteUrl: context.websiteUrl,
           uploadedFiles: context.files
             .filter((f) => f.status === 'uploaded')
             .map((f) => ({
@@ -102,7 +98,6 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
           state: {
             botName: newBot.name,
             goal: selectedGoal === 'other' ? customGoal : selectedGoal,
-            personality: personalityText,
             knowledge: knowledgeText,
           },
         });
@@ -136,7 +131,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-gray-700">
-              {t.step} {step} {t.of} 4
+              {t.step} {step} {t.of} 3
             </span>
             <button
               onClick={handleCloseClick}
@@ -149,7 +144,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
           <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-teal-500 transition-all duration-300"
-              style={{ width: `${(step / 4) * 100}%` }}
+              style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
         </div>
@@ -179,7 +174,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
               ? language === 'ko'
                 ? '생성 중...'
                 : 'Creating...'
-              : step === 4
+              : step === 3
                 ? t.trainAgent
                 : t.next}
             {!isCreating && <ArrowRight size={18} className="ml-2" />}
