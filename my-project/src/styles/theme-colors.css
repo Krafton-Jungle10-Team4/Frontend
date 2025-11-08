@@ -1,0 +1,144 @@
+/**
+ * Dify 스타일 색상 시스템
+ * 청록색(Teal/Cyan)을 메인 포인트 색상으로 사용
+ * 높은 가독성과 명확한 계층 구조를 위한 색상 팔레트
+ */
+
+:root {
+  /* ========== 기본 색상 ========== */
+  /* 배경 - 깨끗한 흰색/밝은 회색 기반 */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f3f4f6;
+
+  /* 텍스트 - 높은 대비로 가독성 확보 */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-text-quaternary: #9ca3af;
+  --color-text-disabled: #d1d5db;
+
+  /* ========== 브랜드 색상 - 청록색 팔레트 ========== */
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;  /* 메인 청록색 */
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+
+  /* ========== UI 컴포넌트 색상 ========== */
+  /* 버튼 */
+  --color-button-primary-bg: var(--color-brand-500);
+  --color-button-primary-hover: var(--color-brand-600);
+  --color-button-primary-text: #ffffff;
+  --color-button-secondary-bg: #ffffff;
+  --color-button-secondary-hover: #f9fafb;
+  --color-button-secondary-text: var(--color-text-primary);
+  --color-button-secondary-border: #e5e7eb;
+
+  /* 입력 필드 */
+  --color-input-bg: #ffffff;
+  --color-input-border: #e5e7eb;
+  --color-input-border-hover: #d1d5db;
+  --color-input-border-focus: var(--color-brand-500);
+  --color-input-placeholder: #9ca3af;
+
+  /* 카드 */
+  --color-card-bg: #ffffff;
+  --color-card-border: #f3f4f6;
+  --color-card-shadow: rgba(0, 0, 0, 0.05);
+  --color-card-hover-shadow: rgba(0, 0, 0, 0.1);
+
+  /* 사이드바 */
+  --color-sidebar-bg: #fcfcfd;
+  --color-sidebar-border: #e5e7eb;
+  --color-sidebar-item-hover: #f3f4f6;
+  --color-sidebar-item-active: var(--color-brand-50);
+  --color-sidebar-item-active-text: var(--color-brand-700);
+
+  /* ========== 워크플로우 빌더 색상 ========== */
+  --color-workflow-bg: #fafafa;
+  --color-workflow-grid: #e5e7eb;
+  --color-workflow-node-bg: #ffffff;
+  --color-workflow-node-border: #e5e7eb;
+  --color-workflow-node-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --color-workflow-node-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  /* 노드 타입별 색상 */
+  --color-node-start: #8b5cf6;      /* 보라색 */
+  --color-node-end: #f59e0b;        /* 주황색 */
+  --color-node-llm: #3b82f6;        /* 파란색 */
+  --color-node-knowledge: var(--color-brand-500); /* 청록색 */
+
+  /* ========== 상태 색상 ========== */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* ========== 기타 UI 요소 ========== */
+  --color-divider: #e5e7eb;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-tooltip-bg: #1f2937;
+  --color-tooltip-text: #ffffff;
+
+  /* ========== 그림자 효과 ========== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ========== 다크 모드 색상 ========== */
+.dark {
+  /* 배경 */
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+
+  /* 텍스트 */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-text-quaternary: #64748b;
+  --color-text-disabled: #475569;
+
+  /* 브랜드 색상 조정 */
+  --color-button-primary-bg: var(--color-brand-600);
+  --color-button-primary-hover: var(--color-brand-700);
+  --color-button-secondary-bg: #1e293b;
+  --color-button-secondary-hover: #334155;
+  --color-button-secondary-border: #475569;
+
+  /* 입력 필드 */
+  --color-input-bg: #1e293b;
+  --color-input-border: #475569;
+  --color-input-border-hover: #64748b;
+  --color-input-placeholder: #64748b;
+
+  /* 카드 */
+  --color-card-bg: #1e293b;
+  --color-card-border: #334155;
+
+  /* 사이드바 */
+  --color-sidebar-bg: #1e293b;
+  --color-sidebar-border: #334155;
+  --color-sidebar-item-hover: #334155;
+  --color-sidebar-item-active: rgba(20, 184, 166, 0.1);
+
+  /* 워크플로우 빌더 */
+  --color-workflow-bg: #0f172a;
+  --color-workflow-grid: #334155;
+  --color-workflow-node-bg: #1e293b;
+  --color-workflow-node-border: #475569;
+
+  /* 기타 */
+  --color-divider: #334155;
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-tooltip-bg: #f1f5f9;
+  --color-tooltip-text: #0f172a;
+}

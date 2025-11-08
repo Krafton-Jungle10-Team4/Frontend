@@ -58,12 +58,12 @@ const BaseNode = ({ data, children }: BaseNodeProps) => {
     >
       <div
         className={clsx(
-          'group relative w-[240px] rounded-[15px] border-2 bg-workflow-block-bg pb-1 shadow-xs',
-          'border-transparent',
-          !data._runningStatus && 'hover:shadow-lg',
-          showRunningBorder && '!border-state-accent-solid',
-          showSuccessBorder && '!border-state-success-solid',
-          showFailedBorder && '!border-state-destructive-solid'
+          'group relative w-[240px] rounded-[15px] border-2 bg-white pb-1 shadow-md',
+          'border-gray-200',
+          !data._runningStatus && 'hover:shadow-lg transition-shadow duration-200',
+          showRunningBorder && '!border-primary',
+          showSuccessBorder && '!border-green-500',
+          showFailedBorder && '!border-red-500'
         )}
       >
         {/* Target Handle (왼쪽 입력) */}

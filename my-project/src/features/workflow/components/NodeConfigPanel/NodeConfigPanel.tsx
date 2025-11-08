@@ -38,7 +38,7 @@ export const NodeConfigPanel = () => {
   // 조건부 return은 모든 Hook 이후에
   if (!selectedNodeId) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-muted-foreground">
         노드를 선택하세요
       </div>
     );
@@ -51,8 +51,8 @@ export const NodeConfigPanel = () => {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <h3 className="font-semibold">노드 설정</h3>
+    <div className="p-4 space-y-4 bg-card border-l border-border">
+      <h3 className="font-semibold text-foreground">노드 설정</h3>
 
       {/* 공통 필드 */}
       <div>

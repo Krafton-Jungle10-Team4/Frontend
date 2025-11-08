@@ -66,6 +66,8 @@ html[data-changing-theme] * {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
+    background-color: #ffffff;
+    color: #111827;
   }
 }
 

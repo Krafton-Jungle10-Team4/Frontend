@@ -10,7 +10,7 @@ import { AppProvider } from './features/bot/contexts/AppContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <AppProvider>
         <RouterProvider router={router} />
       </AppProvider>
