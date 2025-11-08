@@ -17,6 +17,7 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Eye, EyeOff } from 'lucide-react';
 
 import type { Node, Edge } from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
@@ -65,10 +66,13 @@ const WorkflowInner = () => {
     nodes,
     edges,
     isLoading,
+    selectedNodeId,
+    isChatVisible,
     setNodes,
     setEdges,
     loadWorkflow,
     selectNode,
+    toggleChatVisibility,
   } = useWorkflowStore();
 
   const { push } = useHistoryStore();
@@ -123,6 +127,14 @@ const WorkflowInner = () => {
     },
     [selectNode]
   );
+
+  // 빈 공간 클릭 핸들러 (선택 해제 및 채팅창 숨기기)
+  const onPaneClick = useCallback(() => {
+    selectNode(null);
+    if (isChatVisible) {
+      toggleChatVisibility();
+    }
+  }, [selectNode, isChatVisible, toggleChatVisibility]);
 
   // 노드 우클릭 핸들러
   const onNodeContextMenu: NodeMouseHandler = useCallback((event, node) => {
@@ -255,8 +267,29 @@ const WorkflowInner = () => {
           {/* Undo/Redo 버튼 */}
           <UndoRedoButtons />
 
-          {/* 저장 버튼 */}
-          <SaveButton />
+          {/* Preview & 저장 버튼 */}
+          <div className="flex items-center gap-2">
+            {/* Preview 버튼 */}
+            <button
+              onClick={toggleChatVisibility}
+              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 shadow-sm"
+              title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
+            >
+              {isChatVisible ? (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  <span className="text-sm font-medium">미리보기</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4" />
+                  <span className="text-sm font-medium">미리보기</span>
+                </>
+              )}
+            </button>
+
+            <SaveButton />
+          </div>
         </div>
 
         {/* 검증 패널 제거 */}
@@ -268,6 +301,7 @@ const WorkflowInner = () => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
           onNodeContextMenu={onNodeContextMenu}
           onEdgeContextMenu={onEdgeContextMenu}
           onPaneContextMenu={onPaneContextMenu}
@@ -315,10 +349,12 @@ const WorkflowInner = () => {
       )}
       </div>
 
-      {/* 우측 노드 설정 패널 */}
-      <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
-        <NodeConfigPanel />
-      </div>
+      {/* 우측 노드 설정 패널 (노드 선택 시에만 표시) */}
+      {selectedNodeId && (
+        <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
+          <NodeConfigPanel />
+        </div>
+      )}
     </div>
   );
 };
