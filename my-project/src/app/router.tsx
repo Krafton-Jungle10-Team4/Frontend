@@ -106,4 +106,13 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // Widget Chat - 독립 페이지 (RootLayout 없음)
+  {
+    path: '/widget/chat/:widgetKey',
+    lazy: () =>
+      import('@/features/widget').then((module) => ({
+        Component: module.WidgetChatPage,
+      })),
+  },
 ]);
