@@ -75,6 +75,9 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
 
+  // 현재 봇의 deployment인지 확인
+  const currentBotDeployment = deployment?.bot_id === botId ? deployment : null;
+
   // 드롭다운이 열릴 때만 배포 정보 로드
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -101,21 +104,21 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         {/* 상단: 배포 상태 및 업데이트 버튼 */}
         <div className="p-3 border-b">
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant={getStatusVariant(deployment?.status || null)}>
-              {deployment?.status
-                ? DEPLOYMENT_STATUS_LABELS[deployment.status]
+            <Badge variant={getStatusVariant(currentBotDeployment?.status || null)}>
+              {currentBotDeployment?.status
+                ? DEPLOYMENT_STATUS_LABELS[currentBotDeployment.status]
                 : '미배포'}
             </Badge>
-            {deployment?.version && (
+            {currentBotDeployment?.version && (
               <span className="text-xs text-muted-foreground">
-                v{deployment.version}
+                v{currentBotDeployment.version}
               </span>
             )}
           </div>
 
-          {deployment?.updated_at && (
+          {currentBotDeployment?.updated_at && (
             <p className="text-xs text-muted-foreground mb-2">
-              발행일 {formatRelativeTime(deployment.updated_at)}
+              발행일 {formatRelativeTime(currentBotDeployment.updated_at)}
             </p>
           )}
 

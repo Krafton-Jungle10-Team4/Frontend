@@ -101,10 +101,19 @@ export const useDeploymentStore = create<DeploymentStore>()(
             widgetConfig: deployment?.widget_config || initialWidgetConfig,
           });
         } catch (error: any) {
-          set({
-            error: error.message || '배포 조회에 실패했습니다',
-            isLoading: false,
-          });
+          // 404 에러는 배포가 없는 정상 상태로 처리
+          if (error.response?.status === 404) {
+            set({
+              deployment: null,
+              isLoading: false,
+              error: null,
+            });
+          } else {
+            set({
+              error: error.message || '배포 조회에 실패했습니다',
+              isLoading: false,
+            });
+          }
         }
       },
 

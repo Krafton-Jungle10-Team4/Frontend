@@ -30,11 +30,12 @@ export function usePublishActions(botId: string) {
       // 1. 워크플로우 저장
       await saveWorkflow(botId);
 
-      // 2. Deployment 존재 여부 확인
+      // 2. Deployment 존재 여부 확인 (현재 봇의 deployment인지 확인)
       const currentDeployment = useDeploymentStore.getState().deployment;
+      const isCurrentBotDeployment = currentDeployment?.bot_id === botId;
 
-      if (!currentDeployment) {
-        // Deployment가 없으면 기본 설정으로 생성
+      if (!currentDeployment || !isCurrentBotDeployment) {
+        // Deployment가 없거나 다른 봇의 것이면 기본 설정으로 생성
         await createOrUpdateDeployment(botId, {
           status: 'published',
           allowed_domains: [],
@@ -49,9 +50,18 @@ export function usePublishActions(botId: string) {
     } catch (error: any) {
       console.error('Failed to publish update:', error);
 
-      // 404 에러 처리
+      // 404 에러 처리 - 배포가 없으면 자동으로 생성 시도
       if (error.response?.status === 404) {
-        toast.error('배포를 먼저 생성해주세요');
+        try {
+          await createOrUpdateDeployment(botId, {
+            status: 'published',
+            allowed_domains: [],
+            widget_config: widgetConfig,
+          });
+          toast.success('배포가 생성되었습니다');
+        } catch (retryError) {
+          toast.error('배포 생성에 실패했습니다');
+        }
       } else {
         toast.error('배포 업데이트에 실패했습니다');
       }
