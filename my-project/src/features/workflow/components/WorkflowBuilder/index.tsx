@@ -279,44 +279,9 @@ const WorkflowInner = () => {
   }
 
   return (
-    <div className="h-full w-full flex bg-gray-50">
-      {/* 메인 캔버스 영역 */}
-      <div className="flex-1 relative bg-gray-50">
-        {/* 상단 툴바 */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
-          {/* Undo/Redo 버튼 */}
-          <UndoRedoButtons />
-
-          {/* Preview & 저장 & 게시하기 버튼 */}
-          <div className="flex items-center gap-2">
-            {/* Preview 버튼 */}
-            <button
-              onClick={toggleChatVisibility}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
-              title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
-            >
-              {isChatVisible ? (
-                <>
-                  <EyeOff className="w-4 h-4" />
-                  <span className="text-sm font-medium">미리보기</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="w-4 h-4" />
-                  <span className="text-sm font-medium">미리보기</span>
-                </>
-              )}
-            </button>
-
-            <SaveButton />
-
-            {/* 게시하기 드롭다운 */}
-            {botId && <PublishDropdown botId={botId} />}
-          </div>
-        </div>
-
-        {/* 검증 패널 제거 */}
-
+    <div className="h-full w-full relative bg-gray-50">
+      {/* ReactFlow 캔버스 - 전체 영역 차지 */}
+      <div className="absolute inset-0">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -344,7 +309,42 @@ const WorkflowInner = () => {
             color="var(--color-workflow-canvas-workflow-dot-color)"
           />
         </ReactFlow>
+      </div>
 
+      {/* 상단 툴바 - 캔버스 위 오버레이 (absolute 고정) */}
+      <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+        <div className="pointer-events-auto">
+          <UndoRedoButtons />
+        </div>
+
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Preview 버튼 */}
+          <button
+            onClick={toggleChatVisibility}
+            className="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
+            title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
+          >
+            {isChatVisible ? (
+              <>
+                <EyeOff className="w-4 h-4" />
+                <span className="text-sm font-medium">미리보기</span>
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">미리보기</span>
+              </>
+            )}
+          </button>
+
+          <SaveButton />
+
+          {/* 게시하기 드롭다운 */}
+          {botId && <PublishDropdown botId={botId} />}
+        </div>
+      </div>
+
+      {/* 컨텍스트 메뉴 백드롭 */}
       {contextMenu && (
         <div
           className="fixed inset-0 z-40"
@@ -356,6 +356,7 @@ const WorkflowInner = () => {
         />
       )}
 
+      {/* 컨텍스트 메뉴 */}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -370,11 +371,10 @@ const WorkflowInner = () => {
           }
         />
       )}
-      </div>
 
-      {/* 우측 노드 설정 패널 (노드 선택 시에만 표시) */}
+      {/* 우측 노드 설정 패널 - absolute 오버레이 (노드 선택 시에만 표시) */}
       {selectedNodeId && (
-        <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto">
+        <div className="absolute top-20 right-0 bottom-0 w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto z-20 shadow-lg">
           <NodeConfigPanel />
         </div>
       )}
