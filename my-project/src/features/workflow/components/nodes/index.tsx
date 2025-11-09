@@ -15,7 +15,7 @@ const CustomNode = (props: NodeProps) => {
   const NodeComponent = useMemo(() => NodeComponentMap[data.type], [data.type]);
 
   return (
-    <BaseNode data={data}>
+    <BaseNode data={data} selected={props.selected}>
       <NodeComponent data={data} />
     </BaseNode>
   );

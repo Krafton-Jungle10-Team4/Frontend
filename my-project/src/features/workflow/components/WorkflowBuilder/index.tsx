@@ -145,8 +145,15 @@ const WorkflowInner = () => {
       const newNodes = applyNodeChanges(changes, nodes);
       setNodes(newNodes);
       push(newNodes, edges);
+
+      // 선택 상태 변경 감지하여 selectedNodeId 업데이트
+      const selectChange = changes.find((change) => change.type === 'select');
+      if (selectChange && 'selected' in selectChange) {
+        const selectedNode = newNodes.find((node) => node.selected);
+        selectNode(selectedNode?.id || null);
+      }
     },
-    [nodes, edges, setNodes, push]
+    [nodes, edges, setNodes, push, selectNode]
   );
 
   const onEdgesChange = useCallback(
