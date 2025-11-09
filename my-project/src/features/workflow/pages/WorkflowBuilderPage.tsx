@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
@@ -9,6 +9,9 @@ import LogsView from '../components/views/LogsView';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 import { useWorkflowStore } from '../stores/workflowStore';
+import { TopNavigation } from '@/widgets';
+import { useAuthStore } from '@/features/auth';
+import { useUIStore } from '@/shared/stores/uiStore';
 
 const WorkflowWithChat = () => {
   const { language } = useApp();
@@ -52,7 +55,34 @@ const WorkflowWithChat = () => {
  * Dify 스타일의 사이드바와 멀티뷰 지원
  */
 export const WorkflowBuilderPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { botId } = useParams<{ botId: string }>();
   const [activeView, setActiveView] = useState<SidebarView>('flow');
+
+  // Auth store - 사용자 정보
+  const user = useAuthStore((state) => state.user);
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || '';
+
+  // UI store - 언어 설정
+  const language = useUIStore((state) => state.language);
+  const setLanguage = useUIStore((state) => state.setLanguage);
+
+  // Bot 이름 가져오기 (navigation state에서)
+  const state = location.state as { botName?: string } | null;
+  const botName = state?.botName || 'Bot Workflow';
+
+  const handleLogout = async () => {
+    const { logout } = await import('@/features/auth');
+    try {
+      await logout();
+      useAuthStore.getState().reset();
+      navigate('/landing');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const renderContent = () => {
     switch (activeView) {
@@ -68,12 +98,27 @@ export const WorkflowBuilderPage = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex bg-gray-50">
-      <WorkflowSlimSidebar
-        activeView={activeView}
-        onViewChange={setActiveView}
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Top Navigation */}
+      <TopNavigation
+        onToggleSidebar={() => {}}
+        userName={userName}
+        userEmail={userEmail}
+        onHomeClick={() => navigate('/home')}
+        language={language}
+        onLanguageChange={setLanguage}
+        onLogout={handleLogout}
+        currentPage={botName}
       />
-      <div className="flex-1 overflow-hidden">{renderContent()}</div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        <WorkflowSlimSidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
+        <div className="flex-1 overflow-hidden">{renderContent()}</div>
+      </div>
     </div>
   );
 };

@@ -28,6 +28,7 @@ interface TopNavigationProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onLogout?: () => Promise<void> | void;
+  currentPage?: string; // 현재 페이지 이름 (선택사항)
 }
 
 export function TopNavigation({
@@ -38,6 +39,7 @@ export function TopNavigation({
   language,
   onLanguageChange,
   onLogout,
+  currentPage,
 }: TopNavigationProps) {
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -86,7 +88,9 @@ export function TopNavigation({
           {t.workspace}
         </button>
         <span className="text-gray-400 hidden sm:inline">{'>'}</span>
-        <span className="font-semibold text-gray-900 truncate">{t.home}</span>
+        <span className="font-semibold text-gray-900 truncate">
+          {currentPage || t.home}
+        </span>
       </div>
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <Button
