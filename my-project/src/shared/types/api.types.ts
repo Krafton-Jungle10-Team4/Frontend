@@ -87,6 +87,7 @@ export interface HealthCheckResponse {
 
 export interface ChatRequest {
   message: string; // [1, 2000] characters
+  bot_id?: string | null; // Bot ID for workflow execution
   session_id?: string | null;
   document_ids?: string[];
   top_k?: number; // [1, 20], default for retrieval

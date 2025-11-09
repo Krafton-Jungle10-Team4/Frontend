@@ -16,6 +16,7 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   message: string;
+  botId?: string; // Bot ID for workflow execution
   documentId?: string;
   sessionId?: string;
 }

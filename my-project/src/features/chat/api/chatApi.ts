@@ -22,6 +22,7 @@ export const chatApi = {
     documentIds?: string[],
     sessionId?: string,
     options?: {
+      bot_id?: string;
       max_tokens?: number;
       temperature?: number;
       stream?: boolean;
@@ -29,6 +30,7 @@ export const chatApi = {
   ): Promise<ChatResponse> {
     const payload: APIChatRequest = {
       message,
+      bot_id: options?.bot_id,
       document_ids: documentIds,
       session_id: sessionId,
       max_tokens: options?.max_tokens,

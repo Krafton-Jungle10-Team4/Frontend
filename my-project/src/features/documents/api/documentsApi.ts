@@ -26,12 +26,14 @@ export const documentsApi = {
    * - 빈 파일 업로드 불가
    *
    * @param file 업로드할 파일
+   * @param botId 봇 ID (필수)
    * @param onUploadProgress 업로드 진행률 콜백 (선택)
    * @returns DocumentUploadResponse
    * @throws Error 파일 유효성 검증 실패 또는 업로드 오류
    */
   uploadDocument: async (
     file: File,
+    botId: string,
     onUploadProgress?: (progressEvent: any) => void
   ): Promise<DocumentUploadResponse> => {
     // 1. 파일 유효성 검증
@@ -49,6 +51,9 @@ export const documentsApi = {
       API_ENDPOINTS.DOCUMENTS.UPLOAD,
       formData,
       {
+        params: {
+          bot_id: botId,
+        },
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -61,13 +66,20 @@ export const documentsApi = {
   /**
    * 문서 검색 (RAG similarity search)
    * @param request 검색 요청
+   * @param botId 봇 ID (필수)
    * @returns SearchResponse
    */
-  searchDocuments: async (request: SearchRequest): Promise<SearchResponse> => {
+  searchDocuments: async (
+    request: SearchRequest,
+    botId: string
+  ): Promise<SearchResponse> => {
     const { data } = await apiKeyClient.get<SearchResponse>(
       API_ENDPOINTS.DOCUMENTS.SEARCH,
       {
-        params: request,
+        params: {
+          ...request,
+          bot_id: botId,
+        },
       }
     );
     return data;
@@ -76,11 +88,20 @@ export const documentsApi = {
   /**
    * 문서 정보 조회
    * @param documentId 문서 ID
+   * @param botId 봇 ID (필수)
    * @returns DocumentInfo
    */
-  getDocument: async (documentId: string): Promise<DocumentInfo> => {
+  getDocument: async (
+    documentId: string,
+    botId: string
+  ): Promise<DocumentInfo> => {
     const { data } = await apiKeyClient.get<DocumentInfo>(
-      API_ENDPOINTS.DOCUMENTS.BY_ID(documentId)
+      API_ENDPOINTS.DOCUMENTS.BY_ID(documentId),
+      {
+        params: {
+          bot_id: botId,
+        },
+      }
     );
     return data;
   },
@@ -88,9 +109,14 @@ export const documentsApi = {
   /**
    * 문서 삭제
    * @param documentId 문서 ID
+   * @param botId 봇 ID (필수)
    */
-  deleteDocument: async (documentId: string): Promise<void> => {
-    await apiKeyClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId));
+  deleteDocument: async (documentId: string, botId: string): Promise<void> => {
+    await apiKeyClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId), {
+      params: {
+        bot_id: botId,
+      },
+    });
   },
 };
 

@@ -8,7 +8,10 @@ export class ApiClient {
   /**
    * Upload a file to the server
    */
-  static async uploadFile(file: File): Promise<{
+  static async uploadFile(
+    file: File,
+    botId: string
+  ): Promise<{
     document_id: string;
     filename: string;
     file_size: number;
@@ -28,7 +31,11 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/documents/upload`, {
+    // botId를 쿼리 파라미터로 추가
+    const url = new URL(`${API_BASE_URL}/api/v1/documents/upload`);
+    url.searchParams.append('bot_id', botId);
+
+    const response = await fetch(url.toString(), {
       method: 'POST',
       headers,
       body: formData,
@@ -47,13 +54,13 @@ export class ApiClient {
   /**
    * Delete a file from the server
    */
-  static async deleteFile(documentId: string): Promise<void> {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/documents/${documentId}`,
-      {
-        method: 'DELETE',
-      }
-    );
+  static async deleteFile(documentId: string, botId: string): Promise<void> {
+    const url = new URL(`${API_BASE_URL}/api/v1/documents/${documentId}`);
+    url.searchParams.append('bot_id', botId);
+
+    const response = await fetch(url.toString(), {
+      method: 'DELETE',
+    });
 
     if (!response.ok) {
       throw new Error('Delete failed');

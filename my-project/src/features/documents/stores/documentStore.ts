@@ -22,10 +22,10 @@ interface DocumentStore extends AsyncState<Document[]> {
   uploadProgress: number;
 
   // Actions
-  uploadDocument: (file: File) => Promise<Document>;
-  searchDocuments: (query: string) => Promise<void>;
-  getDocument: (id: string) => Promise<Document>;
-  deleteDocument: (id: string) => Promise<void>;
+  uploadDocument: (file: File, botId: string) => Promise<Document>;
+  searchDocuments: (query: string, botId: string) => Promise<void>;
+  getDocument: (id: string, botId: string) => Promise<Document>;
+  deleteDocument: (id: string, botId: string) => Promise<void>;
   selectDocument: (document: Document | null) => void;
   setSearchQuery: (query: string) => void;
   clearDocuments: () => void;
@@ -50,12 +50,13 @@ export const useDocumentStore = create<DocumentStore>()(
         error: null,
 
         // Upload document
-        uploadDocument: async (file: File) => {
+        uploadDocument: async (file: File, botId: string) => {
           set({ loading: true, error: null, uploadProgress: 0 });
 
           try {
             const response = await documentsApi.uploadDocument(
               file,
+              botId,
               (progressEvent) => {
                 if (progressEvent.total) {
                   const progress = Math.round(
@@ -95,14 +96,17 @@ export const useDocumentStore = create<DocumentStore>()(
         },
 
         // Search documents
-        searchDocuments: async (query: string) => {
+        searchDocuments: async (query: string, botId: string) => {
           set({ loading: true, error: null, searchQuery: query });
 
           try {
-            const response = await documentsApi.searchDocuments({
-              query,
-              top_k: 10,
-            });
+            const response = await documentsApi.searchDocuments(
+              {
+                query,
+                top_k: 10,
+              },
+              botId
+            );
 
             // Convert API response to frontend format
             const documents: Document[] = response.results.map((result) => ({
@@ -133,11 +137,11 @@ export const useDocumentStore = create<DocumentStore>()(
         },
 
         // Get single document
-        getDocument: async (id: string) => {
+        getDocument: async (id: string, botId: string) => {
           set({ loading: true, error: null });
 
           try {
-            const response = await documentsApi.getDocument(id);
+            const response = await documentsApi.getDocument(id, botId);
 
             // Convert API response to frontend format
             const document: Document = {
@@ -169,11 +173,11 @@ export const useDocumentStore = create<DocumentStore>()(
         },
 
         // Delete document
-        deleteDocument: async (id: string) => {
+        deleteDocument: async (id: string, botId: string) => {
           set({ loading: true, error: null });
 
           try {
-            await documentsApi.deleteDocument(id);
+            await documentsApi.deleteDocument(id, botId);
 
             set((state) => ({
               documents: state.documents.filter((doc) => doc.id !== id),
