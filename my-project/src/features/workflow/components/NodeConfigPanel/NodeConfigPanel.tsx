@@ -5,6 +5,7 @@
  * 노드 타입에 따라 다른 설정 폼을 표시합니다.
  */
 
+import { useState, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { useDocumentStore } from '@/features/documents/stores/documentStore';
 import { LLMModelSelect } from './LLMModelSelect';
@@ -31,11 +32,54 @@ export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode, selectNode } = useWorkflowStore();
   const { documents } = useDocumentStore();
 
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   // Hook은 항상 최상단에서 호출 (조건부 return 이전)
   const node = nodes.find((n) => n.id === selectedNodeId);
   const isLLMNode = node?.data.type === BlockEnum.LLM;
   const isKnowledgeRetrievalNode =
     node?.data.type === BlockEnum.KnowledgeRetrieval;
+
+  // 제목 편집 모드 시작
+  const handleTitleClick = () => {
+    if (node) {
+      setEditedTitle(node.data.title || node.data.type);
+      setIsEditingTitle(true);
+    }
+  };
+
+  // 제목 저장
+  const handleTitleSave = () => {
+    if (editedTitle.trim() && node) {
+      updateNode(selectedNodeId!, { title: editedTitle.trim() });
+    }
+    setIsEditingTitle(false);
+  };
+
+  // 제목 편집 취소
+  const handleTitleCancel = () => {
+    setIsEditingTitle(false);
+    setEditedTitle('');
+  };
+
+  // Enter 키로 저장, Escape 키로 취소
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      handleTitleCancel();
+    }
+  };
+
+  // 편집 모드 활성화 시 포커스
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
 
   // 조건부 return은 모든 Hook 이후에
   if (!selectedNodeId) {
@@ -60,15 +104,30 @@ export const NodeConfigPanel = () => {
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <BlockIcon type={node.data.type} size="sm" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            {node.data.type.toUpperCase()}
-          </h3>
+          {isEditingTitle ? (
+            <Input
+              ref={titleInputRef}
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              onBlur={handleTitleSave}
+              onKeyDown={handleTitleKeyDown}
+              className="font-semibold text-gray-900 dark:text-white h-7 px-2 py-1"
+            />
+          ) : (
+            <h3
+              onClick={handleTitleClick}
+              className="font-semibold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
+              title="클릭하여 제목 수정"
+            >
+              {node.data.title || node.data.type}
+            </h3>
+          )}
         </div>
         <button
           onClick={handleClose}
-          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors flex-shrink-0"
           title="닫기"
         >
           <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
