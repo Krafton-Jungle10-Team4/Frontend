@@ -7,7 +7,11 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/((?!widget).*)",
+      "source": "/widget/chat/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!widget|assets).*)",
       "destination": "/index.html"
     }
   ],
