@@ -352,7 +352,7 @@ const WorkflowInner = () => {
             gap={14}
             size={2}
             className="bg-workflow-canvas-workflow-bg"
-            color="var(--color-workflow-canvas-workflow-dot-color)"
+            color="#d1d5db"
           />
         </ReactFlow>
       </div>
