@@ -158,3 +158,18 @@ export interface WidgetMessage {
   timestamp: string;
   sources?: WidgetSource[];
 }
+
+/**
+ * Widget Session Message (postMessage 데이터 구조)
+ */
+export interface WidgetSessionMessage {
+  type: 'WIDGET_SESSION';
+  session: {
+    session_id: string;
+    session_token: string;
+    refresh_token: string;
+    expires_at: string;
+  };
+  config: WidgetConfigResponse;
+  apiBaseUrl: string;
+}
