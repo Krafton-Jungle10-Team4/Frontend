@@ -31,6 +31,7 @@ export function WidgetChatPage() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   /**
    * 허용된 부모 도메인 계산
@@ -134,6 +135,15 @@ export function WidgetChatPage() {
   }, [messages]);
 
   /**
+   * 세션 준비 완료 시 입력창에 자동 포커스
+   */
+  useEffect(() => {
+    if (sessionReady && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [sessionReady]);
+
+  /**
    * 메시지 전송
    */
   const sendMessage = async (e: React.FormEvent) => {
@@ -218,8 +228,14 @@ export function WidgetChatPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
+      <div
+        className="flex items-center justify-center h-screen bg-gray-50"
+        role="status"
+        aria-live="polite"
+        aria-label="채팅 로딩 중"
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-gray-600" aria-hidden="true" />
+        <span className="sr-only">채팅을 불러오는 중입니다...</span>
       </div>
     );
   }
@@ -239,15 +255,17 @@ export function WidgetChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <div
+      <header
         className="px-4 py-3 border-b text-white shadow-sm"
         style={{ background: primaryColor }}
+        role="banner"
+        aria-label="챗봇 헤더"
       >
         <div className="flex items-center gap-3">
           {config?.config.avatar_url && (
             <img
               src={config.config.avatar_url}
-              alt="Bot Avatar"
+              alt={`${config?.config.bot_name || '챗봇'} 아바타`}
               className="w-8 h-8 rounded-full"
             />
           )}
@@ -255,13 +273,19 @@ export function WidgetChatPage() {
             {config?.config.bot_name || '챗봇'}
           </h1>
         </div>
-      </div>
+      </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        role="log"
+        aria-live="polite"
+        aria-label="채팅 메시지"
+      >
         {messages.map((msg) => (
-          <div
+          <article
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            aria-label={`${msg.role === 'user' ? '사용자' : '챗봇'} 메시지`}
           >
             <div
               className={`max-w-[80%] rounded-lg p-3 shadow-sm ${
@@ -290,21 +314,22 @@ export function WidgetChatPage() {
                 {new Date(msg.timestamp).toLocaleTimeString('ko-KR')}
               </p>
             </div>
-          </div>
+          </article>
         ))}
         {config?.config.show_typing_indicator && sending && (
-          <div className="flex justify-start">
+          <div className="flex justify-start" role="status" aria-live="polite">
             <div className="bg-white rounded-lg p-3 shadow-sm border">
               <p className="text-sm text-gray-600">입력 중...</p>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
+      </main>
 
-      <div className="p-4 border-t bg-white">
-        <form onSubmit={sendMessage} className="flex gap-2">
+      <footer className="p-4 border-t bg-white">
+        <form onSubmit={sendMessage} className="flex gap-2" aria-label="메시지 입력 폼">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -313,21 +338,24 @@ export function WidgetChatPage() {
               config?.config.placeholder_text || '메시지를 입력하세요...'
             }
             disabled={sending}
+            aria-label="메시지 입력"
+            id="chat-input"
           />
           <button
             type="submit"
             disabled={!input.trim() || sending}
             className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
             style={{ background: primaryColor }}
+            aria-label={sending ? '메시지 전송 중' : '메시지 전송'}
           >
             {sending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
             ) : (
-              <Send className="h-5 w-5" />
+              <Send className="h-5 w-5" aria-hidden="true" />
             )}
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   );
 }
