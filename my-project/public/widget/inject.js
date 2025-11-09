@@ -264,7 +264,10 @@
       iframe.allow = 'clipboard-write';
 
       iframe.onload = () => {
-        this.sendSessionToIframe();
+        // React 컴포넌트 마운트 대기를 위한 지연된 재시도
+        setTimeout(() => this.sendSessionToIframe(), 100);
+        setTimeout(() => this.sendSessionToIframe(), 300);
+        setTimeout(() => this.sendSessionToIframe(), 500);
       };
 
       container.appendChild(closeBtn);
