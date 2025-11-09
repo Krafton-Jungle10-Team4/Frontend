@@ -19,6 +19,7 @@ import type {
 import '@xyflow/react/dist/style.css';
 import { Eye, EyeOff } from 'lucide-react';
 
+import { Button } from '@shared/components/button';
 import type { Node, Edge } from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
@@ -324,7 +325,7 @@ const WorkflowInner = () => {
   }
 
   return (
-    <div className="h-full w-full relative bg-gray-50">
+    <div className="h-full w-full relative bg-gray-100">
       {/* ReactFlow 캔버스 - 전체 영역 차지 */}
       <div className="absolute inset-0">
         <ReactFlow
@@ -364,23 +365,24 @@ const WorkflowInner = () => {
 
         <div className="flex items-center gap-2 pointer-events-auto">
           {/* Preview 버튼 */}
-          <button
+          <Button
+            variant="outline"
             onClick={toggleChatVisibility}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
             title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
+            className="!text-blue-600 hover:!text-blue-700"
           >
             {isChatVisible ? (
               <>
                 <EyeOff className="w-4 h-4" />
-                <span className="text-sm font-medium">미리보기</span>
+                미리보기
               </>
             ) : (
               <>
                 <Eye className="w-4 h-4" />
-                <span className="text-sm font-medium">미리보기</span>
+                미리보기
               </>
             )}
-          </button>
+          </Button>
 
           <SaveButton />
 

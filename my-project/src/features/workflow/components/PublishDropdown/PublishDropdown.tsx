@@ -92,8 +92,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="default"
-          size="sm"
-          className="flex items-center gap-1.5"
+          className="!bg-blue-600 !text-white hover:!bg-blue-700 flex items-center gap-1.5"
         >
           게시하기
           <ChevronDown className="w-4 h-4" />
