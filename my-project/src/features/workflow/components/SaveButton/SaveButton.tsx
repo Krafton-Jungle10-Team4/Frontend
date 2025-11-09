@@ -37,6 +37,7 @@ export const SaveButton = () => {
 
   return (
     <Button
+      variant="outline"
       onClick={handleSave}
       disabled={isSaving || isValidating}
     >

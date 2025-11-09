@@ -27,7 +27,7 @@ const WorkflowSlimSidebar = ({
   ];
 
   return (
-    <div className="w-12 h-full bg-sidebar border-r border-sidebar-border flex flex-col items-center py-4 gap-6">
+    <div className="w-12 h-full bg-white border-r border-sidebar-border flex flex-col items-center py-4 gap-6">
       <button
         onClick={onLogoClick}
         className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg hover:opacity-80 transition-opacity shadow-sm"
