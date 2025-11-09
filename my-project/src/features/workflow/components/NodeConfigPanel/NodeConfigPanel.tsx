@@ -159,24 +159,70 @@ export const NodeConfigPanel = () => {
         {isLLMNode && (
           <>
             <div className="space-y-2">
-              <Label className="font-semibold">모델</Label>
-              <LLMModelSelect
+              <Label className="font-semibold">Provider</Label>
+              <Select
                 value={(() => {
                   const model = (node.data as LLMNodeType).model;
-                  return typeof model === 'object' ? model.name : model;
+                  const provider =
+                    typeof model === 'object' && model.provider
+                      ? model.provider
+                      : 'OpenAI';
+                  console.log('🔍 [Provider Select] model:', model);
+                  console.log('🔍 [Provider Select] extracted provider:', provider);
+                  return provider;
                 })()}
-                onChange={(modelName) => {
+                onValueChange={(provider) => {
+                  console.log('🔍 [Provider Change]:', provider);
+                  handleUpdate('model', {
+                    provider,
+                    name: '', // provider 변경 시 모델 초기화
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="OpenAI">OpenAI</SelectItem>
+                  <SelectItem value="Anthropic">Anthropic</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-semibold">모델</Label>
+              <LLMModelSelect
+                selectedProvider={(() => {
+                  const model = (node.data as LLMNodeType).model;
+                  const provider =
+                    typeof model === 'object' && model.provider
+                      ? model.provider
+                      : 'OpenAI';
+                  return provider;
+                })()}
+                value={(() => {
+                  const model = (node.data as LLMNodeType).model;
+                  const modelId =
+                    typeof model === 'object' && model.name
+                      ? model.name
+                      : typeof model === 'string'
+                        ? model
+                        : '';
+                  console.log('🔍 [Model Select] model:', model);
+                  console.log('🔍 [Model Select] extracted modelId:', modelId);
+                  return modelId;
+                })()}
+                onChange={(modelId) => {
+                  console.log('🔍 [Model Change] new modelId:', modelId);
                   const currentModel = (node.data as LLMNodeType).model;
                   const currentProvider =
-                    typeof currentModel === 'object'
-                      ? currentModel?.provider
-                      : modelName.startsWith('gpt')
-                        ? 'OpenAI'
-                        : 'Anthropic';
+                    typeof currentModel === 'object' && currentModel.provider
+                      ? currentModel.provider
+                      : 'OpenAI';
 
                   handleUpdate('model', {
-                    provider: currentProvider || 'OpenAI',
-                    name: modelName,
+                    provider: currentProvider,
+                    name: modelId, // model.id를 name 필드에 저장 (예: 'gpt-4')
                   });
                 }}
               />

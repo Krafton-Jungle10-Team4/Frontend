@@ -19,9 +19,14 @@ import {
 interface LLMModelSelectProps {
   value?: string;
   onChange: (model: string) => void;
+  selectedProvider?: string; // 선택된 provider로 필터링
 }
 
-export const LLMModelSelect = ({ value, onChange }: LLMModelSelectProps) => {
+export const LLMModelSelect = ({
+  value,
+  onChange,
+  selectedProvider,
+}: LLMModelSelectProps) => {
   const [models, setModels] = useState<ModelResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +34,7 @@ export const LLMModelSelect = ({ value, onChange }: LLMModelSelectProps) => {
     const loadModels = async () => {
       try {
         const modelList = await workflowApi.getModels();
+        console.log('🔍 [LLMModelSelect] Loaded models:', modelList);
         setModels(modelList);
       } catch (error) {
         console.error('Failed to load models:', error);
@@ -39,6 +45,20 @@ export const LLMModelSelect = ({ value, onChange }: LLMModelSelectProps) => {
 
     loadModels();
   }, []);
+
+  // provider로 필터링된 모델 목록 (대소문자 구분 없이)
+  const filteredModels = selectedProvider
+    ? models.filter(
+        (model) =>
+          model.provider.toLowerCase() === selectedProvider.toLowerCase()
+      )
+    : models;
+
+  // 디버깅 로그
+  console.log('🔍 [LLMModelSelect] selectedProvider:', selectedProvider);
+  console.log('🔍 [LLMModelSelect] all models:', models);
+  console.log('🔍 [LLMModelSelect] filteredModels:', filteredModels);
+  console.log('🔍 [LLMModelSelect] current value:', value);
 
   if (loading) {
     return (
@@ -54,14 +74,26 @@ export const LLMModelSelect = ({ value, onChange }: LLMModelSelectProps) => {
         <SelectValue placeholder="Select a model" />
       </SelectTrigger>
       <SelectContent>
-        {models.map((model) => (
-          <SelectItem key={`${model.provider}-${model.name}`} value={model.name}>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{model.display_name}</span>
-              <span className="text-xs text-gray-500">({model.provider})</span>
-            </div>
-          </SelectItem>
-        ))}
+        {filteredModels.length === 0 ? (
+          <div className="px-2 py-4 text-center text-sm text-gray-500">
+            {selectedProvider
+              ? `No models available for ${selectedProvider}`
+              : 'No models available'}
+          </div>
+        ) : (
+          filteredModels.map((model) => (
+            <SelectItem key={`${model.provider}-${model.id}`} value={model.id}>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{model.name}</span>
+                {!selectedProvider && (
+                  <span className="text-xs text-gray-500">
+                    ({model.provider})
+                  </span>
+                )}
+              </div>
+            </SelectItem>
+          ))
+        )}
       </SelectContent>
     </Select>
   );

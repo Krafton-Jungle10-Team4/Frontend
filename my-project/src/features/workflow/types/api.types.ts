@@ -18,11 +18,12 @@ export interface NodeTypeResponse {
  * LLM 모델 응답
  */
 export interface ModelResponse {
-  provider: string; // "openai", "anthropic", etc.
-  name: string; // "gpt-4", "claude-3-opus", etc.
-  display_name: string;
-  max_tokens: number;
-  supports_streaming: boolean;
+  id: string; // "gpt-4", "claude-3-opus", etc. (모델 식별자)
+  name: string; // "GPT-4", "Claude 3 Opus", etc. (표시 이름)
+  provider: string; // "OpenAI", "Anthropic", etc.
+  description?: string;
+  max_tokens?: number;
+  supports_streaming?: boolean;
 }
 
 /**
