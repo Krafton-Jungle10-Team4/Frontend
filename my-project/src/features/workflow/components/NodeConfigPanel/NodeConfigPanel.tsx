@@ -158,8 +158,8 @@ export const NodeConfigPanel = () => {
         {/* LLM 노드 전용 */}
         {isLLMNode && (
           <>
-            <div>
-              <Label>모델</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">모델</Label>
               <LLMModelSelect
                 value={(() => {
                   const model = (node.data as LLMNodeType).model;
@@ -182,8 +182,8 @@ export const NodeConfigPanel = () => {
               />
             </div>
 
-            <div>
-              <Label>프롬프트</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">프롬프트</Label>
               <Textarea
                 value={(node.data as LLMNodeType).prompt || ''}
                 onChange={(e) => handleUpdate('prompt', e.target.value)}
@@ -192,8 +192,8 @@ export const NodeConfigPanel = () => {
               />
             </div>
 
-            <div>
-              <Label>Temperature</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">Temperature</Label>
               <Input
                 type="number"
                 min="0"
@@ -206,8 +206,8 @@ export const NodeConfigPanel = () => {
               />
             </div>
 
-            <div>
-              <Label>Max Tokens</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">Max Tokens</Label>
               <Input
                 type="number"
                 min="1"
@@ -224,8 +224,8 @@ export const NodeConfigPanel = () => {
         {/* Knowledge Retrieval 노드 전용 */}
         {isKnowledgeRetrievalNode && (
           <>
-            <div>
-              <Label>데이터셋</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">데이터셋</Label>
               <Input
                 value={(node.data as KnowledgeRetrievalNodeType).dataset || ''}
                 onChange={(e) => handleUpdate('dataset', e.target.value)}
@@ -233,8 +233,8 @@ export const NodeConfigPanel = () => {
               />
             </div>
 
-            <div>
-              <Label>검색 모드</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">검색 모드</Label>
               <Select
                 value={(node.data as KnowledgeRetrievalNodeType).retrievalMode}
                 onValueChange={(value) => handleUpdate('retrievalMode', value)}
@@ -250,8 +250,8 @@ export const NodeConfigPanel = () => {
               </Select>
             </div>
 
-            <div>
-              <Label>Top K</Label>
+            <div className="space-y-2">
+              <Label className="font-semibold">Top K</Label>
               <Input
                 type="number"
                 min="1"
@@ -263,8 +263,10 @@ export const NodeConfigPanel = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="documentIds">문서 선택 (선택사항)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="documentIds" className="font-semibold">
+                문서 선택 (선택사항)
+              </Label>
               <MultiSelect
                 id="documentIds"
                 value={
