@@ -88,4 +88,12 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/users/${id}`,
     DELETE: (id: string) => `/users/${id}`,
   },
+
+  // Widget 임베딩 (SnapAgent API)
+  WIDGET: {
+    CONFIG: (widgetKey: string) => `/api/v1/widget/config/${widgetKey}`,
+    SESSIONS: '/api/v1/widget/sessions',
+    CHAT: '/api/v1/widget/chat',
+    TRACK: (widgetKey: string) => `/api/v1/widget/config/${widgetKey}/track`,
+  },
 } as const;
