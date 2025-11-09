@@ -83,6 +83,8 @@ const WorkflowInner = () => {
   // Deployment store는 다이얼로그 컴포넌트 내부에서 사용됨
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [panelWidth, setPanelWidth] = useState(320); // 초기 너비 320px (w-80)
+  const [isResizing, setIsResizing] = useState(false);
   const { screenToFlowPosition } = useReactFlow();
 
   // 실시간 검증 비활성화
@@ -100,6 +102,42 @@ const WorkflowInner = () => {
       loadWorkflow(botId);
     }
   }, [botId, loadWorkflow]);
+
+  // 패널 리사이즈 핸들러
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault(); // 텍스트 선택 방지
+    setIsResizing(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    // 리사이즈 중 텍스트 선택 방지
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newWidth = window.innerWidth - e.clientX - 16; // 16px은 right-4 여백
+      // 최소 280px, 최대 600px로 제한
+      setPanelWidth(Math.min(Math.max(newWidth, 280), 600));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isResizing]);
 
   // React Flow 상태 변경 핸들러
   const onNodesChange = useCallback(
@@ -374,7 +412,17 @@ const WorkflowInner = () => {
 
       {/* 우측 노드 설정 패널 - absolute 오버레이 (노드 선택 시에만 표시) */}
       {selectedNodeId && (
-        <div className="absolute top-20 right-0 bottom-0 w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto z-20 shadow-lg">
+        <div
+          className="absolute top-20 right-4 bottom-4 border border-gray-300 dark:border-gray-600 border-l-2 bg-white dark:bg-gray-800 overflow-hidden z-20 shadow-2xl rounded-xl"
+          style={{ width: `${panelWidth}px` }}
+        >
+          {/* 리사이즈 핸들 */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors group select-none"
+            onMouseDown={handleResizeStart}
+          >
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-10 bg-gray-400 dark:bg-gray-500 rounded-full group-hover:bg-blue-500 select-none" />
+          </div>
           <NodeConfigPanel />
         </div>
       )}
