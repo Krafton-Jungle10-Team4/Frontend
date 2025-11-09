@@ -261,7 +261,7 @@ const WorkflowInner = () => {
           title: nodeType,
           desc: getNodeDescription(nodeType),
           ...(nodeType === BlockEnum.LLM && {
-            model: { provider: 'OpenAI', name: 'GPT-4' },
+            model: { provider: 'OpenAI', name: 'gpt-4' }, // name에는 모델 ID 저장
             prompt: '프롬프트를 입력하세요.',
           }),
           ...(nodeType === BlockEnum.KnowledgeRetrieval && {
