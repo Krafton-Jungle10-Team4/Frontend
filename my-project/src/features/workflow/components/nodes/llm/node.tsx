@@ -4,9 +4,10 @@ import { memo, useMemo } from 'react';
 /**
  * LLM 노드
  * AI 모델 호출
+ * - Provider와 Model 분리 표시
  */
 const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
-  const { model, prompt } = data;
+  const { model } = data;
 
   const modelDisplay = useMemo(() => {
     if (!model) return null;
@@ -24,27 +25,27 @@ const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
   }, [model]);
 
   return (
-    <div className="px-3 py-1">
-      {/* 모델 정보 */}
+    <div className="px-3 py-2 space-y-2">
+      {/* Provider 정보 */}
       {modelDisplay && (
-        <div className="mb-1 rounded-md bg-workflow-block-parma-bg px-2 py-1">
+        <div className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5">
           <div className="system-2xs-regular-uppercase text-text-tertiary">
-            MODEL
+            PROVIDER
           </div>
-          <div className="system-xs-medium text-text-primary mt-0.5">
-            {modelDisplay.provider} • {modelDisplay.name}
+          <div className="system-xs-medium text-text-primary mt-1">
+            {modelDisplay.provider}
           </div>
         </div>
       )}
 
-      {/* 프롬프트 정보 */}
-      {prompt && (
-        <div>
+      {/* Model 정보 */}
+      {modelDisplay && (
+        <div className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5">
           <div className="system-2xs-regular-uppercase text-text-tertiary">
-            PROMPT
+            MODEL
           </div>
-          <div className="system-xs-regular text-text-secondary mt-0.5 line-clamp-2">
-            {prompt}
+          <div className="system-xs-medium text-text-primary mt-1">
+            {modelDisplay.name}
           </div>
         </div>
       )}
