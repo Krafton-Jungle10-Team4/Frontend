@@ -105,13 +105,6 @@ const BaseNode = ({ data, children }: BaseNodeProps) => {
 
         {/* 노드 내용 */}
         {children}
-
-        {/* 노드 설명 */}
-        {data.desc && (
-          <div className="system-xs-regular whitespace-pre-line break-words px-3 pb-2 pt-1 text-text-tertiary">
-            {data.desc}
-          </div>
-        )}
       </div>
     </div>
   );

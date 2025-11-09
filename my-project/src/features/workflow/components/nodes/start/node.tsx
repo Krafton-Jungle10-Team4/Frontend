@@ -4,15 +4,10 @@ import { memo } from 'react';
 /**
  * Start 노드
  * 워크플로우의 시작점
+ * - 아이콘과 제목만 표시 (BaseNode에서 제공)
  */
 const StartNode = ({ data: _data }: NodeProps<StartNodeType>) => {
-  return (
-    <div className="px-3 py-1">
-      <div className="system-xs-regular text-text-tertiary text-center">
-        워크플로우 시작
-      </div>
-    </div>
-  );
+  return <></>;
 };
 
 export default memo(StartNode);
