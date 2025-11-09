@@ -189,7 +189,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
   },
 
-  // 선택
+  // 선택 (React Flow가 nodes[].selected를 자동 관리하므로 selectedNodeId만 업데이트)
   selectNode: (id) => set({ selectedNodeId: id }),
 
   // UI 제어
