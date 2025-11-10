@@ -41,6 +41,7 @@ import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
 import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
+import { withEdgeMetadata } from '../../utils/edgeHelpers';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -175,9 +176,16 @@ const WorkflowInner = () => {
   // 노드 연결 처리
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, type: 'custom' }, eds));
+      setEdges((eds) => {
+        const updatedEdges = addEdge(
+          withEdgeMetadata(connection, nodes),
+          eds
+        );
+        push(nodes, updatedEdges);
+        return updatedEdges;
+      });
     },
-    [setEdges]
+    [nodes, setEdges, push]
   );
 
   const handleAutoLayout = useCallback(() => {
@@ -244,25 +252,36 @@ const WorkflowInner = () => {
   // 노드 삭제
   const handleDeleteNode = useCallback(() => {
     if (contextMenu?.nodeId) {
-      setNodes((nds) => nds.filter((node) => node.id !== contextMenu.nodeId));
-      setEdges((eds) =>
-        eds.filter(
-          (edge) =>
-            edge.source !== contextMenu.nodeId &&
-            edge.target !== contextMenu.nodeId
-        )
-      );
+      const nodeId = contextMenu.nodeId;
+
+      setNodes((nds) => {
+        const filteredNodes = nds.filter((node) => node.id !== nodeId);
+        setEdges((eds) => {
+          const filteredEdges = eds.filter(
+            (edge) => edge.source !== nodeId && edge.target !== nodeId
+          );
+          push(filteredNodes, filteredEdges);
+          return filteredEdges;
+        });
+        return filteredNodes;
+      });
     }
     closeContextMenu();
-  }, [contextMenu, setNodes, setEdges, closeContextMenu]);
+  }, [contextMenu, setNodes, setEdges, closeContextMenu, push]);
 
   // 엣지 삭제
   const handleDeleteEdge = useCallback(() => {
     if (contextMenu?.edgeId) {
-      setEdges((eds) => eds.filter((edge) => edge.id !== contextMenu.edgeId));
+      setEdges((eds) => {
+        const filteredEdges = eds.filter(
+          (edge) => edge.id !== contextMenu.edgeId
+        );
+        push(nodes, filteredEdges);
+        return filteredEdges;
+      });
     }
     closeContextMenu();
-  }, [contextMenu, setEdges, closeContextMenu]);
+  }, [contextMenu, setEdges, closeContextMenu, push, nodes]);
 
   // 노드 추가
   const handleAddNode = useCallback(
@@ -295,10 +314,14 @@ const WorkflowInner = () => {
         },
       };
 
-      setNodes((nds) => [...nds, newNode]);
+      setNodes((nds) => {
+        const updatedNodes = [...nds, newNode];
+        push(updatedNodes, edges);
+        return updatedNodes;
+      });
       closeContextMenu();
     },
-    [contextMenu, screenToFlowPosition, setNodes, closeContextMenu]
+    [contextMenu, screenToFlowPosition, setNodes, closeContextMenu, push, edges]
   );
 
   // 키보드 이벤트 (Delete/Backspace)

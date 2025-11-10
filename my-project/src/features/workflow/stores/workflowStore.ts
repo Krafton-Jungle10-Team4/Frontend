@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Node, Edge } from '@/shared/types/workflow.types';
+import { computeWorkflowAutoLayout } from '@/features/workflow/utils/autoLayout';
 
 /**
  * Workflow Store 상태 타입
@@ -126,7 +127,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
       if (bot.workflow) {
         const { nodes, edges } = bot.workflow;
-        set({ nodes, edges });
+        const laidOutNodes = nodes.length
+          ? computeWorkflowAutoLayout(nodes, edges)
+          : nodes;
+        set({ nodes: laidOutNodes, edges });
       } else {
         set({ nodes: [], edges: [] });
       }
