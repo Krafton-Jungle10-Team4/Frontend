@@ -14,7 +14,7 @@ interface FilesTabProps {
 }
 
 export function FilesTab({ language }: FilesTabProps) {
-  const { files, setFiles, sessionId } = useBotSetup();
+  const { files, setFiles, createdBotId } = useBotSetup();
 
   const translations = {
     en: {
@@ -73,8 +73,11 @@ export function FilesTab({ language }: FilesTabProps) {
     // Upload each file
     for (const fileItem of newFiles) {
       try {
-        // Use sessionId as botId during setup (before bot is created)
-        const data = await ApiClient.uploadFile(fileItem.file, sessionId);
+        // Use createdBotId for file upload
+        if (!createdBotId) {
+          throw new Error('Bot not created yet');
+        }
+        const data = await ApiClient.uploadFile(fileItem.file, createdBotId);
 
         // Update file with backend document_id and mark as uploaded
         setFiles((prev) =>
@@ -113,8 +116,11 @@ export function FilesTab({ language }: FilesTabProps) {
     );
 
     try {
-      // Use sessionId as botId during setup
-      await ApiClient.deleteFile(fileId, sessionId);
+      // Use createdBotId for file deletion
+      if (!createdBotId) {
+        throw new Error('Bot not created yet');
+      }
+      await ApiClient.deleteFile(fileId, createdBotId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       toast.success(
         language === 'ko'

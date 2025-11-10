@@ -44,6 +44,6 @@ export interface BotSetupData {
   files: FileItem[];
   knowledgeText: string;
 
-  // Session
-  sessionId: string;
+  // Created Bot
+  createdBotId: string | null;
 }

@@ -95,8 +95,8 @@ export const botApi = {
       const request: CreateBotRequest = {
         name: dto.name,
         goal: dto.goal as any, // BotGoal enum으로 변환됨
-        personality: dto.personality || '',
-        knowledge: dto.knowledge || [],
+        personality: dto.personality,
+        knowledge: dto.knowledge,
       };
 
       // workflow가 제공되면 백엔드 스키마로 변환하여 추가
@@ -173,7 +173,7 @@ export const botApi = {
    */
   updateStatus: async (
     id: string,
-    status: 'active' | 'inactive' | 'error'
+    status: 'draft' | 'active' | 'inactive' | 'error'
   ): Promise<Bot> => {
     const { data } = await apiClient.patch<Bot>(API_ENDPOINTS.BOTS.UPDATE(id), {
       status,

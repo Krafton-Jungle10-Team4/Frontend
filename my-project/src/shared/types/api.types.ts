@@ -144,9 +144,9 @@ export enum BotGoal {
 
 export interface CreateBotRequest {
   name: string; // 1-100 characters
-  goal: BotGoal;
-  personality: string; // max 2000 characters
-  knowledge: string[]; // document_ids
+  goal?: BotGoal; // Optional - can create with just name
+  personality?: string; // max 2000 characters - Optional
+  knowledge?: string[]; // document_ids - Optional
   workflow?: BackendWorkflow;
 }
 
@@ -155,7 +155,7 @@ export interface BotResponse {
   name: string;
   description: string | null;
   avatar: string | null;
-  status: 'active' | 'inactive' | 'training';
+  status: 'draft' | 'active' | 'inactive' | 'training';
   messages_count: number;
   errors_count: number;
   created_at: string; // ISO 8601

@@ -11,7 +11,7 @@ export interface Bot {
   name: string;
   description?: string;
   avatar?: string;
-  status: 'active' | 'inactive' | 'error';
+  status: 'draft' | 'active' | 'inactive' | 'error';
   messagesCount: number;
   errorsCount: number;
   createdAt: string;
@@ -41,7 +41,14 @@ export interface UpdateBotDto {
   name?: string;
   description?: string;
   avatar?: string;
-  status?: 'active' | 'inactive' | 'error';
+  goal?: string;
+  personality?: string;
+  knowledge?: string[];
+  workflow?: {
+    nodes: Node[];
+    edges: Edge[];
+  };
+  status?: 'draft' | 'active' | 'inactive' | 'error';
 }
 
 // ============= Bot Form Types =============
@@ -88,6 +95,6 @@ export const isBot = (value: any): value is Bot => {
     value !== null &&
     typeof value.id === 'string' &&
     typeof value.name === 'string' &&
-    ['active', 'inactive', 'error'].includes(value.status)
+    ['draft', 'active', 'inactive', 'error'].includes(value.status)
   );
 };

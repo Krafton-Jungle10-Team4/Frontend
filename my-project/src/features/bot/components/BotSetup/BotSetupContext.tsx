@@ -3,7 +3,7 @@
  */
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { generateSessionId } from '@/shared/utils/session';
+// import { generateSessionId } from '@/shared/utils/session'; // Removed: no longer need session IDs
 import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import type {
   GoalType,
@@ -35,8 +35,9 @@ export interface BotSetupContextType {
   knowledgeText: string;
   setKnowledgeText: (text: string) => void;
 
-  // Session
-  sessionId: string;
+  // Created Bot
+  createdBotId: string | null;
+  setCreatedBotId: (botId: string | null) => void;
 
   // Navigation
   step: number;
@@ -91,8 +92,8 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
   // Dialog
   const [showExitDialog, setShowExitDialog] = useState(false);
 
-  // Session ID (generated once)
-  const [sessionId] = useState(() => generateSessionId());
+  // Created Bot ID (set after Step 1)
+  const [createdBotId, setCreatedBotId] = useState<string | null>(null);
 
   // Validation functions
   const isStepValid = (stepNumber: number): boolean => {
@@ -146,6 +147,7 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
     setKnowledgeText('');
     setStep(1);
     setShowExitDialog(false);
+    setCreatedBotId(null);
   };
 
   const value: BotSetupContextType = {
@@ -171,8 +173,9 @@ export function BotSetupProvider({ children }: { children: ReactNode }) {
     knowledgeText,
     setKnowledgeText,
 
-    // Session
-    sessionId,
+    // Created Bot
+    createdBotId,
+    setCreatedBotId,
 
     // Navigation
     step,

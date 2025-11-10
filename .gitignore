@@ -99,3 +99,4 @@ vite.config.ts.timestamp-*
 !CONTRIBUTING.md
 !LICENSE.md
 !docs/**/*.md
+test-widget.html

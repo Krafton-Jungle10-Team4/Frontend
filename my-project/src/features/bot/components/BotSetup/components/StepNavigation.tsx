@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Button } from '@/shared/components/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
 import { useCreateBot } from '../../../hooks/useCreateBot';
 import { buildCreateBotDto } from '../../../utils/botSetupHelpers';
+import { botApi } from '../../../api/botApi';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
 
@@ -24,9 +26,13 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     setShowCustomInput,
     hasAnyData,
     setShowExitDialog,
+    botName,
+    createdBotId,
+    setCreatedBotId,
   } = context;
 
   const { createBot, isCreating } = useCreateBot();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const translations = {
     en: {
@@ -49,64 +55,67 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
   const navigate = useNavigate();
 
   const handleNext = async () => {
-    if (step < 3) {
-      setStep(step + 1);
-      if (step === 2) {
+    try {
+      if (step === 1) {
+        // Step 1 → Step 2: Create bot with just name (DRAFT status)
+        if (!createdBotId) {
+          setIsUpdating(true);
+          const newBot = await botApi.create({ name: botName.trim() });
+          setCreatedBotId(newBot.id);
+          console.log('✅ [Step 1] Bot created:', newBot.id);
+          setIsUpdating(false);
+        }
+        setStep(2);
+      } else if (step === 2) {
+        // Step 2 → Step 3: PATCH bot with goal/personality
+        if (createdBotId) {
+          setIsUpdating(true);
+          const goal = selectedGoal === 'other' ? customGoal.trim() : selectedGoal;
+          await botApi.update(createdBotId, { goal } as any);
+          console.log('✅ [Step 2] Bot updated with goal:', goal);
+          setIsUpdating(false);
+        }
+        setStep(3);
         setShowCustomInput(false);
-      }
-    } else {
-      // Step 3: Train Agent button clicked
-      try {
-        const dto = buildCreateBotDto(context);
+      } else if (step === 3) {
+        // Step 3: Complete setup - PATCH status to ACTIVE
+        if (!createdBotId) {
+          toast.error(
+            language === 'ko' ? '봇 ID를 찾을 수 없습니다' : 'Bot ID not found'
+          );
+          return;
+        }
 
-        // 🔍 백엔드로 전달되는 데이터 확인
-        console.log('📤 [Bot Creation] DTO to Backend:', dto);
-        console.log('📋 [Bot Creation] Context Data:', {
-          botName: context.botName,
-          selectedGoal: context.selectedGoal,
-          customGoal: context.customGoal,
-          uploadedFiles: context.files
-            .filter((f) => f.status === 'uploaded')
-            .map((f) => ({
-              id: f.id,
-              file: f.file,
-              status: f.status,
-            })),
-        });
+        setIsUpdating(true);
 
-        // 봇 생성 API 호출
-        const newBot = await createBot(dto);
-
-        // 🔍 백엔드 응답 데이터 확인
-        console.log('📥 [Bot Creation] Response from Backend:', newBot);
-        console.log('✅ [Bot Creation] Created Bot Info:', {
-          id: newBot.id,
-          name: newBot.name,
-          status: newBot.status,
-          messagesCount: newBot.messagesCount,
-          errorsCount: newBot.errorsCount,
-          createdAt: newBot.createdAt,
-        });
+        // Set status to ACTIVE
+        await botApi.updateStatus(createdBotId, 'active');
+        console.log('✅ [Step 3] Bot status set to ACTIVE');
 
         // 성공 메시지
         toast.success(
           language === 'ko' ? '봇이 생성되었습니다' : 'Bot created successfully'
         );
 
-        // Workflow 화면으로 이동 (botId 포함)
-        navigate(`/bot/${newBot.id}/workflow`, {
+        // Workflow 화면으로 이동
+        navigate(`/bot/${createdBotId}/workflow`, {
           state: {
-            botName: newBot.name,
+            botName: botName,
             goal: selectedGoal === 'other' ? customGoal : selectedGoal,
             knowledge: knowledgeText,
           },
         });
-      } catch (error) {
-        console.error('Bot creation error:', error);
-        toast.error(
-          language === 'ko' ? '봇 생성에 실패했습니다' : 'Failed to create bot'
-        );
+
+        setIsUpdating(false);
       }
+    } catch (error) {
+      console.error('Bot setup error:', error);
+      toast.error(
+        language === 'ko'
+          ? '봇 설정 중 오류가 발생했습니다'
+          : 'Error during bot setup'
+      );
+      setIsUpdating(false);
     }
   };
 
@@ -165,19 +174,19 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
 
           <Button
             onClick={handleNext}
-            disabled={!isStepValid(step) || isCreating}
+            disabled={!isStepValid(step) || isUpdating}
             className={`h-12 bg-teal-500 hover:bg-teal-600 text-white ${
               step > 1 ? 'flex-[8]' : 'w-full'
             }`}
           >
-            {isCreating
+            {isUpdating
               ? language === 'ko'
-                ? '생성 중...'
-                : 'Creating...'
+                ? '처리 중...'
+                : 'Processing...'
               : step === 3
                 ? t.trainAgent
                 : t.next}
-            {!isCreating && <ArrowRight size={18} className="ml-2" />}
+            {!isUpdating && <ArrowRight size={18} className="ml-2" />}
           </Button>
         </div>
       </div>
