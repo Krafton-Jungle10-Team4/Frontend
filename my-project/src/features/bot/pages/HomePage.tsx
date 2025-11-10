@@ -19,6 +19,7 @@ import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';
+import { useBots } from '../hooks/useBots';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export function HomePage() {
     hasResults,
   } = useFilteredBots({ searchQuery });
   const { handleCreateBot, handleDeleteBot } = useBotActions();
+  const { loading: botsLoading, error: botsError } = useBots();
 
   // Bot 카드 클릭 시 워크플로우 페이지로 이동
   const handleBotClick = (botId: string) => {
@@ -133,17 +135,34 @@ export function HomePage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Bots List */}
           <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-            <BotList
-              bots={filteredBots}
-              searchQuery={searchQuery}
-              viewMode={viewMode}
-              language={language}
-              isEmpty={isEmpty}
-              hasResults={hasResults}
-              onDelete={handleDeleteBot}
-              onCreateBot={handleCreateBot}
-              onBotClick={handleBotClick}
-            />
+            {botsLoading && isEmpty ? (
+              <div className="flex items-center justify-center h-64 text-gray-500">
+                <p className="text-sm sm:text-base">
+                  {language === 'en'
+                    ? 'Loading bots...'
+                    : '봇을 불러오는 중입니다...'}
+                </p>
+              </div>
+            ) : (
+              <BotList
+                bots={filteredBots}
+                searchQuery={searchQuery}
+                viewMode={viewMode}
+                language={language}
+                isEmpty={isEmpty}
+                hasResults={hasResults}
+                onDelete={handleDeleteBot}
+                onCreateBot={handleCreateBot}
+                onBotClick={handleBotClick}
+              />
+            )}
+            {botsError && (
+              <p className="mt-4 text-sm text-red-500">
+                {language === 'en'
+                  ? 'Failed to load bots. Please try again.'
+                  : '봇 목록을 불러오지 못했습니다. 다시 시도해주세요.'}
+              </p>
+            )}
           </div>
 
           {/* Right Sidebar - Hidden on mobile and tablet */}

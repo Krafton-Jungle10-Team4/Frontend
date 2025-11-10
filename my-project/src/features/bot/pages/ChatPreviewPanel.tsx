@@ -13,6 +13,7 @@ interface Message {
 }
 
 interface ChatPreviewPanelProps {
+  botId?: string;
   botName: string;
   language: 'en' | 'ko';
 }
@@ -21,7 +22,7 @@ interface ChatPreviewPanelProps {
  * 챗봇 프리뷰 패널 (워크플로우 빌더 우측용)
  * BotPreview에서 챗봇 UI만 추출한 컴포넌트
  */
-export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
+export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelProps) {
   const translations = {
     en: {
       initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
@@ -109,6 +110,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         undefined, // documentIds - 필요시 전달
         sessionId || undefined, // sessionId
         {
+          bot_id: botId,
           max_tokens: 1000,
           temperature: 0.7,
         }
@@ -201,6 +203,7 @@ export function ChatPreviewPanel({ botName, language }: ChatPreviewPanelProps) {
         undefined,
         sessionId || undefined,
         {
+          bot_id: botId,
           max_tokens: 1000,
           temperature: 0.7,
         }

@@ -43,7 +43,7 @@ const WorkflowWithChat = () => {
 
           {/* Chatbot Preview */}
           <div className="w-96 flex-shrink-0">
-            <ChatPreviewPanel botName={botName} language={language} />
+            <ChatPreviewPanel botId={botId} botName={botName} language={language} />
           </div>
         </>
       )}

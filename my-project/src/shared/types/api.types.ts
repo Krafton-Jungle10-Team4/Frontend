@@ -164,3 +164,46 @@ export interface BotResponse {
   // 워크플로우 (백엔드 JSONB 스키마 - snake_case)
   workflow?: BackendWorkflow | null;
 }
+
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface BotListItemApiResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  nodeCount: number;
+  edgeCount: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface BotListResponseV2 {
+  data: BotListItemApiResponse[];
+  pagination: PaginationInfo;
+}
+
+export interface BotDetailApiResponse {
+  data: {
+    id: string;
+    name: string;
+    description: string | null;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string | null;
+    workflow?: BackendWorkflow | null;
+  };
+}
+
+export interface StatusToggleApiResponse {
+  data: {
+    id: string;
+    isActive: boolean;
+    updatedAt: string | null;
+  };
+}

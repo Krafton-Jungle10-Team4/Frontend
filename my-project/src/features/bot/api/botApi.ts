@@ -11,32 +11,53 @@ import {
   transformToBackend,
 } from '@/shared/utils/workflowTransform';
 import type { Bot, CreateBotDto, UpdateBotDto } from '../types/bot.types';
-import type { BotResponse, CreateBotRequest } from '@/shared/types/api.types';
+import type {
+  BotDetailApiResponse,
+  BotListItemApiResponse,
+  BotListResponseV2,
+  CreateBotRequest,
+  StatusToggleApiResponse,
+} from '@/shared/types/api.types';
 
 /**
  * API 응답 → 프론트엔드 Bot 타입 변환
  * (snake_case → camelCase)
  */
-function transformBotResponse(apiResponse: BotResponse): Bot {
-  // createdAt이 null이면 updatedAt 사용, 둘 다 없으면 현재 시간
+type BotDetailPayload = BotDetailApiResponse['data'];
+
+function transformBotDetailResponse(apiResponse: BotDetailPayload): Bot {
   const fallbackDate = new Date().toISOString();
-  const createdAt = apiResponse.created_at || apiResponse.updated_at || fallbackDate;
-  const updatedAt = apiResponse.updated_at || apiResponse.created_at || fallbackDate;
+  const createdAt = apiResponse.createdAt || fallbackDate;
+  const updatedAt = apiResponse.updatedAt || apiResponse.createdAt || fallbackDate;
 
   return {
     id: apiResponse.id,
     name: apiResponse.name,
     description: apiResponse.description || undefined,
-    avatar: apiResponse.avatar || undefined,
-    status: apiResponse.status as Bot['status'],
-    messagesCount: apiResponse.messages_count,
-    errorsCount: apiResponse.errors_count,
+    avatar: undefined,
+    status: apiResponse.isActive ? 'active' : 'inactive',
+    messagesCount: 0,
+    errorsCount: 0,
     createdAt,
     updatedAt,
-    // workflow 필드 변환 (백엔드 스키마 → 프론트 스키마)
     workflow: apiResponse.workflow
       ? transformFromBackend(apiResponse.workflow)
       : null,
+  };
+}
+
+function transformBotListItem(item: BotListItemApiResponse): Bot {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description || undefined,
+    avatar: undefined,
+    status: item.isActive ? 'active' : 'inactive',
+    messagesCount: 0,
+    errorsCount: 0,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt || item.createdAt,
+    workflow: null,
   };
 }
 
@@ -66,23 +87,24 @@ export const botApi = {
    * 모든 봇 조회
    */
   getAll: async (params?: { search?: string }): Promise<Bot[]> => {
-    const { data } = await apiClient.get<Bot[]>(API_ENDPOINTS.BOTS.LIST, {
-      params,
-    });
-    return data;
+    const { data } = await apiClient.get<BotListResponseV2>(
+      API_ENDPOINTS.BOTS.LIST,
+      {
+        params,
+      }
+    );
+    return data.data.map(transformBotListItem);
   },
 
   /**
    * 특정 봇 조회
    */
   getById: async (id: string): Promise<Bot> => {
-    // 백엔드 응답 구조: { data: BotResponse }
-    const { data } = await apiClient.get<{ data: BotResponse }>(
+    const { data } = await apiClient.get<BotDetailApiResponse>(
       API_ENDPOINTS.BOTS.BY_ID(id)
     );
 
-    // 실제 봇 데이터는 data.data에 위치
-    return transformBotResponse(data.data);
+    return transformBotDetailResponse(data.data);
   },
 
   /**
@@ -113,17 +135,12 @@ export const botApi = {
         );
       }
 
-      // 백엔드 응답 구조: { data: BotResponse }
-      const response = await apiClient.post<{ data: BotResponse }>(
+      const response = await apiClient.post<BotDetailApiResponse>(
         API_ENDPOINTS.BOTS.CREATE,
         request
       );
 
-      // 🔧 수정: response.data.data에서 실제 BotResponse 추출
-      const botData = response.data.data;
-
-      // BotResponse → Bot 변환 (snake_case → camelCase)
-      return transformBotResponse(botData);
+      return transformBotDetailResponse(response.data.data);
     } catch (error: any) {
       // 네트워크 연결 실패 시 (백엔드 미구현) Mock 데이터 생성
       if (
@@ -154,11 +171,20 @@ export const botApi = {
    * 봇 업데이트
    */
   update: async (id: string, dto: UpdateBotDto): Promise<Bot> => {
-    const { data } = await apiClient.patch<Bot>(
+    const payload: Record<string, unknown> = { ...dto };
+
+    if (dto.workflow) {
+      payload.workflow = transformToBackend(
+        dto.workflow.nodes,
+        dto.workflow.edges
+      );
+    }
+
+    const { data } = await apiClient.patch<BotDetailApiResponse>(
       API_ENDPOINTS.BOTS.UPDATE(id),
-      dto
+      payload
     );
-    return data;
+    return transformBotDetailResponse(data.data);
   },
 
   /**
@@ -175,9 +201,14 @@ export const botApi = {
     id: string,
     status: 'draft' | 'active' | 'inactive' | 'error'
   ): Promise<Bot> => {
-    const { data } = await apiClient.patch<Bot>(API_ENDPOINTS.BOTS.UPDATE(id), {
-      status,
-    });
-    return data;
+    const isActive = status === 'active';
+    await apiClient.patch<StatusToggleApiResponse>(
+      API_ENDPOINTS.BOTS.STATUS(id),
+      {
+        isActive,
+      }
+    );
+
+    return botApi.getById(id);
   },
 } as const;
