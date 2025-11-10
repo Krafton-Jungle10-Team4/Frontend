@@ -7,4 +7,4 @@ export { TopNavigation } from './TopNavigation';
 export { LeftSidebar } from './LeftSidebar';
 export { RightSidebar } from './RightSidebar';
 export { WorkspaceHeader } from './WorkspaceHeader';
-export { WorkspaceSidebar } from './WorkspaceSidebar';
+export { WorkspaceSidebar, type MenuItem } from './WorkspaceSidebar';

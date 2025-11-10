@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { Home, Spline, Activity, FileText } from 'lucide-react';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
@@ -9,7 +10,7 @@ import LogsView from '../components/views/LogsView';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 import { useWorkflowStore } from '../stores/workflowStore';
-import { TopNavigation } from '@/widgets';
+import { TopNavigation, WorkspaceSidebar, type MenuItem } from '@/widgets';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 
@@ -65,7 +66,9 @@ export const WorkflowBuilderPage = () => {
   const userName = user?.name || 'User';
   const userEmail = user?.email || '';
 
-  // UI store - 언어 설정
+  // UI store - 언어 설정 및 사이드바 상태
+  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
 
@@ -84,6 +87,41 @@ export const WorkflowBuilderPage = () => {
     }
   };
 
+  // Workflow-specific menu items
+  const workflowMenuItems = useMemo((): MenuItem[] => {
+    const labels =
+      language === 'ko'
+        ? ['홈', '오케스트레이션', '모니터링', '로그 및 어노테이션']
+        : ['Home', 'Orchestration', 'Monitoring', 'Logs & Annotations'];
+
+    return [
+      {
+        id: 'home',
+        icon: Home,
+        label: labels[0],
+        onClick: () => navigate('/home'),
+      },
+      {
+        id: 'flow',
+        icon: Spline,
+        label: labels[1],
+        onClick: () => setActiveView('flow'),
+      },
+      {
+        id: 'monitoring',
+        icon: Activity,
+        label: labels[2],
+        onClick: () => setActiveView('monitoring'),
+      },
+      {
+        id: 'logs',
+        icon: FileText,
+        label: labels[3],
+        onClick: () => setActiveView('logs'),
+      },
+    ];
+  }, [language, navigate]);
+
   const renderContent = () => {
     switch (activeView) {
       case 'flow':
@@ -98,25 +136,39 @@ export const WorkflowBuilderPage = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Top Navigation */}
-      <TopNavigation
-        onToggleSidebar={() => {}}
+    <div className="h-screen flex bg-gray-50">
+      {/* Workspace Sidebar */}
+      <WorkspaceSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         userName={userName}
-        userEmail={userEmail}
-        onHomeClick={() => navigate('/home')}
-        language={language}
-        onLanguageChange={setLanguage}
-        onLogout={handleLogout}
         currentPage={botName}
+        language={language}
+        menuItems={workflowMenuItems}
+        activeItemId={activeView}
+      />
+
+      {/* Workflow Sidebar - 전체 높이 */}
+      <WorkflowSlimSidebar
+        activeView={activeView}
+        onViewChange={setActiveView}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        <WorkflowSlimSidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Navigation */}
+        <TopNavigation
+          onToggleSidebar={() => setSidebarOpen(true)}
+          userName={userName}
+          userEmail={userEmail}
+          onHomeClick={() => navigate('/home')}
+          language={language}
+          onLanguageChange={setLanguage}
+          onLogout={handleLogout}
+          currentPage={botName}
         />
+
+        {/* Content */}
         <div className="flex-1 overflow-hidden">{renderContent()}</div>
       </div>
     </div>
