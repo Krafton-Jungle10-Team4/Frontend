@@ -53,4 +53,4 @@ const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
   );
 };
 
-export default memo(LLMNode);
+export default LLMNode;

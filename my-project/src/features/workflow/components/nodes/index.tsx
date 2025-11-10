@@ -1,4 +1,3 @@
-import { memo, useMemo } from 'react';
 import type { NodeProps } from '@xyflow/react';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
 import { NodeComponentMap } from './components';
@@ -12,7 +11,7 @@ const CustomNode = (props: NodeProps) => {
   const data = props.data as CommonNodeType;
 
   // 노드 타입에 맞는 컴포넌트 선택
-  const NodeComponent = useMemo(() => NodeComponentMap[data.type], [data.type]);
+  const NodeComponent = NodeComponentMap[data.type];
 
   return (
     <BaseNode data={data} selected={props.selected}>
@@ -23,4 +22,4 @@ const CustomNode = (props: NodeProps) => {
 
 CustomNode.displayName = 'CustomNode';
 
-export default memo(CustomNode);
+export default CustomNode;

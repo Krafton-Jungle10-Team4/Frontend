@@ -10,4 +10,4 @@ const EndNode = ({ data: _data }: NodeProps<EndNodeType>) => {
   return <></>;
 };
 
-export default memo(EndNode);
+export default EndNode;

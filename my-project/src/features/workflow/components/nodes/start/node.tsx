@@ -10,4 +10,4 @@ const StartNode = ({ data: _data }: NodeProps<StartNodeType>) => {
   return <></>;
 };
 
-export default memo(StartNode);
+export default StartNode;

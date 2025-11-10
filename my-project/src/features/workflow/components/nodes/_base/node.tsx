@@ -112,4 +112,4 @@ const BaseNode = ({ data, children, selected }: BaseNodeProps) => {
   );
 };
 
-export default memo(BaseNode);
+export default BaseNode;
