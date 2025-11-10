@@ -6,9 +6,17 @@ import {
   Settings,
   X,
   ChevronDown,
+  type LucideIcon,
 } from 'lucide-react';
 
 type Language = 'en' | 'ko';
+
+export interface MenuItem {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+  onClick?: () => void;
+}
 
 interface WorkspaceSidebarProps {
   isOpen: boolean;
@@ -16,6 +24,8 @@ interface WorkspaceSidebarProps {
   userName?: string;
   currentPage?: string;
   language: Language;
+  menuItems?: MenuItem[];
+  activeItemId?: string;
 }
 
 export function WorkspaceSidebar({
@@ -24,6 +34,8 @@ export function WorkspaceSidebar({
   userName = 'User',
   currentPage = 'Home',
   language,
+  menuItems,
+  activeItemId,
 }: WorkspaceSidebarProps) {
   if (!isOpen) return null;
 
@@ -47,6 +59,17 @@ export function WorkspaceSidebar({
   };
 
   const t = translations[language];
+
+  // Default menu items (Home page)
+  const defaultMenuItems: MenuItem[] = [
+    { id: 'home', icon: Home, label: t.home },
+    { id: 'integrations', icon: Puzzle, label: t.integrations },
+    { id: 'usage', icon: BarChart3, label: t.usage },
+    { id: 'billing', icon: CreditCard, label: t.billing },
+    { id: 'settings', icon: Settings, label: t.settings },
+  ];
+
+  const items = menuItems || defaultMenuItems;
 
   return (
     <>
@@ -83,32 +106,25 @@ export function WorkspaceSidebar({
           {/* Navigation Items */}
           <nav className="flex-1 p-3">
             <div className="space-y-1">
-              <button
-                className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg ${
-                  currentPage === t.home
-                    ? 'text-gray-900 bg-gray-100 font-semibold'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Home size={18} />
-                <span>{t.home}</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                <Puzzle size={18} />
-                <span>{t.integrations}</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                <BarChart3 size={18} />
-                <span>{t.usage}</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                <CreditCard size={18} />
-                <span>{t.billing}</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                <Settings size={18} />
-                <span>{t.settings}</span>
-              </button>
+              {items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeItemId ? activeItemId === item.id : currentPage === item.label;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={item.onClick}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg ${
+                      isActive
+                        ? 'text-gray-900 bg-gray-100 font-semibold'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </nav>
         </div>
