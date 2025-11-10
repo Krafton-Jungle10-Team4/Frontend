@@ -144,17 +144,4 @@ const ContextMenu = ({
   );
 };
 
-/**
- * 아이콘 문자열을 이모지로 변환
- */
-const getIconEmoji = (icon: string): string => {
-  const iconMap: Record<string, string> = {
-    play: '▶️',
-    brain: '🤖',
-    book: '📚',
-    flag: '🏁',
-  };
-  return iconMap[icon] || '📦';
-};
-
 export default ContextMenu;
