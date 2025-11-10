@@ -3,6 +3,25 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import { workflowApi } from '../../api/workflowApi';
 import type { NodeTypeResponse } from '../../types/api.types';
 
+// 아이콘 매핑
+const ICON_MAP: Record<string, string> = {
+  play: '▶️',
+  brain: '🤖',
+  book: '📚',
+  flag: '🏁',
+};
+
+// Fallback 노드 타입 (백엔드 API 실패 시 사용)
+const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
+  { type: 'start', label: 'Start', icon: 'play', max_instances: 1, configurable: false },
+  { type: 'llm', label: 'LLM', icon: 'brain', max_instances: -1, configurable: true },
+  { type: 'knowledge-retrieval', label: 'Knowledge Retrieval', icon: 'book', max_instances: -1, configurable: true },
+  { type: 'end', label: 'End', icon: 'flag', max_instances: 1, configurable: false },
+];
+
+// 아이콘 문자열을 이모지로 변환
+const getIconEmoji = (icon: string): string => ICON_MAP[icon] || '📦';
+
 interface ContextMenuProps {
   x: number;
   y: number;
@@ -36,37 +55,7 @@ const ContextMenu = ({
         setNodeTypes(types);
       } catch (error) {
         console.error('Failed to load node types:', error);
-        // Fallback to hardcoded types
-        setNodeTypes([
-          {
-            type: 'start',
-            label: 'Start',
-            icon: 'play',
-            max_instances: 1,
-            configurable: false,
-          },
-          {
-            type: 'llm',
-            label: 'LLM',
-            icon: 'brain',
-            max_instances: -1,
-            configurable: true,
-          },
-          {
-            type: 'knowledge-retrieval',
-            label: 'Knowledge Retrieval',
-            icon: 'book',
-            max_instances: -1,
-            configurable: true,
-          },
-          {
-            type: 'end',
-            label: 'End',
-            icon: 'flag',
-            max_instances: 1,
-            configurable: false,
-          },
-        ]);
+        setNodeTypes(FALLBACK_NODE_TYPES);
       } finally {
         setLoading(false);
       }

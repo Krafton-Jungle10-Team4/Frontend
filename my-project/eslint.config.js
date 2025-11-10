@@ -6,8 +6,10 @@ import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import importPlugin from 'eslint-plugin-import';
+import reactCompiler from 'eslint-plugin-react-compiler';
 
 export default tseslint.config(
+  reactHooks.configs.flat.recommended,
   // 1. 무시할 파일/폴더 설정
   {
     ignores: [
@@ -48,13 +50,17 @@ export default tseslint.config(
       'react': react,                 // React 규칙
       'jsx-a11y': jsxA11y,            // 웹 접근성 규칙
       'import': importPlugin,         // import 문 정리 규칙
+      'react-compiler': reactCompiler, // React Compiler 규칙
     },
     
     // 상세 규칙 설정
     rules: {
       // React Hooks 규칙 적용
       ...reactHooks.configs.recommended.rules,
-      
+
+      // React Compiler 규칙 (React 규칙 준수 강제)
+      'react-compiler/react-compiler': 'error',
+
       // React Fast Refresh 규칙
       'react-refresh/only-export-components': 'off', // 컴포넌트 외 export 허용
 

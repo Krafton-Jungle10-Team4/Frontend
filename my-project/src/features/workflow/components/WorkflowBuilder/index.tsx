@@ -1,4 +1,5 @@
-import { memo, useCallback, useState, useEffect } from 'react';
+
+import { useCallback, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
@@ -475,4 +476,4 @@ const Workflow = () => {
   );
 };
 
-export default memo(Workflow);
+export default Workflow;

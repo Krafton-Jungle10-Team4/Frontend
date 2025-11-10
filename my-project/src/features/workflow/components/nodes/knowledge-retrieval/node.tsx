@@ -72,4 +72,4 @@ const KnowledgeRetrievalNode = ({
   );
 };
 
-export default memo(KnowledgeRetrievalNode);
+export default KnowledgeRetrievalNode;
