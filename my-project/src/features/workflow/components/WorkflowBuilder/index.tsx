@@ -18,7 +18,11 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Eye, EyeOff } from 'lucide-react';
+import {
+  AlignHorizontalJustifyCenter,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 import { Button } from '@shared/components/button';
 import type { Node, Edge } from '@/shared/types/workflow.types';
@@ -36,6 +40,7 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
 import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
+import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -174,6 +179,14 @@ const WorkflowInner = () => {
     },
     [setEdges]
   );
+
+  const handleAutoLayout = useCallback(() => {
+    if (nodes.length === 0) return;
+
+    const laidOutNodes = computeWorkflowAutoLayout(nodes, edges);
+    setNodes(laidOutNodes);
+    push(laidOutNodes, edges);
+  }, [nodes, edges, setNodes, push]);
 
   // 노드 클릭 핸들러 (선택)
   const onNodeClick: NodeMouseHandler = useCallback(
@@ -383,6 +396,16 @@ const WorkflowInner = () => {
                 미리보기
               </>
             )}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleAutoLayout}
+            disabled={nodes.length === 0}
+            title="노드 자동 정렬"
+          >
+            <AlignHorizontalJustifyCenter className="w-4 h-4" />
+            정렬
           </Button>
 
           <SaveButton />

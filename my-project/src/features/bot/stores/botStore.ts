@@ -98,7 +98,7 @@ export const useBotStore = create<BotStore>()(
       {
         name: 'bot-storage',
         partialize: (state) => ({
-          bots: state.bots,
+          selectedBotId: state.selectedBotId,
         }),
       }
     ),
