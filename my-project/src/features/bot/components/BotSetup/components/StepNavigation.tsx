@@ -88,6 +88,16 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
 
         setIsUpdating(true);
 
+        // Update knowledge with uploaded file IDs
+        const uploadedFileIds = context.files
+          .filter((f) => f.status === 'uploaded')
+          .map((f) => f.id);
+
+        if (uploadedFileIds.length > 0) {
+          await botApi.update(createdBotId, { knowledge: uploadedFileIds } as any);
+          console.log('✅ [Step 3] Bot updated with knowledge:', uploadedFileIds);
+        }
+
         // Set status to ACTIVE
         await botApi.updateStatus(createdBotId, 'active');
         console.log('✅ [Step 3] Bot status set to ACTIVE');
