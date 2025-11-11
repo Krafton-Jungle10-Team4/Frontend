@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { RotateCw, ExternalLink } from 'lucide-react';
-import { chatApi, formatChatMessage } from '@/features/chat/api/chatApi';
+import { chatApi, formatChatMessage, sendMessageStream } from '@/features/chat/api/chatApi';
 import { toast } from 'sonner';
 import type { Source } from '@/shared/types/api.types';
 
@@ -16,13 +16,19 @@ interface ChatPreviewPanelProps {
   botId?: string;
   botName: string;
   language: 'en' | 'ko';
+  supportsStreaming?: boolean;
 }
 
 /**
  * 챗봇 프리뷰 패널 (워크플로우 빌더 우측용)
  * BotPreview에서 챗봇 UI만 추출한 컴포넌트
  */
-export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelProps) {
+export function ChatPreviewPanel({
+  botId,
+  botName,
+  language,
+  supportsStreaming = false,
+}: ChatPreviewPanelProps) {
   const translations = {
     en: {
       initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
@@ -65,7 +71,20 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
+  const sessionIdRef = useRef<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const isStreamingFeatureOn =
+    supportsStreaming && import.meta.env.VITE_USE_STREAMING === 'true';
+
+  const ensureSessionId = () => {
+    if (!sessionIdRef.current) {
+      const generated = `session_${crypto.randomUUID()}`;
+      sessionIdRef.current = generated;
+      setSessionId(generated);
+    }
+    return sessionIdRef.current;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -101,14 +120,79 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
 
     setMessages([...messages, newMessage]);
     setInputValue('');
+
+    const assistantMessageId = `${Date.now()}_assistant`;
+    const emptyAssistantMessage: Message = {
+      id: assistantMessageId,
+      type: 'bot',
+      content: '',
+      timestamp: new Date(),
+      sources: [],
+    };
+
+    setMessages((prev) => [...prev, emptyAssistantMessage]);
     setIsTyping(true);
 
     try {
-      // 실제 Chat API 호출
+      const shouldStream = isStreamingFeatureOn && Boolean(botId);
+
+      if (shouldStream) {
+        const activeSessionId = sessionIdRef.current || ensureSessionId();
+
+        await sendMessageStream(userMessageContent, botId!, {
+          sessionId: activeSessionId,
+          topK: 5,
+          temperature: 0.7,
+          maxTokens: 1000,
+          includeSources: true,
+          onChunk: (chunk) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot') {
+                lastMsg.content += chunk;
+              }
+              return updated;
+            });
+          },
+          onSources: (sources: Source[]) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot') {
+                lastMsg.sources = sources;
+              }
+              return updated;
+            });
+          },
+          onComplete: () => setIsTyping(false),
+          onError: (error) => {
+            setIsTyping(false);
+            const errorText =
+              language === 'ko'
+                ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
+                : `Sorry, an error occurred: ${error.message}`;
+
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
+                lastMsg.content = errorText;
+              }
+              return updated;
+            });
+
+            toast.error(errorText);
+          },
+        });
+
+        return;
+      }
+
       const response = await chatApi.sendMessage(
         userMessageContent,
-        undefined, // documentIds - 필요시 전달
-        sessionId || undefined, // sessionId
+        undefined,
+        sessionIdRef.current || undefined,
         {
           bot_id: botId,
           max_tokens: 1000,
@@ -116,41 +200,32 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
         }
       );
 
-      // 세션 ID 저장 (첫 응답 시)
-      if (response.sessionId && !sessionId) {
+      if (response.sessionId) {
+        sessionIdRef.current = response.sessionId;
         setSessionId(response.sessionId);
       }
 
       setIsTyping(false);
 
-      // API 응답을 Message 형식으로 변환
-      const botResponse: Message = {
-        id: response.message.id,
-        type: 'bot',
-        content: response.message.content,
-        timestamp: new Date(response.message.timestamp),
-        sources: response.message.sources,
-      };
-
-      setMessages((prev) => [...prev, botResponse]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastMsg = updated[updated.length - 1];
+        if (lastMsg && lastMsg.type === 'bot') {
+          lastMsg.content = response.message.content;
+          lastMsg.sources = response.message.sources;
+        }
+        return updated;
+      });
     } catch (error) {
       setIsTyping(false);
-      console.error('Chat API error:', error);
+      console.error('Chat error:', error);
 
-      // 에러 메시지 구체화
       let errorText =
         language === 'ko'
           ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
           : 'Sorry, an error occurred while processing your response.';
 
       if (error instanceof Error) {
-        console.error('Error details:', {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        });
-
-        // 에러 타입별 메시지 커스터마이징
         if (error.message.includes('401') || error.message.includes('403')) {
           errorText =
             language === 'ko'
@@ -169,16 +244,15 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
         }
       }
 
-      // 에러 시 폴백 응답
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: errorText,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastMsg = updated[updated.length - 1];
+        if (lastMsg && lastMsg.type === 'bot') {
+          lastMsg.content = errorText;
+        }
+        return updated;
+      });
 
-      // 사용자에게 에러 알림
       toast.error(errorText);
     }
   };
@@ -194,14 +268,79 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
     };
 
     setMessages([...messages, newMessage]);
+
+    const assistantMessageId = `${Date.now()}_assistant`;
+    const emptyAssistantMessage: Message = {
+      id: assistantMessageId,
+      type: 'bot',
+      content: '',
+      timestamp: new Date(),
+      sources: [],
+    };
+
+    setMessages((prev) => [...prev, emptyAssistantMessage]);
     setIsTyping(true);
 
     try {
-      // 실제 Chat API 호출
+      const shouldStream = isStreamingFeatureOn && Boolean(botId);
+
+      if (shouldStream) {
+        const activeSessionId = sessionIdRef.current || ensureSessionId();
+
+        await sendMessageStream(msg, botId!, {
+          sessionId: activeSessionId,
+          topK: 5,
+          temperature: 0.7,
+          maxTokens: 1000,
+          includeSources: true,
+          onChunk: (chunk) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot') {
+                lastMsg.content += chunk;
+              }
+              return updated;
+            });
+          },
+          onSources: (sources: Source[]) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot') {
+                lastMsg.sources = sources;
+              }
+              return updated;
+            });
+          },
+          onComplete: () => setIsTyping(false),
+          onError: (error) => {
+            setIsTyping(false);
+            const errorText =
+              language === 'ko'
+                ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
+                : `Sorry, an error occurred: ${error.message}`;
+
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
+                lastMsg.content = errorText;
+              }
+              return updated;
+            });
+
+            toast.error(errorText);
+          },
+        });
+
+        return;
+      }
+
       const response = await chatApi.sendMessage(
         msg,
         undefined,
-        sessionId || undefined,
+        sessionIdRef.current || undefined,
         {
           bot_id: botId,
           max_tokens: 1000,
@@ -209,39 +348,32 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
         }
       );
 
-      // 세션 ID 저장 (첫 응답 시)
-      if (response.sessionId && !sessionId) {
+      if (response.sessionId) {
+        sessionIdRef.current = response.sessionId;
         setSessionId(response.sessionId);
       }
 
       setIsTyping(false);
 
-      const botResponse: Message = {
-        id: response.message.id,
-        type: 'bot',
-        content: response.message.content,
-        timestamp: new Date(response.message.timestamp),
-        sources: response.message.sources,
-      };
-      setMessages((prev) => [...prev, botResponse]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastMsg = updated[updated.length - 1];
+        if (lastMsg && lastMsg.type === 'bot') {
+          lastMsg.content = response.message.content;
+          lastMsg.sources = response.message.sources;
+        }
+        return updated;
+      });
     } catch (error) {
       setIsTyping(false);
-      console.error('Chat API error:', error);
+      console.error('Chat error:', error);
 
-      // 에러 메시지 구체화
       let errorText =
         language === 'ko'
           ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
           : 'Sorry, an error occurred while processing your response.';
 
       if (error instanceof Error) {
-        console.error('Error details:', {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        });
-
-        // 에러 타입별 메시지 커스터마이징
         if (error.message.includes('401') || error.message.includes('403')) {
           errorText =
             language === 'ko'
@@ -260,13 +392,14 @@ export function ChatPreviewPanel({ botId, botName, language }: ChatPreviewPanelP
         }
       }
 
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: errorText,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastMsg = updated[updated.length - 1];
+        if (lastMsg && lastMsg.type === 'bot') {
+          lastMsg.content = errorText;
+        }
+        return updated;
+      });
 
       toast.error(errorText);
     }
