@@ -98,4 +98,13 @@ export const API_ENDPOINTS = {
     CHAT_STREAM: '/api/v1/widget/chat/stream',
     TRACK: (widgetKey: string) => `/api/v1/widget/config/${widgetKey}/track`,
   },
+
+  // MCP 관리 (SnapAgent API)
+  MCP: {
+    PROVIDERS: '/api/v1/mcp/providers',
+    PROVIDER_DETAIL: (providerId: string) =>
+      `/api/v1/mcp/providers/${providerId}`,
+    KEYS: '/api/v1/mcp/keys',
+    KEY_DETAIL: (keyId: string) => `/api/v1/mcp/keys/${keyId}`,
+  },
 } as const;

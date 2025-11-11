@@ -13,6 +13,7 @@ export enum BlockEnum {
   LLM = 'llm',
   End = 'end',
   KnowledgeRetrieval = 'knowledge-retrieval',
+  MCP = 'mcp',
 }
 
 /**
@@ -144,3 +145,13 @@ export type WorkflowData = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+/**
+ * MCP 노드 타입
+ */
+export type MCPNodeType = CommonNodeType<{
+  type: BlockEnum.MCP;
+  provider_id?: string;
+  action?: string;
+  parameters?: Record<string, any>;
+}>;

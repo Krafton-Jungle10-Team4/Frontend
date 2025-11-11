@@ -25,6 +25,10 @@ export interface BackendNode {
     mode?: 'semantic' | 'keyword' | 'hybrid';
     top_k?: number;
     document_ids?: string[];
+    // MCP 노드
+    provider_id?: string;
+    action?: string;
+    parameters?: Record<string, any>;
   };
 }
 

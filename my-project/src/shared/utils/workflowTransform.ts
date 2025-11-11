@@ -47,6 +47,13 @@ export const transformToBackend = (
           top_k: (node.data as any).topK || 5,
           document_ids: (node.data as any).documentIds || [],
         }),
+
+        // MCP 노드 변환
+        ...(node.data.type === BlockEnum.MCP && {
+          provider_id: (node.data as any).provider_id || '',
+          action: (node.data as any).action || '',
+          parameters: (node.data as any).parameters || {},
+        }),
       },
     })),
 
@@ -118,6 +125,13 @@ export const transformFromBackend = (
           retrievalMode: capitalize(node.data.mode || 'semantic'),
           topK: node.data.top_k || 5,
           documentIds: node.data.document_ids || [],
+        }),
+
+        // MCP 노드 변환
+        ...(node.type === 'mcp' && {
+          provider_id: node.data.provider_id || '',
+          action: node.data.action || '',
+          parameters: node.data.parameters || {},
         }),
       },
     })),

@@ -8,6 +8,7 @@ const ICON_MAP: Record<string, string> = {
   play: '▶️',
   brain: '🤖',
   book: '📚',
+  plug: '🔌',
   flag: '🏁',
 };
 
@@ -16,6 +17,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   { type: 'start', label: 'Start', icon: 'play', max_instances: 1, configurable: false },
   { type: 'llm', label: 'LLM', icon: 'brain', max_instances: -1, configurable: true },
   { type: 'knowledge-retrieval', label: 'Knowledge Retrieval', icon: 'book', max_instances: -1, configurable: true },
+  { type: 'mcp', label: 'MCP Service', icon: 'plug', max_instances: -1, configurable: true },
   { type: 'end', label: 'End', icon: 'flag', max_instances: 1, configurable: false },
 ];
 
@@ -52,6 +54,16 @@ const ContextMenu = ({
     const loadNodeTypes = async () => {
       try {
         const types = await workflowApi.getNodeTypes();
+
+        // 백엔드 응답에 MCP가 없으면 추가
+        const hasMCP = types.some((type) => type.type === 'mcp');
+        if (!hasMCP) {
+          const mcpType = FALLBACK_NODE_TYPES.find((type) => type.type === 'mcp');
+          if (mcpType) {
+            types.push(mcpType);
+          }
+        }
+
         setNodeTypes(types);
       } catch (error) {
         console.error('Failed to load node types:', error);
