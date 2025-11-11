@@ -148,7 +148,7 @@ export const useDocumentsArray = () => {
 /**
  * 특정 봇의 완료된 문서만 반환 (Workflow용)
  *
- * @param botId - 봇 ID
+ * @param botId - 봇 ID (optional, null 시 빈 배열 반환)
  * @returns 완료된 문서 목록 (레거시 포맷)
  *
  * @note 필드 매핑 (표준 스키마 → 레거시):
@@ -156,9 +156,16 @@ export const useDocumentsArray = () => {
  *       - originalFilename → filename
  *       - fileSize → size
  *       - createdAt → uploadedAt
+ *
+ * @note TypeScript 타입 안정성:
+ *       - botId가 null/undefined인 경우 빈 배열 반환
+ *       - React hooks rules 준수 (unconditional invocation)
  */
-export const useCompletedDocuments = (botId: string) => {
+export const useCompletedDocuments = (botId?: string | null) => {
   return useAsyncDocumentStore((state) => {
+    // Guard: botId가 없으면 빈 배열 반환
+    if (!botId) return [];
+
     return Array.from(state.documents.values())
       .filter(
         (doc) => doc.botId === botId && doc.status === DocumentStatus.DONE
