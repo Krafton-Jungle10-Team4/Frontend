@@ -26,7 +26,15 @@ export const transformToBackend = (
 
         // LLM 노드 변환
         ...(node.data.type === BlockEnum.LLM && {
-          model: (node.data as any).model?.name || 'gpt-4',
+          provider:
+            (node.data as any).provider ||
+            extractProviderSlug((node.data as any).model) ||
+            'openai',
+          model:
+            (node.data as any).model?.name ||
+            (typeof (node.data as any).model === 'string'
+              ? (node.data as any).model
+              : 'gpt-4o-mini'),
           prompt_template: (node.data as any).prompt || '',
           temperature: (node.data as any).temperature || 0.7,
           max_tokens: (node.data as any).maxTokens || 500,
@@ -73,12 +81,31 @@ export const transformFromBackend = (
 
         // LLM 노드 변환
         ...(node.type === 'llm' && {
+          provider:
+            (node.data as any).provider ||
+            extractProviderSlug(node.data.model || ''),
           model:
             typeof node.data.model === 'object' && node.data.model !== null
-              ? node.data.model
+              ? {
+                  provider:
+                    (node.data as any).provider ||
+                    (node.data.model as any).provider ||
+                    extractProviderSlug(
+                      (node.data.model as any).name || ''
+                    ),
+                  name:
+                    (node.data.model as any).name ||
+                    extractModelName(
+                      (node.data.model as any).id ||
+                        (node.data.model as any).name ||
+                        ''
+                    ),
+                }
               : {
-                  provider: extractProvider(node.data.model || ''),
-                  name: extractModelName(node.data.model || 'gpt-4'),
+                  provider:
+                    (node.data as any).provider ||
+                    extractProviderSlug(node.data.model || ''),
+                  name: extractModelName(node.data.model || 'gpt-4o-mini'),
                 },
           prompt: node.data.prompt_template || '',
           temperature: node.data.temperature || 0.7,
@@ -112,31 +139,38 @@ export const transformFromBackend = (
  * 모델명에서 제공자 추출
  * "provider/model" 형식 지원 추가
  */
-const extractProvider = (model: string): string => {
+const extractProviderSlug = (model: unknown): string => {
+  if (typeof model === 'object' && model !== null && 'provider' in model) {
+    return String((model as { provider?: string }).provider || '').toLowerCase();
+  }
+
+  const normalized = typeof model === 'string' ? model : '';
+
   // "provider/model" 형식 파싱 (예: "anthropic/claude", "openai/gpt-4")
-  if (model.includes('/')) {
-    const [provider] = model.split('/');
+  if (normalized.includes('/')) {
+    const [provider] = normalized.split('/');
     const providerLower = provider.toLowerCase();
-    if (providerLower === 'openai') return 'OpenAI';
-    if (providerLower === 'anthropic') return 'Anthropic';
+    if (providerLower === 'openai') return 'openai';
+    if (providerLower === 'anthropic') return 'anthropic';
   }
 
   // 기존 로직: 모델명으로 추론
-  if (model.startsWith('gpt')) return 'OpenAI';
-  if (model.startsWith('claude')) return 'Anthropic';
+  if (normalized.startsWith('gpt')) return 'openai';
+  if (normalized.startsWith('claude')) return 'anthropic';
 
-  return 'Unknown';
+  return 'openai';
 };
 
 /**
  * "provider/model" 형식에서 실제 모델명 추출
  */
-const extractModelName = (model: string): string => {
-  if (model.includes('/')) {
-    const [, modelName] = model.split('/');
-    return modelName || model;
+const extractModelName = (model: unknown): string => {
+  const normalized = typeof model === 'string' ? model : '';
+  if (normalized.includes('/')) {
+    const [, modelName] = normalized.split('/');
+    return modelName || normalized;
   }
-  return model;
+  return normalized || 'gpt-4o-mini';
 };
 
 /**
