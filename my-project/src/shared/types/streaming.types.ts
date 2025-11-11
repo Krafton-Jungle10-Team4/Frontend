@@ -12,7 +12,7 @@ import type { Source } from './api.types';
 /**
  * SSE 이벤트 타입
  */
-export type SSEEventType = 'content' | 'sources' | 'error';
+export type SSEEventType = 'content' | 'sources' | 'error' | 'node';
 
 /**
  * 콘텐츠 청크 이벤트
@@ -52,9 +52,21 @@ export interface ErrorEvent {
 }
 
 /**
+ * 워크플로우 노드 이벤트
+ */
+export interface WorkflowNodeEvent {
+  type: 'node';
+  node_id: string;
+  node_type: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  message?: string;
+  output_preview?: string;
+}
+
+/**
  * SSE 이벤트 유니온 타입
  */
-export type SSEEvent = ContentEvent | SourcesEvent | ErrorEvent;
+export type SSEEvent = ContentEvent | SourcesEvent | ErrorEvent | WorkflowNodeEvent;
 
 /**
  * 완료 신호 (문자열 리터럴)
@@ -108,6 +120,11 @@ export interface StreamCallbacks {
    * @param error - 에러 객체
    */
   onError?: (error: Error) => void;
+
+  /**
+   * 워크플로우 노드 이벤트 수신 시 호출
+   */
+  onNodeEvent?: (event: WorkflowNodeEvent) => void;
 
   /**
    * 스트림 완료 시 호출

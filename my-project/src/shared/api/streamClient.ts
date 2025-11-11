@@ -3,7 +3,7 @@
  * Fetch API 기반 Server-Sent Events 구현
  */
 
-import type { SSEEvent, StreamCallbacks } from '@/shared/types/streaming.types';
+import type { SSEEvent, StreamCallbacks, WorkflowNodeEvent } from '@/shared/types/streaming.types';
 import { getFreshAccessToken } from '@/shared/utils/tokenManager';
 
 /**
@@ -139,6 +139,10 @@ export async function streamRequest({
               error.code = event.code;
               callbacks.onError?.(error);
               throw error; // 에러 발생 시 스트림 중단
+
+            case 'node':
+              callbacks.onNodeEvent?.(event as WorkflowNodeEvent);
+              break;
 
             default:
               console.warn('[SSE] Unknown event type:', event);
