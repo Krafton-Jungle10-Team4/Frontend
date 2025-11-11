@@ -16,8 +16,8 @@ import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 // Memoized wrapper to prevent unnecessary re-renders
-const KnowledgeView = memo(() => {
-  return <LegacyDocumentsView />;
+const KnowledgeView = memo(({ botId }: { botId?: string }) => {
+  return <LegacyDocumentsView botId={botId} />;
 });
 KnowledgeView.displayName = 'KnowledgeView';
 
@@ -144,7 +144,7 @@ export const WorkflowBuilderPage = () => {
       case 'flow':
         return <WorkflowWithChat />;
       case 'knowledge':
-        return <KnowledgeView />;
+        return <KnowledgeView botId={botId} />;
       case 'monitoring':
         return <MonitoringView />;
       case 'logs':

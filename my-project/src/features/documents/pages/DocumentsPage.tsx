@@ -22,10 +22,17 @@ import { toast } from 'sonner';
  * Legacy Documents View
  * Fully functional legacy UI with data fetching, upload, and delete capabilities
  */
-export const LegacyDocumentsView: React.FC = () => {
+interface LegacyDocumentsViewProps {
+  botId?: string; // Optional bot ID from workflow context
+}
+
+export const LegacyDocumentsView: React.FC<LegacyDocumentsViewProps> = ({ botId: propBotId }) => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const documents = useDocumentsArray(); // Convert DocumentWithStatus → legacy Document format
-  const selectedBotId = useBotStore(selectSelectedBotId);
+  const globalSelectedBotId = useBotStore(selectSelectedBotId);
+
+  // Use prop botId if provided (workflow context), otherwise use global selected bot
+  const selectedBotId = propBotId || globalSelectedBotId;
 
   // Fetch documents on mount and when bot changes (with stable reference)
   useEffect(() => {
