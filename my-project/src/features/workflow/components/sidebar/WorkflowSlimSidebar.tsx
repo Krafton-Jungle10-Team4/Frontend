@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, Spline, Activity, FileText } from 'lucide-react';
-export type SidebarView = 'flow' | 'monitoring' | 'logs';
+import { Home, Spline, Activity, FileText, BookOpen } from 'lucide-react';
+export type SidebarView = 'flow' | 'monitoring' | 'logs' | 'knowledge';
 
 export interface WorkflowSlimSidebarProps {
   activeView: SidebarView;
@@ -22,6 +22,7 @@ const WorkflowSlimSidebar = ({
 
   const menuItems: { id: SidebarView; icon: React.ElementType }[] = [
     { id: 'flow', icon: Spline },
+    { id: 'knowledge', icon: BookOpen },
     { id: 'monitoring', icon: Activity },
     { id: 'logs', icon: FileText },
   ];

@@ -1,18 +1,25 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { Home, Spline, Activity, FileText } from 'lucide-react';
+import { Home, Spline, Activity, FileText, BookOpen } from 'lucide-react';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
 } from '../components/sidebar/WorkflowSlimSidebar';
 import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
+import { LegacyDocumentsView } from '@/features/documents/pages/DocumentsPage';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { TopNavigation, WorkspaceSidebar, type MenuItem } from '@/widgets';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
+
+// Memoized wrapper to prevent unnecessary re-renders
+const KnowledgeView = memo(() => {
+  return <LegacyDocumentsView />;
+});
+KnowledgeView.displayName = 'KnowledgeView';
 
 const WorkflowWithChat = () => {
   const { language } = useApp();
@@ -95,8 +102,8 @@ export const WorkflowBuilderPage = () => {
   const workflowMenuItems = useMemo((): MenuItem[] => {
     const labels =
       language === 'ko'
-        ? ['홈', '오케스트레이션', '모니터링', '로그 및 어노테이션']
-        : ['Home', 'Orchestration', 'Monitoring', 'Logs & Annotations'];
+        ? ['홈', '오케스트레이션', '지식', '모니터링', '로그 및 어노테이션']
+        : ['Home', 'Orchestration', 'Knowledge', 'Monitoring', 'Logs & Annotations'];
 
     return [
       {
@@ -112,15 +119,21 @@ export const WorkflowBuilderPage = () => {
         onClick: () => setActiveView('flow'),
       },
       {
+        id: 'knowledge',
+        icon: BookOpen,
+        label: labels[2],
+        onClick: () => setActiveView('knowledge'),
+      },
+      {
         id: 'monitoring',
         icon: Activity,
-        label: labels[2],
+        label: labels[3],
         onClick: () => setActiveView('monitoring'),
       },
       {
         id: 'logs',
         icon: FileText,
-        label: labels[3],
+        label: labels[4],
         onClick: () => setActiveView('logs'),
       },
     ];
@@ -130,6 +143,8 @@ export const WorkflowBuilderPage = () => {
     switch (activeView) {
       case 'flow':
         return <WorkflowWithChat />;
+      case 'knowledge':
+        return <KnowledgeView />;
       case 'monitoring':
         return <MonitoringView />;
       case 'logs':
