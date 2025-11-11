@@ -25,15 +25,15 @@ import { toast } from 'sonner';
 export const LegacyDocumentsView: React.FC = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const documents = useDocumentsArray(); // Convert DocumentWithStatus → legacy Document format
-  const { fetchDocuments, deleteDocument } = useAsyncDocumentStore();
   const selectedBotId = useBotStore(selectSelectedBotId);
 
-  // Fetch documents on mount and when bot changes
+  // Fetch documents on mount and when bot changes (with stable reference)
   useEffect(() => {
     if (selectedBotId) {
+      const fetchDocuments = useAsyncDocumentStore.getState().fetchDocuments;
       fetchDocuments({ botId: selectedBotId });
     }
-  }, [selectedBotId, fetchDocuments]);
+  }, [selectedBotId]);
 
   // Delete handler
   const handleDelete = async (documentId: string) => {
@@ -43,6 +43,7 @@ export const LegacyDocumentsView: React.FC = () => {
     }
 
     try {
+      const deleteDocument = useAsyncDocumentStore.getState().deleteDocument;
       await deleteDocument(documentId, selectedBotId);
       toast.success('문서가 삭제되었습니다');
     } catch (error) {
@@ -58,6 +59,7 @@ export const LegacyDocumentsView: React.FC = () => {
     }
 
     try {
+      const fetchDocuments = useAsyncDocumentStore.getState().fetchDocuments;
       await fetchDocuments({ botId: selectedBotId });
       toast.success('문서 목록을 새로고침했습니다');
     } catch (error) {

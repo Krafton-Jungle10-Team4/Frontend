@@ -373,14 +373,16 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             filters: { ...state.filters, ...newFilters },
             pagination: { ...state.pagination, offset: 0 },
           }));
-          get().fetchDocuments();
+          // ✅ FIX: Removed automatic fetchDocuments() to prevent infinite loops
+          // Components should explicitly call fetchDocuments() when needed
         },
 
         setPagination: (newPagination) => {
           set((state) => ({
             pagination: { ...state.pagination, ...newPagination },
           }));
-          get().fetchDocuments();
+          // ✅ FIX: Removed automatic fetchDocuments() to prevent infinite loops
+          // Components should explicitly call fetchDocuments() when needed
         },
 
         resetFilters: () => {
@@ -392,7 +394,8 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
               total: 0,
             },
           });
-          get().fetchDocuments();
+          // ✅ FIX: Removed automatic fetchDocuments() to prevent infinite loops
+          // Components should explicitly call fetchDocuments() when needed
         },
 
         selectDocument: (documentId) => {

@@ -7,6 +7,8 @@
 
 import { useAsyncDocumentStore } from './documentStore.async';
 import { DocumentStatus } from '../types/document.types';
+import { useCallback, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 // ============================================================================
 // Document Selectors
@@ -124,25 +126,32 @@ export const useError = () => {
  *       - fileSize → size
  *       - createdAt → uploadedAt
  *
+ * @note 🔧 FIX: Memoization added to prevent infinite re-renders
+ *       Uses useShallow to only update when documents actually change
+ *
  * @returns Legacy Document[] format
  */
 export const useDocumentsArray = () => {
-  return useAsyncDocumentStore((state) => {
-    // Map<string, DocumentWithStatus> → Legacy Document[] 변환
-    return Array.from(state.documents.values()).map((doc) => ({
-      id: doc.documentId, // ✅ FIX: documentId → id
-      filename: doc.originalFilename, // ✅ FIX: originalFilename → filename
-      size: doc.fileSize, // ✅ FIX: fileSize → size
-      mimeType: doc.mimeType,
-      uploadedAt: doc.createdAt, // ✅ FIX: createdAt → uploadedAt
-      metadata: {
-        status: doc.status,
-        chunkCount: doc.chunkCount,
-        fileExtension: doc.fileExtension, // 추가 정보 유지
-        ...doc.metadata,
-      },
-    }));
-  });
+  // ✅ FIX: Use useShallow to prevent infinite re-renders
+  // Only creates new array when documents Map actually changes
+  return useAsyncDocumentStore(
+    useShallow((state) => {
+      // Map<string, DocumentWithStatus> → Legacy Document[] 변환
+      return Array.from(state.documents.values()).map((doc) => ({
+        id: doc.documentId, // ✅ FIX: documentId → id
+        filename: doc.originalFilename, // ✅ FIX: originalFilename → filename
+        size: doc.fileSize, // ✅ FIX: fileSize → size
+        mimeType: doc.mimeType,
+        uploadedAt: doc.createdAt, // ✅ FIX: createdAt → uploadedAt
+        metadata: {
+          status: doc.status,
+          chunkCount: doc.chunkCount,
+          fileExtension: doc.fileExtension, // 추가 정보 유지
+          ...doc.metadata,
+        },
+      }));
+    })
+  );
 };
 
 /**
@@ -160,28 +169,34 @@ export const useDocumentsArray = () => {
  * @note TypeScript 타입 안정성:
  *       - botId가 null/undefined인 경우 빈 배열 반환
  *       - React hooks rules 준수 (unconditional invocation)
+ *
+ * @note 🔧 FIX: Memoization added to prevent infinite re-renders
+ *       Uses useShallow to only update when documents actually change
  */
 export const useCompletedDocuments = (botId?: string | null) => {
-  return useAsyncDocumentStore((state) => {
-    // Guard: botId가 없으면 빈 배열 반환
-    if (!botId) return [];
+  // ✅ FIX: Use useShallow to prevent infinite re-renders
+  return useAsyncDocumentStore(
+    useShallow((state) => {
+      // Guard: botId가 없으면 빈 배열 반환
+      if (!botId) return [];
 
-    return Array.from(state.documents.values())
-      .filter(
-        (doc) => doc.botId === botId && doc.status === DocumentStatus.DONE
-      )
-      .map((doc) => ({
-        id: doc.documentId, // ✅ FIX: documentId → id
-        filename: doc.originalFilename, // ✅ FIX: originalFilename → filename
-        size: doc.fileSize, // ✅ FIX: fileSize → size
-        mimeType: doc.mimeType,
-        uploadedAt: doc.createdAt, // ✅ FIX: createdAt → uploadedAt
-        metadata: {
-          chunkCount: doc.chunkCount,
-          fileExtension: doc.fileExtension,
-        },
-      }));
-  });
+      return Array.from(state.documents.values())
+        .filter(
+          (doc) => doc.botId === botId && doc.status === DocumentStatus.DONE
+        )
+        .map((doc) => ({
+          id: doc.documentId, // ✅ FIX: documentId → id
+          filename: doc.originalFilename, // ✅ FIX: originalFilename → filename
+          size: doc.fileSize, // ✅ FIX: fileSize → size
+          mimeType: doc.mimeType,
+          uploadedAt: doc.createdAt, // ✅ FIX: createdAt → uploadedAt
+          metadata: {
+            chunkCount: doc.chunkCount,
+            fileExtension: doc.fileExtension,
+          },
+        }));
+    })
+  );
 };
 
 /**
