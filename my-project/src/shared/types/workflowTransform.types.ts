@@ -15,6 +15,7 @@ export interface BackendNode {
     desc: string;
     type: string;
     // LLM 노드
+    provider?: string;
     model?: string;
     prompt_template?: string;
     temperature?: number;

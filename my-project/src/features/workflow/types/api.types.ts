@@ -20,7 +20,7 @@ export interface NodeTypeResponse {
 export interface ModelResponse {
   id: string; // "gpt-4", "claude-3-opus", etc. (모델 식별자)
   name: string; // "GPT-4", "Claude 3 Opus", etc. (표시 이름)
-  provider: string; // "OpenAI", "Anthropic", etc.
+  provider: string; // "openai", "anthropic" 등 slug
   description?: string;
   max_tokens?: number;
   supports_streaming?: boolean;

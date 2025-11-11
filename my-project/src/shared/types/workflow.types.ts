@@ -102,6 +102,7 @@ export type StartNodeType = CommonNodeType<{
  */
 export type LLMNodeType = CommonNodeType<{
   type: BlockEnum.LLM;
+  provider?: string;
   model?:
     | string
     | {
