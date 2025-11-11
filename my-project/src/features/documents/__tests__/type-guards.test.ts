@@ -48,6 +48,7 @@ describe('Type Guards', () => {
     const validDocument: DocumentWithStatus = {
       documentId: 'doc-123',
       botId: 'bot-456',
+      userUuid: 'user-789',
       originalFilename: 'test.pdf',
       fileExtension: 'pdf',
       fileSize: 1024,
@@ -94,6 +95,7 @@ describe('Type Guards', () => {
     const queuedDoc: DocumentWithStatus = {
       documentId: 'doc-123',
       botId: 'bot-456',
+      userUuid: 'user-789',
       originalFilename: 'test.pdf',
       fileExtension: 'pdf',
       fileSize: 1024,
@@ -135,6 +137,7 @@ describe('Type Guards', () => {
     const baseDoc: DocumentWithStatus = {
       documentId: 'doc-123',
       botId: 'bot-456',
+      userUuid: 'user-789',
       originalFilename: 'test.pdf',
       fileExtension: 'pdf',
       fileSize: 1024,
@@ -168,6 +171,7 @@ describe('Type Guards', () => {
     const baseDoc: DocumentWithStatus = {
       documentId: 'doc-123',
       botId: 'bot-456',
+      userUuid: 'user-789',
       originalFilename: 'test.pdf',
       fileExtension: 'pdf',
       fileSize: 1024,
@@ -202,6 +206,7 @@ describe('Type Guards', () => {
     const baseDoc: DocumentWithStatus = {
       documentId: 'doc-123',
       botId: 'bot-456',
+      userUuid: 'user-789',
       originalFilename: 'test.pdf',
       fileExtension: 'pdf',
       fileSize: 1024,
