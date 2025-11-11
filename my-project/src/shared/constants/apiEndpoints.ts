@@ -95,6 +95,7 @@ export const API_ENDPOINTS = {
     CONFIG: (widgetKey: string) => `/api/v1/widget/config/${widgetKey}`,
     SESSIONS: '/api/v1/widget/sessions',
     CHAT: '/api/v1/widget/chat',
+    CHAT_STREAM: '/api/v1/widget/chat/stream',
     TRACK: (widgetKey: string) => `/api/v1/widget/config/${widgetKey}/track`,
   },
 } as const;
