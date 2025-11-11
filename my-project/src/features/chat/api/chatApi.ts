@@ -7,6 +7,7 @@ import type {
   Source,
 } from '@/shared/types/api.types';
 import type { ChatResponse, ChatMessage } from '../types/chat.types';
+import type { WorkflowNodeEvent } from '@/shared/types/streaming.types';
 
 /**
  * Chat API (SnapAgent)
@@ -151,6 +152,7 @@ export async function sendMessageStream(
     onSources?: (sources: Source[]) => void;
     onError?: (error: Error) => void;
     onComplete?: () => void;
+    onNodeEvent?: (event: WorkflowNodeEvent) => void;
   }
 ): Promise<void> {
   const { sendMessageStream: streamAPI } = await import('./chatStreamApi');
@@ -171,6 +173,7 @@ export async function sendMessageStream(
       onSources: options?.onSources,
       onError: options?.onError,
       onComplete: options?.onComplete,
+      onNodeEvent: options?.onNodeEvent,
     }
   );
 }

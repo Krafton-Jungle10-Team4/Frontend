@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { RotateCw, ExternalLink } from 'lucide-react';
-import { chatApi, formatChatMessage, sendMessageStream } from '@/features/chat/api/chatApi';
+import { RotateCw } from 'lucide-react';
+import { sendMessageStream } from '@/features/chat/api/chatApi';
 import { toast } from 'sonner';
 import type { Source } from '@/shared/types/api.types';
+import type { WorkflowNodeEvent } from '@/shared/types/streaming.types';
 
 interface Message {
   id: string;
@@ -16,7 +17,6 @@ interface ChatPreviewPanelProps {
   botId?: string;
   botName: string;
   language: 'en' | 'ko';
-  supportsStreaming?: boolean;
 }
 
 /**
@@ -27,7 +27,6 @@ export function ChatPreviewPanel({
   botId,
   botName,
   language,
-  supportsStreaming = false,
 }: ChatPreviewPanelProps) {
   const translations = {
     en: {
@@ -59,6 +58,20 @@ export function ChatPreviewPanel({
   };
 
   const t = translations[language];
+  const statusLabels = {
+    running: language === 'ko' ? '진행 중' : 'Running',
+    completed: language === 'ko' ? '완료' : 'Completed',
+    failed: language === 'ko' ? '실패' : 'Failed',
+    pending: language === 'ko' ? '대기' : 'Pending',
+    skipped: language === 'ko' ? '건너뜀' : 'Skipped',
+  } as const;
+  const statusColors = {
+    running: 'text-amber-500',
+    completed: 'text-teal-600',
+    failed: 'text-red-500',
+    pending: 'text-gray-500',
+    skipped: 'text-gray-400',
+  } as const;
 
   const initialMessage: Message = {
     id: '1',
@@ -70,12 +83,12 @@ export function ChatPreviewPanel({
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState<string>('');
+  const [_sessionId, setSessionId] = useState<string>('');
   const sessionIdRef = useRef<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const isStreamingFeatureOn =
-    supportsStreaming && import.meta.env.VITE_USE_STREAMING === 'true';
+  const [nodeEvents, setNodeEvents] = useState<WorkflowNodeEvent[]>([]);
+  const typingBufferRef = useRef('');
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const ensureSessionId = () => {
     if (!sessionIdRef.current) {
@@ -86,6 +99,44 @@ export function ChatPreviewPanel({
     return sessionIdRef.current;
   };
 
+  const stopTypingAnimation = () => {
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+    typingBufferRef.current = '';
+  };
+
+  const enqueueTypingChunk = (chunk: string) => {
+    typingBufferRef.current += chunk;
+    if (typingIntervalRef.current) {
+      return;
+    }
+
+    typingIntervalRef.current = setInterval(() => {
+      if (!typingBufferRef.current.length) {
+        stopTypingAnimation();
+        return;
+      }
+
+      const nextChar = typingBufferRef.current[0];
+      typingBufferRef.current = typingBufferRef.current.slice(1);
+
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+        const lastMsg = updated[lastIndex];
+        if (lastMsg && lastMsg.type === 'bot') {
+          updated[lastIndex] = {
+            ...lastMsg,
+            content: lastMsg.content + nextChar,
+          };
+        }
+        return updated;
+      });
+    }, 12);
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -94,7 +145,14 @@ export function ChatPreviewPanel({
     scrollToBottom();
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    return () => {
+      stopTypingAnimation();
+    };
+  }, []);
+
   const handleResetChat = () => {
+    stopTypingAnimation();
     setMessages([
       {
         id: Date.now().toString(),
@@ -104,7 +162,32 @@ export function ChatPreviewPanel({
       },
     ]);
     setInputValue('');
+    stopTypingAnimation();
     setIsTyping(false);
+    setNodeEvents([]);
+  };
+
+  const handleNodeEventUpdate = (event: WorkflowNodeEvent) => {
+    setNodeEvents((prev) => {
+      const existingIndex = prev.findIndex((item) => item.node_id === event.node_id);
+      if (existingIndex === -1) {
+        return [...prev, event];
+      }
+      const updated = [...prev];
+      updated[existingIndex] = event;
+      return updated;
+    });
+  };
+
+  const waitForTypingToFinish = () => {
+    const poll = () => {
+      if (!typingBufferRef.current.length && !typingIntervalRef.current) {
+        setIsTyping(false);
+        return;
+      }
+      requestAnimationFrame(poll);
+    };
+    poll();
   };
 
   const handleSendMessage = async () => {
@@ -118,7 +201,9 @@ export function ChatPreviewPanel({
       timestamp: new Date(),
     };
 
-    setMessages([...messages, newMessage]);
+    stopTypingAnimation();
+    stopTypingAnimation();
+    setMessages((prev) => [...prev, newMessage]);
     setInputValue('');
 
     const assistantMessageId = `${Date.now()}_assistant`;
@@ -134,90 +219,70 @@ export function ChatPreviewPanel({
     setIsTyping(true);
 
     try {
-      const shouldStream = isStreamingFeatureOn && Boolean(botId);
-
-      if (shouldStream) {
-        const activeSessionId = sessionIdRef.current || ensureSessionId();
-
-        await sendMessageStream(userMessageContent, botId!, {
-          sessionId: activeSessionId,
-          topK: 5,
-          temperature: 0.7,
-          maxTokens: 1000,
-          includeSources: true,
-          onChunk: (chunk) => {
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot') {
-                lastMsg.content += chunk;
-              }
-              return updated;
-            });
-          },
-          onSources: (sources: Source[]) => {
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot') {
-                lastMsg.sources = sources;
-              }
-              return updated;
-            });
-          },
-          onComplete: () => setIsTyping(false),
-          onError: (error) => {
-            setIsTyping(false);
-            const errorText =
-              language === 'ko'
-                ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
-                : `Sorry, an error occurred: ${error.message}`;
-
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
-                lastMsg.content = errorText;
-              }
-              return updated;
-            });
-
-            toast.error(errorText);
-          },
-        });
-
-        return;
+      if (!botId) {
+        throw new Error(
+          language === 'ko'
+            ? '봇 ID가 없어 스트리밍을 시작할 수 없습니다.'
+            : 'Cannot start streaming without a bot ID.'
+        );
       }
 
-      const response = await chatApi.sendMessage(
-        userMessageContent,
-        undefined,
-        sessionIdRef.current || undefined,
-        {
-          bot_id: botId,
-          max_tokens: 1000,
-          temperature: 0.7,
-        }
-      );
+      const activeSessionId = sessionIdRef.current || ensureSessionId();
+      setNodeEvents([]);
+      setNodeEvents([]);
 
-      if (response.sessionId) {
-        sessionIdRef.current = response.sessionId;
-        setSessionId(response.sessionId);
-      }
+      await sendMessageStream(userMessageContent, botId, {
+        sessionId: activeSessionId,
+        topK: 5,
+        temperature: 0.7,
+        maxTokens: 1000,
+        includeSources: true,
+        onChunk: (chunk) => {
+          enqueueTypingChunk(chunk);
+        },
+        onSources: (sources: Source[]) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            const lastMsg = updated[lastIndex];
+            if (lastMsg && lastMsg.type === 'bot') {
+              updated[lastIndex] = {
+                ...lastMsg,
+                sources,
+              };
+            }
+            return updated;
+          });
+        },
+        onComplete: () => waitForTypingToFinish(),
+        onError: (error) => {
+          setIsTyping(false);
+          const errorText =
+            language === 'ko'
+              ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
+              : `Sorry, an error occurred: ${error.message}`;
 
-      setIsTyping(false);
+          stopTypingAnimation();
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastMsg = updated[updated.length - 1];
+            if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
+              updated[updated.length - 1] = {
+                ...lastMsg,
+                content: errorText,
+              };
+            }
+            return updated;
+          });
 
-      setMessages((prev) => {
-        const updated = [...prev];
-        const lastMsg = updated[updated.length - 1];
-        if (lastMsg && lastMsg.type === 'bot') {
-          lastMsg.content = response.message.content;
-          lastMsg.sources = response.message.sources;
-        }
-        return updated;
+          toast.error(errorText);
+        },
+        onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
-      setIsTyping(false);
+      stopTypingAnimation();
+      waitForTypingToFinish();
+      console.error('Chat error:', error);
       console.error('Chat error:', error);
 
       let errorText =
@@ -248,7 +313,10 @@ export function ChatPreviewPanel({
         const updated = [...prev];
         const lastMsg = updated[updated.length - 1];
         if (lastMsg && lastMsg.type === 'bot') {
-          lastMsg.content = errorText;
+          updated[updated.length - 1] = {
+            ...lastMsg,
+            content: errorText,
+          };
         }
         return updated;
       });
@@ -267,7 +335,7 @@ export function ChatPreviewPanel({
       timestamp: new Date(),
     };
 
-    setMessages([...messages, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
 
     const assistantMessageId = `${Date.now()}_assistant`;
     const emptyAssistantMessage: Message = {
@@ -282,90 +350,67 @@ export function ChatPreviewPanel({
     setIsTyping(true);
 
     try {
-      const shouldStream = isStreamingFeatureOn && Boolean(botId);
-
-      if (shouldStream) {
-        const activeSessionId = sessionIdRef.current || ensureSessionId();
-
-        await sendMessageStream(msg, botId!, {
-          sessionId: activeSessionId,
-          topK: 5,
-          temperature: 0.7,
-          maxTokens: 1000,
-          includeSources: true,
-          onChunk: (chunk) => {
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot') {
-                lastMsg.content += chunk;
-              }
-              return updated;
-            });
-          },
-          onSources: (sources: Source[]) => {
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot') {
-                lastMsg.sources = sources;
-              }
-              return updated;
-            });
-          },
-          onComplete: () => setIsTyping(false),
-          onError: (error) => {
-            setIsTyping(false);
-            const errorText =
-              language === 'ko'
-                ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
-                : `Sorry, an error occurred: ${error.message}`;
-
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
-                lastMsg.content = errorText;
-              }
-              return updated;
-            });
-
-            toast.error(errorText);
-          },
-        });
-
-        return;
+      if (!botId) {
+        throw new Error(
+          language === 'ko'
+            ? '봇 ID가 없어 스트리밍을 시작할 수 없습니다.'
+            : 'Cannot start streaming without a bot ID.'
+        );
       }
 
-      const response = await chatApi.sendMessage(
-        msg,
-        undefined,
-        sessionIdRef.current || undefined,
-        {
-          bot_id: botId,
-          max_tokens: 1000,
-          temperature: 0.7,
-        }
-      );
+      const activeSessionId = sessionIdRef.current || ensureSessionId();
 
-      if (response.sessionId) {
-        sessionIdRef.current = response.sessionId;
-        setSessionId(response.sessionId);
-      }
+      await sendMessageStream(msg, botId, {
+        sessionId: activeSessionId,
+        topK: 5,
+        temperature: 0.7,
+        maxTokens: 1000,
+        includeSources: true,
+        onChunk: (chunk) => {
+          enqueueTypingChunk(chunk);
+        },
+        onSources: (sources: Source[]) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            const lastMsg = updated[lastIndex];
+            if (lastMsg && lastMsg.type === 'bot') {
+              updated[lastIndex] = {
+                ...lastMsg,
+                sources,
+              };
+            }
+            return updated;
+          });
+        },
+        onComplete: () => waitForTypingToFinish(),
+        onError: (error) => {
+          stopTypingAnimation();
+          waitForTypingToFinish();
+          const errorText =
+            language === 'ko'
+              ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
+              : `Sorry, an error occurred: ${error.message}`;
 
-      setIsTyping(false);
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastMsg = updated[updated.length - 1];
+            if (lastMsg && lastMsg.type === 'bot' && !lastMsg.content) {
+              updated[updated.length - 1] = {
+                ...lastMsg,
+                content: errorText,
+              };
+            }
+            return updated;
+          });
 
-      setMessages((prev) => {
-        const updated = [...prev];
-        const lastMsg = updated[updated.length - 1];
-        if (lastMsg && lastMsg.type === 'bot') {
-          lastMsg.content = response.message.content;
-          lastMsg.sources = response.message.sources;
-        }
-        return updated;
+          toast.error(errorText);
+        },
+        onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
-      setIsTyping(false);
+      stopTypingAnimation();
+      waitForTypingToFinish();
       console.error('Chat error:', error);
 
       let errorText =
@@ -396,7 +441,10 @@ export function ChatPreviewPanel({
         const updated = [...prev];
         const lastMsg = updated[updated.length - 1];
         if (lastMsg && lastMsg.type === 'bot') {
-          lastMsg.content = errorText;
+          updated[updated.length - 1] = {
+            ...lastMsg,
+            content: errorText,
+          };
         }
         return updated;
       });
@@ -443,6 +491,37 @@ export function ChatPreviewPanel({
           <span className="text-xs text-gray-500">{t.today}</span>
         </div>
 
+        {nodeEvents.length > 0 && (
+          <div className="mb-4 space-y-2">
+            {nodeEvents.map((event) => {
+              const statusColor =
+                statusColors[event.status as keyof typeof statusColors] || 'text-gray-500';
+              const statusLabel =
+                statusLabels[event.status as keyof typeof statusLabels] || event.status;
+              return (
+                <div
+                  key={event.node_id}
+                  className="bg-white border border-gray-200 rounded-xl px-3 py-2"
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">
+                      {event.node_type} · {event.node_id}
+                    </span>
+                    <span className={`font-medium ${statusColor}`}>
+                      {statusLabel}
+                    </span>
+                  </div>
+                  {event.output_preview && (
+                    <p className="text-xs text-gray-700 mt-1 whitespace-pre-wrap">
+                      {event.output_preview}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Messages */}
         <div className="space-y-3">
           {messages.map((message, index) => (
@@ -474,24 +553,24 @@ export function ChatPreviewPanel({
                         </p>
                         {message.sources.map((source, idx) => (
                           <div
-                            key={source.chunk_id}
+                            key={`${source.chunk_id}-${idx}`}
                             className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="text-gray-700 font-medium mb-1">
-                                  {source.metadata?.filename ||
-                                    (language === 'ko' ? `문서 ${idx + 1}` : `Document ${idx + 1}`)}
+                                  {language === 'ko'
+                                    ? `출처 ${idx + 1}`
+                                    : `Source ${idx + 1}`}
                                 </p>
-                                <p className="text-gray-600 line-clamp-2">
-                                  {source.content}
+                                <p className="text-gray-600 line-clamp-2 whitespace-pre-wrap">
+                                  {source.content.replace(/\*\*/g, '')}
                                 </p>
                               </div>
                               <div className="flex items-center gap-1 text-teal-500">
                                 <span className="text-xs">
                                   {Math.round(source.similarity_score * 100)}%
                                 </span>
-                                <ExternalLink size={12} />
                               </div>
                             </div>
                           </div>

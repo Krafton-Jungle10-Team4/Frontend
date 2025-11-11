@@ -47,7 +47,6 @@ const WorkflowWithChat = () => {
               botId={botId}
               botName={botName}
               language={language}
-              supportsStreaming={false}
             />
           </div>
         </>
