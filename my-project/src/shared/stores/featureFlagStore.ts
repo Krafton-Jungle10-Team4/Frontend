@@ -7,10 +7,13 @@
  * Note: Flags are initialized from environment variables on every page load
  * to ensure immediate rollback capability. Runtime toggles work within a
  * session but do not persist across page reloads.
+ *
+ * This store wraps the single source of truth from @/shared/config/features
  */
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { featureFlags } from '@/shared/config/features';
 
 export type FeatureFlag = 'async_document_upload';
 
@@ -26,15 +29,11 @@ interface FeatureFlagState {
 }
 
 /**
- * Get initial feature flag values from environment variables
+ * Get initial feature flag values from features.ts (single source of truth)
  */
 const getInitialFlags = (): Record<FeatureFlag, boolean> => {
   return {
-    async_document_upload:
-      import.meta.env.VITE_FEATURE_ASYNC_DOCUMENT_UPLOAD === 'true' ||
-      import.meta.env.VITE_FEATURE_ASYNC_DOCUMENT_UPLOAD === '1' ||
-      // Default to true if not specified
-      import.meta.env.VITE_FEATURE_ASYNC_DOCUMENT_UPLOAD === undefined,
+    async_document_upload: featureFlags.asyncDocumentUpload.enabled,
   };
 };
 

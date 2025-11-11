@@ -3,16 +3,17 @@
  *
  * Main page for document management that switches between
  * the new monitoring dashboard and legacy document list based on feature flag
+ * 
+ * NOTE: This file is now only used for backward compatibility.
+ * The routing logic has moved to routes.tsx for proper code-splitting.
  */
 
 import React, { useEffect, useState } from 'react';
-import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
-import { DocumentMonitoringPage } from '../components/monitoring/DocumentMonitoringPage';
-import { DocumentList } from '../components/DocumentList';
-import { DocumentUploadModal } from '../components/monitoring/DocumentUploadModal';
 import { useAsyncDocumentStore } from '../stores/documentStore.async';
 import { useDocumentsArray } from '../stores/selectors';
 import { useBotStore, selectSelectedBotId } from '@/features/bot/stores/botStore';
+import { DocumentList } from '../components/DocumentList';
+import { DocumentUploadModal } from '../components/monitoring/DocumentUploadModal';
 import { Button } from '@/shared/components/button';
 import { FileUp, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -21,7 +22,7 @@ import { toast } from 'sonner';
  * Legacy Documents View
  * Fully functional legacy UI with data fetching, upload, and delete capabilities
  */
-const LegacyDocumentsView: React.FC = () => {
+export const LegacyDocumentsView: React.FC = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const documents = useDocumentsArray(); // Convert DocumentWithStatus → legacy Document format
   const { fetchDocuments, deleteDocument } = useAsyncDocumentStore();
@@ -112,8 +113,9 @@ const LegacyDocumentsView: React.FC = () => {
   );
 };
 
-export const DocumentsPage: React.FC = () => {
-  const useAsyncUpload = useFeatureFlag('async_document_upload');
-
-  return useAsyncUpload ? <DocumentMonitoringPage /> : <LegacyDocumentsView />;
-};
+/**
+ * @deprecated This component is kept for backward compatibility only.
+ * The routing logic has moved to routes.tsx for proper code-splitting.
+ * Please import LegacyDocumentsView directly instead.
+ */
+export const DocumentsPage = LegacyDocumentsView;
