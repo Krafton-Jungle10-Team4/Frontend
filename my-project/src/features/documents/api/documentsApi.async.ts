@@ -7,6 +7,7 @@ import type {
   DocumentListRequest,
   DocumentListResponse,
 } from '../types/document.types';
+import { keysToCamel, keysToSnake, filterUndefined } from '../utils/case-conversion';
 
 /**
  * 비동기 문서 처리 API
@@ -27,7 +28,7 @@ export const documentsAsyncApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const { data } = await apiClient.post<AsyncDocumentUploadResponse>(
+    const { data } = await apiClient.post(
       API_ENDPOINTS.DOCUMENTS.UPLOAD,
       formData,
       {
@@ -37,7 +38,8 @@ export const documentsAsyncApi = {
       }
     );
 
-    return data;
+    // Normalize snake_case to camelCase
+    return keysToCamel<AsyncDocumentUploadResponse>(data);
   },
 
   /**
@@ -46,10 +48,11 @@ export const documentsAsyncApi = {
    * @returns DocumentStatusResponse
    */
   getStatus: async (documentId: string): Promise<DocumentStatusResponse> => {
-    const { data } = await apiClient.get<DocumentStatusResponse>(
+    const { data } = await apiClient.get(
       API_ENDPOINTS.DOCUMENTS.STATUS(documentId)
     );
-    return data;
+    // Normalize snake_case to camelCase
+    return keysToCamel<DocumentStatusResponse>(data);
   },
 
   /**
@@ -60,11 +63,16 @@ export const documentsAsyncApi = {
   listWithStatus: async (
     request: DocumentListRequest
   ): Promise<DocumentListResponse> => {
-    const { data } = await apiClient.get<DocumentListResponse>(
+    // Convert camelCase query params to snake_case for backend
+    const snakeCaseParams = filterUndefined(keysToSnake(request));
+
+    const { data } = await apiClient.get(
       API_ENDPOINTS.DOCUMENTS.LIST,
-      { params: request }
+      { params: snakeCaseParams }
     );
-    return data;
+
+    // Normalize snake_case response to camelCase
+    return keysToCamel<DocumentListResponse>(data);
   },
 
   /**
@@ -73,10 +81,11 @@ export const documentsAsyncApi = {
    * @returns AsyncDocumentUploadResponse
    */
   retry: async (documentId: string): Promise<AsyncDocumentUploadResponse> => {
-    const { data } = await apiClient.post<AsyncDocumentUploadResponse>(
+    const { data } = await apiClient.post(
       API_ENDPOINTS.DOCUMENTS.RETRY(documentId)
     );
-    return data;
+    // Normalize snake_case to camelCase
+    return keysToCamel<AsyncDocumentUploadResponse>(data);
   },
 
   /**

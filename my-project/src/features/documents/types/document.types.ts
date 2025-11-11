@@ -71,6 +71,7 @@ export interface DocumentWithStatus {
   // Primary Fields (Backend DB Columns)
   documentId: string; // UUID (matches DB document_id)
   botId: string; // Foreign key to bot
+  userUuid: string; // Owner user UUID (matches DB user_uuid)
   originalFilename: string; // Original file name (matches DB original_filename)
   fileExtension: string; // File extension without dot (matches DB file_extension)
   fileSize: number; // File size in bytes (matches DB file_size)

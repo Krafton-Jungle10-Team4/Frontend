@@ -31,6 +31,8 @@ export function isValidDocument(doc: any): doc is DocumentWithStatus {
   return (
     'documentId' in doc &&
     typeof doc.documentId === 'string' &&
+    'userUuid' in doc &&
+    typeof doc.userUuid === 'string' &&
     'originalFilename' in doc &&
     typeof doc.originalFilename === 'string' &&
     'fileSize' in doc &&
