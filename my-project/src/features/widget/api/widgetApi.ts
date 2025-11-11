@@ -1,5 +1,6 @@
 import { widgetClient } from './widgetClient';
-import { API_ENDPOINTS } from '@shared/constants/apiEndpoints';
+import { API_BASE_URL, API_ENDPOINTS } from '@shared/constants/apiEndpoints';
+import { streamRequest } from '@/shared/api/streamClient';
 import type {
   WidgetConfigResponse,
   SessionCreateRequest,
@@ -7,6 +8,7 @@ import type {
   WidgetChatRequest,
   WidgetChatResponse,
 } from '../types/widget.types';
+import type { StreamCallbacks } from '@/shared/types/streaming.types';
 
 /**
  * Widget API 클라이언트
@@ -69,6 +71,31 @@ export const widgetApi = {
     await widgetClient.post(API_ENDPOINTS.WIDGET.TRACK(widgetKey), {
       event,
       metadata,
+    });
+  },
+
+  /**
+   * Widget 채팅 스트리밍 (세션 토큰 필요)
+   */
+  sendMessageStream: async (
+    sessionToken: string,
+    request: WidgetChatRequest,
+    callbacks: StreamCallbacks,
+    apiBaseUrl?: string
+  ): Promise<void> => {
+    const baseUrl = apiBaseUrl || API_BASE_URL;
+    const url = `${baseUrl}${API_ENDPOINTS.WIDGET.CHAT_STREAM}`;
+
+    await streamRequest({
+      url,
+      body: request,
+      callbacks,
+      timeout: 60000,
+      useAuth: false,
+      credentials: 'omit',
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
     });
   },
 };

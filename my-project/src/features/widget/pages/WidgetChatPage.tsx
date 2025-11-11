@@ -3,11 +3,14 @@ import { useParams } from 'react-router-dom';
 import { Loader2, AlertCircle, Send } from 'lucide-react';
 import { Alert, AlertDescription } from '@shared/components/alert';
 import { widgetApi } from '../api/widgetApi';
+import { API_BASE_URL } from '@shared/constants/apiEndpoints';
 import type {
   WidgetConfigResponse,
   WidgetMessage,
   WidgetSessionMessage,
+  WidgetSource,
 } from '../types/widget.types';
+import type { Source } from '@/shared/types/api.types';
 
 /**
  * Widget Chat Page
@@ -32,6 +35,74 @@ export function WidgetChatPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const typingBufferRef = useRef('');
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeAssistantIdRef = useRef<string | null>(null);
+  const updateAssistantMessage = useCallback(
+    (messageId: string, updater: (msg: WidgetMessage) => WidgetMessage) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? updater(msg) : msg))
+      );
+    },
+    []
+  );
+
+  /**
+   * 타이핑 애니메이션 중지
+   */
+  const stopTypingAnimation = useCallback(() => {
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+    typingBufferRef.current = '';
+    activeAssistantIdRef.current = null;
+  }, []);
+
+  /**
+   * 타이핑 애니메이션에 텍스트 청크 추가
+   */
+  const enqueueTypingChunk = useCallback((messageId: string, chunk: string) => {
+    if (activeAssistantIdRef.current !== messageId) {
+      stopTypingAnimation();
+      activeAssistantIdRef.current = messageId;
+    }
+
+    typingBufferRef.current += chunk;
+
+    if (typingIntervalRef.current) {
+      return;
+    }
+
+    typingIntervalRef.current = setInterval(() => {
+      if (!typingBufferRef.current.length) {
+        stopTypingAnimation();
+        return;
+      }
+
+      const nextChar = typingBufferRef.current[0];
+      typingBufferRef.current = typingBufferRef.current.slice(1);
+
+      updateAssistantMessage(messageId, (msg) => ({
+        ...msg,
+        content: `${msg.content}${nextChar}`,
+      }));
+    }, 12);
+  }, [stopTypingAnimation, updateAssistantMessage]);
+
+  /**
+   * 타이핑 애니메이션 완료 대기
+   */
+  const waitForTypingToFinish = useCallback((callback?: () => void) => {
+    const poll = () => {
+      if (!typingBufferRef.current.length && !typingIntervalRef.current) {
+        callback?.();
+        return;
+      }
+      requestAnimationFrame(poll);
+    };
+    poll();
+  }, []);
 
   /**
    * 허용된 부모 도메인 계산
@@ -134,6 +205,12 @@ export function WidgetChatPage() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    return () => {
+      stopTypingAnimation();
+    };
+  }, []);
+
   /**
    * 세션 준비 완료 시 입력창에 자동 포커스
    */
@@ -143,6 +220,101 @@ export function WidgetChatPage() {
     }
   }, [sessionReady]);
 
+  const startStreamingConversation = async (messageContent: string) => {
+    const userMessage: WidgetMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: messageContent,
+      timestamp: new Date().toISOString(),
+    };
+
+    const assistantMessageId = `assistant-${Date.now()}`;
+    const placeholderAssistant: WidgetMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toISOString(),
+      sources: [],
+    };
+
+    stopTypingAnimation();
+    activeAssistantIdRef.current = assistantMessageId;
+
+    setMessages((prev) => [...prev, userMessage, placeholderAssistant]);
+    setSending(true);
+
+    try {
+      const sessionToken = localStorage.getItem('widget_session_token');
+      const sessionId = localStorage.getItem('widget_session_id');
+      const apiBaseUrl =
+        localStorage.getItem('widget_api_base_url') || API_BASE_URL;
+
+      if (!sessionToken || !sessionId) {
+        throw new Error('세션이 만료되었습니다');
+      }
+
+      await widgetApi.sendMessageStream(
+        sessionToken,
+        {
+          session_id: sessionId,
+          message: {
+            content: userMessage.content,
+            type: 'text',
+          },
+          context: {
+            timestamp: new Date().toISOString(),
+          },
+        },
+        {
+          onChunk: (chunk) => {
+            enqueueTypingChunk(assistantMessageId, chunk);
+          },
+          onSources: (sources) => {
+            const normalized = normalizeSources(sources);
+            updateAssistantMessage(assistantMessageId, (msg) => ({
+              ...msg,
+              sources: normalized,
+            }));
+          },
+          onComplete: () => {
+            waitForTypingToFinish(() => {
+              updateAssistantMessage(assistantMessageId, (msg) => ({
+                ...msg,
+                timestamp: new Date().toISOString(),
+              }));
+              setSending(false);
+            });
+          },
+          onError: (error) => {
+            stopTypingAnimation();
+            updateAssistantMessage(assistantMessageId, () => ({
+              id: assistantMessageId,
+              role: 'assistant',
+              content: `오류: ${error.message}`,
+              timestamp: new Date().toISOString(),
+            }));
+            setSending(false);
+          },
+        },
+        apiBaseUrl
+      );
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : '메시지 전송 실패';
+      console.error('Send message error:', err);
+
+      stopTypingAnimation();
+      updateAssistantMessage(assistantMessageId, () => ({
+        id: assistantMessageId,
+        role: 'assistant',
+        content: `오류: ${errorMessage}`,
+        timestamp: new Date().toISOString(),
+      }));
+    } finally {
+      setSending(false);
+    }
+  };
+
   /**
    * 메시지 전송
    */
@@ -151,61 +323,10 @@ export function WidgetChatPage() {
 
     if (!input.trim() || sending || !sessionReady) return;
 
-    const userMessage: WidgetMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const messageContent = input.trim();
     setInput('');
-    setSending(true);
 
-    try {
-      const sessionToken = localStorage.getItem('widget_session_token');
-      const sessionId = localStorage.getItem('widget_session_id');
-
-      if (!sessionToken || !sessionId) {
-        throw new Error('세션이 만료되었습니다');
-      }
-
-      const response = await widgetApi.sendMessage(sessionToken, {
-        session_id: sessionId,
-        message: {
-          content: userMessage.content,
-          type: 'text',
-        },
-        context: {
-          timestamp: new Date().toISOString(),
-        },
-      });
-
-      const assistantMessage: WidgetMessage = {
-        id: response.message_id,
-        role: 'assistant',
-        content: response.response.content,
-        timestamp: response.timestamp,
-        sources: response.sources,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : '메시지 전송 실패';
-      console.error('Send message error:', err);
-
-      const errorMsg: WidgetMessage = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: `오류: ${errorMessage}`,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setSending(false);
-    }
+    await startStreamingConversation(messageContent);
   };
 
   const applyTheme = (cfg: WidgetConfigResponse['config']) => {
@@ -301,11 +422,22 @@ export function WidgetChatPage() {
                 {msg.content}
               </p>
               {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-gray-200">
+                <div className="mt-2 pt-2 border-t border-gray-200 space-y-2">
                   <p className="text-xs text-gray-600 mb-1">출처:</p>
                   {msg.sources.map((source, idx) => (
-                    <div key={idx} className="text-xs text-gray-500">
-                      • {source.title}
+                    <div
+                      key={`${msg.id}-source-${idx}`}
+                      className="text-xs text-gray-600"
+                    >
+                      <p className="font-medium text-gray-700">{source.title}</p>
+                      {source.snippet && (
+                        <p className="text-gray-500 line-clamp-2">{source.snippet}</p>
+                      )}
+                      {typeof source.relevance_score === 'number' && (
+                        <span className="text-gray-400">
+                          {Math.round(source.relevance_score * 100)}%
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -359,3 +491,12 @@ export function WidgetChatPage() {
     </div>
   );
 }
+
+const normalizeSources = (sources: Source[]): WidgetSource[] => {
+  return sources.map((source, idx) => ({
+    document_id: source.document_id,
+    title: `출처 ${idx + 1}`,
+    snippet: source.content,
+    relevance_score: source.similarity_score ?? 0,
+  }));
+};

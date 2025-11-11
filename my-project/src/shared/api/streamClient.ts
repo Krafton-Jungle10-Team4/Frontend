@@ -14,6 +14,9 @@ interface StreamRequestOptions {
   body: object;
   callbacks: StreamCallbacks;
   timeout?: number; // 밀리초, 기본값 60초
+  headers?: Record<string, string>;
+  useAuth?: boolean;
+  credentials?: RequestCredentials;
 }
 
 /**
@@ -37,9 +40,20 @@ export async function streamRequest({
   body,
   callbacks,
   timeout = 60000,
+  headers = {},
+  useAuth = true,
+  credentials = 'include',
 }: StreamRequestOptions): Promise<void> {
-  // 1. JWT 토큰 최신화
-  const token = await getFreshAccessToken();
+  // 1. 인증 헤더 구성
+  let requestHeaders: Record<string, string> = { ...headers };
+
+  if (useAuth) {
+    const token = await getFreshAccessToken();
+    requestHeaders = {
+      ...requestHeaders,
+      Authorization: `Bearer ${token}`,
+    };
+  }
 
   // 2. AbortController로 타임아웃 설정
   const abortController = new AbortController();
@@ -52,12 +66,12 @@ export async function streamRequest({
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        ...requestHeaders,
       },
       body: JSON.stringify(body),
       signal: abortController.signal,
-      credentials: 'include',
+      credentials,
     });
 
     // 4. HTTP 에러 확인
