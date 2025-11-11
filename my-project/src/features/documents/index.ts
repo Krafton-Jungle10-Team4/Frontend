@@ -3,6 +3,12 @@
  * Public API
  */
 
+// Pages
+export { DocumentsPage } from './pages/DocumentsPage';
+
+// Routes
+export { documentsRoutes } from './routes';
+
 // Components
 export { DocumentList } from './components/DocumentList';
 
@@ -14,6 +20,8 @@ export { DocumentProgressBar } from './components/monitoring/DocumentProgressBar
 export { DocumentActions } from './components/monitoring/DocumentActions';
 export { DocumentFilters } from './components/monitoring/DocumentFilters';
 export { DocumentUploadModal } from './components/monitoring/DocumentUploadModal';
+export { DocumentStatusCard } from './components/monitoring/DocumentStatusCard';
+export { ProcessingQueuePanel } from './components/monitoring/ProcessingQueuePanel';
 
 // Legacy Store (Backward Compatibility)
 export {

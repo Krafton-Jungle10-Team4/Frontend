@@ -5,6 +5,7 @@ import { ProtectedRoute, authRoutes } from '@/features/auth';
 import { workflowRoutes } from '@/features/workflow';
 import { dashboardRoutes } from '@/features/dashboard';
 import { mcpRoutes } from '@/features/mcp';
+import { documentsRoutes } from '@/features/documents';
 
 /**
  * React Router v7 기반 애플리케이션 라우터 설정
@@ -89,6 +90,8 @@ export const router = createBrowserRouter([
           },
           // Dashboard routes - Feature 기반
           dashboardRoutes,
+          // Documents routes - 문서 관리
+          documentsRoutes,
           // MCP routes - MCP 키 관리
           mcpRoutes,
           // Deployment routes - 배포 관리

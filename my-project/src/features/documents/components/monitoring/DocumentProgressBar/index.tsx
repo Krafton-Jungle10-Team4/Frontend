@@ -8,12 +8,18 @@ interface DocumentProgressBarProps {
 
 export const DocumentProgressBar: React.FC<DocumentProgressBarProps> = ({ document }) => {
   const getProgress = (): number => {
+    // Use backend-provided progress if available
+    if (document.progressPercent !== undefined) {
+      return Math.min(100, Math.max(0, document.progressPercent));
+    }
+
+    // Fallback to status-based progress
     switch (document.status) {
       case DocumentStatus.UPLOADED:
       case DocumentStatus.QUEUED:
         return 0;
       case DocumentStatus.PROCESSING:
-        // 임의 진행률 (실제로는 Backend에서 제공해야 함)
+        // Default to 50% if backend doesn't provide progress
         return 50;
       case DocumentStatus.DONE:
         return 100;

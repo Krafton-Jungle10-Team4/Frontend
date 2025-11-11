@@ -84,6 +84,7 @@ export interface DocumentWithStatus {
   retryCount: number; // Number of retry attempts
   chunkCount?: number; // Number of chunks after embedding
   processingTime?: number; // Processing duration in seconds
+  progressPercent?: number; // Processing progress percentage (0-100)
 
   // Timestamps
   createdAt: string; // Creation timestamp (matches DB created_at)
@@ -116,6 +117,7 @@ export interface DocumentStatusResponse {
   errorMessage?: string;
   chunkCount?: number;
   processingTime?: number;
+  progressPercent?: number;
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
