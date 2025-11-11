@@ -21,7 +21,7 @@ test.describe('Document Upload Flow', () => {
 
     // Upload file
     const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('fixtures/test.pdf');
+    await fileInput.setInputFiles('e2e/fixtures/test.pdf');
 
     // Submit upload
     await page.click('button:has-text("업로드"):not([disabled])');
@@ -211,7 +211,7 @@ test.describe('Document Upload Validation', () => {
   test('should reject invalid file types', async ({ page }) => {
     // Try to upload invalid file type
     const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('fixtures/invalid.xyz');
+    await fileInput.setInputFiles('e2e/fixtures/invalid.xyz');
 
     // Should show error message
     await expect(page.locator('text=지원되지 않는 파일 형식')).toBeVisible();
@@ -225,7 +225,7 @@ test.describe('Document Upload Validation', () => {
     // Try to upload file larger than 10MB
     // (This assumes fixtures/large-file.pdf > 10MB)
     const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('fixtures/large-file.pdf');
+    await fileInput.setInputFiles('e2e/fixtures/large-file.pdf');
 
     // Should show error message
     await expect(page.locator('text=파일 크기가 너무 큽니다')).toBeVisible();
