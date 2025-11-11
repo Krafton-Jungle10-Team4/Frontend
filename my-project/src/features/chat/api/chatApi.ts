@@ -4,6 +4,7 @@ import type {
   ChatRequest as APIChatRequest,
   ChatResponse as APIChatResponse,
   HealthCheckResponse,
+  Source,
 } from '@/shared/types/api.types';
 import type { ChatResponse, ChatMessage } from '../types/chat.types';
 
@@ -116,3 +117,60 @@ export const handleChatError = (error: unknown): string => {
   }
   return 'An unexpected error occurred';
 };
+
+/**
+ * 스트리밍 메시지 전송
+ *
+ * @param message - 사용자 메시지
+ * @param botId - 봇 ID
+ * @param options - 스트리밍 옵션
+ * @returns Promise<void> - 스트림 완료 시 resolve
+ *
+ * @example
+ * await sendMessageStream(
+ *   '안녕하세요',
+ *   'bot_123',
+ *   {
+ *     sessionId: 'session_xyz',
+ *     onChunk: (chunk) => console.log(chunk),
+ *     onComplete: () => console.log('Done'),
+ *   }
+ * );
+ */
+export async function sendMessageStream(
+  message: string,
+  botId: string,
+  options?: {
+    sessionId?: string;
+    documentIds?: string[];
+    topK?: number;
+    temperature?: number;
+    maxTokens?: number;
+    includeSources?: boolean;
+    onChunk?: (chunk: string) => void;
+    onSources?: (sources: Source[]) => void;
+    onError?: (error: Error) => void;
+    onComplete?: () => void;
+  }
+): Promise<void> {
+  const { sendMessageStream: streamAPI } = await import('./chatStreamApi');
+
+  await streamAPI(
+    {
+      message,
+      bot_id: botId,
+      session_id: options?.sessionId,
+      document_ids: options?.documentIds,
+      top_k: options?.topK,
+      temperature: options?.temperature,
+      max_tokens: options?.maxTokens,
+      include_sources: options?.includeSources,
+    },
+    {
+      onChunk: options?.onChunk,
+      onSources: options?.onSources,
+      onError: options?.onError,
+      onComplete: options?.onComplete,
+    }
+  );
+}
