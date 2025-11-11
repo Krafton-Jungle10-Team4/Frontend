@@ -34,7 +34,6 @@ export const LLMModelSelect = ({
     const loadModels = async () => {
       try {
         const modelList = await workflowApi.getModels();
-        console.log('🔍 [LLMModelSelect] Loaded models:', modelList);
         setModels(modelList);
       } catch (error) {
         console.error('Failed to load models:', error);
@@ -53,12 +52,6 @@ export const LLMModelSelect = ({
           model.provider.toLowerCase() === selectedProvider.toLowerCase()
       )
     : models;
-
-  // 디버깅 로그
-  console.log('🔍 [LLMModelSelect] selectedProvider:', selectedProvider);
-  console.log('🔍 [LLMModelSelect] all models:', models);
-  console.log('🔍 [LLMModelSelect] filteredModels:', filteredModels);
-  console.log('🔍 [LLMModelSelect] current value:', value);
 
   if (loading) {
     return (
@@ -87,7 +80,10 @@ export const LLMModelSelect = ({
                 <span className="font-medium">{model.name}</span>
                 {!selectedProvider && (
                   <span className="text-xs text-gray-500">
-                    ({model.provider})
+                    (
+                    {model.provider.charAt(0).toUpperCase() +
+                      model.provider.slice(1)}
+                    )
                   </span>
                 )}
               </div>

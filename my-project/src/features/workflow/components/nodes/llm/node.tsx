@@ -7,35 +7,39 @@ import { memo, useMemo } from 'react';
  * - Provider와 Model 분리 표시
  */
 const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
-  const { model } = data;
+  const { model, provider } = data;
 
   const modelDisplay = useMemo(() => {
-    if (!model) return null;
+    if (!model && !provider) return null;
 
-    if (typeof model === 'string') {
-      let provider = 'Unknown';
-      let name = model;
+    const providerSlug =
+      (typeof provider === 'string' && provider.toLowerCase()) ||
+      (typeof model === 'object' &&
+      model !== null &&
+      'provider' in model &&
+      typeof (model as { provider?: string }).provider === 'string'
+        ? ((model as { provider?: string }).provider as string).toLowerCase()
+        : undefined) ||
+      (typeof model === 'string' && model.toLowerCase().startsWith('claude')
+        ? 'anthropic'
+        : typeof model === 'string' && model.toLowerCase().startsWith('gpt')
+        ? 'openai'
+        : undefined);
 
-      // "provider/model" 형식 파싱 (예: "anthropic/claude", "openai/gpt-4")
-      if (model.includes('/')) {
-        const [providerPart, modelPart] = model.split('/');
-        const providerLower = providerPart.toLowerCase();
-        if (providerLower === 'openai') provider = 'OpenAI';
-        else if (providerLower === 'anthropic') provider = 'Anthropic';
-        name = modelPart;
-      }
-      // 모델명으로 provider 추론
-      else if (model.startsWith('gpt')) {
-        provider = 'OpenAI';
-      } else if (model.startsWith('claude')) {
-        provider = 'Anthropic';
-      }
+    const modelName =
+      typeof model === 'object' && model !== null && 'name' in model
+        ? (model as { name?: string }).name
+        : typeof model === 'string'
+        ? model.includes('/') ? model.split('/')[1] : model
+        : 'N/A';
 
-      return { provider, name };
-    }
-
-    return model;
-  }, [model]);
+    return {
+      provider: providerSlug
+        ? providerSlug.charAt(0).toUpperCase() + providerSlug.slice(1)
+        : 'Unknown',
+      name: modelName || 'N/A',
+    };
+  }, [model, provider]);
 
   return (
     <div className="px-3 py-2 space-y-2">

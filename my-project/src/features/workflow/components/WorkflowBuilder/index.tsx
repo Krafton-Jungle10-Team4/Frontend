@@ -297,12 +297,13 @@ const WorkflowInner = () => {
         id: `${Date.now()}`,
         type: 'custom',
         position,
-        data: {
-          type: nodeType,
-          title: nodeType,
-          desc: getNodeDescription(nodeType),
-          ...(nodeType === BlockEnum.LLM && {
-            model: { provider: 'OpenAI', name: 'gpt-4' }, // name에는 모델 ID 저장
+          data: {
+            type: nodeType,
+            title: nodeType,
+            desc: getNodeDescription(nodeType),
+            ...(nodeType === BlockEnum.LLM && {
+            provider: 'openai',
+            model: { provider: 'openai', name: 'gpt-4o-mini' }, // name에는 모델 ID 저장
             prompt: '프롬프트를 입력하세요.',
           }),
           ...(nodeType === BlockEnum.KnowledgeRetrieval && {

@@ -33,24 +33,22 @@ import BlockIcon from '../nodes/_base/block-icon';
  */
 const extractProviderFromModel = (model: unknown): string => {
   if (typeof model === 'object' && model !== null && 'provider' in model) {
-    return (model as { provider: string }).provider;
+    const value = (model as { provider?: string }).provider;
+    return (value || 'openai').toLowerCase();
   }
 
   if (typeof model === 'string') {
-    // "provider/model" 형식 파싱 (예: "anthropic/claude")
-    if (model.includes('/')) {
-      const [provider] = model.split('/');
-      const providerLower = provider.toLowerCase();
-      if (providerLower === 'openai') return 'OpenAI';
-      if (providerLower === 'anthropic') return 'Anthropic';
+    const normalized = model.toLowerCase();
+    if (normalized.includes('/')) {
+      const [provider] = normalized.split('/');
+      if (provider === 'openai') return 'openai';
+      if (provider === 'anthropic') return 'anthropic';
     }
-
-    // 모델명으로 provider 추론
-    if (model.startsWith('gpt')) return 'OpenAI';
-    if (model.startsWith('claude')) return 'Anthropic';
+    if (normalized.startsWith('gpt')) return 'openai';
+    if (normalized.startsWith('claude')) return 'anthropic';
   }
 
-  return 'OpenAI'; // 기본값
+  return 'openai'; // 기본값
 };
 
 /**
@@ -70,7 +68,7 @@ const extractModelNameFromModel = (model: unknown): string => {
     return model;
   }
 
-  return '';
+  return 'gpt-4o-mini';
 };
 
 export const NodeConfigPanel = () => {
@@ -203,47 +201,52 @@ export const NodeConfigPanel = () => {
         {/* LLM 노드 전용 */}
         {isLLMNode && (
           <>
-            <div className="space-y-2">
-              <Label className="font-semibold">Provider</Label>
-              <Select
-                value={extractProviderFromModel((node.data as LLMNodeType).model)}
-                onValueChange={(provider) => {
-                  console.log('🔍 [Provider Change]:', provider);
-                  handleUpdate('model', {
-                    provider,
-                    name: '', // provider 변경 시 모델 초기화
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="OpenAI">OpenAI</SelectItem>
-                  <SelectItem value="Anthropic">Anthropic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {(() => {
+              const llmData = node.data as LLMNodeType;
+              const currentProvider =
+                llmData.provider || extractProviderFromModel(llmData.model);
+              return (
+                <>
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Provider</Label>
+                    <Select
+                      value={currentProvider}
+                      onValueChange={(provider) => {
+                        handleUpdate('provider', provider);
+                        handleUpdate('model', {
+                          provider,
+                          name: '', // provider 변경 시 모델 초기화
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="openai">OpenAI</SelectItem>
+                        <SelectItem value="anthropic">Anthropic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <div className="space-y-2">
-              <Label className="font-semibold">모델</Label>
-              <LLMModelSelect
-                selectedProvider={extractProviderFromModel(
-                  (node.data as LLMNodeType).model
-                )}
-                value={extractModelNameFromModel((node.data as LLMNodeType).model)}
-                onChange={(modelId) => {
-                  console.log('🔍 [Model Change] new modelId:', modelId);
-                  const currentModel = (node.data as LLMNodeType).model;
-                  const currentProvider = extractProviderFromModel(currentModel);
-
-                  handleUpdate('model', {
-                    provider: currentProvider,
-                    name: modelId, // model.id를 name 필드에 저장 (예: 'gpt-4')
-                  });
-                }}
-              />
-            </div>
+                  <div className="space-y-2">
+                    <Label className="font-semibold">모델</Label>
+                    <LLMModelSelect
+                      selectedProvider={currentProvider}
+                      value={extractModelNameFromModel(
+                        (node.data as LLMNodeType).model
+                      )}
+                      onChange={(modelId) => {
+                        handleUpdate('model', {
+                          provider: currentProvider,
+                          name: modelId, // model.id를 name 필드에 저장 (예: 'gpt-4')
+                        });
+                      }}
+                    />
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="space-y-2">
               <Label className="font-semibold">프롬프트</Label>
