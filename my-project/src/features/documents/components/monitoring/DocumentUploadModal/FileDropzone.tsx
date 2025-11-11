@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/components/button';
 import { FILE_CONSTRAINTS } from '../../../constants/documentConstants';
 import { formatBytes } from '@/shared/utils/format';
+import { toast } from 'sonner';
 
 interface FileDropzoneProps {
   files: File[];
@@ -13,9 +14,44 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
+  // Validate file size and extension
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Check file size
+    if (file.size > FILE_CONSTRAINTS.MAX_SIZE) {
+      return {
+        valid: false,
+        error: `파일 크기는 최대 ${formatBytes(FILE_CONSTRAINTS.MAX_SIZE)}까지 허용됩니다`,
+      };
+    }
+
+    // Check file extension
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (!extension || !FILE_CONSTRAINTS.ALLOWED_EXTENSIONS.includes(extension)) {
+      return {
+        valid: false,
+        error: `허용되는 파일 형식: ${FILE_CONSTRAINTS.ALLOWED_EXTENSIONS.join(', ').toUpperCase()}`,
+      };
+    }
+
+    return { valid: true };
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
-    onFilesChange([...files, ...selectedFiles]);
+    const validFiles: File[] = [];
+
+    selectedFiles.forEach((file) => {
+      const validation = validateFile(file);
+      if (validation.valid) {
+        validFiles.push(file);
+      } else {
+        toast.error(`${file.name}: ${validation.error}`);
+      }
+    });
+
+    if (validFiles.length > 0) {
+      onFilesChange([...files, ...validFiles]);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -32,7 +68,20 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange
     e.preventDefault();
     setIsDragActive(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
-    onFilesChange([...files, ...droppedFiles]);
+    const validFiles: File[] = [];
+
+    droppedFiles.forEach((file) => {
+      const validation = validateFile(file);
+      if (validation.valid) {
+        validFiles.push(file);
+      } else {
+        toast.error(`${file.name}: ${validation.error}`);
+      }
+    });
+
+    if (validFiles.length > 0) {
+      onFilesChange([...files, ...validFiles]);
+    }
   };
 
   const removeFile = (index: number) => {

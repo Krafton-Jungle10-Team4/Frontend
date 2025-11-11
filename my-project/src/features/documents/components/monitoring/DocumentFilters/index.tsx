@@ -5,11 +5,14 @@ import { useAsyncDocumentStore } from '../../../stores/documentStore.async';
 import { useFilters } from '../../../stores/selectors';
 import { StatusFilter } from './StatusFilter';
 import { SearchInput } from './SearchInput';
+import { BotFilter } from './BotFilter';
+import { useBotStore, selectBots } from '@/features/bot/stores/botStore';
 import { DocumentStatus } from '../../../types/document.types';
 
 export const DocumentFilters: React.FC = () => {
   const filters = useFilters();
   const { setFilters, resetFilters } = useAsyncDocumentStore();
+  const bots = useBotStore(selectBots);
 
   const [searchQuery, setSearchQuery] = React.useState(filters.searchQuery || '');
 
@@ -23,7 +26,16 @@ export const DocumentFilters: React.FC = () => {
   }, [searchQuery, setFilters]);
 
   const hasActiveFilters =
-    filters.status !== undefined || (filters.searchQuery && filters.searchQuery.length > 0);
+    filters.status !== undefined ||
+    filters.botId !== undefined ||
+    (filters.searchQuery && filters.searchQuery.length > 0);
+
+  // Get bot name for active filter display
+  const getSelectedBotName = (botId?: string) => {
+    if (!botId) return null;
+    const bot = bots.find((b) => b.id === botId);
+    return bot?.name || botId;
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -33,6 +45,11 @@ export const DocumentFilters: React.FC = () => {
         <StatusFilter
           value={filters.status}
           onChange={(status) => setFilters({ status })}
+        />
+
+        <BotFilter
+          value={filters.botId}
+          onChange={(botId) => setFilters({ botId })}
         />
 
         {hasActiveFilters && (
@@ -57,6 +74,11 @@ export const DocumentFilters: React.FC = () => {
           {filters.status && (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary">
               상태: {filters.status}
+            </span>
+          )}
+          {filters.botId && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary">
+              봇: {getSelectedBotName(filters.botId)}
             </span>
           )}
           {filters.searchQuery && (

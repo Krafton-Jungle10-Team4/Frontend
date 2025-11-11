@@ -14,6 +14,8 @@ import { useDocuments, usePagination } from '../../stores/selectors';
 import { DocumentTable } from './DocumentTable';
 import { DocumentFilters } from './DocumentFilters';
 import { DocumentUploadModal } from './DocumentUploadModal';
+import { DocumentStatusCard } from './DocumentStatusCard';
+import { ProcessingQueuePanel } from './ProcessingQueuePanel';
 import { FileUp, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -58,9 +60,13 @@ export const DocumentMonitoringPage: React.FC = () => {
     }
   };
 
-  const handleRefresh = () => {
-    fetchDocuments();
-    toast.success('문서 목록을 새로고침했습니다');
+  const handleRefresh = async () => {
+    try {
+      await fetchDocuments();
+      toast.success('문서 목록을 새로고침했습니다');
+    } catch (error) {
+      toast.error('새로고침 실패: ' + (error as Error).message);
+    }
   };
 
   // Pagination
@@ -91,6 +97,12 @@ export const DocumentMonitoringPage: React.FC = () => {
             업로드
           </Button>
         </div>
+      </div>
+
+      {/* Status Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DocumentStatusCard />
+        <ProcessingQueuePanel />
       </div>
 
       {/* Filters */}
