@@ -209,6 +209,8 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
                 chunkCount: status.chunkCount,
                 processingTime: status.processingTime,
                 completedAt: status.completedAt,
+                // Persist progressPercent from status API, fallback to existing value
+                progressPercent: status.progressPercent ?? document.progressPercent,
               };
 
               documents.set(documentId, updated);
@@ -270,10 +272,16 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             const response =
               await documentsAsyncApi.listWithStatus(finalRequest);
 
-            // Update documents map
+            // Update documents map, preserving progressPercent from existing state
+            const existingDocuments = get().documents;
             const documents = new Map<string, DocumentWithStatus>();
             response.documents.forEach((doc) => {
-              documents.set(doc.documentId, doc);
+              const existingDoc = existingDocuments.get(doc.documentId);
+              documents.set(doc.documentId, {
+                ...doc,
+                // Preserve progressPercent: use new value if available, otherwise keep existing
+                progressPercent: doc.progressPercent ?? existingDoc?.progressPercent,
+              });
             });
 
             set({
@@ -314,6 +322,8 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
               document.status = 'queued' as DocumentStatus;
               document.errorMessage = undefined;
               document.retryCount++;
+              // Reset progressPercent for retry
+              document.progressPercent = 0;
               documents.set(documentId, document);
               set({ documents });
             }
