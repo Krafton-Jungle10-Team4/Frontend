@@ -1,0 +1,113 @@
+import React, { useRef, useState } from 'react';
+import { Upload, X } from 'lucide-react';
+import { Button } from '@/shared/components/button';
+import { FILE_CONSTRAINTS } from '../../../constants/documentConstants';
+import { formatBytes } from '@/shared/utils/format';
+
+interface FileDropzoneProps {
+  files: File[];
+  onFilesChange: (files: File[]) => void;
+}
+
+export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    onFilesChange([...files, ...selectedFiles]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    onFilesChange([...files, ...droppedFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    onFilesChange(files.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        className={`
+          border-2 border-dashed rounded-lg p-8
+          flex flex-col items-center justify-center
+          cursor-pointer transition-colors
+          ${
+            isDragActive
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/50'
+          }
+        `}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.txt,.docx"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <Upload className="h-10 w-10 text-muted-foreground mb-4" />
+        {isDragActive ? (
+          <p className="text-sm text-muted-foreground">파일을 여기에 놓아주세요...</p>
+        ) : (
+          <div className="text-center">
+            <p className="text-sm font-medium mb-1">
+              파일을 드래그하거나 클릭하여 선택하세요
+            </p>
+            <p className="text-xs text-muted-foreground">
+              PDF, TXT, DOCX (최대 10MB)
+            </p>
+          </div>
+        )}
+      </div>
+
+      {files.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">선택된 파일 ({files.length}개)</p>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {files.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-2 rounded-md bg-secondary"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{file.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatBytes(file.size)}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFile(index)}
+                  className="ml-2"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
