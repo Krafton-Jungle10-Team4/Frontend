@@ -4,6 +4,7 @@ import Home from '../../icons/Home';
 import Llm from '../../icons/Llm';
 import Answer from '../../icons/Answer';
 import KnowledgeRetrieval from '../../icons/KnowledgeRetrieval';
+import Mcp from '../../icons/Mcp';
 import clsx from 'clsx';
 
 type BlockIconProps = {
@@ -32,6 +33,7 @@ const getIcon = (type: BlockEnum, className: string) => {
     [BlockEnum.KnowledgeRetrieval]: (
       <KnowledgeRetrieval className={className} />
     ),
+    [BlockEnum.MCP]: <Mcp className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -44,6 +46,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
   [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
   [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
+  [BlockEnum.MCP]: 'bg-purple-500',
 };
 
 /**

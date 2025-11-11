@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { useDocumentStore } from '@/features/documents/stores/documentStore';
 import { LLMModelSelect } from './LLMModelSelect';
+import { MCPNodeConfig } from './configs/MCPNodeConfig';
 import { Input } from '@shared/components/input';
 import { Textarea } from '@shared/components/textarea';
 import { Label } from '@shared/components/label';
@@ -84,6 +85,7 @@ export const NodeConfigPanel = () => {
   const isLLMNode = node?.data.type === BlockEnum.LLM;
   const isKnowledgeRetrievalNode =
     node?.data.type === BlockEnum.KnowledgeRetrieval;
+  const isMCPNode = node?.data.type === BlockEnum.MCP;
 
   // 제목 편집 모드 시작
   const handleTitleClick = () => {
@@ -358,6 +360,9 @@ export const NodeConfigPanel = () => {
             </div>
           </>
         )}
+
+        {/* MCP 노드 전용 */}
+        {isMCPNode && <MCPNodeConfig />}
       </div>
     </div>
   );
