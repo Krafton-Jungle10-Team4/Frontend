@@ -28,6 +28,51 @@ import {
 } from '@/shared/types/workflow.types';
 import BlockIcon from '../nodes/_base/block-icon';
 
+/**
+ * model 값에서 provider 추출
+ */
+const extractProviderFromModel = (model: unknown): string => {
+  if (typeof model === 'object' && model !== null && 'provider' in model) {
+    return (model as { provider: string }).provider;
+  }
+
+  if (typeof model === 'string') {
+    // "provider/model" 형식 파싱 (예: "anthropic/claude")
+    if (model.includes('/')) {
+      const [provider] = model.split('/');
+      const providerLower = provider.toLowerCase();
+      if (providerLower === 'openai') return 'OpenAI';
+      if (providerLower === 'anthropic') return 'Anthropic';
+    }
+
+    // 모델명으로 provider 추론
+    if (model.startsWith('gpt')) return 'OpenAI';
+    if (model.startsWith('claude')) return 'Anthropic';
+  }
+
+  return 'OpenAI'; // 기본값
+};
+
+/**
+ * model 값에서 실제 모델명 추출
+ */
+const extractModelNameFromModel = (model: unknown): string => {
+  if (typeof model === 'object' && model !== null && 'name' in model) {
+    return (model as { name: string }).name;
+  }
+
+  if (typeof model === 'string') {
+    // "provider/model" 형식 파싱 (예: "anthropic/claude")
+    if (model.includes('/')) {
+      const [, modelName] = model.split('/');
+      return modelName || model;
+    }
+    return model;
+  }
+
+  return '';
+};
+
 export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode, selectNode } = useWorkflowStore();
   const { documents } = useDocumentStore();
@@ -161,16 +206,7 @@ export const NodeConfigPanel = () => {
             <div className="space-y-2">
               <Label className="font-semibold">Provider</Label>
               <Select
-                value={(() => {
-                  const model = (node.data as LLMNodeType).model;
-                  const provider =
-                    typeof model === 'object' && model.provider
-                      ? model.provider
-                      : 'OpenAI';
-                  console.log('🔍 [Provider Select] model:', model);
-                  console.log('🔍 [Provider Select] extracted provider:', provider);
-                  return provider;
-                })()}
+                value={extractProviderFromModel((node.data as LLMNodeType).model)}
                 onValueChange={(provider) => {
                   console.log('🔍 [Provider Change]:', provider);
                   handleUpdate('model', {
@@ -192,33 +228,14 @@ export const NodeConfigPanel = () => {
             <div className="space-y-2">
               <Label className="font-semibold">모델</Label>
               <LLMModelSelect
-                selectedProvider={(() => {
-                  const model = (node.data as LLMNodeType).model;
-                  const provider =
-                    typeof model === 'object' && model.provider
-                      ? model.provider
-                      : 'OpenAI';
-                  return provider;
-                })()}
-                value={(() => {
-                  const model = (node.data as LLMNodeType).model;
-                  const modelId =
-                    typeof model === 'object' && model.name
-                      ? model.name
-                      : typeof model === 'string'
-                        ? model
-                        : '';
-                  console.log('🔍 [Model Select] model:', model);
-                  console.log('🔍 [Model Select] extracted modelId:', modelId);
-                  return modelId;
-                })()}
+                selectedProvider={extractProviderFromModel(
+                  (node.data as LLMNodeType).model
+                )}
+                value={extractModelNameFromModel((node.data as LLMNodeType).model)}
                 onChange={(modelId) => {
                   console.log('🔍 [Model Change] new modelId:', modelId);
                   const currentModel = (node.data as LLMNodeType).model;
-                  const currentProvider =
-                    typeof currentModel === 'object' && currentModel.provider
-                      ? currentModel.provider
-                      : 'OpenAI';
+                  const currentProvider = extractProviderFromModel(currentModel);
 
                   handleUpdate('model', {
                     provider: currentProvider,

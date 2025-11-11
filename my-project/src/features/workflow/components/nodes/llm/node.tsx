@@ -13,12 +13,25 @@ const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
     if (!model) return null;
 
     if (typeof model === 'string') {
-      const provider = model.startsWith('gpt')
-        ? 'OpenAI'
-        : model.startsWith('claude')
-          ? 'Anthropic'
-          : 'Unknown';
-      return { provider, name: model };
+      let provider = 'Unknown';
+      let name = model;
+
+      // "provider/model" 형식 파싱 (예: "anthropic/claude", "openai/gpt-4")
+      if (model.includes('/')) {
+        const [providerPart, modelPart] = model.split('/');
+        const providerLower = providerPart.toLowerCase();
+        if (providerLower === 'openai') provider = 'OpenAI';
+        else if (providerLower === 'anthropic') provider = 'Anthropic';
+        name = modelPart;
+      }
+      // 모델명으로 provider 추론
+      else if (model.startsWith('gpt')) {
+        provider = 'OpenAI';
+      } else if (model.startsWith('claude')) {
+        provider = 'Anthropic';
+      }
+
+      return { provider, name };
     }
 
     return model;

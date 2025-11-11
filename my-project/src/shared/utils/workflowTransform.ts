@@ -78,7 +78,7 @@ export const transformFromBackend = (
               ? node.data.model
               : {
                   provider: extractProvider(node.data.model || ''),
-                  name: node.data.model || 'gpt-4',
+                  name: extractModelName(node.data.model || 'gpt-4'),
                 },
           prompt: node.data.prompt_template || '',
           temperature: node.data.temperature || 0.7,
@@ -110,11 +110,33 @@ export const transformFromBackend = (
 
 /**
  * 모델명에서 제공자 추출
+ * "provider/model" 형식 지원 추가
  */
 const extractProvider = (model: string): string => {
+  // "provider/model" 형식 파싱 (예: "anthropic/claude", "openai/gpt-4")
+  if (model.includes('/')) {
+    const [provider] = model.split('/');
+    const providerLower = provider.toLowerCase();
+    if (providerLower === 'openai') return 'OpenAI';
+    if (providerLower === 'anthropic') return 'Anthropic';
+  }
+
+  // 기존 로직: 모델명으로 추론
   if (model.startsWith('gpt')) return 'OpenAI';
   if (model.startsWith('claude')) return 'Anthropic';
+
   return 'Unknown';
+};
+
+/**
+ * "provider/model" 형식에서 실제 모델명 추출
+ */
+const extractModelName = (model: string): string => {
+  if (model.includes('/')) {
+    const [, modelName] = model.split('/');
+    return modelName || model;
+  }
+  return model;
 };
 
 /**
