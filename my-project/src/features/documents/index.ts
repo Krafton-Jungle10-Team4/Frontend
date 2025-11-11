@@ -6,6 +6,15 @@
 // Components
 export { DocumentList } from './components/DocumentList';
 
+// Monitoring Components (Phase 4)
+export { DocumentMonitoringPage } from './components/monitoring/DocumentMonitoringPage';
+export { DocumentTable } from './components/monitoring/DocumentTable';
+export { DocumentStatusBadge } from './components/monitoring/DocumentStatusBadge';
+export { DocumentProgressBar } from './components/monitoring/DocumentProgressBar';
+export { DocumentActions } from './components/monitoring/DocumentActions';
+export { DocumentFilters } from './components/monitoring/DocumentFilters';
+export { DocumentUploadModal } from './components/monitoring/DocumentUploadModal';
+
 // Legacy Store (Backward Compatibility)
 export {
   useDocumentStore,

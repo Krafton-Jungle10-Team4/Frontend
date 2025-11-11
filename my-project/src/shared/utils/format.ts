@@ -62,3 +62,8 @@ export function truncateText(text: string, maxLength: number): string {
 export function formatNumber(num: number, locale: string = 'en-US'): string {
   return new Intl.NumberFormat(locale).format(num);
 }
+
+/**
+ * Alias for formatFileSize (for backward compatibility)
+ */
+export const formatBytes = formatFileSize;
