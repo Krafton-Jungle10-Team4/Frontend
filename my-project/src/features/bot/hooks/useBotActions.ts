@@ -56,8 +56,6 @@ export function useBotActions() {
       const t = translations[language];
 
       try {
-        toast.loading(t.deleting);
-
         // 1. 백엔드 API 호출하여 DB에서 삭제
         await botApi.delete(botId);
 
@@ -73,11 +71,9 @@ export function useBotActions() {
           message: `${userName} ${language === 'en' ? 'deleted bot' : '봇을 삭제했습니다'}: ${botName}`,
         });
 
-        toast.dismiss();
         toast.success(t.success);
       } catch (error: any) {
         console.error('Failed to delete bot:', error);
-        toast.dismiss();
 
         // 404 에러 처리: 봇이 이미 삭제됨 (정상 처리)
         if (error?.response?.status === 404) {
