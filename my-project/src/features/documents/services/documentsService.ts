@@ -4,6 +4,7 @@
  */
 
 import { documentsAsyncApi } from '../api/documentsApi.async';
+import { documentsApi } from '../api/documentsApi';
 import { ApiClient } from '@/shared/utils/api';
 import type { AxiosProgressEvent } from 'axios';
 import type {
@@ -67,8 +68,8 @@ export const documentsService = {
    * @param botId Bot ID
    */
   deleteDocument: async (documentId: string, botId: string): Promise<void> => {
-    // Always use legacy delete for now (async delete not implemented yet)
-    return ApiClient.deleteFile(documentId, botId);
+    // Use authenticated API client for delete (FSD compliance)
+    return documentsApi.deleteDocument(documentId, botId);
   },
 
   /**
