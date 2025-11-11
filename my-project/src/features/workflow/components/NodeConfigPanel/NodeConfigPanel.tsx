@@ -257,8 +257,8 @@ export const NodeConfigPanel = () => {
               <Input
                 type="number"
                 min="1"
-                max="4096"
-                value={(node.data as LLMNodeType).maxTokens || 500}
+                max="8192"
+                value={(node.data as LLMNodeType).maxTokens || 4000}
                 onChange={(e) =>
                   handleUpdate('maxTokens', parseInt(e.target.value, 10))
                 }
