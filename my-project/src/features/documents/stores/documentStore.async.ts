@@ -3,6 +3,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { documentsAsyncApi } from '../api/documentsApi.async';
 import { documentsApi } from '../api/documentsApi';
 import { POLLING_CONFIG } from '../constants/documentConstants';
+import { useBotStore } from '@features/bot/stores/botStore';
 import type {
   DocumentWithStatus,
   DocumentListRequest,
@@ -241,11 +242,26 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
         fetchDocuments: async (request?: DocumentListRequest) => {
           const { filters, pagination } = get();
 
+          // Guard: Ensure botId is provided through fallback chain
+          const botId =
+            request?.botId ??
+            filters.botId ??
+            useBotStore.getState().selectedBotId;
+
+          if (!botId) {
+            const error = new Error(
+              'botId is required for fetching documents. Please provide botId in request, filters, or select a bot.'
+            );
+            set({ error, isLoading: false });
+            throw error;
+          }
+
           const finalRequest: DocumentListRequest = {
             ...filters,
             limit: pagination.limit,
             offset: pagination.offset,
             ...request,
+            botId, // Ensure botId is always present
           };
 
           set({ isLoading: true, error: null });
