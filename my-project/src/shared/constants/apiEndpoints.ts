@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
   // 채팅 (SnapAgent API)
   CHAT: {
     SEND: '/api/v1/chat',
+    STREAM: '/api/v1/chat/stream',
     HEALTH: '/api/v1/chat/health',
   },
 
