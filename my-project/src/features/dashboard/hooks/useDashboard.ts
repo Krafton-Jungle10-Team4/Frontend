@@ -13,6 +13,7 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     activities,
     performanceMetrics,
     error,
+    isLoading,
     setStats,
     setActivities,
     setPerformanceMetrics,
@@ -98,6 +99,7 @@ export function useDashboard(options?: { autoFetch?: boolean }) {
     activities,
     performanceMetrics,
     error,
+    loading: isLoading,
 
     // Actions
     fetchDashboardData,

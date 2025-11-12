@@ -15,10 +15,13 @@ import { keysToCamel, keysToSnake, filterUndefined } from '../utils/case-convers
 export const documentsAsyncApi = {
   /**
    * 비동기 문서 업로드
+   *
+   * 엔드포인트: POST /api/v1/documents/upload-async
+   *
    * @param file 업로드할 파일
-   * @param botId 봇 ID
+   * @param botId 봇 ID (필수, 형식: bot_{timestamp}_{random})
    * @param onUploadProgress 업로드 진행률 콜백 (선택)
-   * @returns 즉시 응답 (< 2초)
+   * @returns AsyncDocumentUploadResponse (job_id, status, message, estimated_time)
    */
   uploadAsync: async (
     file: File,

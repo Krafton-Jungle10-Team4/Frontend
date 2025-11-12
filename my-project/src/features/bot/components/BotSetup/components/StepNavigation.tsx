@@ -91,7 +91,8 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
         // Update knowledge with uploaded file IDs
         const uploadedFileIds = context.files
           .filter((f) => f.status === 'uploaded')
-          .map((f) => f.id);
+          .map((f) => f.id)
+          .filter((id): id is string => id != null); // null/undefined 제거
 
         if (uploadedFileIds.length > 0) {
           await botApi.update(createdBotId, { knowledge: uploadedFileIds } as any);

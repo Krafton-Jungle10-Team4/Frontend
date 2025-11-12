@@ -31,8 +31,8 @@ export const API_ENDPOINTS = {
 
   // 문서 관리 (SnapAgent API)
   DOCUMENTS: {
-    // 기존 엔드포인트 (유지)
-    UPLOAD: '/api/v1/documents/upload',
+    // 비동기 업로드 엔드포인트
+    UPLOAD: '/api/v1/documents/upload-async',
     SEARCH: '/api/v1/documents/search',
     BY_ID: (documentId: string) => `/api/v1/documents/${documentId}`,
 
