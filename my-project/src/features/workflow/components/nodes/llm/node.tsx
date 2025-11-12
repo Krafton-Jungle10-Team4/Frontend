@@ -24,6 +24,8 @@ const LLMNode = ({ data }: NodeProps<LLMNodeType>) => {
         ? 'anthropic'
         : typeof model === 'string' && model.toLowerCase().startsWith('gpt')
         ? 'openai'
+        : typeof model === 'string' && model.toLowerCase().includes('gemini')
+        ? 'google'
         : undefined);
 
     const modelName =

@@ -45,9 +45,11 @@ const extractProviderFromModel = (model: unknown): string => {
       const [provider] = normalized.split('/');
       if (provider === 'openai') return 'openai';
       if (provider === 'anthropic') return 'anthropic';
+      if (provider === 'google') return 'google';
     }
     if (normalized.startsWith('gpt')) return 'openai';
     if (normalized.startsWith('claude')) return 'anthropic';
+    if (normalized.includes('gemini')) return 'google';
   }
 
   return 'openai'; // 기본값
@@ -238,6 +240,7 @@ export const NodeConfigPanel = () => {
                       <SelectContent>
                         <SelectItem value="openai">OpenAI</SelectItem>
                         <SelectItem value="anthropic">Anthropic</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

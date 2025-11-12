@@ -166,11 +166,13 @@ const extractProviderSlug = (model: unknown): string => {
     const providerLower = provider.toLowerCase();
     if (providerLower === 'openai') return 'openai';
     if (providerLower === 'anthropic') return 'anthropic';
+    if (providerLower === 'google') return 'google';
   }
 
   // 기존 로직: 모델명으로 추론
   if (normalized.startsWith('gpt')) return 'openai';
   if (normalized.startsWith('claude')) return 'anthropic';
+  if (normalized.includes('gemini')) return 'google';
 
   return 'openai';
 };

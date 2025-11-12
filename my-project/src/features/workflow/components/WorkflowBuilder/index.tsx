@@ -85,6 +85,7 @@ const WorkflowInner = () => {
     loadWorkflow,
     selectNode,
     toggleChatVisibility,
+    reset,
   } = useWorkflowStore();
 
   const { push } = useHistoryStore();
@@ -105,12 +106,21 @@ const WorkflowInner = () => {
   // 게시하기 단축키 (Cmd/Ctrl+Shift+P, E)
   useWorkflowShortcuts(botId || '');
 
-  // 워크플로우 로드
+  // 봇 변경 시 상태 초기화 및 워크플로우 로드
   useEffect(() => {
+    // 기존 상태 초기화 (선택/미리보기 등 정리)
+    reset();
+
+    // botId가 존재할 때만 워크플로우 로드
     if (botId) {
       loadWorkflow(botId);
     }
-  }, [botId, loadWorkflow]);
+
+    // 언마운트 시에도 잔여 상태 정리
+    return () => {
+      reset();
+    };
+  }, [botId, loadWorkflow, reset]);
 
   // 패널 리사이즈 핸들러
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
