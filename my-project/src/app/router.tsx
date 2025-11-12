@@ -5,6 +5,7 @@ import { ProtectedRoute, authRoutes } from '@/features/auth';
 import { workflowRoutes } from '@/features/workflow';
 import { dashboardRoutes } from '@/features/dashboard';
 import { mcpRoutes } from '@/features/mcp';
+import { promptEngineeringStudioRoutes } from '@/features/prompt-engineering-studio';
 import { documentsRoutes } from '@/features/documents';
 
 /**
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
 
       // Workflow routes - Feature 기반
       workflowRoutes,
+      // MCP routes - MCP 키 관리
+      mcpRoutes,
+      // Prompt Engineering Studio routes - 프롬프트 스튜디오 관리
+      promptEngineeringStudioRoutes,
 
       // Protected routes - 인증 필요
       {
@@ -90,8 +95,6 @@ export const router = createBrowserRouter([
           },
           // Dashboard routes - Feature 기반
           dashboardRoutes,
-          // Documents routes - 문서 관리
-          documentsRoutes,
           // MCP routes - MCP 키 관리
           mcpRoutes,
           // Deployment routes - 배포 관리
