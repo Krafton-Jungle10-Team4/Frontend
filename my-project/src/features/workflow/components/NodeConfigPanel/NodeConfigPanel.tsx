@@ -7,7 +7,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '../../stores/workflowStore';
-import { useDocumentStore } from '@/features/documents/stores/documentStore';
+import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
+import { useBotStore } from '@/features/bot/stores/botStore';
 import { LLMModelSelect } from './LLMModelSelect';
 import { MCPNodeConfig } from './configs/MCPNodeConfig';
 import { Input } from '@shared/components/input';
@@ -74,11 +75,21 @@ const extractModelNameFromModel = (model: unknown): string => {
 
 export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode, selectNode } = useWorkflowStore();
-  const { documents } = useDocumentStore();
+  const { documents, fetchDocuments } = useAsyncDocumentStore();
+  const { selectedBotId } = useBotStore();
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // 문서 목록 로드
+  useEffect(() => {
+    if (selectedBotId) {
+      fetchDocuments({ botId: selectedBotId }).catch((error) => {
+        console.error('Failed to fetch documents:', error);
+      });
+    }
+  }, [selectedBotId, fetchDocuments]);
 
   // Hook은 항상 최상단에서 호출 (조건부 return 이전)
   const node = nodes.find((n) => n.id === selectedNodeId);
@@ -344,10 +355,12 @@ export const NodeConfigPanel = () => {
                   // 항상 새 배열로 전달 (참조 변경 보장)
                   handleUpdate('documentIds', selectedIds);
                 }}
-                options={documents.map((doc) => ({
-                  value: doc.id,
-                  label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB)`,
-                }))}
+                options={Array.from(documents.values())
+                  .filter((doc) => doc.status === 'done') // 완료된 문서만 표시
+                  .map((doc) => ({
+                    value: doc.documentId,
+                    label: `${doc.originalFilename} (${(doc.fileSize / 1024 / 1024).toFixed(2)} MB)`,
+                  }))}
                 placeholder="검색할 문서를 선택하세요..."
                 emptyMessage="문서가 없습니다. 먼저 문서를 업로드해주세요."
               />

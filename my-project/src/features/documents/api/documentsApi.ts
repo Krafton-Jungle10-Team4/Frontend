@@ -14,11 +14,14 @@ import { validateFile } from '@/shared/utils/fileValidation';
  */
 export const documentsApi = {
   /**
-   * 문서 업로드
+   * 문서 업로드 (비동기)
    *
    * 인증: JWT Bearer Token (로그인 필수)
-   * 엔드포인트: POST /api/v1/documents/upload
+   * 엔드포인트: POST /api/v1/documents/upload-async
    * Content-Type: multipart/form-data
+   *
+   * 비동기 처리: 파일이 S3에 업로드되고 SQS 메시지 큐에 추가됩니다.
+   * 실제 임베딩 처리는 백그라운드 워커가 수행하며, job_id로 상태를 추적할 수 있습니다.
    *
    * 파일 제약사항:
    * - 최대 크기: 10MB
@@ -26,9 +29,9 @@ export const documentsApi = {
    * - 빈 파일 업로드 불가
    *
    * @param file 업로드할 파일
-   * @param botId 봇 ID (필수)
+   * @param botId 봇 ID (필수, 형식: bot_{timestamp}_{random})
    * @param onUploadProgress 업로드 진행률 콜백 (선택)
-   * @returns DocumentUploadResponse
+   * @returns DocumentUploadResponse (job_id, status, message, estimated_time 포함)
    * @throws Error 파일 유효성 검증 실패 또는 업로드 오류
    */
   uploadDocument: async (
@@ -108,11 +111,14 @@ export const documentsApi = {
 
   /**
    * 문서 삭제
+   * 
+   * 인증: JWT Bearer Token (관리 작업은 JWT 인증 필수)
+   * 
    * @param documentId 문서 ID
    * @param botId 봇 ID (필수)
    */
   deleteDocument: async (documentId: string, botId: string): Promise<void> => {
-    await apiKeyClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId), {
+    await apiClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId), {
       params: {
         bot_id: botId,
       },

@@ -6,19 +6,21 @@ import { API_BASE_URL } from './constants';
 
 export class ApiClient {
   /**
-   * Upload a file to the server
+   * Upload a file to the server (비동기)
+   *
+   * 엔드포인트: POST /api/v1/documents/upload-async
+   *
+   * 비동기 처리: 파일이 S3에 업로드되고 SQS 큐에 추가됩니다.
+   * 반환된 job_id로 처리 상태를 추적할 수 있습니다.
    */
   static async uploadFile(
     file: File,
     botId: string
   ): Promise<{
-    document_id: string;
-    filename: string;
-    file_size: number;
-    chunk_count: number;
-    processing_time: number;
+    job_id: string;
     status: string;
     message: string;
+    estimated_time?: number;
   }> {
     const formData = new FormData();
     formData.append('file', file);
@@ -32,7 +34,7 @@ export class ApiClient {
     }
 
     // botId를 쿼리 파라미터로 추가
-    const url = new URL(`${API_BASE_URL}/api/v1/documents/upload`);
+    const url = new URL(`${API_BASE_URL}/api/v1/documents/upload-async`);
     url.searchParams.append('bot_id', botId);
 
     const response = await fetch(url.toString(), {

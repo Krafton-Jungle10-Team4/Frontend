@@ -1,6 +1,8 @@
 import { Upload, X, Loader2, FileIcon, CheckCircle2 } from 'lucide-react';
 import { useBotSetup } from '../../BotSetupContext';
-import { ApiClient } from '@/shared/utils/api';
+import { documentsService } from '@features/documents/services/documentsService';
+import { useAsyncDocumentStore } from '@features/documents/stores/documentStore.async';
+import { isAsyncUploadResponse } from '@features/documents/types/type-guards';
 import { isValidFileType, isValidFileSize } from '@/shared/utils/validation';
 import { formatFileSize } from '@/shared/utils/format';
 import { FILE_UPLOAD } from '@/shared/utils/constants';
@@ -9,12 +11,22 @@ import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
 import type { FileStatus } from '../../types';
 
+/**
+ * Feature flag for async upload
+ */
+const isAsyncUploadEnabled = (): boolean => {
+  return import.meta.env.VITE_ENABLE_ASYNC_UPLOAD === 'true';
+};
+
 interface FilesTabProps {
   language: Language;
 }
 
 export function FilesTab({ language }: FilesTabProps) {
   const { files, setFiles, createdBotId } = useBotSetup();
+
+  // Async document store (feature flag controlled)
+  const asyncStore = useAsyncDocumentStore();
 
   const translations = {
     en: {
@@ -77,22 +89,69 @@ export function FilesTab({ language }: FilesTabProps) {
         if (!createdBotId) {
           throw new Error('Bot not created yet');
         }
-        const data = await ApiClient.uploadFile(fileItem.file, createdBotId);
 
-        // Update file with backend document_id and mark as uploaded
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileItem.id
-              ? {
-                  ...f,
-                  id: data.document_id,
-                  status: 'uploaded' as FileStatus,
-                }
-              : f
-          )
-        );
+        if (isAsyncUploadEnabled()) {
+          // Use async store for upload (with polling)
+          const jobId = await asyncStore.uploadDocumentAsync(
+            fileItem.file,
+            createdBotId
+          );
 
-        toast.success(`${fileItem.file.name} uploaded successfully`);
+          // Update UI with job ID
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileItem.id
+                ? {
+                    ...f,
+                    id: jobId,
+                    status: 'uploaded' as FileStatus,
+                  }
+                : f
+            )
+          );
+          toast.success(
+            `${fileItem.file.name} uploaded - processing in background`
+          );
+        } else {
+          // Legacy flow: Use documentsService
+          const response = await documentsService.uploadDocument(
+            fileItem.file,
+            createdBotId
+          );
+
+          // Handle async or sync response
+          if (isAsyncUploadResponse(response)) {
+            // Async upload - job queued
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === fileItem.id
+                  ? {
+                      ...f,
+                      id: response.jobId,
+                      status: 'uploaded' as FileStatus,
+                    }
+                  : f
+              )
+            );
+            toast.success(
+              `${fileItem.file.name} uploaded - ${response.message}`
+            );
+          } else {
+            // Legacy sync upload - processing complete
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === fileItem.id
+                  ? {
+                      ...f,
+                      id: response.document_id,
+                      status: 'uploaded' as FileStatus,
+                    }
+                  : f
+              )
+            );
+            toast.success(`${fileItem.file.name} uploaded successfully`);
+          }
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
@@ -120,7 +179,15 @@ export function FilesTab({ language }: FilesTabProps) {
       if (!createdBotId) {
         throw new Error('Bot not created yet');
       }
-      await ApiClient.deleteFile(fileId, createdBotId);
+
+      if (isAsyncUploadEnabled()) {
+        // Use async store for deletion
+        await asyncStore.deleteDocument(fileId, createdBotId);
+      } else {
+        // Legacy flow: Use documentsService
+        await documentsService.deleteDocument(fileId, createdBotId);
+      }
+
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       toast.success(
         language === 'ko'

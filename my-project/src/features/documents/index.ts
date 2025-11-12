@@ -3,10 +3,27 @@
  * Public API
  */
 
+// Pages
+export { DocumentsPage } from './pages/DocumentsPage';
+
+// Routes
+export { documentsRoutes } from './routes';
+
 // Components
 export { DocumentList } from './components/DocumentList';
 
-// Store
+// Monitoring Components (Phase 4)
+export { DocumentMonitoringPage } from './components/monitoring/DocumentMonitoringPage';
+export { DocumentTable } from './components/monitoring/DocumentTable';
+export { DocumentStatusBadge } from './components/monitoring/DocumentStatusBadge';
+export { DocumentProgressBar } from './components/monitoring/DocumentProgressBar';
+export { DocumentActions } from './components/monitoring/DocumentActions';
+export { DocumentFilters } from './components/monitoring/DocumentFilters';
+export { DocumentUploadModal } from './components/monitoring/DocumentUploadModal';
+export { DocumentStatusCard } from './components/monitoring/DocumentStatusCard';
+export { ProcessingQueuePanel } from './components/monitoring/ProcessingQueuePanel';
+
+// Legacy Store (Backward Compatibility)
 export {
   useDocumentStore,
   selectDocuments,
@@ -17,6 +34,27 @@ export {
   selectError,
 } from './stores/documentStore';
 
+// Async Store (Phase 3)
+export { useAsyncDocumentStore } from './stores/documentStore.async';
+
+// Selectors (Phase 3)
+export {
+  useDocuments,
+  useDocument,
+  useDocumentsByStatus,
+  useIsPolling,
+  usePollingCount,
+  useFilters,
+  usePagination,
+  useSelectedDocument,
+  useUploadProgress as useAsyncUploadProgress,
+  useIsLoading as useAsyncIsLoading,
+  useError as useAsyncError,
+  useDocumentsArray,
+  useCompletedDocuments,
+  toLegacyDocument,
+} from './stores/selectors';
+
 // Types
 export type {
   Document,
@@ -24,7 +62,23 @@ export type {
   DocumentUploadResponse,
   DocumentSearchRequest,
   DocumentSearchResponse,
+  DocumentWithStatus,
+  DocumentStatus,
+  AsyncDocumentUploadResponse,
+  DocumentStatusResponse,
+  DocumentListRequest,
+  DocumentListResponse,
 } from './types/document.types';
+
+// Type Guards
+export {
+  isAsyncUploadResponse,
+  isValidDocument,
+  isProcessing,
+  isCompleted,
+  isSuccessfullyCompleted,
+  isFailed,
+} from './types/type-guards';
 
 // API
 export {
@@ -32,3 +86,14 @@ export {
   isDocumentError,
   handleDocumentError,
 } from './api/documentsApi';
+
+// Async API 
+export { documentsAsyncApi } from './api/documentsApi.async';
+
+// Constants 
+export {
+  POLLING_CONFIG,
+  DOCUMENT_STATUS_CONFIG,
+  PAGINATION_CONFIG,
+  FILE_CONSTRAINTS,
+} from './constants/documentConstants';
