@@ -7,9 +7,6 @@
 // Components
 export { default as Workflow } from './components/WorkflowBuilder';
 
-// Hooks
-export { useWorkflow } from './hooks/useWorkflow';
-
 // Store
 export { useWorkflowStore } from './stores/workflowStore';
 

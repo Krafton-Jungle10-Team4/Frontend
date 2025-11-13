@@ -2,6 +2,9 @@
  * Workflow API 응답 타입 정의
  */
 
+import type { NodePortSchema } from '@/shared/types/workflow';
+import type { BackendWorkflow } from '@/shared/types/workflowTransform.types';
+
 /**
  * 노드 타입 응답
  */
@@ -9,9 +12,13 @@ export interface NodeTypeResponse {
   type: string;
   label: string;
   icon: string;
+  category?: string;
+  description?: string;
   max_instances: number; // -1 = unlimited
   configurable: boolean;
+  ports?: NodePortSchema;
   config_schema?: Record<string, unknown>;
+  default_data?: Record<string, unknown>;
 }
 
 /**
@@ -31,9 +38,16 @@ export interface ModelResponse {
  */
 export interface WorkflowValidationResponse {
   is_valid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: WorkflowValidationMessage[];
+  warnings: WorkflowValidationMessage[];
   execution_order: string[] | null; // 노드 실행 순서
+}
+
+export interface WorkflowValidationMessage {
+  node_id: string | null;
+  type: string;
+  message: string;
+  severity: 'error' | 'warning';
 }
 
 /**
@@ -46,4 +60,54 @@ export interface NodeTypeSchema {
     properties: Record<string, unknown>;
     required: string[];
   };
+}
+
+export interface WorkflowVersionSummary {
+  id: string;
+  version: string;
+  status: 'draft' | 'published' | 'archived';
+  created_at: string;
+  updated_at: string;
+  published_at?: string | null;
+}
+
+export interface WorkflowVersionDetail extends WorkflowVersionSummary {
+  graph: BackendWorkflow;
+  environment_variables: Record<string, unknown>;
+  conversation_variables: Record<string, unknown>;
+}
+
+export interface WorkflowRunSummary {
+  id: string;
+  session_id: string;
+  status: 'running' | 'succeeded' | 'failed';
+  started_at: string;
+  finished_at?: string | null;
+  elapsed_time?: number | null;
+  total_tokens?: number | null;
+  total_steps?: number | null;
+}
+
+export interface WorkflowRunDetail extends WorkflowRunSummary {
+  workflow_version_id: string;
+  graph_snapshot: BackendWorkflow;
+  inputs: Record<string, unknown>;
+  outputs: Record<string, unknown>;
+  error_message?: string | null;
+}
+
+export interface WorkflowNodeExecution {
+  id: string;
+  node_id: string;
+  node_type: string;
+  status: 'running' | 'succeeded' | 'failed';
+  inputs: Record<string, unknown>;
+  outputs: Record<string, unknown>;
+  started_at: string;
+  finished_at?: string | null;
+  elapsed_time?: number | null;
+  tokens_used?: number | null;
+  is_truncated?: boolean;
+  truncated_fields?: Record<string, boolean>;
+  error_message?: string | null;
 }

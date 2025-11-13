@@ -81,11 +81,31 @@ export const API_ENDPOINTS = {
 
     // 검증
     VALIDATE: '/api/v1/workflows/validate',
-
-    // 봇 워크플로우 관련
-    BOT_WORKFLOW: (botId: string) => `/api/v1/workflows/bots/${botId}/workflow`,
     BOT_WORKFLOW_VALIDATE: (botId: string) =>
       `/api/v1/workflows/bots/${botId}/workflow/validate`,
+
+    // 워크플로우 버전/Draft 관리
+    BOT_WORKFLOW_VERSIONS: (botId: string) =>
+      `/api/v1/bots/${botId}/workflow-versions`,
+    BOT_WORKFLOW_VERSION_DETAIL: (botId: string, versionId: string) =>
+      `/api/v1/bots/${botId}/workflow-versions/${versionId}`,
+    BOT_WORKFLOW_VERSION_DRAFT: (botId: string) =>
+      `/api/v1/bots/${botId}/workflow-versions/draft`,
+    BOT_WORKFLOW_VERSION_PUBLISH: (botId: string, versionId: string) =>
+      `/api/v1/bots/${botId}/workflow-versions/${versionId}/publish`,
+
+    // 실행 이력
+    WORKFLOW_RUNS: (botId: string) =>
+      `/api/v1/bots/${botId}/workflow-executions`,
+    WORKFLOW_RUN_DETAIL: (botId: string, runId: string) =>
+      `/api/v1/bots/${botId}/workflow-executions/${runId}`,
+    WORKFLOW_RUN_NODES: (botId: string, runId: string) =>
+      `/api/v1/bots/${botId}/workflow-executions/${runId}/nodes`,
+    WORKFLOW_RUN_NODE_DETAIL: (
+      botId: string,
+      runId: string,
+      nodeId: string
+    ) => `/api/v1/bots/${botId}/workflow-executions/${runId}/nodes/${nodeId}`,
   },
 
   // 레거시 (호환성 유지)

@@ -18,7 +18,7 @@ export function usePublishActions(botId: string) {
     widgetConfig,
   } = useDeploymentStore();
 
-  const { saveWorkflow } = useWorkflowStore();
+  const { saveWorkflow, publishWorkflow } = useWorkflowStore();
 
   /**
    * 업데이트 게시
@@ -27,8 +27,13 @@ export function usePublishActions(botId: string) {
    */
   const publishUpdate = useCallback(async () => {
     try {
-      // 1. 워크플로우 저장
+      // 1. 워크플로우 저장 및 발행
       await saveWorkflow(botId);
+      const publishResult = await publishWorkflow(botId);
+      if (!publishResult) {
+        toast.error('발행할 Draft가 없습니다');
+        return;
+      }
 
       // 2. Deployment 존재 여부 확인 (현재 봇의 deployment인지 확인)
       const currentDeployment = useDeploymentStore.getState().deployment;

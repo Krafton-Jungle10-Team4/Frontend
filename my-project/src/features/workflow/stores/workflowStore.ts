@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import type { Node, Edge } from '@/shared/types/workflow.types';
 import { computeWorkflowAutoLayout } from '@/features/workflow/utils/autoLayout';
+import { workflowApi } from '../api/workflowApi';
+import { transformFromBackend } from '@/shared/utils/workflowTransform';
+import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
+import type {
+  NodeTypeResponse,
+  WorkflowValidationMessage,
+  WorkflowVersionSummary,
+} from '../types/api.types';
 
 /**
  * 워크플로우 실행 상태
@@ -22,15 +30,22 @@ export interface ExecutionState {
  */
 interface WorkflowState {
   // 상태
+  botId: string | null;
   nodes: Node[];
   edges: Edge[];
   selectedNodeId: string | null;
   isLoading: boolean;
   isSaving: boolean;
-  validationErrors: string[];
-  validationWarnings: string[];
+  validationErrors: WorkflowValidationMessage[];
+  validationWarnings: WorkflowValidationMessage[];
   isChatVisible: boolean;
   executionState: ExecutionState | null;
+  draftVersionId: string | null;
+  environmentVariables: Record<string, unknown>;
+  conversationVariables: Record<string, unknown>;
+  nodeTypes: NodeTypeResponse[];
+  nodeTypesLoading: boolean;
+  lastSavedAt: string | null;
 
   // 노드 관리
   setNodes: (nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => void;
@@ -45,7 +60,8 @@ interface WorkflowState {
 
   // 워크플로우 CRUD
   loadWorkflow: (botId: string) => Promise<void>;
-  saveWorkflow: (botId: string) => Promise<void>;
+  saveWorkflow: (botId: string) => Promise<WorkflowVersionSummary | null>;
+  publishWorkflow: (botId: string) => Promise<WorkflowVersionSummary | null>;
 
   // 검증 (두 가지 방식)
   validateWorkflow: () => Promise<boolean>; // 일반 검증 (실시간 검증용)
@@ -67,6 +83,13 @@ interface WorkflowState {
   // UI 제어
   toggleChatVisibility: () => void;
 
+  // 워크플로우 설정
+  setEnvironmentVariables: (vars: Record<string, unknown>) => void;
+  setConversationVariables: (vars: Record<string, unknown>) => void;
+
+  // 노드 타입
+  loadNodeTypes: () => Promise<NodeTypeResponse[]>;
+
   // 리셋
   reset: () => void;
 }
@@ -75,6 +98,7 @@ interface WorkflowState {
  * 초기 상태
  */
 const initialState = {
+  botId: null,
   nodes: [],
   edges: [],
   selectedNodeId: null,
@@ -84,6 +108,12 @@ const initialState = {
   validationWarnings: [],
   isChatVisible: false,
   executionState: null,
+  draftVersionId: null,
+  environmentVariables: {},
+  conversationVariables: {},
+  nodeTypes: [],
+  nodeTypesLoading: false,
+  lastSavedAt: null,
 };
 
 /**
@@ -147,19 +177,54 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   // 워크플로우 불러오기
   loadWorkflow: async (botId: string) => {
-    set({ isLoading: true });
+    set({ isLoading: true, botId });
     try {
-      const { botApi } = await import('@/features/bot/api/botApi');
-      const bot = await botApi.getById(botId);
+      const state = get();
+      if (!state.nodeTypes.length) {
+        await get().loadNodeTypes();
+      }
 
-      if (bot.workflow) {
-        const { nodes, edges } = bot.workflow;
-        const laidOutNodes = nodes.length
-          ? computeWorkflowAutoLayout(nodes, edges)
-          : nodes;
-        set({ nodes: laidOutNodes, edges });
+      const versions = await workflowApi.listWorkflowVersions(botId, {
+        status: 'draft',
+      });
+
+      if (versions.length > 0) {
+        const draft = versions[0];
+        const detail = await workflowApi.getWorkflowVersionDetail(
+          botId,
+          draft.id
+        );
+        const graph = transformFromBackend(detail.graph);
+        const laidOutNodes = graph.nodes.length
+          ? computeWorkflowAutoLayout(graph.nodes, graph.edges)
+          : graph.nodes;
+
+        set({
+          nodes: laidOutNodes,
+          edges: graph.edges,
+          draftVersionId: detail.id,
+          environmentVariables: detail.environment_variables || {},
+          conversationVariables: detail.conversation_variables || {},
+          lastSavedAt: detail.updated_at,
+        });
       } else {
-        set({ nodes: [], edges: [] });
+        const clonedNodes = DEFAULT_WORKFLOW.nodes.map((node) => ({
+          ...node,
+          data: { ...node.data },
+        }));
+        const clonedEdges = DEFAULT_WORKFLOW.edges.map((edge) => ({ ...edge }));
+        const laidOutNodes = clonedNodes.length
+          ? computeWorkflowAutoLayout(clonedNodes, clonedEdges)
+          : clonedNodes;
+
+        set({
+          nodes: laidOutNodes,
+          edges: clonedEdges,
+          draftVersionId: null,
+          environmentVariables: {},
+          conversationVariables: {},
+          lastSavedAt: null,
+        });
       }
     } catch (error) {
       console.error('Failed to load workflow:', error);
@@ -173,9 +238,23 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   saveWorkflow: async (botId: string) => {
     set({ isSaving: true });
     try {
-      const { nodes, edges } = get();
-      const { workflowApi } = await import('../../workflow/api/workflowApi');
-      await workflowApi.saveBotWorkflow(botId, nodes, edges);
+      const { nodes, edges, environmentVariables, conversationVariables } = get();
+      const result = await workflowApi.upsertDraftWorkflow(
+        botId,
+        nodes,
+        edges,
+        {
+          environment_variables: environmentVariables,
+          conversation_variables: conversationVariables,
+        }
+      );
+
+      set({
+        draftVersionId: result.id,
+        lastSavedAt: result.updated_at ?? new Date().toISOString(),
+      });
+
+      return result;
     } catch (error) {
       console.error('Failed to save workflow:', error);
       throw error;
@@ -184,12 +263,26 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
   },
 
+  publishWorkflow: async (botId: string) => {
+    const { draftVersionId } = get();
+    if (!draftVersionId) {
+      console.warn('No draft version available to publish');
+      return null;
+    }
+
+    await get().saveWorkflow(botId);
+    const result = await workflowApi.publishWorkflowVersion(
+      botId,
+      draftVersionId
+    );
+    return result;
+  },
+
   // 일반 검증 (실시간 검증용 - 팀 권한 체크 없음)
   validateWorkflow: async () => {
     const { nodes, edges } = get();
 
     try {
-      const { workflowApi } = await import('../../workflow/api/workflowApi');
       const result = await workflowApi.validate(nodes, edges);
       set({
         validationErrors: result.errors,
@@ -207,7 +300,6 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const { nodes, edges } = get();
 
     try {
-      const { workflowApi } = await import('../../workflow/api/workflowApi');
       const result = await workflowApi.validateBotWorkflow(botId, nodes, edges);
       set({
         validationErrors: result.errors,
@@ -283,6 +375,33 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   toggleChatVisibility: () =>
     set((state) => ({ isChatVisible: !state.isChatVisible })),
 
+  setEnvironmentVariables: (vars) => set({ environmentVariables: vars }),
+
+  setConversationVariables: (vars) =>
+    set({ conversationVariables: vars }),
+
+  loadNodeTypes: async () => {
+    const state = get();
+    if (state.nodeTypes.length) {
+      return state.nodeTypes;
+    }
+
+    set({ nodeTypesLoading: true });
+    try {
+      const nodeTypes = await workflowApi.getNodeTypes();
+      set({ nodeTypes, nodeTypesLoading: false });
+      return nodeTypes;
+    } catch (error) {
+      set({ nodeTypesLoading: false });
+      throw error;
+    }
+  },
+
   // 리셋
-  reset: () => set(initialState),
+  reset: () =>
+    set((state) => ({
+      ...initialState,
+      nodeTypes: state.nodeTypes,
+      nodeTypesLoading: state.nodeTypesLoading,
+    })),
 }));
