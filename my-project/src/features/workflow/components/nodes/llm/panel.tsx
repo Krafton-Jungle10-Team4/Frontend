@@ -6,10 +6,10 @@
 
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
+import { Box, Group, Field } from '../_base/components/layout';
 import { LLMModelSelect } from '../../shared-components/LLMModelSelect';
 import { Input } from '@shared/components/input';
 import { Textarea } from '@shared/components/textarea';
-import { Label } from '@shared/components/label';
 import {
   Select,
   SelectContent,
@@ -79,84 +79,88 @@ export const LLMPanel = () => {
 
   return (
     <BasePanel>
-      {/* Provider 선택 */}
-      <div className="space-y-2">
-        <Label className="font-semibold">Provider</Label>
-        <Select
-          value={currentProvider}
-          onValueChange={(provider) => {
-            handleUpdate('provider', provider);
-            handleUpdate('model', {
-              provider,
-              name: '',
-            });
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="openai">OpenAI</SelectItem>
-            <SelectItem value="anthropic">Anthropic</SelectItem>
-            <SelectItem value="google">Google</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Box>
+        <Group title="모델 설정" description="사용할 LLM 제공자와 모델을 선택하세요">
+          <Field label="Provider" required>
+            <Select
+              value={currentProvider}
+              onValueChange={(provider) => {
+                handleUpdate('provider', provider);
+                handleUpdate('model', {
+                  provider,
+                  name: '',
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="openai">OpenAI</SelectItem>
+                <SelectItem value="anthropic">Anthropic</SelectItem>
+                <SelectItem value="google">Google</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
 
-      {/* 모델 선택 */}
-      <div className="space-y-2">
-        <Label className="font-semibold">모델</Label>
-        <LLMModelSelect
-          selectedProvider={currentProvider}
-          value={extractModelNameFromModel(llmData.model)}
-          onChange={(modelId) => {
-            handleUpdate('model', {
-              provider: currentProvider,
-              name: modelId,
-            });
-          }}
-        />
-      </div>
+          <Field label="모델" required>
+            <LLMModelSelect
+              selectedProvider={currentProvider}
+              value={extractModelNameFromModel(llmData.model)}
+              onChange={(modelId) => {
+                handleUpdate('model', {
+                  provider: currentProvider,
+                  name: modelId,
+                });
+              }}
+            />
+          </Field>
+        </Group>
 
-      {/* 프롬프트 */}
-      <div className="space-y-2">
-        <Label className="font-semibold">프롬프트</Label>
-        <Textarea
-          value={llmData.prompt || ''}
-          onChange={(e) => handleUpdate('prompt', e.target.value)}
-          rows={6}
-          placeholder="프롬프트를 입력하세요..."
-        />
-      </div>
+        <Group title="프롬프트 설정" description="모델에 전달할 프롬프트를 작성하세요">
+          <Field label="프롬프트" required>
+            <Textarea
+              value={llmData.prompt || ''}
+              onChange={(e) => handleUpdate('prompt', e.target.value)}
+              rows={6}
+              placeholder="프롬프트를 입력하세요..."
+            />
+          </Field>
+        </Group>
 
-      {/* Temperature */}
-      <div className="space-y-2">
-        <Label className="font-semibold">Temperature</Label>
-        <Input
-          type="number"
-          min="0"
-          max="2"
-          step="0.1"
-          value={llmData.temperature || 0.7}
-          onChange={(e) =>
-            handleUpdate('temperature', parseFloat(e.target.value))
-          }
-        />
-      </div>
+        <Group title="고급 설정">
+          <Field
+            label="Temperature"
+            description="0: 결정적, 2: 창의적 (기본값: 0.7)"
+          >
+            <Input
+              type="number"
+              min="0"
+              max="2"
+              step="0.1"
+              value={llmData.temperature || 0.7}
+              onChange={(e) =>
+                handleUpdate('temperature', parseFloat(e.target.value))
+              }
+            />
+          </Field>
 
-      {/* Max Tokens */}
-      <div className="space-y-2">
-        <Label className="font-semibold">Max Tokens</Label>
-        <Input
-          type="number"
-          min="1"
-          max="8192"
-          value={llmData.maxTokens || 4000}
-          onChange={(e) =>
-            handleUpdate('maxTokens', parseInt(e.target.value, 10))
-          }
-        />
-      </div>
+          <Field
+            label="Max Tokens"
+            description="생성할 최대 토큰 수 (기본값: 4000)"
+          >
+            <Input
+              type="number"
+              min="1"
+              max="8192"
+              value={llmData.maxTokens || 4000}
+              onChange={(e) =>
+                handleUpdate('maxTokens', parseInt(e.target.value, 10))
+              }
+            />
+          </Field>
+        </Group>
+      </Box>
     </BasePanel>
   );
 };
