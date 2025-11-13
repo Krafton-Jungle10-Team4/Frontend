@@ -1,6 +1,6 @@
 // src/features/workflow/components/nodes/_base/PortIndicator.tsx
 
-import { RiAsteriskIcon, RiCheckLineIcon } from '@remixicon/react';
+import { RiCheckLine } from '@remixicon/react';
 import { cn } from '@shared/utils/cn';
 
 interface PortIndicatorProps {
@@ -18,17 +18,19 @@ export function PortIndicator({ type, size = 'sm' }: PortIndicatorProps) {
 
   if (type === 'required') {
     return (
-      <RiAsteriskIcon
-        size={iconSize}
-        className="text-red-500"
+      <span
+        className="text-red-500 font-bold leading-none"
+        style={{ fontSize: `${iconSize}px` }}
         title="필수 포트"
-      />
+      >
+        *
+      </span>
     );
   }
 
   if (type === 'connected') {
     return (
-      <RiCheckLineIcon
+      <RiCheckLine
         size={iconSize}
         className="text-green-500"
         title="연결됨"
