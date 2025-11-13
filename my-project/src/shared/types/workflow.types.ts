@@ -6,7 +6,6 @@ import type {
 
 /**
  * 워크플로우 노드 타입 열거형
- * 현재 구현된 노드만 포함
  */
 export enum BlockEnum {
   Start = 'start',
@@ -14,6 +13,13 @@ export enum BlockEnum {
   End = 'end',
   KnowledgeRetrieval = 'knowledge-retrieval',
   MCP = 'mcp',
+  Answer = 'answer',
+  KnowledgeBase = 'knowledge-base',
+  Code = 'code',
+  TemplateTransform = 'template-transform',
+  IfElse = 'if-else',
+  Assigner = 'assigner',
+  Http = 'http',
 }
 
 /**
@@ -154,4 +160,84 @@ export type MCPNodeType = CommonNodeType<{
   provider_id?: string;
   action?: string;
   parameters?: Record<string, any>;
+}>;
+
+/**
+ * Answer 노드 타입
+ */
+export type AnswerNodeType = CommonNodeType<{
+  type: BlockEnum.Answer;
+  responseVariable?: string;
+  responseType?: 'text' | 'json' | 'markdown';
+}>;
+
+/**
+ * Knowledge Base 노드 타입
+ */
+export type KnowledgeBaseNodeType = CommonNodeType<{
+  type: BlockEnum.KnowledgeBase;
+  datasetId?: string;
+  documents?: Array<{ id: string; name: string }>;
+  indexingMethod?: 'vector' | 'keyword' | 'hybrid';
+}>;
+
+/**
+ * Code 노드 타입
+ */
+export type CodeNodeType = CommonNodeType<{
+  type: BlockEnum.Code;
+  language?: 'python3' | 'javascript';
+  code?: string;
+  inputVariables?: Record<string, string>;
+  outputVariable?: string;
+}>;
+
+/**
+ * Template Transform 노드 타입
+ */
+export type TemplateTransformNodeType = CommonNodeType<{
+  type: BlockEnum.TemplateTransform;
+  template?: string;
+  outputFormat?: 'plain' | 'markdown' | 'json';
+}>;
+
+/**
+ * If-Else 조건 타입
+ */
+export type IfElseCondition = {
+  variable: string;
+  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
+  value: string;
+  logicalOperator?: 'AND' | 'OR';
+};
+
+/**
+ * If-Else 노드 타입
+ */
+export type IfElseNodeType = CommonNodeType<{
+  type: BlockEnum.IfElse;
+  conditions?: IfElseCondition[];
+}>;
+
+/**
+ * Assigner 노드 타입
+ */
+export type AssignerNodeType = CommonNodeType<{
+  type: BlockEnum.Assigner;
+  assignments?: Array<{
+    variable: string;
+    value: string;
+  }>;
+}>;
+
+/**
+ * HTTP 노드 타입
+ */
+export type HttpNodeType = CommonNodeType<{
+  type: BlockEnum.Http;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  url?: string;
+  headers?: Array<{ key: string; value: string }>;
+  body?: string;
+  timeout?: number;
 }>;
