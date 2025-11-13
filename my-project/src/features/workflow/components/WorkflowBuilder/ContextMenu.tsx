@@ -11,6 +11,7 @@ const ICON_MAP: Record<string, string> = {
   plug: '🔌',
   flag: '🏁',
   message: '💬', // Answer 노드용
+  template: '📝', // Template Transform 노드용
 };
 
 // Fallback 노드 타입 (백엔드 API 실패 시 사용)
@@ -23,6 +24,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
 
   // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
   { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
+  { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
 ];
 
 // 아이콘 문자열을 이모지로 변환
@@ -74,6 +76,15 @@ const ContextMenu = ({
           const answerType = FALLBACK_NODE_TYPES.find((type) => type.type === 'answer');
           if (answerType) {
             types.push(answerType);
+          }
+        }
+
+        // 🚧 임시: Phase 3-B - 백엔드 응답에 Template Transform이 없으면 추가
+        const hasTemplateTransform = types.some((type) => type.type === 'template-transform');
+        if (!hasTemplateTransform) {
+          const templateType = FALLBACK_NODE_TYPES.find((type) => type.type === 'template-transform');
+          if (templateType) {
+            types.push(templateType);
           }
         }
 

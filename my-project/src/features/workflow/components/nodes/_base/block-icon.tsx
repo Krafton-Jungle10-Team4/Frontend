@@ -5,6 +5,7 @@ import Llm from '../../icons/Llm';
 import Answer from '../../icons/Answer';
 import KnowledgeRetrieval from '../../icons/KnowledgeRetrieval';
 import Mcp from '../../icons/Mcp';
+import TemplateTransform from '../../icons/TemplateTransform';
 import clsx from 'clsx';
 
 type BlockIconProps = {
@@ -35,6 +36,7 @@ const getIcon = (type: BlockEnum, className: string) => {
     ),
     [BlockEnum.MCP]: <Mcp className={className} />,
     [BlockEnum.Answer]: <Answer className={className} />,
+    [BlockEnum.TemplateTransform]: <TemplateTransform className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -49,6 +51,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
   [BlockEnum.MCP]: 'bg-purple-500',
   [BlockEnum.Answer]: 'bg-cyan-500',
+  [BlockEnum.TemplateTransform]: 'bg-amber-500',
 };
 
 /**
