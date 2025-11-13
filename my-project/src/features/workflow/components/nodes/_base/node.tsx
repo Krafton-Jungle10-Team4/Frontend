@@ -8,13 +8,18 @@ import {
 import type { NodeProps } from '@/shared/types/workflow.types';
 import { NodeRunningStatus } from '@/shared/types/workflow.types';
 import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
+import { NodePort } from './NodePort';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
+import { useNodeOutput } from '@features/workflow/hooks/useNodeOutput';
+import { usePortConnection } from '@features/workflow/hooks/usePortConnection';
+import type { NodePortSchema } from '@shared/types/workflow';
 
 type BaseNodeProps = {
   children: ReactElement;
   data: NodeProps['data'];
   selected?: boolean;
+  id: string;
 };
 
 /**
@@ -23,8 +28,12 @@ type BaseNodeProps = {
  * - 240px 고정 폭
  * - 실행 상태에 따른 테두리 색상
  * - BlockIcon, StatusIcon, NodeHandle 표시
+ * - 포트 시스템 지원 (하위 호환)
  */
-const BaseNode = ({ data, children, selected }: BaseNodeProps) => {
+const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
+  const ports = data.ports as NodePortSchema | undefined;
+  const nodeOutputs = useNodeOutput(id);
+  const { isPortConnected } = usePortConnection();
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
     data._singleRunningStatus === NodeRunningStatus.Running;
@@ -69,19 +78,56 @@ const BaseNode = ({ data, children, selected }: BaseNodeProps) => {
         data._dimmed && 'opacity-30'
       )}
     >
-      {/* Target Handle (왼쪽 입력) */}
-      <NodeTargetHandle
-        data={data}
-        handleClassName="!top-4 !-left-[9px] !translate-y-0"
-        handleId="target"
-      />
+      {/* 포트 시스템 (새로운 워크플로우) */}
+      {ports && (
+        <>
+          {/* 입력 포트 */}
+          {ports.inputs.map((port, index) => (
+            <NodePort
+              key={`input-${port.name}`}
+              port={port}
+              nodeId={id}
+              direction="input"
+              index={index}
+              totalPorts={ports.inputs.length}
+              isConnected={isPortConnected(id, port.name, 'input')}
+            />
+          ))}
 
-      {/* Source Handle (오른쪽 출력) */}
-      <NodeSourceHandle
-        data={data}
-        handleClassName="!top-4 !-right-[9px] !translate-y-0"
-        handleId="source"
-      />
+          {/* 출력 포트 */}
+          {ports.outputs.map((port, index) => (
+            <NodePort
+              key={`output-${port.name}`}
+              port={port}
+              nodeId={id}
+              direction="output"
+              index={index}
+              totalPorts={ports.outputs.length}
+              isConnected={isPortConnected(id, port.name, 'output')}
+              currentValue={nodeOutputs[port.name]}
+            />
+          ))}
+        </>
+      )}
+
+      {/* 레거시 핸들 (포트 없는 기존 노드) */}
+      {!ports && (
+        <>
+          {/* Target Handle (왼쪽 입력) */}
+          <NodeTargetHandle
+            data={data}
+            handleClassName="!top-4 !-left-[9px] !translate-y-0"
+            handleId="target"
+          />
+
+          {/* Source Handle (오른쪽 출력) */}
+          <NodeSourceHandle
+            data={data}
+            handleClassName="!top-4 !-right-[9px] !translate-y-0"
+            handleId="source"
+          />
+        </>
+      )}
 
       {/* 노드 헤더 */}
       <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
