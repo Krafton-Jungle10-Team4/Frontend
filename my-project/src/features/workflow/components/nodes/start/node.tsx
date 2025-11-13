@@ -4,10 +4,10 @@ import { memo } from 'react';
 /**
  * Start 노드
  * 워크플로우의 시작점
- * - 아이콘과 제목만 표시 (BaseNode에서 제공)
+ * - 워크플로우 메타데이터 설정
  */
-const StartNode = ({ data: _data }: NodeProps<StartNodeType>) => {
+const StartNode = ({ data }: NodeProps<StartNodeType>) => {
   return <></>;
 };
 
-export default StartNode;
+export default memo(StartNode);
