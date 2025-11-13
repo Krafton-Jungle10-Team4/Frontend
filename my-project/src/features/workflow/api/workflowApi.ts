@@ -13,7 +13,24 @@ import type {
   NodeTypeSchema,
   ModelResponse,
   WorkflowValidationResponse,
+  WorkflowVersionSummary,
+  WorkflowVersionDetail,
+  WorkflowRunSummary,
+  WorkflowRunDetail,
+  WorkflowNodeExecution,
 } from '../types/api.types';
+import type { NodePortSchema, PortDefinition } from '@/shared/types/workflow';
+
+interface WorkflowDraftPayload {
+  graph: ReturnType<typeof transformToBackend>;
+  environment_variables: Record<string, unknown>;
+  conversation_variables: Record<string, unknown>;
+}
+
+const DEFAULT_WORKFLOW_VARIABLES = {
+  environment_variables: {},
+  conversation_variables: {},
+};
 
 export const workflowApi = {
   /**
@@ -21,7 +38,8 @@ export const workflowApi = {
    */
   getNodeTypes: async (): Promise<NodeTypeResponse[]> => {
     const { data } = await apiClient.get(API_ENDPOINTS.WORKFLOWS.NODE_TYPES);
-    return data.node_types;
+    const nodeTypes = data.node_types ?? data;
+    return nodeTypes.map(mapNodeTypeResponse);
   },
 
   /**
@@ -58,32 +76,6 @@ export const workflowApi = {
   },
 
   /**
-   * 봇 워크플로우 저장
-   */
-  saveBotWorkflow: async (
-    botId: string,
-    nodes: Node[],
-    edges: Edge[]
-  ): Promise<void> => {
-    const payload = transformToBackend(nodes, edges);
-
-    // 🔍 개발 중 검증: payload 출력
-    console.log('🔍 [saveBotWorkflow] Payload:', JSON.stringify(payload, null, 2));
-
-    // Knowledge Retrieval 노드만 필터링하여 확인
-    const krNodes = payload.nodes.filter((n) => n.type === 'knowledge-retrieval');
-    console.log(
-      '🔍 [KR Nodes]:',
-      krNodes.map((n) => ({
-        id: n.id,
-        document_ids: n.data.document_ids,
-      }))
-    );
-
-    await apiClient.put(API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW(botId), payload);
-  },
-
-  /**
    * 봇 워크플로우 검증 (저장 전)
    */
   validateBotWorkflow: async (
@@ -98,4 +90,178 @@ export const workflowApi = {
     );
     return data;
   },
+
+  /**
+   * Draft 저장/업데이트
+   */
+  upsertDraftWorkflow: async (
+    botId: string,
+    nodes: Node[],
+    edges: Edge[],
+    variables: Partial<WorkflowDraftPayload> = {}
+  ): Promise<WorkflowVersionSummary> => {
+    const graph = transformToBackend(nodes, edges);
+    const payload: WorkflowDraftPayload = {
+      graph,
+      environment_variables:
+        variables.environment_variables ?? DEFAULT_WORKFLOW_VARIABLES.environment_variables,
+      conversation_variables:
+        variables.conversation_variables ??
+        DEFAULT_WORKFLOW_VARIABLES.conversation_variables,
+    };
+
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSION_DRAFT(botId),
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * 워크플로우 버전 목록 조회
+   */
+  listWorkflowVersions: async (
+    botId: string,
+    params?: { status?: string }
+  ): Promise<WorkflowVersionSummary[]> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSIONS(botId),
+      { params }
+    );
+    return data;
+  },
+
+  /**
+   * 워크플로우 버전 상세 조회
+   */
+  getWorkflowVersionDetail: async (
+    botId: string,
+    versionId: string
+  ): Promise<WorkflowVersionDetail> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSION_DETAIL(botId, versionId)
+    );
+    return data;
+  },
+
+  /**
+   * 워크플로우 발행
+   */
+  publishWorkflowVersion: async (
+    botId: string,
+    versionId: string
+  ): Promise<WorkflowVersionSummary> => {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSION_PUBLISH(botId, versionId),
+      {}
+    );
+    return data;
+  },
+
+  /**
+   * 실행 이력 목록
+   */
+  listWorkflowRuns: async (
+    botId: string,
+    params?: {
+      status?: string;
+      start_date?: string;
+      end_date?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{
+    runs: WorkflowRunSummary[];
+    total: number;
+    page: number;
+    page_size: number;
+  }> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUNS(botId),
+      { params }
+    );
+    return data;
+  },
+
+  /**
+   * 실행 상세
+   */
+  getWorkflowRun: async (
+    botId: string,
+    runId: string
+  ): Promise<WorkflowRunDetail> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_DETAIL(botId, runId)
+    );
+    return data;
+  },
+
+  /**
+   * 노드 실행 목록
+   */
+  getWorkflowRunNodes: async (
+    botId: string,
+    runId: string
+  ): Promise<WorkflowNodeExecution[]> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_NODES(botId, runId)
+    );
+    return data;
+  },
+
+  /**
+   * 노드 실행 상세
+   */
+  getWorkflowRunNodeDetail: async (
+    botId: string,
+    runId: string,
+    nodeId: string
+  ): Promise<WorkflowNodeExecution> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_NODE_DETAIL(botId, runId, nodeId)
+    );
+    return data;
+  },
+};
+
+const mapNodeTypeResponse = (raw: any): NodeTypeResponse => {
+  const ports: NodePortSchema | undefined = raw.input_ports || raw.output_ports
+    ? {
+        inputs: normalizePortList(raw.input_ports),
+        outputs: normalizePortList(raw.output_ports),
+      }
+    : undefined;
+
+  return {
+    type: raw.type,
+    label: raw.label ?? raw.name ?? raw.type,
+    icon: raw.icon ?? raw.type,
+    category: raw.category,
+    description: raw.description,
+    max_instances: raw.max_instances ?? -1,
+    configurable: raw.configurable ?? true,
+    ports,
+    config_schema: raw.config_schema,
+    default_data: raw.default_config ?? raw.default_data,
+  };
+};
+
+const normalizePortList = (
+  ports: Array<{
+    name: string;
+    type: string;
+    required?: boolean;
+    default_value?: unknown;
+    description?: string;
+    display_name?: string;
+  }> = []
+): PortDefinition[] => {
+  return ports.map((port) => ({
+    name: port.name,
+    type: port.type,
+    required: port.required ?? true,
+    default_value: port.default_value,
+    description: port.description ?? '',
+    display_name: port.display_name ?? port.name,
+  }));
 };
