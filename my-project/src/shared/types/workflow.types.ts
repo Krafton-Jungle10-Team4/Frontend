@@ -3,6 +3,8 @@ import type {
   Node as ReactFlowNode,
   XYPosition,
 } from '@xyflow/react';
+import type { NodePortSchema } from './workflow/port.types';
+import type { NodeVariableMappings } from './workflow/variable.types';
 
 /**
  * 워크플로우 노드 타입 열거형
@@ -63,6 +65,8 @@ export type CommonNodeType<T = object> = {
   width?: number;
   height?: number;
   position?: XYPosition;
+  ports?: NodePortSchema;
+  variable_mappings?: NodeVariableMappings;
 } & T;
 
 /**

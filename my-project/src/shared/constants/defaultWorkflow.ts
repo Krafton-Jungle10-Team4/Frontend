@@ -3,7 +3,7 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 
 /**
  * Bot 생성 시 사용되는 기본 워크플로우 구조
- * Start 노드 → End 노드 연결
+ * 연결되지 않은 Start / End 노드만 포함한다.
  */
 export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
   nodes: [
@@ -15,6 +15,19 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
         title: 'Start',
         desc: '워크플로우 시작',
         type: BlockEnum.Start,
+        ports: {
+          inputs: [],
+          outputs: [
+            {
+              name: 'user_message',
+              type: 'string',
+              required: true,
+              default_value: '',
+              description: '최초 사용자 입력',
+              display_name: 'User Message',
+            },
+          ],
+        },
       },
     },
     {
@@ -25,19 +38,22 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
         title: 'End',
         desc: '워크플로우 종료',
         type: BlockEnum.End,
+        ports: {
+          inputs: [
+            {
+              name: 'final_output',
+              type: 'string',
+              required: true,
+              default_value: '',
+              description: '최종 응답',
+              display_name: 'Final Output',
+            },
+          ],
+          outputs: [],
+        },
       },
     },
   ],
-  edges: [
-    {
-      id: 'e-start-end',
-      source: 'start-1',
-      target: 'end-1',
-      type: 'custom',
-      data: {
-        sourceType: BlockEnum.Start,
-        targetType: BlockEnum.End,
-      },
-    },
-  ],
+  // 초기 상태에서는 노드 간 연결을 제공하지 않는다.
+  edges: [],
 };

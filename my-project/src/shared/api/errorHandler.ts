@@ -1,6 +1,7 @@
 import type {
   APIErrorResponse,
   HTTPValidationError,
+  ValidationError,
 } from '@/shared/types/api.types';
 import { ERROR_MESSAGES } from '@/shared/constants/errorMessages';
 
@@ -29,9 +30,17 @@ export const handleAPIError = (error: any): never => {
     };
 
     // Validation 에러 처리 (422)
-    if (
+    if (Array.isArray(data.detail)) {
+      const validationErrors = data.detail as ValidationError[];
+      const errorMessages = validationErrors
+        .map((err) => `${err.loc.join('.')}: ${err.msg}`)
+        .join(', ');
+
+      throw new APIError(status, errorMessages, validationErrors);
+    } else if (
       typeof data.detail === 'object' &&
-      Array.isArray((data.detail as any).detail)
+      data.detail !== null &&
+      Array.isArray((data.detail as HTTPValidationError).detail)
     ) {
       const validationError = data.detail as HTTPValidationError;
       const errorMessages = validationError.detail
@@ -44,24 +53,28 @@ export const handleAPIError = (error: any): never => {
     // 일반 에러 메시지 (다양한 백엔드 응답 형식 지원)
     let message: string;
 
-    // 1. FastAPI 표준 형식: data.detail (문자열)
     if (typeof data.detail === 'string') {
+      // 1. FastAPI 표준 형식: data.detail (문자열)
       message = data.detail;
-    }
-    // 2. 중첩된 message 객체: data.message.message
-    else if (
+    } else if (
+      typeof data.error === 'object' &&
+      data.error !== null &&
+      typeof data.error.message === 'string'
+    ) {
+      // 2. 서버 공통 포맷: { error: { code, message } }
+      message = data.error.message;
+    } else if (
       typeof data.message === 'object' &&
       data.message !== null &&
       typeof (data.message as any).message === 'string'
     ) {
+      // 3. 중첩된 message 객체: data.message.message
       message = (data.message as any).message;
-    }
-    // 3. 단순 message 문자열: data.message
-    else if (typeof data.message === 'string') {
+    } else if (typeof data.message === 'string') {
+      // 4. 단순 message 문자열: data.message
       message = data.message;
-    }
-    // 4. 폴백: 알 수 없는 오류
-    else {
+    } else {
+      // 5. 폴백
       message = ERROR_MESSAGES.COMMON.UNKNOWN;
     }
 

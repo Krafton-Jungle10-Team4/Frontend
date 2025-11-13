@@ -29,7 +29,36 @@ export interface BackendNode {
     provider_id?: string;
     action?: string;
     parameters?: Record<string, any>;
+    [key: string]: unknown;
   };
+  ports?: {
+    inputs: Array<{
+      name: string;
+      type: string;
+      required: boolean;
+      default_value?: unknown;
+      description?: string;
+      display_name?: string;
+    }>;
+    outputs: Array<{
+      name: string;
+      type: string;
+      required: boolean;
+      default_value?: unknown;
+      description?: string;
+      display_name?: string;
+    }>;
+  };
+  variable_mappings?: Record<
+    string,
+    {
+      target_port: string;
+      source: {
+        variable: string;
+        value_type: string;
+      };
+    }
+  >;
 }
 
 /**
@@ -40,6 +69,9 @@ export interface BackendEdge {
   source: string;
   target: string;
   type: string;
+  source_port?: string | null;
+  target_port?: string | null;
+  data_type?: string | null;
   data: {
     source_type: string;
     target_type: string;
@@ -52,4 +84,6 @@ export interface BackendEdge {
 export interface BackendWorkflow {
   nodes: BackendNode[];
   edges: BackendEdge[];
+  environment_variables?: Record<string, unknown>;
+  conversation_variables?: Record<string, unknown>;
 }

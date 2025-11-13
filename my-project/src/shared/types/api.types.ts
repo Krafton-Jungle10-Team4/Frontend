@@ -128,8 +128,16 @@ export interface HTTPValidationError {
   detail: ValidationError[];
 }
 
+export interface APIErrorPayload {
+  code?: string;
+  message: string;
+  [key: string]: unknown;
+}
+
 export interface APIErrorResponse {
-  detail: string | HTTPValidationError;
+  detail?: string | HTTPValidationError | ValidationError[];
+  message?: string | { message: string };
+  error?: APIErrorPayload;
 }
 
 // ============================================

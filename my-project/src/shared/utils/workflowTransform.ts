@@ -4,8 +4,14 @@
  */
 
 import type { Node, Edge } from '@/shared/types/workflow.types';
-import type { BackendWorkflow } from '@/shared/types/workflowTransform.types';
+import type { BackendWorkflow, BackendNode } from '@/shared/types/workflowTransform.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
+import type {
+  NodePortSchema,
+  PortDefinition,
+  NodeVariableMappings,
+  VariableMapping,
+} from '@/shared/types/workflow';
 
 /**
  * 프론트엔드 노드/엣지 → 백엔드 스키마 변환
@@ -55,13 +61,19 @@ export const transformToBackend = (
           parameters: (node.data as any).parameters || {},
         }),
       },
+      ports: serializePorts(node.data.ports),
+      variable_mappings: serializeVariableMappings(
+        node.data.variable_mappings as NodeVariableMappings | undefined
+      ),
     })),
-
     edges: edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       type: edge.type || 'custom',
+      source_port: edge.sourceHandle ?? undefined,
+      target_port: edge.targetHandle ?? undefined,
+      data_type: inferEdgeDataType(nodes, edge),
       data: {
         source_type: edge.data?.sourceType || '',
         target_type: edge.data?.targetType || '',
@@ -85,6 +97,8 @@ export const transformFromBackend = (
         type: node.type as BlockEnum,
         title: node.data.title,
         desc: node.data.desc,
+        ports: deserializePorts(node.ports),
+        variable_mappings: deserializeVariableMappings(node.variable_mappings),
 
         // LLM 노드 변환
         ...(node.type === 'llm' && {
@@ -141,12 +155,106 @@ export const transformFromBackend = (
       source: edge.source,
       target: edge.target,
       type: edge.type || 'custom',
+      sourceHandle: edge.source_port || undefined,
+      targetHandle: edge.target_port || undefined,
       data: {
         sourceType: edge.data.source_type as BlockEnum,
         targetType: edge.data.target_type as BlockEnum,
       },
     })),
   };
+};
+ 
+const serializePorts = (ports?: NodePortSchema | null) => {
+  if (!ports) return undefined;
+  const mapPort = (port: PortDefinition) => ({
+    name: port.name,
+    type: port.type,
+    required: port.required,
+    default_value: port.default_value,
+    description: port.description,
+    display_name: port.display_name,
+  });
+
+  return {
+    inputs: ports.inputs.map(mapPort),
+    outputs: ports.outputs.map(mapPort),
+  };
+};
+
+const deserializePorts = (
+  ports?: BackendNode['ports']
+): NodePortSchema | undefined => {
+  if (!ports) return undefined;
+  const mapPort = (port: BackendNode['ports']['inputs'][number]) => ({
+    name: port.name,
+    type: port.type as PortDefinition['type'],
+    required: port.required,
+    default_value: port.default_value,
+    description: port.description ?? '',
+    display_name: port.display_name ?? port.name,
+  });
+
+  return {
+    inputs: (ports.inputs || []).map(mapPort),
+    outputs: (ports.outputs || []).map(mapPort),
+  };
+};
+
+const serializeVariableMappings = (
+  mappings?: NodeVariableMappings
+) => {
+  if (!mappings) return undefined;
+
+  return Object.entries(mappings).reduce<BackendNode['variable_mappings']>(
+    (acc, [key, mapping]) => {
+      if (!mapping) return acc;
+      acc[key] = {
+        target_port: mapping.target_port,
+        source: {
+          variable: mapping.source.variable,
+          value_type: mapping.source.value_type,
+        },
+      };
+      return acc;
+    },
+    {}
+  );
+};
+
+const deserializeVariableMappings = (
+  mappings?: BackendNode['variable_mappings']
+): NodeVariableMappings | undefined => {
+  if (!mappings) return undefined;
+
+  return Object.entries(mappings).reduce<NodeVariableMappings>(
+    (acc, [key, mapping]) => {
+      if (!mapping) return acc;
+      acc[key] = {
+        target_port: mapping.target_port,
+        source: {
+          variable: mapping.source.variable,
+          value_type: mapping.source.value_type as VariableMapping['source']['value_type'],
+        },
+      };
+      return acc;
+    },
+    {}
+  );
+};
+
+const inferEdgeDataType = (nodes: Node[], edge: Edge): string | undefined => {
+  const sourceNode = nodes.find((node) => node.id === edge.source);
+  const sourceHandle = edge.sourceHandle;
+
+  if (!sourceNode || !sourceHandle || !sourceNode.data?.ports) {
+    return undefined;
+  }
+
+  const port = sourceNode.data.ports.outputs.find(
+    (output) => output.name === sourceHandle
+  );
+  return port?.type;
 };
 
 /**
