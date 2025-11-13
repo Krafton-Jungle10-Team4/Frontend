@@ -44,6 +44,9 @@ import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
 import { withEdgeMetadata } from '../../utils/edgeHelpers';
+import type { NodeTypeResponse } from '../../types/api.types';
+import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
+import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
 
 // 노드 타입 매핑
 const nodeTypes = {
@@ -87,6 +90,8 @@ const WorkflowInner = () => {
     selectNode,
     toggleChatVisibility,
     reset,
+    nodeTypes,
+    loadNodeTypes,
   } = useWorkflowStore();
 
   const { push } = useHistoryStore();
@@ -125,6 +130,17 @@ const WorkflowInner = () => {
       reset();
     };
   }, [botId, loadWorkflow, reset]);
+
+  // 노드 타입 사전 로드
+  useEffect(() => {
+    if (nodeTypes.length === 0) {
+      loadNodeTypes().catch((error) => {
+        console.error('Failed to load node types:', error);
+      });
+    }
+  }, [nodeTypes.length, loadNodeTypes]);
+
+  useWorkflowAutoSave(botId);
 
   // 패널 리사이즈 핸들러
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -314,7 +330,7 @@ const WorkflowInner = () => {
 
   // 노드 추가
   const handleAddNode = useCallback(
-    (nodeType: BlockEnum) => {
+    (nodeType: NodeTypeResponse) => {
       if (!contextMenu) return;
 
       const position = screenToFlowPosition({
@@ -326,16 +342,18 @@ const WorkflowInner = () => {
         id: `${Date.now()}`,
         type: 'custom',
         position,
-          data: {
-            type: nodeType,
-            title: nodeType,
-            desc: getNodeDescription(nodeType),
-            ...(nodeType === BlockEnum.LLM && {
+        data: {
+          type: nodeType.type as BlockEnum,
+          title: nodeType.label || nodeType.type,
+          desc: nodeType.description || getNodeDescription(nodeType.type as BlockEnum),
+          ports: nodeType.ports,
+          ...(nodeType.default_data || {}),
+          ...(nodeType.type === BlockEnum.LLM && {
             provider: 'openai',
-            model: { provider: 'openai', name: 'gpt-4o-mini' }, // name에는 모델 ID 저장
+            model: { provider: 'openai', name: 'gpt-4o-mini' },
             prompt: '프롬프트를 입력하세요.',
           }),
-          ...(nodeType === BlockEnum.KnowledgeRetrieval && {
+          ...(nodeType.type === BlockEnum.KnowledgeRetrieval && {
             dataset: '',
             retrievalMode: 'semantic',
             topK: 5,
@@ -460,6 +478,8 @@ const WorkflowInner = () => {
             <AlignHorizontalJustifyCenter className="w-4 h-4" />
             정렬
           </Button>
+
+          <WorkflowSettingsDialog />
 
           <SaveButton />
 

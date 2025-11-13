@@ -11,6 +11,7 @@ type Language = 'en' | 'ko';
 
 interface WorkspaceHeaderProps {
   onCreateBot: () => void;
+  isCreatingBot?: boolean;
   userName?: string;
   botCount?: number;
   maxBots?: number;
@@ -19,6 +20,7 @@ interface WorkspaceHeaderProps {
 
 export function WorkspaceHeader({
   onCreateBot,
+  isCreatingBot = false,
   userName = 'User',
   botCount = 0,
   maxBots = 5,
@@ -31,12 +33,14 @@ export function WorkspaceHeader({
     en: {
       workspace: "'s Workspace",
       createBot: '+ Create Bot',
+      creating: 'Creating...',
       limitTooltip: 'You have reached the limit of bots you can create.',
       deleteInstruction: 'Please delete the bot and try again.',
     },
     ko: {
       workspace: '의 워크스페이스',
       createBot: '+ 챗봇 생성',
+      creating: '생성 중...',
       limitTooltip: '생성 가능한 챗봇 개수를 초과했습니다.',
       deleteInstruction: '챗봇을 삭제한 후 다시 시도해주세요.',
     },
@@ -68,11 +72,16 @@ export function WorkspaceHeader({
                 <div>
                   <Button
                     onClick={onCreateBot}
-                    disabled={isLimitReached}
+                    disabled={isLimitReached || isCreatingBot}
+                    aria-busy={isCreatingBot}
                     className="bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base px-3 sm:px-4"
                   >
-                    <span className="hidden sm:inline">{t.createBot}</span>
-                    <span className="sm:hidden">+ Bot</span>
+                    <span className="hidden sm:inline">
+                      {isCreatingBot ? t.creating : t.createBot}
+                    </span>
+                    <span className="sm:hidden">
+                      {isCreatingBot ? t.creating : '+ Bot'}
+                    </span>
                   </Button>
                 </div>
               </TooltipTrigger>

@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from '@shared/components/select';
 import type { LLMNodeType } from '@/shared/types/workflow.types';
+import { VarReferencePicker } from '../../variable/VarReferencePicker';
+import { PortType, type ValueSelector } from '@shared/types/workflow';
 
 /**
  * model 값에서 provider 추출
@@ -77,9 +79,62 @@ export const LLMPanel = () => {
     updateNode(selectedNodeId!, { [field]: value });
   };
 
+  const handleVariableChange = (
+    portName: string,
+    selector: ValueSelector | null
+  ) => {
+    const currentMappings = (node.data.variable_mappings || {}) as Record<
+      string,
+      {
+        target_port: string;
+        source: ValueSelector;
+      } | undefined
+    >;
+
+    const nextMappings = { ...currentMappings };
+    if (selector) {
+      nextMappings[portName] = {
+        target_port: portName,
+        source: selector,
+      };
+    } else {
+      delete nextMappings[portName];
+    }
+
+    updateNode(selectedNodeId!, { variable_mappings: nextMappings });
+  };
+
   return (
     <BasePanel>
       <Box>
+        <Group
+          title="입력 매핑"
+          description="이 노드가 사용할 입력을 이전 노드의 출력과 연결하세요"
+        >
+          <Field label="사용자 메시지" required>
+            <VarReferencePicker
+              nodeId={node.id}
+              portName="user_message"
+              portType={PortType.STRING}
+              value={node.data.variable_mappings?.user_message?.source || null}
+              onChange={(selector) =>
+                handleVariableChange('user_message', selector)
+              }
+              placeholder="Start 노드의 user_message를 선택하세요"
+            />
+          </Field>
+          <Field label="컨텍스트(선택)">
+            <VarReferencePicker
+              nodeId={node.id}
+              portName="context"
+              portType={PortType.STRING}
+              value={node.data.variable_mappings?.context?.source || null}
+              onChange={(selector) => handleVariableChange('context', selector)}
+              placeholder="Knowledge 노드의 context를 선택하세요"
+            />
+          </Field>
+        </Group>
+
         <Group title="모델 설정" description="사용할 LLM 제공자와 모델을 선택하세요">
           <Field label="Provider" required>
             <Select

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { BlockEnum } from '@/shared/types/workflow.types';
-import { workflowApi } from '../../api/workflowApi';
 import type { NodeTypeResponse } from '../../types/api.types';
+import { useWorkflowStore } from '../../stores/workflowStore';
 
 // 아이콘 매핑
 const ICON_MAP: Record<string, string> = {
@@ -36,7 +36,7 @@ interface ContextMenuProps {
   onClose: () => void;
   onDeleteNode?: () => void;
   onDeleteEdge?: () => void;
-  onAddNode?: (nodeType: BlockEnum) => void;
+  onAddNode?: (nodeType: NodeTypeResponse) => void;
 }
 
 /**
@@ -52,53 +52,17 @@ const ContextMenu = ({
   onAddNode,
 }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [nodeTypes, setNodeTypes] = useState<NodeTypeResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const nodeTypes = useWorkflowStore((state) => state.nodeTypes);
+  const nodeTypesLoading = useWorkflowStore((state) => state.nodeTypesLoading);
+  const loadNodeTypes = useWorkflowStore((state) => state.loadNodeTypes);
 
-  // 동적 노드 타입 로드
   useEffect(() => {
-    const loadNodeTypes = async () => {
-      try {
-        const types = await workflowApi.getNodeTypes();
-
-        // 백엔드 응답에 MCP가 없으면 추가
-        const hasMCP = types.some((type) => type.type === 'mcp');
-        if (!hasMCP) {
-          const mcpType = FALLBACK_NODE_TYPES.find((type) => type.type === 'mcp');
-          if (mcpType) {
-            types.push(mcpType);
-          }
-        }
-
-        // 🚧 임시: Phase 3-B - 백엔드 응답에 Answer가 없으면 추가
-        const hasAnswer = types.some((type) => type.type === 'answer');
-        if (!hasAnswer) {
-          const answerType = FALLBACK_NODE_TYPES.find((type) => type.type === 'answer');
-          if (answerType) {
-            types.push(answerType);
-          }
-        }
-
-        // 🚧 임시: Phase 3-B - 백엔드 응답에 Template Transform이 없으면 추가
-        const hasTemplateTransform = types.some((type) => type.type === 'template-transform');
-        if (!hasTemplateTransform) {
-          const templateType = FALLBACK_NODE_TYPES.find((type) => type.type === 'template-transform');
-          if (templateType) {
-            types.push(templateType);
-          }
-        }
-
-        setNodeTypes(types);
-      } catch (error) {
+    if (!nodeTypes.length) {
+      loadNodeTypes().catch((error) => {
         console.error('Failed to load node types:', error);
-        setNodeTypes(FALLBACK_NODE_TYPES);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadNodeTypes();
-  }, []);
+      });
+    }
+  }, [nodeTypes.length, loadNodeTypes]);
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -158,15 +122,15 @@ const ContextMenu = ({
           <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
             Add Node
           </div>
-          {loading ? (
+          {nodeTypesLoading && nodeTypes.length === 0 ? (
             <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
               Loading node types...
             </div>
           ) : (
-            nodeTypes.map((nodeType) => (
+            (nodeTypes.length > 0 ? nodeTypes : FALLBACK_NODE_TYPES).map((nodeType) => (
               <button
                 key={nodeType.type}
-                onClick={() => onAddNode(nodeType.type as BlockEnum)}
+                onClick={() => onAddNode?.(nodeType)}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-300 flex items-center gap-2"
               >
                 <span>{getIconEmoji(nodeType.icon)}</span>

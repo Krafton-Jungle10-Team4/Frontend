@@ -1,37 +1,43 @@
-import { useState, memo } from 'react';
+import { useEffect, useMemo, useState, memo } from 'react';
 import { DollarSign, Activity, Zap } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/shared/components/tabs';
 import { StatCard } from '@/shared/components/usage/UsageStats';
 import { UsageChart } from '@/shared/components/usage/UsageChart';
-import { ModelSelector } from '@/shared/components/usage/ModelSelector';
 import {
-  openAIUsage,
-  geminiUsage,
   calculateSummary,
+  type DailyUsage,
 } from '@/shared/data/mockUsageData';
+import { workflowApi } from '../../api/workflowApi';
+import { useBotStore } from '@/features/bot/stores/botStore';
 
 /**
  * 모니터링 뷰 - API 사용량 및 비용 통계
  */
 const MonitoringView = () => {
-  const [selectedProvider, setSelectedProvider] = useState('openai');
-  const [selectedModel, setSelectedModel] = useState('gpt-4');
+  const botId = useBotStore((state) => state.selectedBotId);
+  const [usageData, setUsageData] = useState<DailyUsage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const currentProviderData =
-    selectedProvider === 'openai' ? openAIUsage : geminiUsage;
-  const models = Object.keys(currentProviderData);
+  useEffect(() => {
+    if (!botId) return;
 
-  // 프로바이더 변경시 첫 번째 모델로 자동 선택
-  const handleProviderChange = (provider: string) => {
-    setSelectedProvider(provider);
-    const newModels = Object.keys(
-      provider === 'openai' ? openAIUsage : geminiUsage
-    );
-    setSelectedModel(newModels[0]);
-  };
+    setLoading(true);
+    setError(null);
+    workflowApi
+      .listWorkflowRuns(botId, { limit: 100 })
+      .then((response) => {
+        const grouped = groupRunsByDay(response.runs);
+        setUsageData(grouped);
+      })
+      .catch((err) => {
+        console.error('Failed to load runs:', err);
+        setError('실행 이력을 불러오지 못했습니다.');
+        setUsageData([]);
+      })
+      .finally(() => setLoading(false));
+  }, [botId]);
 
-  const currentData = currentProviderData[selectedModel] || [];
-  const summary = calculateSummary(currentData);
+  const summary = useMemo(() => calculateSummary(usageData), [usageData]);
 
   return (
     <div className="h-full w-full overflow-auto bg-background">
@@ -39,30 +45,22 @@ const MonitoringView = () => {
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl">Usage</h1>
           <p className="text-muted-foreground">
-            Monitor your API usage and costs
+            Monitor workflow executions, token usage, and cost estimates
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6 space-y-4">
-          <Tabs value={selectedProvider} onValueChange={handleProviderChange}>
-            <TabsList>
-              <TabsTrigger value="openai">OpenAI</TabsTrigger>
-              <TabsTrigger value="gemini">Gemini</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Model:</span>
-            <ModelSelector
-              models={models}
-              selectedModel={selectedModel}
-              onSelectModel={setSelectedModel}
-            />
+        {!botId && (
+          <div className="mb-6 text-sm text-muted-foreground">
+            워크플로우 사용 현황을 보려면 먼저 봇을 선택하세요.
           </div>
-        </div>
-
+        )}
+        {error && (
+          <div className="mb-6 text-sm text-red-500">
+            {error}
+          </div>
+        )}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatCard
             title="Total Requests"
@@ -86,10 +84,43 @@ const MonitoringView = () => {
           />
         </div>
 
-        <UsageChart data={currentData} />
+        {loading ? (
+          <div className="text-center text-sm text-muted-foreground">
+            실행 이력을 불러오는 중입니다...
+          </div>
+        ) : (
+          <UsageChart data={usageData} />
+        )}
       </div>
     </div>
   );
 };
 
 export default memo(MonitoringView);
+
+function groupRunsByDay(runs: Array<{ started_at: string; total_tokens?: number | null }>): DailyUsage[] {
+  const grouped: Record<string, DailyUsage> = {};
+
+  runs.forEach((run) => {
+    const dateKey = run.started_at
+      ? run.started_at.slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = {
+        date: dateKey,
+        requests: 0,
+        tokens: 0,
+        cost: 0,
+      };
+    }
+
+    grouped[dateKey].requests += 1;
+    grouped[dateKey].tokens += run.total_tokens ?? 0;
+    grouped[dateKey].cost += ((run.total_tokens ?? 0) / 1000) * 0.002;
+  });
+
+  return Object.values(grouped).sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+}
