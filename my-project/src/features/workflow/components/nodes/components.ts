@@ -7,6 +7,7 @@ import LLMNode from './llm/node';
 import EndNode from './end/node';
 import KnowledgeRetrievalNode from './knowledge-retrieval/node';
 import MCPNode from './mcp/node';
+import AnswerNode from './answer/node';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
@@ -14,6 +15,7 @@ import { EndPanel } from './end/panel';
 import { LLMPanel } from './llm/panel';
 import { KnowledgeRetrievalPanel } from './knowledge-retrieval/panel';
 import { MCPPanel } from './mcp/panel';
+import { AnswerPanel } from './answer/panel';
 
 /**
  * 노드 타입 → 캔버스 컴포넌트 매핑
@@ -25,6 +27,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.End]: EndNode,
   [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalNode,
   [BlockEnum.MCP]: MCPNode,
+  [BlockEnum.Answer]: AnswerNode,
 };
 
 /**
@@ -36,4 +39,5 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.LLM]: LLMPanel,
   [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalPanel,
   [BlockEnum.MCP]: MCPPanel,
+  [BlockEnum.Answer]: AnswerPanel,
 };

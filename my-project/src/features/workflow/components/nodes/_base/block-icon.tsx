@@ -34,6 +34,7 @@ const getIcon = (type: BlockEnum, className: string) => {
       <KnowledgeRetrieval className={className} />
     ),
     [BlockEnum.MCP]: <Mcp className={className} />,
+    [BlockEnum.Answer]: <Answer className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -47,6 +48,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
   [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
   [BlockEnum.MCP]: 'bg-purple-500',
+  [BlockEnum.Answer]: 'bg-cyan-500',
 };
 
 /**

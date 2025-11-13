@@ -10,6 +10,7 @@ const ICON_MAP: Record<string, string> = {
   book: '📚',
   plug: '🔌',
   flag: '🏁',
+  message: '💬', // Answer 노드용
 };
 
 // Fallback 노드 타입 (백엔드 API 실패 시 사용)
@@ -19,6 +20,9 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   { type: 'knowledge-retrieval', label: 'Knowledge Retrieval', icon: 'book', max_instances: -1, configurable: true },
   { type: 'mcp', label: 'MCP Service', icon: 'plug', max_instances: -1, configurable: true },
   { type: 'end', label: 'End', icon: 'flag', max_instances: 1, configurable: false },
+
+  // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
+  { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
 ];
 
 // 아이콘 문자열을 이모지로 변환
@@ -61,6 +65,15 @@ const ContextMenu = ({
           const mcpType = FALLBACK_NODE_TYPES.find((type) => type.type === 'mcp');
           if (mcpType) {
             types.push(mcpType);
+          }
+        }
+
+        // 🚧 임시: Phase 3-B - 백엔드 응답에 Answer가 없으면 추가
+        const hasAnswer = types.some((type) => type.type === 'answer');
+        if (!hasAnswer) {
+          const answerType = FALLBACK_NODE_TYPES.find((type) => type.type === 'answer');
+          if (answerType) {
+            types.push(answerType);
           }
         }
 
