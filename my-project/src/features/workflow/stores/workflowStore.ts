@@ -3,6 +3,21 @@ import type { Node, Edge } from '@/shared/types/workflow.types';
 import { computeWorkflowAutoLayout } from '@/features/workflow/utils/autoLayout';
 
 /**
+ * 워크플로우 실행 상태
+ */
+export interface ExecutionState {
+  status: 'idle' | 'running' | 'success' | 'error';
+  currentNodeId: string | null;
+  executedNodes: string[];
+  /**
+   * Real-time output values from executed nodes
+   * Format: { [nodeId]: { [portName]: value } }
+   */
+  nodeOutputs: Record<string, Record<string, unknown>>;
+  error?: string;
+}
+
+/**
  * Workflow Store 상태 타입
  */
 interface WorkflowState {
@@ -15,6 +30,7 @@ interface WorkflowState {
   validationErrors: string[];
   validationWarnings: string[];
   isChatVisible: boolean;
+  executionState: ExecutionState | null;
 
   // 노드 관리
   setNodes: (nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => void;
@@ -34,6 +50,16 @@ interface WorkflowState {
   // 검증 (두 가지 방식)
   validateWorkflow: () => Promise<boolean>; // 일반 검증 (실시간 검증용)
   validateBotWorkflow: (botId: string) => Promise<boolean>; // 봇 전용 검증 (저장 전)
+
+  // 실행 상태 관리
+  updateExecutionState: (updates: Partial<ExecutionState>) => void;
+  onNodeExecutionComplete: (
+    nodeId: string,
+    outputs: Record<string, unknown>
+  ) => void;
+  startExecution: () => void;
+  completeExecution: () => void;
+  failExecution: (error: string) => void;
 
   // 선택
   selectNode: (id: string | null) => void;
@@ -57,6 +83,7 @@ const initialState = {
   validationErrors: [],
   validationWarnings: [],
   isChatVisible: false,
+  executionState: null,
 };
 
 /**
@@ -191,6 +218,62 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       console.error('Failed to validate bot workflow:', error);
       return false;
     }
+  },
+
+  // 실행 상태 관리
+  updateExecutionState: (updates) => {
+    set((state) => ({
+      executionState: state.executionState
+        ? { ...state.executionState, ...updates }
+        : null,
+    }));
+  },
+
+  onNodeExecutionComplete: (nodeId, outputs) => {
+    set((state) => ({
+      executionState: state.executionState
+        ? {
+            ...state.executionState,
+            executedNodes: [...state.executionState.executedNodes, nodeId],
+            nodeOutputs: {
+              ...state.executionState.nodeOutputs,
+              [nodeId]: outputs,
+            },
+          }
+        : null,
+    }));
+  },
+
+  startExecution: () => {
+    set({
+      executionState: {
+        status: 'running',
+        currentNodeId: null,
+        executedNodes: [],
+        nodeOutputs: {},
+      },
+    });
+  },
+
+  completeExecution: () => {
+    set((state) => ({
+      executionState: state.executionState
+        ? { ...state.executionState, status: 'success', currentNodeId: null }
+        : null,
+    }));
+  },
+
+  failExecution: (error) => {
+    set((state) => ({
+      executionState: state.executionState
+        ? {
+            ...state.executionState,
+            status: 'error',
+            currentNodeId: null,
+            error,
+          }
+        : null,
+    }));
   },
 
   // 선택 (React Flow가 nodes[].selected를 자동 관리하므로 selectedNodeId만 업데이트)
