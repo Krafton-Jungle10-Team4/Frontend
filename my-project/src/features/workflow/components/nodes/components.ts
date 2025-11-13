@@ -10,6 +10,7 @@ import MCPNode from './mcp/node';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
+import { EndPanel } from './end/panel';
 import { LLMPanel } from './llm/panel';
 import { KnowledgeRetrievalPanel } from './knowledge-retrieval/panel';
 import { MCPPanel } from './mcp/panel';
@@ -31,8 +32,8 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
  */
 export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> = {
   [BlockEnum.Start]: StartPanel,
+  [BlockEnum.End]: EndPanel,
   [BlockEnum.LLM]: LLMPanel,
   [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalPanel,
   [BlockEnum.MCP]: MCPPanel,
-  // End는 설정 패널 없음
 };
