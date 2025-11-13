@@ -39,6 +39,7 @@ import { NodeConfigPanel } from '../NodeConfigPanel';
 import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
+import { usePortConnection } from '../../hooks/usePortConnection';
 import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
@@ -105,6 +106,9 @@ const WorkflowInner = () => {
 
   // 게시하기 단축키 (Cmd/Ctrl+Shift+P, E)
   useWorkflowShortcuts(botId || '');
+
+  // 포트 연결 관리
+  const { handleConnect: handlePortConnect } = usePortConnection();
 
   // 봇 변경 시 상태 초기화 및 워크플로우 로드
   useEffect(() => {
@@ -187,16 +191,30 @@ const WorkflowInner = () => {
   // 노드 연결 처리
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => {
-        const updatedEdges = addEdge(
-          withEdgeMetadata(connection, nodes),
-          eds
-        );
-        push(nodes, updatedEdges);
-        return updatedEdges;
-      });
+      // 포트 시스템이 있는 경우 포트 검증 수행
+      const sourceNode = nodes.find((n) => n.id === connection.source);
+      const targetNode = nodes.find((n) => n.id === connection.target);
+
+      // 노드에 ports가 있으면 포트 검증 사용
+      if (sourceNode?.data?.ports && targetNode?.data?.ports) {
+        const isValid = handlePortConnect(connection);
+        if (!isValid) {
+          // 검증 실패 시 연결 중단
+          return;
+        }
+      } else {
+        // 레거시 노드는 기존 방식으로 처리
+        setEdges((eds) => {
+          const updatedEdges = addEdge(
+            withEdgeMetadata(connection, nodes),
+            eds
+          );
+          push(nodes, updatedEdges);
+          return updatedEdges;
+        });
+      }
     },
-    [nodes, setEdges, push]
+    [nodes, setEdges, push, handlePortConnect]
   );
 
   const handleAutoLayout = useCallback(() => {
