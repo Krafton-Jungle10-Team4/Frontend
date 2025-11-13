@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Home, Spline, Activity, FileText, BookOpen } from 'lucide-react';
 import Workflow from '../components/WorkflowBuilder';
@@ -14,6 +14,8 @@ import { useWorkflowStore } from '../stores/workflowStore';
 import { TopNavigation, WorkspaceSidebar, type MenuItem } from '@/widgets';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useBotStore } from '@/features/bot/stores/botStore';
+import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 
 // Memoized wrapper to prevent unnecessary re-renders
 const KnowledgeView = memo(({ botId }: { botId?: string }) => {
@@ -71,6 +73,29 @@ export const WorkflowBuilderPage = () => {
   const location = useLocation();
   const { botId } = useParams<{ botId: string }>();
   const [activeView, setActiveView] = useState<SidebarView>('flow');
+  const setSelectedBotId = useBotStore((state) => state.setSelectedBotId);
+  const fetchDocuments = useAsyncDocumentStore(
+    (state) => state.fetchDocuments
+  );
+
+  // Keep bot store in sync with the workflow route param so other features (documents, knowledge nodes)
+  // know which bot is currently being configured.
+  useEffect(() => {
+    if (botId) {
+      setSelectedBotId(botId);
+    } else {
+      setSelectedBotId(null);
+    }
+  }, [botId, setSelectedBotId]);
+
+  // 문서 스토어를 미리 로드해 지식 노드/패널에서 바로 사용할 수 있도록 함
+  useEffect(() => {
+    if (!botId) return;
+
+    fetchDocuments({ botId }).catch((error) => {
+      console.error('Failed to prefetch documents for workflow builder:', error);
+    });
+  }, [botId, fetchDocuments]);
 
   // Auth store - 사용자 정보
   const user = useAuthStore((state) => state.user);

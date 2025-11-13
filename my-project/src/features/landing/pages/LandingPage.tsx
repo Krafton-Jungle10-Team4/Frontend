@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RiRobot2Line,
@@ -14,6 +15,54 @@ import { useAuth } from '@/features/auth';
 export function LandingPage() {
   const navigate = useNavigate();
   const { isAuthenticated, logout, isLoading } = useAuth();
+
+  // Memoize star positions to avoid recalculating on every render
+  const stars1 = useMemo(
+    () =>
+      [...Array(50)].map((_, i) => ({
+        id: `star1-${i}`,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        animationDelay: Math.random() * 3,
+        animationDuration: 2 + Math.random() * 3,
+      })),
+    []
+  );
+
+  const stars2 = useMemo(
+    () =>
+      [...Array(30)].map((_, i) => ({
+        id: `star2-${i}`,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        animationDelay: Math.random() * 2,
+        animationDuration: 1.5 + Math.random() * 2,
+      })),
+    []
+  );
+
+  const stars3 = useMemo(
+    () =>
+      [...Array(20)].map((_, i) => ({
+        id: `star3-${i}`,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        animationDelay: Math.random() * 2,
+        animationDuration: 1 + Math.random() * 2,
+      })),
+    []
+  );
+
+  const shootingStars = useMemo(
+    () =>
+      [...Array(3)].map((_, i) => ({
+        id: `shooting-${i}`,
+        left: 20 + Math.random() * 60,
+        animationDuration: 5 + i * 2,
+        animationDelay: i * 3,
+      })),
+    []
+  );
 
   const handleGetStarted = () => {
     // 로그인되어 있으면 홈으로, 아니면 로그인 페이지로
@@ -46,15 +95,15 @@ export function LandingPage() {
       <div className="fixed inset-0 bg-gradient-to-b from-gray-900 to-teal-900">
         {/* Stars Layer 1 - Small stars */}
         <div className="absolute inset-0 opacity-50">
-          {[...Array(50)].map((_, i) => (
+          {stars1.map((star) => (
             <div
-              key={`star1-${i}`}
+              key={star.id}
               className="absolute w-1 h-1 bg-teal-300 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+                animationDelay: `${star.animationDelay}s`,
+                animationDuration: `${star.animationDuration}s`,
               }}
             />
           ))}
@@ -62,15 +111,15 @@ export function LandingPage() {
 
         {/* Stars Layer 2 - Medium stars */}
         <div className="absolute inset-0 opacity-70">
-          {[...Array(30)].map((_, i) => (
+          {stars2.map((star) => (
             <div
-              key={`star2-${i}`}
+              key={star.id}
               className="absolute w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1.5 + Math.random() * 2}s`,
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+                animationDelay: `${star.animationDelay}s`,
+                animationDuration: `${star.animationDuration}s`,
               }}
             />
           ))}
@@ -78,15 +127,15 @@ export function LandingPage() {
 
         {/* Stars Layer 3 - Large stars */}
         <div className="absolute inset-0 opacity-80">
-          {[...Array(20)].map((_, i) => (
+          {stars3.map((star) => (
             <div
-              key={`star3-${i}`}
+              key={star.id}
               className="absolute w-2 h-2 bg-teal-500 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1 + Math.random() * 2}s`,
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+                animationDelay: `${star.animationDelay}s`,
+                animationDuration: `${star.animationDuration}s`,
               }}
             />
           ))}
@@ -94,16 +143,16 @@ export function LandingPage() {
 
         {/* Shooting stars */}
         <div className="absolute inset-0">
-          {[...Array(3)].map((_, i) => (
+          {shootingStars.map((star) => (
             <div
-              key={`shooting-${i}`}
+              key={star.id}
               className="absolute w-1 h-20 bg-gradient-to-b from-white to-transparent opacity-0"
               style={{
-                left: `${20 + Math.random() * 60}%`,
+                left: `${star.left}%`,
                 top: `-100px`,
                 transform: 'rotate(135deg)',
-                animation: `shooting ${5 + i * 2}s linear infinite`,
-                animationDelay: `${i * 3}s`,
+                animation: `shooting ${star.animationDuration}s linear infinite`,
+                animationDelay: `${star.animationDelay}s`,
               }}
             />
           ))}

@@ -3,7 +3,22 @@ import type {
   KnowledgeRetrievalNodeType,
 } from '@/shared/types/workflow.types';
 import { memo, useMemo } from 'react';
-import { useDocumentStore } from '@/features/documents/stores/documentStore';
+import { useDocumentsArray } from '@/features/documents/stores/selectors';
+
+type RetrievalModeValue = 'semantic' | 'keyword' | 'hybrid';
+
+const RETRIEVAL_MODE_LABELS: Record<RetrievalModeValue, string> = {
+  semantic: 'Semantic Search',
+  keyword: 'Keyword Search',
+  hybrid: 'Hybrid Search',
+};
+
+const formatRetrievalMode = (mode?: string): string => {
+  const normalized = (mode || '').toLowerCase();
+  if (normalized.startsWith('keyword')) return RETRIEVAL_MODE_LABELS.keyword;
+  if (normalized.startsWith('hybrid')) return RETRIEVAL_MODE_LABELS.hybrid;
+  return RETRIEVAL_MODE_LABELS.semantic;
+};
 
 /**
  * Knowledge Retrieval 노드
@@ -13,11 +28,11 @@ const KnowledgeRetrievalNode = ({
   data,
 }: NodeProps<KnowledgeRetrievalNodeType>) => {
   const { dataset, retrievalMode, documentIds } = data;
-  const { documents } = useDocumentStore();
+  const documents = useDocumentsArray();
 
   // documentIds로 실제 문서 정보 찾기 (null 체크 포함)
   const selectedDocuments = useMemo(() => {
-    if (!documentIds || !documents) return [];
+    if (!documentIds || documentIds.length === 0) return [];
     return documents.filter((doc) => documentIds.includes(doc.id));
   }, [documentIds, documents]);
 
@@ -64,7 +79,7 @@ const KnowledgeRetrievalNode = ({
             MODE
           </div>
           <div className="system-xs-regular text-text-secondary mt-0.5">
-            {retrievalMode}
+            {formatRetrievalMode(retrievalMode)}
           </div>
         </div>
       )}

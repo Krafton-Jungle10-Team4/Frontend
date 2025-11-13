@@ -23,7 +23,8 @@ export const DocumentFilters: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, setFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // ✅ FIX: Remove setFilters to prevent infinite loop
 
   const hasActiveFilters =
     filters.status !== undefined ||

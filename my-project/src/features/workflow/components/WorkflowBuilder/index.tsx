@@ -318,8 +318,8 @@ const WorkflowInner = () => {
             prompt: '프롬프트를 입력하세요.',
           }),
           ...(nodeType === BlockEnum.KnowledgeRetrieval && {
-            dataset: 'Dataset',
-            retrievalMode: 'Semantic Search',
+            dataset: '',
+            retrievalMode: 'semantic',
             topK: 5,
             documentIds: [],
           }),

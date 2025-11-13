@@ -43,7 +43,7 @@ export const transformToBackend = (
         // Knowledge Retrieval 노드 변환
         ...(node.data.type === BlockEnum.KnowledgeRetrieval && {
           dataset_id: (node.data as any).dataset || '',
-          mode: ((node.data as any).retrievalMode?.toLowerCase() || 'semantic') as any,
+          mode: normalizeRetrievalModeValue((node.data as any).retrievalMode),
           top_k: (node.data as any).topK || 5,
           document_ids: (node.data as any).documentIds || [],
         }),
@@ -122,7 +122,7 @@ export const transformFromBackend = (
         // Knowledge Retrieval 노드 변환
         ...(node.type === 'knowledge-retrieval' && {
           dataset: node.data.dataset_id || '',
-          retrievalMode: capitalize(node.data.mode || 'semantic'),
+          retrievalMode: normalizeRetrievalModeValue(node.data.mode),
           topK: node.data.top_k || 5,
           documentIds: node.data.document_ids || [],
         }),
@@ -192,6 +192,14 @@ const extractModelName = (model: unknown): string => {
 /**
  * 문자열 첫 글자 대문자 변환
  */
-const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
+function normalizeRetrievalModeValue(
+  mode?: unknown
+): 'semantic' | 'keyword' | 'hybrid' {
+  if (typeof mode !== 'string') {
+    return 'semantic';
+  }
+  const normalized = mode.toLowerCase();
+  if (normalized.startsWith('keyword')) return 'keyword';
+  if (normalized.startsWith('hybrid')) return 'hybrid';
+  return 'semantic';
+}

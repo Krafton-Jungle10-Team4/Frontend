@@ -5,10 +5,12 @@
  * 노드 타입에 따라 다른 설정 폼을 표시합니다.
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 import { useBotStore } from '@/features/bot/stores/botStore';
+import { useCompletedDocuments } from '@/features/documents/stores/selectors';
+import { useParams } from 'react-router-dom';
 import { LLMModelSelect } from './LLMModelSelect';
 import { MCPNodeConfig } from './configs/MCPNodeConfig';
 import { Input } from '@shared/components/input';
@@ -29,6 +31,26 @@ import {
   type KnowledgeRetrievalNodeType,
 } from '@/shared/types/workflow.types';
 import BlockIcon from '../nodes/_base/block-icon';
+
+type RetrievalModeValue = 'semantic' | 'keyword' | 'hybrid';
+const EMPTY_DOCUMENT_IDS: string[] = [];
+
+const RETRIEVAL_MODE_OPTIONS: Array<{
+  value: RetrievalModeValue;
+  label: string;
+}> = [
+  { value: 'semantic', label: 'Semantic Search' },
+  { value: 'keyword', label: 'Keyword Search' },
+  { value: 'hybrid', label: 'Hybrid Search' },
+];
+
+const normalizeRetrievalMode = (mode?: string): RetrievalModeValue => {
+  const normalized = (mode || '').toLowerCase();
+  if (normalized.startsWith('keyword')) return 'keyword';
+  if (normalized.startsWith('hybrid')) return 'hybrid';
+  return 'semantic';
+};
+
 
 /**
  * model 값에서 provider 추출
@@ -77,8 +99,11 @@ const extractModelNameFromModel = (model: unknown): string => {
 
 export const NodeConfigPanel = () => {
   const { selectedNodeId, nodes, updateNode, selectNode } = useWorkflowStore();
-  const { documents, fetchDocuments } = useAsyncDocumentStore();
-  const { selectedBotId } = useBotStore();
+  const fetchDocuments = useAsyncDocumentStore((state) => state.fetchDocuments);
+  const { botId: routeBotId } = useParams<{ botId: string }>();
+  const selectedBotId = useBotStore((state) => state.selectedBotId);
+  const activeBotId = selectedBotId || routeBotId || null;
+  const completedDocuments = useCompletedDocuments(activeBotId);
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
@@ -86,12 +111,12 @@ export const NodeConfigPanel = () => {
 
   // 문서 목록 로드
   useEffect(() => {
-    if (selectedBotId) {
-      fetchDocuments({ botId: selectedBotId }).catch((error) => {
+    if (activeBotId) {
+      fetchDocuments({ botId: activeBotId }).catch((error) => {
         console.error('Failed to fetch documents:', error);
       });
     }
-  }, [selectedBotId, fetchDocuments]);
+  }, [activeBotId, fetchDocuments]);
 
   // Hook은 항상 최상단에서 호출 (조건부 return 이전)
   const node = nodes.find((n) => n.id === selectedNodeId);
@@ -99,6 +124,9 @@ export const NodeConfigPanel = () => {
   const isKnowledgeRetrievalNode =
     node?.data.type === BlockEnum.KnowledgeRetrieval;
   const isMCPNode = node?.data.type === BlockEnum.MCP;
+  const knowledgeNodeData = isKnowledgeRetrievalNode
+    ? (node?.data as KnowledgeRetrievalNodeType)
+    : null;
 
   // 제목 편집 모드 시작
   const handleTitleClick = () => {
@@ -157,6 +185,37 @@ export const NodeConfigPanel = () => {
   const handleClose = () => {
     selectNode(null);
   };
+
+  const validDocumentIds = useMemo(
+    () => new Set(completedDocuments.map((doc) => doc.id)),
+    [completedDocuments]
+  );
+
+  const sanitizedDocumentIds = useMemo(() => {
+    if (!knowledgeNodeData) return [];
+    const ids = knowledgeNodeData.documentIds ?? EMPTY_DOCUMENT_IDS;
+    return ids.filter((id) => validDocumentIds.has(id));
+  }, [knowledgeNodeData, validDocumentIds]);
+
+  const currentRetrievalMode = knowledgeNodeData
+    ? normalizeRetrievalMode(knowledgeNodeData.retrievalMode)
+    : 'semantic';
+
+  useEffect(() => {
+    if (!knowledgeNodeData || !selectedNodeId) return;
+    const original = knowledgeNodeData.documentIds ?? EMPTY_DOCUMENT_IDS;
+    if (
+      original.length !== sanitizedDocumentIds.length ||
+      original.some((id, idx) => id !== sanitizedDocumentIds[idx])
+    ) {
+      updateNode(selectedNodeId, { documentIds: sanitizedDocumentIds });
+    }
+  }, [
+    knowledgeNodeData,
+    sanitizedDocumentIds,
+    selectedNodeId,
+    updateNode,
+  ]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
@@ -304,12 +363,12 @@ export const NodeConfigPanel = () => {
         )}
 
         {/* Knowledge Retrieval 노드 전용 */}
-        {isKnowledgeRetrievalNode && (
+        {isKnowledgeRetrievalNode && knowledgeNodeData && (
           <>
             <div className="space-y-2">
               <Label className="font-semibold">데이터셋</Label>
               <Input
-                value={(node.data as KnowledgeRetrievalNodeType).dataset || ''}
+                value={knowledgeNodeData.dataset || ''}
                 onChange={(e) => handleUpdate('dataset', e.target.value)}
                 placeholder="데이터셋 ID를 입력하세요..."
               />
@@ -318,16 +377,20 @@ export const NodeConfigPanel = () => {
             <div className="space-y-2">
               <Label className="font-semibold">검색 모드</Label>
               <Select
-                value={(node.data as KnowledgeRetrievalNodeType).retrievalMode}
-                onValueChange={(value) => handleUpdate('retrievalMode', value)}
+                value={currentRetrievalMode}
+                onValueChange={(value) =>
+                  handleUpdate('retrievalMode', value as RetrievalModeValue)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Semantic Search">Semantic Search</SelectItem>
-                  <SelectItem value="Keyword Search">Keyword Search</SelectItem>
-                  <SelectItem value="Hybrid Search">Hybrid Search</SelectItem>
+                  {RETRIEVAL_MODE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -338,7 +401,7 @@ export const NodeConfigPanel = () => {
                 type="number"
                 min="1"
                 max="20"
-                value={(node.data as KnowledgeRetrievalNodeType).topK || 5}
+                value={knowledgeNodeData.topK || 5}
                 onChange={(e) =>
                   handleUpdate('topK', parseInt(e.target.value, 10))
                 }
@@ -351,26 +414,34 @@ export const NodeConfigPanel = () => {
               </Label>
               <MultiSelect
                 id="documentIds"
-                value={
-                  (node.data as KnowledgeRetrievalNodeType).documentIds || []
-                }
+                disabled={!activeBotId}
+                value={sanitizedDocumentIds}
                 onChange={(selectedIds: string[]) => {
-                  // 항상 새 배열로 전달 (참조 변경 보장)
-                  handleUpdate('documentIds', selectedIds);
+                  const filtered = selectedIds.filter((id) =>
+                    validDocumentIds.has(id)
+                  );
+                  handleUpdate('documentIds', filtered);
                 }}
-                options={Array.from(documents.values())
-                  .filter((doc) => doc.status === 'done') // 완료된 문서만 표시
-                  .map((doc) => ({
-                    value: doc.documentId,
-                    label: `${doc.originalFilename} (${(doc.fileSize / 1024 / 1024).toFixed(2)} MB)`,
-                  }))}
-                placeholder="검색할 문서를 선택하세요..."
-                emptyMessage="문서가 없습니다. 먼저 문서를 업로드해주세요."
+                options={completedDocuments.map((doc) => ({
+                  value: doc.id,
+                  label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB) • ${doc.id}`,
+                }))}
+                placeholder={
+                  activeBotId
+                    ? '검색할 문서를 선택하세요...'
+                    : '먼저 봇을 선택해주세요.'
+                }
+                emptyMessage={
+                  !activeBotId
+                    ? '봇이 선택되지 않았습니다.'
+                    : completedDocuments.length === 0
+                      ? '완료된 문서가 없습니다. 먼저 문서를 업로드하거나 처리가 끝날 때까지 기다려주세요.'
+                      : '문서를 찾을 수 없습니다.'
+                }
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 선택된 문서:{' '}
-                {(node.data as KnowledgeRetrievalNodeType).documentIds?.length ||
-                  0}
+                {sanitizedDocumentIds.length}
                 개
               </p>
             </div>
