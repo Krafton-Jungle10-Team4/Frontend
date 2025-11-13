@@ -52,7 +52,7 @@ export function HomePage() {
     isEmpty,
     hasResults,
   } = useFilteredBots({ searchQuery });
-  const { handleCreateBot, handleDeleteBot } = useBotActions();
+  const { handleCreateBot, handleDeleteBot, isCreatingBot } = useBotActions();
   const { loading: botsLoading, error: botsError } = useBots();
 
   // Bot 카드 클릭 시 워크플로우 페이지로 이동
@@ -116,6 +116,7 @@ export function HomePage() {
         {/* Workspace Header */}
         <WorkspaceHeader
           onCreateBot={handleCreateBot}
+          isCreatingBot={isCreatingBot}
           userName={userName}
           botCount={totalCount}
           maxBots={5}

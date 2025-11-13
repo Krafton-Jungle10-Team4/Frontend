@@ -8,6 +8,7 @@ import { buildCreateBotDto } from '../../../utils/botSetupHelpers';
 import { botApi } from '../../../api/botApi';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
+import { getErrorMessage } from '@/shared/api/errorHandler';
 
 interface StepNavigationProps {
   onBack: () => void;
@@ -121,11 +122,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
       }
     } catch (error) {
       console.error('Bot setup error:', error);
-      toast.error(
-        language === 'ko'
-          ? '봇 설정 중 오류가 발생했습니다'
-          : 'Error during bot setup'
-      );
+      toast.error(getErrorMessage(error));
       setIsUpdating(false);
     }
   };
