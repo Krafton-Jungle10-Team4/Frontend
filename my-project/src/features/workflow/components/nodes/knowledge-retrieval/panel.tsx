@@ -11,8 +11,8 @@ import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore
 import { useCompletedDocuments } from '@/features/documents/stores/selectors';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { BasePanel } from '../_base/base-panel';
+import { Box, Group, Field } from '../_base/components/layout';
 import { Input } from '@shared/components/input';
-import { Label } from '@shared/components/label';
 import {
   Select,
   SelectContent,
@@ -109,89 +109,93 @@ export const KnowledgeRetrievalPanel = () => {
 
   return (
     <BasePanel>
-      {/* 데이터셋 */}
-      <div className="space-y-2">
-        <Label className="font-semibold">데이터셋</Label>
-        <Input
-          value={krData.dataset || ''}
-          onChange={(e) => handleUpdate('dataset', e.target.value)}
-          placeholder="데이터셋 ID를 입력하세요..."
-        />
-      </div>
+      <Box>
+        <Group title="데이터 소스">
+          <Field label="데이터셋">
+            <Input
+              value={krData.dataset || ''}
+              onChange={(e) => handleUpdate('dataset', e.target.value)}
+              placeholder="데이터셋 ID를 입력하세요..."
+            />
+          </Field>
+        </Group>
 
-      {/* 검색 모드 */}
-      <div className="space-y-2">
-        <Label className="font-semibold">검색 모드</Label>
-        <Select
-          value={currentRetrievalMode}
-          onValueChange={(value) =>
-            handleUpdate('retrievalMode', value as RetrievalModeValue)
-          }
+        <Group title="검색 설정">
+          <Field
+            label="검색 모드"
+            description="문서 검색 방식을 선택하세요"
+          >
+            <Select
+              value={currentRetrievalMode}
+              onValueChange={(value) =>
+                handleUpdate('retrievalMode', value as RetrievalModeValue)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RETRIEVAL_MODE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label="Top K" description="">
+            <Input
+              type="number"
+              min="1"
+              max="20"
+              value={krData.topK || 5}
+              onChange={(e) =>
+                handleUpdate('topK', parseInt(e.target.value, 10))
+              }
+            />
+          </Field>
+        </Group>
+
+        <Group
+          title="문서 필터"
+          description="특정 문서만 검색하려면 선택하세요"
         >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RETRIEVAL_MODE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Top K */}
-      <div className="space-y-2">
-        <Label className="font-semibold">Top K</Label>
-        <Input
-          type="number"
-          min="1"
-          max="20"
-          value={krData.topK || 5}
-          onChange={(e) =>
-            handleUpdate('topK', parseInt(e.target.value, 10))
-          }
-        />
-      </div>
-
-      {/* 문서 선택 */}
-      <div className="space-y-2">
-        <Label htmlFor="documentIds" className="font-semibold">
-          문서 선택 (선택사항)
-        </Label>
-        <MultiSelect
-          id="documentIds"
-          disabled={!activeBotId}
-          value={sanitizedDocumentIds}
-          onChange={(selectedIds: string[]) => {
-            // 유효한 ID만 필터링
-            const filtered = selectedIds.filter((id) =>
-              validDocumentIds.has(id)
-            );
-            handleUpdate('documentIds', filtered);
-          }}
-          options={completedDocuments.map((doc) => ({
-            value: doc.id,
-            label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB) • ${doc.id}`,
-          }))}
-          placeholder={
-            activeBotId
-              ? '검색할 문서를 선택하세요...'
-              : '먼저 봇을 선택해주세요.'
-          }
-          emptyMessage={
-            !activeBotId
-              ? '봇이 선택되지 않았습니다.'
-              : completedDocuments.length === 0
-                ? '완료된 문서가 없습니다. 먼저 문서를 업로드하거나 처리가 끝날 때까지 기다려주세요.'
-                : '문서를 찾을 수 없습니다.'
-          }
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          선택된 문서: {sanitizedDocumentIds.length}개
-        </p>
-      </div>
+          <Field label="문서 선택 (선택사항)">
+            <MultiSelect
+              id="documentIds"
+              disabled={!activeBotId}
+              value={sanitizedDocumentIds}
+              onChange={(selectedIds: string[]) => {
+                // 유효한 ID만 필터링
+                const filtered = selectedIds.filter((id) =>
+                  validDocumentIds.has(id)
+                );
+                handleUpdate('documentIds', filtered);
+              }}
+              options={completedDocuments.map((doc) => ({
+                value: doc.id,
+                label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB) • ${doc.id}`,
+              }))}
+              placeholder={
+                activeBotId
+                  ? '검색할 문서를 선택하세요...'
+                  : '먼저 봇을 선택해주세요.'
+              }
+              emptyMessage={
+                !activeBotId
+                  ? '봇이 선택되지 않았습니다.'
+                  : completedDocuments.length === 0
+                    ? '완료된 문서가 없습니다. 먼저 문서를 업로드하거나 처리가 끝날 때까지 기다려주세요.'
+                    : '문서를 찾을 수 없습니다.'
+              }
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              선택된 문서: {sanitizedDocumentIds.length}개
+            </p>
+          </Field>
+        </Group>
+      </Box>
     </BasePanel>
   );
 };
