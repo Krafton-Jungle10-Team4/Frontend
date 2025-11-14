@@ -39,13 +39,17 @@ export const SearchFilters = ({
     <div className="flex items-center gap-4 px-6 py-4 border-b">
       <div className="relative flex-1">
         <div className="relative flex items-center">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none"
+            aria-hidden="true"
+          />
           <Input
             type="text"
             placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-3"
+            style={{ paddingLeft: '2.75rem' }}
           />
         </div>
       </div>

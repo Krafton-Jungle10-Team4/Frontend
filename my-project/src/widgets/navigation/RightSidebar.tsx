@@ -20,7 +20,11 @@ export function RightSidebar({
   userName = 'User',
   language,
 }: RightSidebarProps) {
-  const usagePercentage = Math.round((totalBots / maxBots) * 100);
+  const isUnlimited = !Number.isFinite(maxBots);
+  const usagePercentage =
+    isUnlimited || maxBots <= 0
+      ? 0
+      : Math.min(100, Math.round((totalBots / maxBots) * 100));
   const userInitial = userName.charAt(0).toUpperCase();
 
   const translations = {
@@ -31,6 +35,7 @@ export function RightSidebar({
       of: 'of',
       recentActivity: 'Recent Activity',
       viewAll: 'View All',
+      unlimited: 'Unlimited',
     },
     ko: {
       bots: '챗봇',
@@ -39,6 +44,7 @@ export function RightSidebar({
       of: '/',
       recentActivity: '최근 활동',
       viewAll: '모두 보기',
+      unlimited: '무제한',
     },
   };
 
@@ -60,11 +66,14 @@ export function RightSidebar({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">
-              {totalBots} {t.of} {maxBots} {t.used}
+              {totalBots} {t.of}{' '}
+              {isUnlimited ? t.unlimited : maxBots} {t.used}
             </span>
-            <span className="text-gray-900">{usagePercentage}%</span>
+            <span className="text-gray-900">
+              {isUnlimited ? '∞' : `${usagePercentage}%`}
+            </span>
           </div>
-          <Progress value={usagePercentage} className="h-2" />
+          {!isUnlimited && <Progress value={usagePercentage} className="h-2" />}
         </div>
       </div>
 

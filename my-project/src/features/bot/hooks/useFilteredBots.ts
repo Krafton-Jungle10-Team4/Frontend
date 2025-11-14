@@ -11,11 +11,10 @@ export interface BotCardData {
   id: string;
   name: string;
   deployedDate: string;
-  messages: number;
-  messageChange: string;
-  errors: number;
-  errorStatus: string;
   createdAt: Date;
+  nodeCount: number;
+  edgeCount: number;
+  estimatedCost: number;
 }
 
 interface UseFilteredBotsOptions {
@@ -26,15 +25,27 @@ interface UseFilteredBotsOptions {
  * Bot 타입을 BotCardData 타입으로 변환
  */
 function convertToBotCardData(bot: Bot): BotCardData {
+  const derivedNodeCount =
+    bot.workflow?.nodes?.length ??
+    Math.max(3, Math.round(bot.messagesCount / 40) || 3);
+  const derivedEdgeCount =
+    bot.workflow?.edges?.length ??
+    Math.max(2, Math.round(derivedNodeCount * 0.6));
+  const estimatedCost = Number(
+    (
+      Math.max(bot.messagesCount, 10) * 0.02 +
+      derivedEdgeCount * 0.15
+    ).toFixed(2)
+  );
+
   return {
     id: bot.id,
     name: bot.name,
     deployedDate: bot.createdAt,
-    messages: bot.messagesCount,
-    messageChange: '+12%', // TODO: 실제 데이터로 대체
-    errors: bot.errorsCount,
-    errorStatus: bot.status === 'error' ? '오류' : '오류 없음',
     createdAt: new Date(bot.createdAt),
+    nodeCount: derivedNodeCount,
+    edgeCount: derivedEdgeCount,
+    estimatedCost,
   };
 }
 

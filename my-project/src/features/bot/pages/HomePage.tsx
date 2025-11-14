@@ -16,12 +16,20 @@ import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
 import { BotCreateDialog } from '../components/BotCreateDialog';
 import { useAuth, useAuthStore } from '@/features/auth';
+import { useBilling } from '@/features/billing/hooks/useBilling';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';
 import { useBotCreateDialog } from '../hooks/useBotCreateDialog';
 import { useBots } from '../hooks/useBots';
+import type { Plan } from '@/features/billing/mock/billingMock';
+
+const PLAN_BOT_LIMITS: Record<Plan['plan_id'], number> = {
+  free: 3,
+  pro: 10,
+  enterprise: Number.POSITIVE_INFINITY,
+};
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -46,6 +54,10 @@ export function HomePage() {
 
   // Activity store
   const activities = useActivityStore((state) => state.activities);
+  const { billingStatus } = useBilling();
+  const currentPlanId: Plan['plan_id'] =
+    billingStatus?.current_plan.plan_id ?? 'free';
+  const planBotLimit = PLAN_BOT_LIMITS[currentPlanId];
 
   // Custom hooks
   const {
@@ -128,7 +140,7 @@ export function HomePage() {
           isCreatingBot={isCreatingBot}
           userName={userName}
           botCount={totalCount}
-          maxBots={5}
+          maxBots={planBotLimit}
           language={language}
         />
 
@@ -180,7 +192,7 @@ export function HomePage() {
             <RightSidebar
               totalBots={totalCount}
               activities={activities}
-              maxBots={5}
+              maxBots={planBotLimit}
               userName={userName}
               language={language}
             />
