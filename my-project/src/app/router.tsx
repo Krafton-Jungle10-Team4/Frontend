@@ -6,7 +6,6 @@ import { workflowRoutes } from '@/features/workflow';
 import { dashboardRoutes } from '@/features/dashboard';
 import { mcpRoutes } from '@/features/mcp';
 import { promptEngineeringStudioRoutes } from '@/features/prompt-engineering-studio';
-import { documentsRoutes } from '@/features/documents';
 
 /**
  * React Router v7 기반 애플리케이션 라우터 설정
@@ -97,6 +96,14 @@ export const router = createBrowserRouter([
           dashboardRoutes,
           // MCP routes - MCP 키 관리
           mcpRoutes,
+          // Billing Settings Page
+          {
+            path: 'billing-settings',
+            lazy: () =>
+              import('@/features/billing').then((module) => ({
+                Component: module.BillingSettingsPage,
+              })),
+          },
           // Deployment routes - 배포 관리
           {
             path: 'deployment/:botId',

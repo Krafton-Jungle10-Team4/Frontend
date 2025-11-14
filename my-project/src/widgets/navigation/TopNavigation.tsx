@@ -7,7 +7,11 @@ import {
   Bug,
   Palette,
   LogOut,
+  Zap,
+  Crown,
 } from 'lucide-react';
+import { useUIStore } from '@/shared/stores/uiStore';
+import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import { Button } from '@/shared/components/button';
 import {
@@ -31,6 +35,42 @@ interface TopNavigationProps {
   currentPage?: string; // 현재 페이지 이름 (선택사항)
 }
 
+const PlanDisplay = () => {
+  const { billingStatus } = useBilling();
+
+  if (!billingStatus) {
+    return null;
+  }
+
+  const { plan_id, name } = billingStatus.current_plan;
+
+  const planConfig = {
+    free: {
+      icon: null,
+      className: 'bg-gray-100 text-gray-800',
+    },
+    pro: {
+      icon: <Zap size={14} className="text-yellow-500" />,
+      className: 'bg-yellow-100 text-yellow-800',
+    },
+    enterprise: {
+      icon: <Crown size={14} className="text-purple-500" />,
+      className: 'bg-purple-100 text-purple-800',
+    },
+  };
+
+  const config = planConfig[plan_id];
+
+  return (
+    <div
+      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.className}`}
+    >
+      {config.icon}
+      <span>{name}</span>
+    </div>
+  );
+};
+
 export function TopNavigation({
   onToggleSidebar,
   userName = 'User',
@@ -41,15 +81,15 @@ export function TopNavigation({
   onLogout,
   currentPage,
 }: TopNavigationProps) {
+  const { openPricingModal } = useUIStore();
+  const { isFreePlan } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
-
-  // TODO: Add userAvatar prop and use it in Avatar component
-  // const userAvatar = user?.avatar;
 
   const translations = {
     en: {
       workspace: "'s Workspace",
       home: 'Home',
+      upgrade: 'Upgrade',
       accountSettings: 'Account Settings',
       linkSocialAccounts: 'Link social accounts',
       changePassword: 'Change password',
@@ -60,6 +100,7 @@ export function TopNavigation({
     ko: {
       workspace: '의 워크스페이스',
       home: '홈',
+      upgrade: '업그레이드',
       accountSettings: '계정 설정',
       linkSocialAccounts: '소셜 계정 연결',
       changePassword: '비밀번호 변경',
@@ -91,6 +132,17 @@ export function TopNavigation({
         <span className="font-semibold text-gray-900 truncate">
           {currentPage || t.home}
         </span>
+        {isFreePlan && (
+          <Button
+            variant="default"
+            size="sm"
+            className="ml-4 transition-transform hover:scale-105"
+            onClick={openPricingModal}
+          >
+            <Zap size={14} className="mr-1.5" />
+            {t.upgrade}
+          </Button>
+        )}
       </div>
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <Button
@@ -104,6 +156,8 @@ export function TopNavigation({
             {language === 'en' ? '한국어' : 'English'}
           </span>
         </Button>
+
+        <PlanDisplay />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
