@@ -3,55 +3,133 @@
 /**
  * @file useBilling.ts
  * @description Billing 관련 상태를 조회하고 관리하는 커스텀 훅입니다.
- * 현재는 Mock 데이터를 사용하여 스토어를 초기화하는 역할을 합니다.
- * 추후 실제 API 연동 로직으로 교체될 예정입니다.
+ * 비용 모니터링 API와 Bot 목록 API를 이용해 사용자별 총 사용량을 계산합니다.
  */
 
 import { useEffect } from 'react';
 import { useBillingStore } from '@/shared/stores/billingStore';
-// 개발 단계에서는 Free 유저와 Pro 유저 시나리오를 쉽게 전환하기 위해 두 가지를 모두 import 합니다.
-import { mockFreeUserBillingStatus } from '../mock/billingMock';
+import { mockPlans } from '../mock/billingMock';
+import { botApi } from '@/features/bot/api/botApi';
+import { costApi } from '../api/costApi';
+
+const defaultPlan = mockPlans[0];
+
+const getBillingCycle = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  return {
+    start_date: start.toISOString(),
+    end_date: end.toISOString(),
+  };
+};
 
 export function useBilling() {
-  // useBillingStore에서 상태와 액션을 가져옵니다.
-  const { status, isLoading, error, setStatus } = useBillingStore();
+  const {
+    status,
+    isLoading,
+    error,
+    syncedPlanId,
+    setStatus,
+    setLoading,
+    setError,
+    setSyncedPlanId,
+  } = useBillingStore();
 
-  // 컴포넌트 마운트 시 1회만 실행되는 useEffect
+  const currentPlanId = status?.current_plan.plan_id ?? defaultPlan.plan_id;
+
   useEffect(() => {
-    // 스토어에 이미 상태가 있으면 다시 초기화하지 않음
-    if (status) {
-      return;
-    }
+    let isMounted = true;
 
-    // 현재는 실제 API 호출 없이 Mock 데이터를 사용하여 스토어를 초기화합니다.
-    // TODO: 추후 실제 API가 구현되면 아래 로직을 API 호출 코드로 대체해야 합니다.
-    
-    // --- Mock Logic ---
-    try {
-      // 1초의 가상 로딩 시간을 줍니다.
-      const timer = setTimeout(() => {
-        // 여기서 Free 유저 시나리오와 Pro 유저 시나리오를 선택할 수 있습니다.
-        // HomePage의 업그레이드 플로우를 테스트하려면 `mockFreeUserBillingStatus`를 사용하세요.
-        setStatus(mockFreeUserBillingStatus);
-        // setStatus(mockBillingStatus); // Pro 유저 테스트 시 이 코드를 사용
-      }, 1000);
+    const fetchUsage = async () => {
+      if (syncedPlanId === currentPlanId && status) {
+        setLoading(false);
+        return;
+      }
 
-      // 컴포넌트 언마운트 시 타이머를 정리합니다.
-      return () => clearTimeout(timer);
+      setLoading(true);
 
-    } catch (e) {
-      // Mock 로직에서는 에러가 발생할 가능성이 낮지만, 형식상 남겨둡니다.
-      console.error("Failed to load mock billing data", e);
-    }
-    // setStatus는 변경되지 않으므로 의존성 배열에 포함합니다.
-  }, [status, setStatus]);
+      try {
+        const planMeta =
+          mockPlans.find((plan) => plan.plan_id === currentPlanId) ??
+          defaultPlan;
+        const bots = await botApi.getAll();
 
-  // 훅을 사용하는 컴포넌트에 상태와 로딩 여부 등을 반환합니다.
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const usageResults = await Promise.allSettled(
+          bots.map((bot) =>
+            costApi.getBotUsage({
+              botId: bot.id,
+              startDate: monthStart,
+              endDate: now,
+            })
+          )
+        );
+
+        if (!isMounted) return;
+
+        const totalCost = usageResults.reduce((sum, result) => {
+          if (result.status === 'fulfilled') {
+            return sum + result.value.totalCost;
+          }
+          return sum;
+        }, 0);
+
+        const totalCredit = planMeta.credits.amount;
+        const creditRemaining = Math.max(totalCredit - totalCost, 0);
+
+        const billingCycle = status?.billing_cycle ?? getBillingCycle();
+
+        setStatus({
+          current_plan:
+            status?.current_plan ?? {
+              plan_id: planMeta.plan_id,
+              name: planMeta.name,
+            },
+          usage: {
+            monthly_cost: Number(totalCost.toFixed(2)),
+            total_credit: totalCredit,
+            credit_remaining: Number(creditRemaining.toFixed(2)),
+          },
+          billing_cycle: billingCycle,
+        });
+        setSyncedPlanId(currentPlanId);
+        setError(null);
+      } catch (err) {
+        if (!isMounted) return;
+        console.error('Failed to load billing data', err);
+        setError(err as Error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchUsage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    currentPlanId,
+    setError,
+    setLoading,
+    setStatus,
+    setSyncedPlanId,
+    status,
+    syncedPlanId,
+  ]);
+
+  const effectivePlanId = status?.current_plan.plan_id ?? defaultPlan.plan_id;
+
   return {
     billingStatus: status,
     isLoading,
     error,
-    // 편의를 위해 현재 플랜이 free인지 확인하는 boolean 값을 제공합니다.
-    isFreePlan: status?.current_plan.plan_id === 'free',
+    isFreePlan: effectivePlanId === 'free',
   };
 }
