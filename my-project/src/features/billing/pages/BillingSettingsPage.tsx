@@ -159,11 +159,11 @@ export function BillingSettingsPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-white/50 bg-transparent text-white hover:bg-white/10"
+                className="ml-auto border-white/50 bg-transparent text-white hover:bg-white/10"
                 onClick={handleCancelSubscription}
                 disabled={isFreePlan}
               >
-                {language === 'en' ? 'Switch to Free' : '무료 플랜으로 전환'}
+                {language === 'en' ? 'Cancel subscription' : '구독 취소'}
               </Button>
               <Button
                 variant="outline"
