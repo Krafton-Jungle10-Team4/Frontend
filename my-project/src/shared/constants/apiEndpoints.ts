@@ -106,6 +106,11 @@ export const API_ENDPOINTS = {
       runId: string,
       nodeId: string
     ) => `/api/v1/bots/${botId}/workflow-executions/${runId}/nodes/${nodeId}`,
+
+    // Variable Assigner 노드 관련
+    DEFAULT_NODE_CONFIG: (botId: string, nodeType: string) =>
+      `/api/v1/bots/${botId}/workflows/default-workflow-block-configs/${nodeType}`,
+    NODE_PORTS: (nodeId: string) => `/api/v1/workflows/nodes/${nodeId}/ports`,
   },
 
   // 레거시 (호환성 유지)

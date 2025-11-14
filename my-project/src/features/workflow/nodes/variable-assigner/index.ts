@@ -7,3 +7,12 @@
 
 // Types
 export * from './types';
+
+// API
+export { variableAssignerApi } from './api/variableAssignerApi';
+export {
+  valueSelectorToReference,
+  referenceToValueSelector,
+  toBackendFormat,
+  fromBackendFormat,
+} from './api/transformers';
