@@ -23,6 +23,7 @@ export { useVariableAssignerStore } from './stores/variableAssignerStore';
 // Hooks
 export { useVariableAssigner } from './hooks/useVariableAssigner';
 export { useVariableValidation } from './hooks/useVariableValidation';
+export { useAvailableVariables } from './hooks/useAvailableVariables';
 
 // Components
 export { VariableAssignerNode } from './components/VariableAssignerNode';
