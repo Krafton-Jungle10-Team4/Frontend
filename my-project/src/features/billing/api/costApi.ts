@@ -30,8 +30,24 @@ interface GetBotUsageParams {
   endDate?: Date;
 }
 
-const formatDateParam = (date?: Date) =>
-  date ? date.toISOString().split('T')[0] : undefined;
+// FastAPI expects an ISO 8601 timestamp for datetime query params.
+// Send the full string (including timezone) to avoid 422 validation errors.
+const formatDateParam = (date?: Date) => (date ? date.toISOString() : undefined);
+
+const createEmptyUsageSummary = (
+  botId: string,
+  startDate?: Date,
+  endDate?: Date
+): BotUsageSummary => ({
+  botId,
+  totalRequests: 0,
+  totalInputTokens: 0,
+  totalOutputTokens: 0,
+  totalTokens: 0,
+  totalCost: 0,
+  periodStart: startDate?.toISOString() ?? null,
+  periodEnd: endDate?.toISOString() ?? null,
+});
 
 const transformUsageResponse = (data: BotUsageApiResponse): BotUsageSummary => ({
   botId: data.bot_id,
@@ -63,17 +79,26 @@ export const costApi = {
 
       return transformUsageResponse(data);
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return {
-          botId,
-          totalRequests: 0,
-          totalInputTokens: 0,
-          totalOutputTokens: 0,
-          totalTokens: 0,
-          totalCost: 0,
-          periodStart: startDate?.toISOString() ?? null,
-          periodEnd: endDate?.toISOString() ?? null,
-        };
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const errorCode =
+          (error.response?.data as { error_code?: string })?.error_code;
+        const shouldFallback =
+          status === 404 ||
+          (status !== undefined && status >= 500) ||
+          !error.response ||
+          error.code === 'ECONNABORTED';
+
+        if (shouldFallback) {
+          console.warn(
+            `[Billing] Using fallback usage summary for bot ${botId}`,
+            {
+              status,
+              errorCode,
+            }
+          );
+          return createEmptyUsageSummary(botId, startDate, endDate);
+        }
       }
       throw error;
     }

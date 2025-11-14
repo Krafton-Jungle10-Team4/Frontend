@@ -11,11 +11,11 @@ import { Button } from '@/shared/components/button';
 import { Progress } from '@/shared/components/progress';
 import { LeftSidebar, TopNavigation, WorkspaceSidebar } from '@/widgets';
 import { mockPlans } from '../mock/billingMock';
-import { CalendarDays, CheckCircle2, CreditCard, Zap } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap } from 'lucide-react';
 
 export function BillingSettingsPage() {
   const navigate = useNavigate();
-  const { billingStatus, isLoading } = useBilling();
+  const { billingStatus, isLoading, error } = useBilling();
   const upgradePlan = useBillingStore((state) => state.upgradePlan);
   
   const user = useAuthStore((state) => state.user);
@@ -50,8 +50,50 @@ export function BillingSettingsPage() {
     ko: { currentPage: '결제' },
   };
   const t = translations[language];
+  const handleRetry = () => {
+    window.location.reload();
+  };
 
   const renderContent = () => {
+    if (error) {
+      return (
+        <div className="flex h-full items-center justify-center bg-gray-50 px-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
+              <AlertTriangle className="h-8 w-8" />
+            </div>
+            <h2 className="mt-4 text-xl font-semibold text-gray-900">
+              {language === 'en'
+                ? 'Unable to load billing usage data'
+                : '결제 사용량 정보를 불러오지 못했습니다'}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              {language === 'en'
+                ? 'Please refresh and try again in a moment. You can keep using other pages safely.'
+                : '잠시 후 페이지를 새로고침하여 다시 시도해주세요. 다른 페이지는 계속 이용하셔도 됩니다.'}
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate('/home')}
+              >
+                {language === 'en' ? 'Go to Home' : '홈으로 이동'}
+              </Button>
+              <Button className="w-full" onClick={handleRetry}>
+                {language === 'en' ? 'Retry' : '다시 시도'}
+              </Button>
+            </div>
+            <p className="mt-4 text-xs text-gray-400 break-words">
+              {language === 'en'
+                ? `Error details: ${error.message}`
+                : `오류 상세: ${error.message}`}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     if (isLoading || !billingStatus) {
       return (
         <div className="flex h-full items-center justify-center bg-gray-50 px-4">
