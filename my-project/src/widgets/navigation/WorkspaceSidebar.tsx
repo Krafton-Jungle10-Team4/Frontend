@@ -7,6 +7,7 @@ import {
   Settings,
   X,
   ChevronDown,
+  UserCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
@@ -88,7 +89,9 @@ export function WorkspaceSidebar({
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg"></div>
+                <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center">
+                  <UserCircle className="text-white" aria-hidden="true" />
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1">
                     <span className="text-sm">

@@ -13,11 +13,10 @@ export interface BotCardData {
   id: string;
   name: string;
   deployedDate: string;
-  messages: number;
-  messageChange: string;
-  errors: number;
-  errorStatus: string;
   createdAt: Date;
+  nodeCount: number;
+  edgeCount: number;
+  estimatedCost: number;
 }
 
 interface BotCardProps {
@@ -40,19 +39,55 @@ export function BotCard({
   const translations = {
     en: {
       created: 'Created',
-      messages: 'Messages',
-      errors: 'Errors',
+      nodes: 'Nodes',
+      edges: 'Edges',
+      cost: 'Monthly Cost',
       delete: 'Delete',
     },
     ko: {
       created: '생성:',
-      messages: '메시지',
-      errors: '오류',
+      nodes: '노드 수',
+      edges: '엣지 수',
+      cost: '월 비용',
       delete: '삭제',
     },
   };
 
   const t = translations[language];
+  const stats = [
+    { label: t.nodes, value: bot.nodeCount },
+    { label: t.edges, value: bot.edgeCount },
+    { label: t.cost, value: `$${bot.estimatedCost.toFixed(2)}` },
+  ];
+
+  const renderStatItems = () =>
+    stats.map((stat) => (
+      <div key={stat.label}>
+        <p className="text-[10px] uppercase tracking-wide text-gray-400">
+          {stat.label}
+        </p>
+        <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+      </div>
+    ));
+
+  const StatsRow = () => (
+    <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm text-gray-600">
+      {renderStatItems()}
+    </div>
+  );
+
+  const StatsGrid = () => (
+    <div className="grid grid-cols-3 gap-4">
+      {stats.map((stat) => (
+        <div key={stat.label}>
+          <p className="text-xs uppercase tracking-wide text-gray-400">
+            {stat.label}
+          </p>
+          <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+        </div>
+      ))}
+    </div>
+  );
 
   const handleCardClick = () => {
     if (suppressNextClick) {
@@ -84,23 +119,8 @@ export function BotCard({
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
             </div>
-            <div className="hidden md:flex items-center gap-6 lg:gap-8">
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {bot.messages} {t.messages}
-                </div>
-                <div className="text-xs text-green-600">
-                  {bot.messageChange}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {bot.errors} {t.errors}
-                </div>
-                <div className="text-xs text-gray-500">{bot.errorStatus}</div>
-              </div>
-            </div>
           </div>
+          <StatsRow />
           <DropdownMenu onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -125,6 +145,9 @@ export function BotCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <div className="mt-4 w-full md:hidden">
+          <StatsGrid />
+        </div>
       </div>
     );
   }
@@ -134,7 +157,7 @@ export function BotCard({
       className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <BotIcon className="text-white" size={20} />
@@ -172,19 +195,8 @@ export function BotCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <div className="text-sm text-gray-600 mb-1">
-            {bot.messages} {t.messages}
-          </div>
-          <div className="text-xs text-green-600">{bot.messageChange}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-600 mb-1">
-            {bot.errors} {t.errors}
-          </div>
-          <div className="text-xs text-gray-500">{bot.errorStatus}</div>
-        </div>
+      <div className="mt-4">
+        <StatsGrid />
       </div>
     </div>
   );

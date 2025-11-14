@@ -52,14 +52,44 @@ const planVisualConfig: Record<
 const creditLabel = (frequency: Plan['credits']['frequency']) =>
   frequency === 'monthly' ? '월 제공 크레딧' : '제공 크레딧';
 
+const PLAN_PRIORITY: Record<Plan['plan_id'], number> = {
+  free: 0,
+  pro: 1,
+  enterprise: 2,
+};
+
+type PlanRelation = 'current' | 'upgrade' | 'downgrade';
+
+const getPlanRelation = (
+  planId: Plan['plan_id'],
+  currentPlanId: Plan['plan_id']
+): PlanRelation => {
+  if (planId === currentPlanId) {
+    return 'current';
+  }
+  return PLAN_PRIORITY[planId] > PLAN_PRIORITY[currentPlanId]
+    ? 'upgrade'
+    : 'downgrade';
+};
+
 const PlanCard = ({
   plan,
   onUpgrade,
+  relation,
 }: {
   plan: Plan;
   onUpgrade: (planId: Plan['plan_id']) => void;
+  relation: PlanRelation;
 }) => {
   const config = planVisualConfig[plan.plan_id];
+  const isCurrentPlan = relation === 'current';
+  const isDowngrade = relation === 'downgrade';
+  const buttonDisabled = isCurrentPlan || isDowngrade;
+  const buttonLabel = isCurrentPlan
+    ? '현재 플랜'
+    : isDowngrade
+      ? '다운그레이드 불가'
+      : `${plan.name}으로 업그레이드`;
 
   return (
     <Card
@@ -112,12 +142,15 @@ const PlanCard = ({
           className={cn(
             'w-full h-11 text-sm font-semibold rounded-xl transition-all',
             config.button,
-            plan.plan_id === 'free' && 'cursor-default'
+            buttonDisabled && 'cursor-default'
           )}
-          onClick={() => onUpgrade(plan.plan_id)}
-          disabled={plan.plan_id === 'free'}
+          onClick={() => {
+            if (buttonDisabled) return;
+            onUpgrade(plan.plan_id);
+          }}
+          disabled={buttonDisabled}
         >
-          {plan.plan_id === 'free' ? '현재 플랜' : `${plan.name}으로 업그레이드`}
+          {buttonLabel}
         </Button>
       </CardFooter>
     </Card>
@@ -127,9 +160,17 @@ const PlanCard = ({
 export function PricingModal() {
   const { isPricingModalOpen, closePricingModal } = useUIStore();
   const upgradePlan = useBillingStore((state) => state.upgradePlan);
+  const currentPlanId =
+    useBillingStore(
+      (state) => state.status?.current_plan.plan_id
+    ) ?? 'free';
+  const orderedPlans = [...mockPlans].sort(
+    (a, b) => PLAN_PRIORITY[a.plan_id] - PLAN_PRIORITY[b.plan_id]
+  );
 
   const handleUpgrade = (planId: Plan['plan_id']) => {
-    if (planId === 'free') return;
+    const relation = getPlanRelation(planId, currentPlanId);
+    if (relation !== 'upgrade') return;
     upgradePlan(planId);
     const planName = mockPlans.find(p => p.plan_id === planId)?.name;
     toast.success(`${planName} 플랜으로 변경되었습니다!`);
@@ -164,8 +205,13 @@ export function PricingModal() {
         </div>
         <div className="bg-white px-4 py-10 sm:px-8">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {mockPlans.map((plan) => (
-              <PlanCard key={plan.plan_id} plan={plan} onUpgrade={handleUpgrade} />
+            {orderedPlans.map((plan) => (
+              <PlanCard
+                key={plan.plan_id}
+                plan={plan}
+                onUpgrade={handleUpgrade}
+                relation={getPlanRelation(plan.plan_id, currentPlanId)}
+              />
             ))}
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">

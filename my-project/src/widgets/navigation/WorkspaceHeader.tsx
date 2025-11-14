@@ -1,5 +1,5 @@
+import { UserCircle } from 'lucide-react';
 import { Button } from '@/shared/components/button';
-import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +26,6 @@ export function WorkspaceHeader({
   maxBots = 5,
   language,
 }: WorkspaceHeaderProps) {
-  const userInitial = userName.charAt(0).toUpperCase();
   const isLimitReached = botCount >= maxBots;
 
   const translations = {
@@ -52,7 +51,9 @@ export function WorkspaceHeader({
     <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl flex-shrink-0"></div>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+            <UserCircle className="text-white" aria-hidden="true" />
+          </div>
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl truncate">
               {userName}
@@ -61,11 +62,6 @@ export function WorkspaceHeader({
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 hidden sm:flex">
-            <AvatarFallback className="bg-teal-500 text-white">
-              {userInitial}
-            </AvatarFallback>
-          </Avatar>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
