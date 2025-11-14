@@ -85,10 +85,9 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         data._dimmed && 'opacity-30'
       )}
     >
-      {/* 포트 시스템 (새로운 워크플로우) */}
-      {ports && (
+      {/* 포트 시스템 비활성화 - ports 데이터는 유지하되 UI는 렌더링하지 않음 */}
+      {/* {ports && (
         <>
-          {/* 입력 포트 */}
           {ports.inputs.map((port, index) => (
             <NodePort
               key={`input-${port.name}`}
@@ -101,7 +100,6 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
             />
           ))}
 
-          {/* 출력 포트 */}
           {ports.outputs.map((port, index) => (
             <NodePort
               key={`output-${port.name}`}
@@ -115,26 +113,24 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
             />
           ))}
         </>
-      )}
+      )} */}
 
-      {/* 레거시 핸들 (포트 없는 기존 노드) */}
-      {!ports && (
-        <>
-          {/* Target Handle (왼쪽 입력) */}
-          <NodeTargetHandle
-            data={data}
-            handleClassName="!top-4 !-left-[9px] !translate-y-0"
-            handleId="target"
-          />
+      {/* 핸들 (모든 노드) */}
+      <>
+        {/* Target Handle (왼쪽 입력) */}
+        <NodeTargetHandle
+          data={data}
+          handleClassName="!top-4 !-left-[9px] !translate-y-0"
+          handleId="target"
+        />
 
-          {/* Source Handle (오른쪽 출력) */}
-          <NodeSourceHandle
-            data={data}
-            handleClassName="!top-4 !-right-[9px] !translate-y-0"
-            handleId="source"
-          />
-        </>
-      )}
+        {/* Source Handle (오른쪽 출력) */}
+        <NodeSourceHandle
+          data={data}
+          handleClassName="!top-4 !-right-[9px] !translate-y-0"
+          handleId="source"
+        />
+      </>
 
       {/* 노드 헤더 */}
       <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
