@@ -16,3 +16,10 @@ export {
   toBackendFormat,
   fromBackendFormat,
 } from './api/transformers';
+
+// Store
+export { useVariableAssignerStore } from './stores/variableAssignerStore';
+
+// Hooks
+export { useVariableAssigner } from './hooks/useVariableAssigner';
+export { useVariableValidation } from './hooks/useVariableValidation';
