@@ -13,6 +13,7 @@ interface UIStore {
   searchQuery: string;
   viewMode: ViewMode;
   language: Language;
+  isPricingModalOpen: boolean;
 
   // Actions
   toggleSidebar: () => void;
@@ -21,6 +22,8 @@ interface UIStore {
   setViewMode: (mode: ViewMode) => void;
   setLanguage: (lang: Language) => void;
   clearSearch: () => void;
+  openPricingModal: () => void;
+  closePricingModal: () => void;
 }
 
 export const useUIStore = create<UIStore>()(
@@ -32,6 +35,7 @@ export const useUIStore = create<UIStore>()(
         searchQuery: '',
         viewMode: 'grid',
         language: 'en',
+        isPricingModalOpen: false,
 
         // Toggle sidebar
         toggleSidebar: () =>
@@ -51,6 +55,10 @@ export const useUIStore = create<UIStore>()(
 
         // Clear search
         clearSearch: () => set({ searchQuery: '' }),
+
+        // Pricing Modal actions
+        openPricingModal: () => set({ isPricingModalOpen: true }),
+        closePricingModal: () => set({ isPricingModalOpen: false }),
       }),
       {
         name: 'ui-storage',

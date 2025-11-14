@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Home,
   Puzzle,
@@ -8,6 +9,8 @@ import {
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
+import { useBilling } from '@/features/billing/hooks/useBilling';
+import { Progress } from '@/shared/components/progress';
 
 type Language = 'en' | 'ko';
 
@@ -37,6 +40,8 @@ export function WorkspaceSidebar({
   menuItems,
   activeItemId,
 }: WorkspaceSidebarProps) {
+  const { billingStatus, isLoading } = useBilling();
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   const translations = {
@@ -62,10 +67,10 @@ export function WorkspaceSidebar({
 
   // Default menu items (Home page)
   const defaultMenuItems: MenuItem[] = [
-    { id: 'home', icon: Home, label: t.home },
+    { id: 'home', icon: Home, label: t.home, onClick: () => navigate('/home') },
     { id: 'integrations', icon: Puzzle, label: t.integrations },
     { id: 'usage', icon: BarChart3, label: t.usage },
-    { id: 'billing', icon: CreditCard, label: t.billing },
+    { id: 'billing', icon: CreditCard, label: t.billing, onClick: () => navigate('/billing-settings') },
     { id: 'settings', icon: Settings, label: t.settings },
   ];
 
@@ -127,6 +132,22 @@ export function WorkspaceSidebar({
               })}
             </div>
           </nav>
+
+          {/* Credit Usage Widget 추가 */}
+          <div className="mt-auto p-4">
+            <h3 className="text-sm font-semibold text-gray-400 mb-2">Credit Usage</h3>
+            {isLoading ? (
+              <p className="text-xs text-gray-500">Loading...</p>
+            ) : billingStatus ? (
+              <div>
+                <Progress value={(billingStatus.usage.monthly_cost / billingStatus.usage.total_credit) * 100} className="h-2" />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>${billingStatus.usage.monthly_cost.toFixed(2)}</span>
+                  <span>${billingStatus.usage.total_credit.toFixed(2)}</span>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </>
