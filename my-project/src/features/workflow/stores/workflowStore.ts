@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import type { Node, Edge } from '@/shared/types/workflow.types';
-import { computeWorkflowAutoLayout } from '@/features/workflow/utils/autoLayout';
 import { workflowApi } from '../api/workflowApi';
 import { transformFromBackend } from '@/shared/utils/workflowTransform';
 import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
@@ -195,12 +194,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           draft.id
         );
         const graph = transformFromBackend(detail.graph);
-        const laidOutNodes = graph.nodes.length
-          ? computeWorkflowAutoLayout(graph.nodes, graph.edges)
-          : graph.nodes;
 
         set({
-          nodes: laidOutNodes,
+          nodes: graph.nodes,
           edges: graph.edges,
           draftVersionId: detail.id,
           environmentVariables: detail.environment_variables || {},
@@ -213,12 +209,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           data: { ...node.data },
         }));
         const clonedEdges = DEFAULT_WORKFLOW.edges.map((edge) => ({ ...edge }));
-        const laidOutNodes = clonedNodes.length
-          ? computeWorkflowAutoLayout(clonedNodes, clonedEdges)
-          : clonedNodes;
 
         set({
-          nodes: laidOutNodes,
+          nodes: clonedNodes,
           edges: clonedEdges,
           draftVersionId: null,
           environmentVariables: {},
