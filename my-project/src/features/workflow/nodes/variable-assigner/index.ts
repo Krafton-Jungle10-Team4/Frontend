@@ -33,3 +33,12 @@ export { VarList } from './components/VarList';
 export { GroupHeaderInput } from './components/GroupHeaderInput';
 export { AddVariableButton } from './components/AddVariableButton';
 export { VariablePicker } from './components/VariablePicker';
+
+// Utils
+export { checkValid, createVarFilter } from './utils/validation';
+export { generatePortSchema } from './utils/portSchemaGenerator';
+export {
+  generateNextGroupName,
+  isDuplicateGroupName,
+  validateGroupNameFormat,
+} from './utils/groupHelpers';
