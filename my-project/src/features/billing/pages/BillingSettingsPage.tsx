@@ -69,6 +69,20 @@ export function BillingSettingsPage() {
       usage.total_credit > 0
         ? Math.min((usage.monthly_cost / usage.total_credit) * 100, 100)
         : 0;
+    const additionalCharge = Math.max(
+      usage.monthly_cost - usage.total_credit,
+      0
+    );
+    const canPayOutstanding = additionalCharge > 0;
+
+    const handlePayOutstanding = () => {
+      if (!canPayOutstanding) return;
+      const message =
+        language === 'en'
+          ? 'Redirecting to the payment page (coming soon).'
+          : '결제 페이지로 이동합니다. (준비 중)';
+      toast.info(message);
+    };
 
     const formatDate = (value: string) =>
       new Date(value).toLocaleDateString(language === 'en' ? 'en-US' : 'ko-KR', {
@@ -151,7 +165,24 @@ export function BillingSettingsPage() {
               >
                 {language === 'en' ? 'Switch to Free' : '무료 플랜으로 전환'}
               </Button>
+              <Button
+                variant="outline"
+                className="border border-white/70 bg-white/20 text-white hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={handlePayOutstanding}
+                disabled={!canPayOutstanding}
+              >
+                {language === 'en' ? 'Pay Outstanding' : '결제하기'}
+              </Button>
             </div>
+            <p className="mt-3 text-xs text-white/80">
+              {canPayOutstanding
+                ? language === 'en'
+                  ? `Additional charge due: $${additionalCharge.toFixed(2)}`
+                  : `추가 청구 예정 금액: $${additionalCharge.toFixed(2)}`
+                : language === 'en'
+                  ? 'No additional charges this cycle.'
+                  : '이번 결제 주기에 추가 청구 예정 금액이 없습니다.'}
+            </p>
           </section>
 
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -199,10 +230,27 @@ export function BillingSettingsPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="text-xs text-gray-500">
-                {language === 'en'
-                  ? 'Usage resets at the start of each billing cycle.'
-                  : '사용량은 매 결제 주기 시작 시 초기화됩니다.'}
+              <CardFooter className="flex flex-col gap-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                <span
+                  className={
+                    canPayOutstanding
+                      ? 'font-semibold text-red-600'
+                      : 'font-semibold text-emerald-600'
+                  }
+                >
+                  {canPayOutstanding
+                    ? language === 'en'
+                      ? `Additional charge pending: $${additionalCharge.toFixed(2)}`
+                      : `추가 청구 예정 금액: $${additionalCharge.toFixed(2)}`
+                    : language === 'en'
+                      ? 'All usage is within your credit allowance.'
+                      : '모든 사용량이 제공된 크레딧 한도 내에 있습니다.'}
+                </span>
+                <span>
+                  {language === 'en'
+                    ? 'Usage resets at the start of each billing cycle.'
+                    : '사용량은 매 결제 주기 시작 시 초기화됩니다.'}
+                </span>
               </CardFooter>
             </Card>
 

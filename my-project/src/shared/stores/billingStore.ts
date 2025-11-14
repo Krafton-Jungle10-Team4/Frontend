@@ -13,7 +13,11 @@ interface BillingState {
   status: BillingStatus | null; // 사용자 구독 상태 정보
   isLoading: boolean; // 상태 정보 로딩 여부
   error: Error | null; // 에러 상태
+  syncedPlanId: Plan['plan_id'] | null; // 최근 사용량 동기화된 플랜 ID
   setStatus: (status: BillingStatus) => void; // 상태를 설정하는 액션
+  setLoading: (loading: boolean) => void;
+  setError: (error: Error | null) => void;
+  setSyncedPlanId: (planId: Plan['plan_id'] | null) => void;
   upgradePlan: (planId: Plan['plan_id']) => void; // 플랜을 업그레이드하는 액션
 }
 
@@ -23,9 +27,15 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   status: null,
   isLoading: true,
   error: null,
+  syncedPlanId: null,
   
   // 상태를 업데이트하는 액션 함수
-  setStatus: (status: BillingStatus) => set({ status, isLoading: false, error: null }),
+  setStatus: (status: BillingStatus) =>
+    set({ status, isLoading: false, error: null }),
+  setLoading: (loading: boolean) => set({ isLoading: loading }),
+  setError: (error: Error | null) => set({ error, isLoading: false }),
+  setSyncedPlanId: (planId: Plan['plan_id'] | null) =>
+    set({ syncedPlanId: planId }),
 
   // 플랜을 업그레이드하는 액션
   upgradePlan: (planId: Plan['plan_id']) => {
@@ -55,6 +65,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       },
     };
 
+    set({ syncedPlanId: null });
     get().setStatus(newStatus);
   },
 }));

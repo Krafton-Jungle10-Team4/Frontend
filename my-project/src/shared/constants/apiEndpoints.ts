@@ -133,4 +133,13 @@ export const API_ENDPOINTS = {
     KEYS: '/api/v1/mcp/keys',
     KEY_DETAIL: (keyId: string) => `/api/v1/mcp/keys/${keyId}`,
   },
+
+  // 비용 모니터링 (SnapAgent API)
+  COST: {
+    USAGE: (botId: string) => `/api/v1/cost/usage/${botId}`,
+    USAGE_BREAKDOWN: (botId: string) =>
+      `/api/v1/cost/usage/${botId}/breakdown`,
+    DAILY_USAGE: (botId: string) => `/api/v1/cost/usage/${botId}/daily`,
+    PRICING: '/api/v1/cost/pricing',
+  },
 } as const;
