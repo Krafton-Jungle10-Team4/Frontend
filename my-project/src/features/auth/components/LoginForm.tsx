@@ -3,6 +3,7 @@ import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 
 /**
  * 일반 로그인 폼 (이메일/비밀번호)
+ * 화이트 테마로 업데이트
  */
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -43,7 +44,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* 이메일 입력 */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-teal-200 mb-2">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
           이메일
         </label>
         <input
@@ -53,14 +54,14 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
           placeholder="your@email.com"
-          className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 backdrop-blur-sm transition-colors focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
           required
         />
       </div>
 
       {/* 비밀번호 입력 */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-teal-200 mb-2">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
           비밀번호
         </label>
         <div className="relative">
@@ -71,14 +72,14 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
             placeholder="••••••••"
-            className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 pr-12 text-white placeholder-white/50 backdrop-blur-sm transition-colors focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
             minLength={6}
             required
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
             aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
           >
             {showPassword ? (
@@ -92,7 +93,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
 
       {/* 에러 메시지 */}
       {(error || validationError) && (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-200">
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
           {error || validationError}
         </div>
       )}
@@ -101,7 +102,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 px-4 py-3 font-semibold text-white shadow-lg transition-all hover:from-teal-600 hover:to-cyan-600 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:from-teal-500 disabled:hover:to-cyan-500"
+        className="w-full rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white shadow-lg shadow-gray-400/50 transition-all hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
       >
         {isLoading ? (
           <div className="flex items-center justify-center gap-2">

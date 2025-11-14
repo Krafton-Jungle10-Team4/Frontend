@@ -1,75 +1,58 @@
-import { useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RiRobot2Line,
   RiArrowRightLine,
   RiLoginCircleLine,
   RiLogoutCircleLine,
+  RiFlowChart,
+  RiSparklingLine,
+  RiTestTubeLine,
+  RiRocketLine,
+  RiDatabase2Line,
+  RiCodeSSlashLine,
 } from '@remixicon/react';
 import { useAuth } from '@/features/auth';
 
 /**
  * LandingPage - 메인 랜딩 페이지
- * 로그인하지 않은 사용자가 처음 접근하는 페이지
+ * 깔끔한 화이트 배경의 모던한 디자인
  */
 export function LandingPage() {
   const navigate = useNavigate();
   const { isAuthenticated, logout, isLoading } = useAuth();
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
-  // Memoize star positions to avoid recalculating on every render
-  const stars1 = useMemo(
-    () =>
-      [...Array(50)].map((_, i) => ({
-        id: `star1-${i}`,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        animationDelay: Math.random() * 3,
-        animationDuration: 2 + Math.random() * 3,
-      })),
-    []
-  );
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('section-reveal-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
 
-  const stars2 = useMemo(
-    () =>
-      [...Array(30)].map((_, i) => ({
-        id: `star2-${i}`,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        animationDelay: Math.random() * 2,
-        animationDuration: 1.5 + Math.random() * 2,
-      })),
-    []
-  );
+    sectionRefs.current.forEach((section, index) => {
+      if (!section) return;
+      section.classList.add('section-reveal');
+      if (index === 0) {
+        section.classList.add('section-reveal-visible');
+        return;
+      }
+      observer.observe(section);
+    });
 
-  const stars3 = useMemo(
-    () =>
-      [...Array(20)].map((_, i) => ({
-        id: `star3-${i}`,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        animationDelay: Math.random() * 2,
-        animationDuration: 1 + Math.random() * 2,
-      })),
-    []
-  );
-
-  const shootingStars = useMemo(
-    () =>
-      [...Array(3)].map((_, i) => ({
-        id: `shooting-${i}`,
-        left: 20 + Math.random() * 60,
-        animationDuration: 5 + i * 2,
-        animationDelay: i * 3,
-      })),
-    []
-  );
+    return () => observer.disconnect();
+  }, []);
 
   const handleGetStarted = () => {
-    // 로그인되어 있으면 홈으로, 아니면 로그인 페이지로
     if (isAuthenticated) {
       navigate('/home');
-    }
-    else {
+    } else {
       navigate('/login');
     }
   };
@@ -79,213 +62,324 @@ export function LandingPage() {
       try {
         await logout();
         navigate('/landing');
-      }
-      catch (error) {
+      } catch (error) {
         console.error('Logout failed:', error);
       }
-    }
-    else {
+    } else {
       navigate('/login');
     }
   };
 
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col">
-      {/* Animated Space Background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-gray-900 to-teal-900">
-        {/* Stars Layer 1 - Small stars */}
-        <div className="absolute inset-0 opacity-50">
-          {stars1.map((star) => (
-            <div
-              key={star.id}
-              className="absolute w-1 h-1 bg-teal-300 rounded-full animate-pulse"
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-                animationDelay: `${star.animationDelay}s`,
-                animationDuration: `${star.animationDuration}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Stars Layer 2 - Medium stars */}
-        <div className="absolute inset-0 opacity-70">
-          {stars2.map((star) => (
-            <div
-              key={star.id}
-              className="absolute w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse"
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-                animationDelay: `${star.animationDelay}s`,
-                animationDuration: `${star.animationDuration}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Stars Layer 3 - Large stars */}
-        <div className="absolute inset-0 opacity-80">
-          {stars3.map((star) => (
-            <div
-              key={star.id}
-              className="absolute w-2 h-2 bg-teal-500 rounded-full animate-pulse"
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-                animationDelay: `${star.animationDelay}s`,
-                animationDuration: `${star.animationDuration}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Shooting stars */}
-        <div className="absolute inset-0">
-          {shootingStars.map((star) => (
-            <div
-              key={star.id}
-              className="absolute w-1 h-20 bg-gradient-to-b from-white to-transparent opacity-0"
-              style={{
-                left: `${star.left}%`,
-                top: `-100px`,
-                transform: 'rotate(135deg)',
-                animation: `shooting ${star.animationDuration}s linear infinite`,
-                animationDelay: `${star.animationDelay}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Nebula effect */}
-        <div className="absolute inset-0 bg-gradient-radial from-teal-400/20 via-transparent to-transparent blur-3xl" />
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden bg-gray-100">
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col">
+      <div className="relative z-10">
         {/* Header */}
-        <header className="w-full px-6 py-4 flex justify-between items-center backdrop-blur-sm bg-black/20">
-          <div className="flex items-center gap-2">
-            <RiRobot2Line className="h-8 w-8 text-teal-400" />
-            <span className="text-2xl font-bold text-white">SnapAgent</span>
+        <header className="w-full px-6 lg:px-12 py-6 flex justify-between items-center border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <RiRobot2Line className="h-9 w-9 text-teal-500" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              SnapAgent
+            </span>
           </div>
           <button
             onClick={handleAuthAction}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 text-white transition-colors hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-900 text-white font-medium transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             {isAuthenticated ? (
               <RiLogoutCircleLine className="h-5 w-5" />
             ) : (
               <RiLoginCircleLine className="h-5 w-5" />
             )}
-            <span className="font-medium">
+            <span className="font-medium text-sm">
               {isAuthenticated ? '로그아웃' : '로그인'}
             </span>
           </button>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 flex items-center justify-center px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Hero Section */}
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
-                지능형 AI Agent를
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 animate-pulse">
-                  만들어보세요
+        {/* Hero Section */}
+        <section
+          className="px-6 lg:px-12 pt-20 pb-32 lg:pt-32 lg:pb-40 bg-gray-100 border-b border-gray-200"
+          ref={(el) => (sectionRefs.current[0] = el)}
+        >
+          <div className="max-w-6xl mx-auto text-center space-y-8">
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
+                차세대 AI Agent
+                <br />
+                <span className="relative inline-block mt-2 text-gray-800">
+                  개발 플랫폼
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto drop-shadow-lg">
-                직관적인 Workflow Builder로 강력한 Agent을 제작하세요.
+              <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                시각적 Workflow Builder와 고급 Prompt Engineering으로
+                <br className="hidden md:block" />
+                누구나 쉽게 강력한 AI Agent를 만들 수 있습니다
               </p>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
               <button
                 onClick={handleGetStarted}
-                className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-teal-500/50 hover:shadow-teal-500/70 transition-all transform hover:scale-105"
+                className="group flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-lg font-semibold text-base shadow-lg shadow-gray-500/40 transition-all hover:bg-gray-800 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20"
               >
-                시작하기
-                <RiArrowRightLine className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <span className="flex items-center gap-2">
+                  무료로 시작하기
+                  <RiArrowRightLine className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
               </button>
               <button
-                onClick={() => {
-                  // Scroll to features section (나중에 추가 가능)
-                }}
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-xl font-semibold text-lg  │
-│        border-2 border-white/30 hover:border-white/50 transition-all"
+                onClick={scrollToFeatures}
+                className="px-8 py-4 bg-gray-900 text-white rounded-lg font-semibold text-base border border-gray-900 transition-all hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20"
               >
                 더 알아보기
               </button>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 pt-16">
-              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
-                  <span className="text-2xl">🎯</span>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 pt-16 max-w-3xl mx-auto">
+              <div className="space-y-1">
+                <div className="text-3xl md:text-4xl font-bold text-gray-800">100+</div>
+                <div className="text-sm text-gray-500">활성 사용자</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl md:text-4xl font-bold text-gray-800">99.9%</div>
+                <div className="text-sm text-gray-500">안정성</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl md:text-4xl font-bold text-gray-800">24/7</div>
+                <div className="text-sm text-gray-500">운영 시간</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section
+          id="features"
+          className="px-6 lg:px-12 py-24 bg-gray-200 border-y border-gray-300"
+          ref={(el) => (sectionRefs.current[1] = el)}
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center space-y-4 mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                모든 기능을 하나로
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                AI Agent 개발에 필요한 모든 도구를 통합 플랫폼에서 제공합니다
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-teal-500/30">
+                  <RiFlowChart className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  시각적 Workflow
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  시각적 Workflow Builder
                 </h3>
-                <p className="text-gray-400">
-                  직관적인 드래그 앤 드롭 인터페이스로 복잡한 AI Workflow를 손쉽게 
-                  구축하세요
+                <p className="text-gray-600 leading-relaxed">
+                  드래그 앤 드롭으로 복잡한 AI 로직을 직관적으로 구성하고, 실시간으로 테스트할 수 있습니다
                 </p>
               </div>
 
-              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
-                  <span className="text-2xl">⚡</span>
+              {/* Feature 2 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+                  <RiSparklingLine className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  빠른 배포
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Prompt Engineering Studio
                 </h3>
-                <p className="text-gray-400">
-                  Agent를 즉시 배포하고 사용자와 소통을 시작하세요
+                <p className="text-gray-600 leading-relaxed">
+                  고급 프롬프트 최적화 도구로 AI 응답 품질을 극대화하고 일관성을 보장합니다
                 </p>
               </div>
 
-              <div className="p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/20">
-                <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-lg">
-                  <span className="text-2xl">📊</span>
+              {/* Feature 3 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-pink-300 hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-pink-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-pink-500/30">
+                  <RiTestTubeLine className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  실시간 분석
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  자동화된 테스트
                 </h3>
-                <p className="text-gray-400">
-                  상세한 분석으로 사용량, 비용 및 성능을 모니터링하세요
+                <p className="text-gray-600 leading-relaxed">
+                  대규모 테스트셋으로 Agent 성능을 검증하고, 개선 지점을 자동으로 파악합니다
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-teal-500/30">
+                  <RiRocketLine className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  원클릭 배포
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  개발 완료 즉시 프로덕션 환경에 배포하고, 사용자에게 즉시 서비스를 제공합니다
+                </p>
+              </div>
+
+              {/* Feature 5 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+                  <RiDatabase2Line className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  지식 베이스 통합
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  문서를 업로드하고 RAG 기술로 Agent에게 전문 지식을 학습시킬 수 있습니다
+                </p>
+              </div>
+
+              {/* Feature 6 */}
+              <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-pink-300 hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300 hover:scale-[1.02]">
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-pink-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-pink-500/30">
+                  <RiCodeSSlashLine className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  MCP 프로토콜 지원
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Model Context Protocol로 외부 시스템과 안전하게 연동하고 기능을 확장합니다
                 </p>
               </div>
             </div>
           </div>
-        </main>
+        </section>
+
+        {/* How It Works Section */}
+        <section
+          className="px-6 lg:px-12 py-24 bg-gray-100 border-y border-gray-200"
+          ref={(el) => (sectionRefs.current[2] = el)}
+        >
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center space-y-4 mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                간단한 3단계
+              </h2>
+              <p className="text-lg text-gray-600">
+                누구나 쉽게 AI Agent를 만들고 배포할 수 있습니다
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="relative">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-teal-500/30">
+                    1
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Workflow 설계</h3>
+                  <p className="text-gray-600">
+                    비주얼 빌더로 대화 흐름과 로직을 직관적으로 구성합니다
+                  </p>
+                </div>
+                <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-teal-300 to-transparent" />
+              </div>
+
+              <div className="relative">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-purple-500/30">
+                    2
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">테스트 & 최적화</h3>
+                  <p className="text-gray-600">
+                    실시간 프리뷰와 자동 테스트로 Agent 성능을 검증합니다
+                  </p>
+                </div>
+                <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-purple-300 to-transparent" />
+              </div>
+
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-pink-500/30">
+                  3
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">즉시 배포</h3>
+                <p className="text-gray-600">
+                  원클릭으로 프로덕션에 배포하고 사용자와 연결됩니다
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA Section */}
+        <section
+          className="px-6 lg:px-12 py-32 bg-gray-200 border-y border-gray-300"
+          ref={(el) => (sectionRefs.current[3] = el)}
+        >
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+                지금 바로 시작하세요
+              </h2>
+              <p className="text-xl text-gray-600">
+                무료로 AI Agent를 만들고, 무한한 가능성을 경험하세요
+              </p>
+            </div>
+            <button
+              onClick={handleGetStarted}
+              className="group inline-flex items-center gap-2 px-10 py-5 bg-gray-900 text-white rounded-lg font-semibold text-lg shadow-2xl shadow-gray-600/40 transition-all hover:bg-gray-800 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30"
+            >
+              <span className="flex items-center gap-2">
+                무료로 시작하기
+                <RiArrowRightLine className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          </div>
+        </section>
 
         {/* Footer */}
-        <footer className="w-full px-6 py-8 text-center text-teal-200 text-sm backdrop-blur-sm bg-black/20">
-          <p>&copy; 2025 SnapAgent. All rights reserved.</p>
+        <footer className="px-6 lg:px-12 py-8 border-t border-gray-200 bg-gray-100">
+          <div className="max-w-7xl mx-auto text-center text-gray-500 text-sm">
+            <p>&copy; 2025 SnapAgent. All rights reserved.</p>
+          </div>
         </footer>
       </div>
 
-      {/* Shooting star animation keyframes - Add to global CSS */}
+      {/* Global Styles */}
       <style>{`
-        @keyframes shooting {
-          0% {
-            opacity: 0;
-            transform: translateY(0) translateX(0) rotate(135deg);
+        @keyframes gradient-shift {
+          0%, 100% {
+            background-position: 0% 50%;
           }
-          10% {
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 8s ease infinite;
+        }
+
+        .section-reveal {
+          opacity: 0;
+          transform: translateY(60px);
+          transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section-reveal-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .section-reveal {
             opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(100vh) translateX(100vh) rotate(135deg);
+            transform: none;
           }
         }
       `}</style>
