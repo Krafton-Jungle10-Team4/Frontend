@@ -5,7 +5,6 @@
  * 재귀적으로 렌더링하여 계층 구조 시각화
  */
 
-import { TypeBadge } from '@features/workflow/components/variable/TypeBadge';
 import { PortType } from '@shared/types/workflow/port.types';
 import { cn } from '@shared/utils/cn';
 
@@ -88,12 +87,14 @@ export const VarItem = ({
         isIndent && 'ml-4 pl-3 border-l-2 border-gray-300 dark:border-gray-600'
       )}
     >
-      {/* 변수 이름 및 타입 */}
+      {/* 변수 이름 및 타입 (Dify 스타일) */}
       <div className="flex items-center gap-2">
         <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
           {name}
         </span>
-        <TypeBadge type={type} />
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+          {type}
+        </span>
       </div>
 
       {/* 변수 설명 */}
