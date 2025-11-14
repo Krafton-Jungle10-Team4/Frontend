@@ -11,7 +11,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@shared/components/collapsible';
-import { Label } from '@shared/components/label';
 import { RiArrowDownSLine, RiArrowRightSLine } from '@remixicon/react';
 import { cn } from '@shared/utils/cn';
 
@@ -55,7 +54,9 @@ export const OutputVars = ({
             ) : (
               <RiArrowRightSLine size={16} className="text-gray-500" />
             )}
-            <Label className="font-semibold cursor-pointer">{title}</Label>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+              {title}
+            </span>
           </button>
         </CollapsibleTrigger>
 

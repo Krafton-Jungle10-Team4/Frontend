@@ -2,27 +2,33 @@
  * Start 노드 설정 패널
  *
  * 워크플로우 메타데이터 설정 (제목, 설명)
+ * Phase 2: 워크플로우 입력 변수 정의 UI 추가
  */
 
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
-import { Box, Group, Field } from '../_base/components/layout';
+import { Box, Group, Field, OutputVars, VarItem } from '../_base/components';
 import { Input } from '@shared/components/input';
 import { Textarea } from '@shared/components/textarea';
+import { BlockEnum } from '@shared/types/workflow.types';
+import { getNodeOutputs } from '@shared/constants/workflow/nodeOutputs';
 import type { StartNodeType } from '@/shared/types/workflow.types';
 
 export const StartPanel = () => {
-  const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const { selectedNodeId, nodes } = useWorkflowStore();
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
   if (!node) return null;
 
   const startData = node.data as StartNodeType;
+  const updateNode = useWorkflowStore((state) => state.updateNode);
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
   };
+
+  const outputVars = getNodeOutputs(BlockEnum.Start);
 
   return (
     <BasePanel>
@@ -45,6 +51,21 @@ export const StartPanel = () => {
             />
           </Field>
         </Group>
+
+        {/* 출력 변수 스펙 (이 노드 타입이 출력하는 변수) */}
+        {outputVars.length > 0 && (
+          <OutputVars title="출력 변수" defaultCollapsed={false}>
+            {outputVars.map((output) => (
+              <VarItem
+                key={output.name}
+                name={output.name}
+                type={output.type}
+                description={output.description}
+                subItems={output.subItems}
+              />
+            ))}
+          </OutputVars>
+        )}
       </Box>
     </BasePanel>
   );
