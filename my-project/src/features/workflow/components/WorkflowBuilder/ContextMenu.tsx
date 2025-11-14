@@ -2,6 +2,10 @@ import { useEffect, useRef } from 'react';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowStore } from '../../stores/workflowStore';
+import {
+  VARIABLE_ASSIGNER_ICON,
+  cloneVariableAssignerNodeType,
+} from '../../constants/nodeTypes';
 
 // 아이콘 매핑
 const ICON_MAP: Record<string, string> = {
@@ -12,6 +16,7 @@ const ICON_MAP: Record<string, string> = {
   flag: '🏁',
   message: '💬', // Answer 노드용
   template: '📝', // Template Transform 노드용
+  [VARIABLE_ASSIGNER_ICON]: '🧮',
 };
 
 // Fallback 노드 타입 (백엔드 API 실패 시 사용)
@@ -25,6 +30,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
   { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
+  cloneVariableAssignerNodeType(),
 ];
 
 // 아이콘 문자열을 이모지로 변환

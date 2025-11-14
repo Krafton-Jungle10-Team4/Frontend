@@ -20,6 +20,7 @@ import { generatePortSchema } from '@features/workflow/nodes/variable-assigner/u
 import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/validation';
 import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
 import { VarType } from '@features/workflow/nodes/variable-assigner/types';
+import { cloneVariableAssignerNodeType } from '../constants/nodeTypes';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -980,7 +981,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     set({ nodeTypesLoading: true });
     try {
-      const nodeTypes = await workflowApi.getNodeTypes();
+      const fetched = await workflowApi.getNodeTypes();
+      const hasVariableAssigner = fetched.some(
+        (type) => type.type === BlockEnum.Assigner
+      );
+      const nodeTypes = hasVariableAssigner
+        ? fetched
+        : [...fetched, cloneVariableAssignerNodeType()];
       set({ nodeTypes, nodeTypesLoading: false });
       return nodeTypes;
     } catch (error) {
