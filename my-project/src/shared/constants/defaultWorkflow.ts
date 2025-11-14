@@ -10,9 +10,9 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
     {
       id: 'start-1',
       type: 'custom',
-      position: { x: 100, y: 150 },
+      position: { x: 150, y: 150 },
       data: {
-        title: 'Start',
+        title: '시작',
         desc: '워크플로우 시작',
         type: BlockEnum.Start,
         ports: {
@@ -33,9 +33,9 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
     {
       id: 'end-1',
       type: 'custom',
-      position: { x: 500, y: 150 },
+      position: { x: 350, y: 150 },
       data: {
-        title: 'End',
+        title: '종료',
         desc: '워크플로우 종료',
         type: BlockEnum.End,
         ports: {
