@@ -1,6 +1,6 @@
 // src/features/workflow/hooks/usePortConnection.ts
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Connection, Edge } from '@xyflow/react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { validatePortConnection } from '../utils/portValidation';
@@ -116,10 +116,14 @@ export function usePortConnection() {
     [getPortConnections]
   );
 
-  return {
-    handleConnect,
-    getPortInfo,
-    getPortConnections,
-    isPortConnected,
-  };
+  // 반환 객체를 메모이제이션하여 참조 안정성 보장
+  return useMemo(
+    () => ({
+      handleConnect,
+      getPortInfo,
+      getPortConnections,
+      isPortConnected,
+    }),
+    [handleConnect, getPortInfo, getPortConnections, isPortConnected]
+  );
 }

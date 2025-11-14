@@ -1,5 +1,6 @@
 // src/features/workflow/hooks/useNodeOutput.ts
 
+import { useMemo } from 'react';
 import { useVariablePoolStore } from '../stores/variablePoolStore';
 import { PortValue, PortValues } from '@shared/types/workflow';
 
@@ -30,13 +31,14 @@ import { PortValue, PortValues } from '@shared/types/workflow';
  * ```
  */
 export function useNodeOutput(nodeId: string): PortValues {
-  return useVariablePoolStore(
-    (state) => state.nodeOutputs[nodeId] || {},
-    (prev, next) => {
-      // 얕은 비교로 불필요한 리렌더링 방지
-      return JSON.stringify(prev) === JSON.stringify(next);
-    }
-  );
+  // Get the outputs from store
+  const outputs = useVariablePoolStore((state) => state.nodeOutputs[nodeId]);
+
+  // Memoize empty object to prevent infinite re-renders
+  // This ensures we always return the same empty object reference when there are no outputs
+  const emptyOutputs = useMemo(() => ({}), []);
+
+  return outputs || emptyOutputs;
 }
 
 /**

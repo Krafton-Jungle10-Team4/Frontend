@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import type { ReactElement } from 'react';
 import {
   RiCheckboxCircleFill,
@@ -32,9 +32,15 @@ type BaseNodeProps = {
  * - 포트 시스템 지원 (하위 호환)
  */
 const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
-  const ports = data.ports as NodePortSchema | undefined;
+  // 포트 데이터를 메모이제이션하여 참조 안정성 보장
+  const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
+
+  // Fixed: useNodeOutput now properly memoizes empty objects
   const nodeOutputs = useNodeOutput(id);
+
+  // Use the actual port connection hook
   const { isPortConnected } = usePortConnection();
+
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
     data._singleRunningStatus === NodeRunningStatus.Running;
@@ -176,4 +182,12 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   );
 };
 
-export default BaseNode;
+export default memo(BaseNode, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if these key props change
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.selected === nextProps.selected &&
+    prevProps.data === nextProps.data &&
+    prevProps.children === nextProps.children
+  );
+});
