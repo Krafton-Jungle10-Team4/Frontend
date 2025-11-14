@@ -11,12 +11,14 @@ export { EmptyState } from './components/EmptyState';
 export { SetupComplete } from './components/SetupComplete';
 export { BotPreview } from './components/BotPreview';
 export { BotSetup } from './components/BotSetup';
+export { BotCreateDialog } from './components/BotCreateDialog';
 
 // ============= Hooks =============
 export { useBots } from './hooks/useBots';
 export { useBotActions } from './hooks/useBotActions';
 export { useFilteredBots } from './hooks/useFilteredBots';
 export { useCreateBot } from './hooks/useCreateBot';
+export { useBotCreateDialog } from './hooks/useBotCreateDialog';
 
 // ============= Store =============
 export { useBotStore } from './stores/botStore';

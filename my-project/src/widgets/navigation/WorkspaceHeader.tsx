@@ -39,10 +39,10 @@ export function WorkspaceHeader({
     },
     ko: {
       workspace: '의 워크스페이스',
-      createBot: '+ 챗봇 생성',
+      createBot: '+ 봇 생성',
       creating: '생성 중...',
-      limitTooltip: '생성 가능한 챗봇 개수를 초과했습니다.',
-      deleteInstruction: '챗봇을 삭제한 후 다시 시도해주세요.',
+      limitTooltip: '생성 가능한 봇 개수를 초과했습니다.',
+      deleteInstruction: '봇을 삭제한 후 다시 시도해주세요.',
     },
   };
 
