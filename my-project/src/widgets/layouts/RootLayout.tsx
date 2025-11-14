@@ -6,7 +6,7 @@ export function RootLayout() {
   return (
     <div className="h-screen bg-background font-pretendard">
       <Outlet />
-      <Toaster />
+      <Toaster position="top-center" />
       <PricingModal />
     </div>
   );
