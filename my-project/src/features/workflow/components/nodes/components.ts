@@ -9,6 +9,7 @@ import KnowledgeRetrievalNode from './knowledge-retrieval/node';
 import MCPNode from './mcp/node';
 import AnswerNode from './answer/node';
 import TemplateTransformNode from './template-transform/node';
+import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
@@ -18,6 +19,7 @@ import { KnowledgeRetrievalPanel } from './knowledge-retrieval/panel';
 import { MCPPanel } from './mcp/panel';
 import { AnswerPanel } from './answer/panel';
 import { TemplateTransformPanel } from './template-transform/panel';
+import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
 
 /**
  * 노드 타입 → 캔버스 컴포넌트 매핑
@@ -31,6 +33,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.MCP]: MCPNode,
   [BlockEnum.Answer]: AnswerNode,
   [BlockEnum.TemplateTransform]: TemplateTransformNode,
+  [BlockEnum.Assigner]: VariableAssignerNode,
 };
 
 /**
@@ -44,4 +47,5 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.MCP]: MCPPanel,
   [BlockEnum.Answer]: AnswerPanel,
   [BlockEnum.TemplateTransform]: TemplateTransformPanel,
+  [BlockEnum.Assigner]: VariableAssignerPanel,
 };

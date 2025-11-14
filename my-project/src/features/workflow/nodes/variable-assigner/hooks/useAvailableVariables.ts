@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
-import type { NodeVariableGroup, AvailableVariable, VarType } from '../types';
+import type { NodeVariableGroup, AvailableVariable } from '../types';
+import { VarType } from '../types';
 import type { Node, Edge } from '@/shared/types/workflow.types';
 import { PortType } from '@/shared/types/workflow';
 import type { NodePortSchema } from '@/shared/types/workflow';

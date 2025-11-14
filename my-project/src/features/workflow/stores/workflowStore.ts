@@ -15,6 +15,11 @@ import { PortType } from '@/shared/types/workflow';
 import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
 import { withEdgeMetadata } from '../utils/edgeHelpers';
 import type { Connection } from '@xyflow/react';
+import { useVariableAssignerStore } from '@features/workflow/nodes/variable-assigner/stores/variableAssignerStore';
+import { generatePortSchema } from '@features/workflow/nodes/variable-assigner/utils/portSchemaGenerator';
+import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/validation';
+import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
+import { VarType } from '@features/workflow/nodes/variable-assigner/types';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -36,6 +41,72 @@ const stringifyValue = (value: unknown): string => {
     }
   }
   return String(value);
+};
+
+const isVariableAssignerNode = (node: Node): boolean =>
+  (node.data.type as BlockEnum) === BlockEnum.Assigner;
+
+const ensureVariableAssignerData = (
+  rawData: Record<string, any>
+): VariableAssignerNodeData => {
+  const advanced = rawData.advanced_settings ?? {};
+  const groups = Array.isArray(advanced.groups) ? advanced.groups : [];
+
+  return {
+    output_type: rawData.output_type ?? VarType.ANY,
+    variables: Array.isArray(rawData.variables) ? rawData.variables : [],
+    advanced_settings: {
+      group_enabled: Boolean(advanced.group_enabled),
+      groups,
+    },
+    ports: rawData.ports,
+    variable_mappings: rawData.variable_mappings,
+  };
+};
+
+const syncVariableAssignerNodesFromWorkflow = (nodes: Node[]) => {
+  const variableStore = useVariableAssignerStore.getState();
+  const presentIds = new Set<string>();
+
+  nodes.forEach((node) => {
+    if (!isVariableAssignerNode(node)) {
+      return;
+    }
+
+    presentIds.add(node.id);
+    const data = ensureVariableAssignerData(node.data as Record<string, any>);
+    variableStore.initializeNode(node.id, data);
+  });
+
+  Object.keys(variableStore.nodeDataMap).forEach((id) => {
+    if (!presentIds.has(id)) {
+      variableStore.deleteNode(id);
+    }
+  });
+};
+
+const collectVariableAssignerValidationErrors = (
+  nodes: Node[]
+): WorkflowValidationMessage[] => {
+  return nodes.reduce<WorkflowValidationMessage[]>((acc, node) => {
+    if (!isVariableAssignerNode(node)) {
+      return acc;
+    }
+
+    const data = ensureVariableAssignerData(node.data as Record<string, any>);
+    const result = checkValid(data);
+
+    if (!result.isValid) {
+      acc.push({
+        node_id: node.id,
+        type: 'validation',
+        message: result.errorMessage ?? 'Invalid Variable Assigner configuration',
+        severity: 'error',
+      });
+    }
+
+    return acc;
+  }, []);
 };
 
 const normalizeValidationMessages = (
@@ -367,20 +438,30 @@ const normalizeVariableMappingsForNode = (
 const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
   const normalizedNodes = nodes.map<Node>((node) => {
     const nodeType = node.data.type as BlockEnum;
-    const clonedPorts: NodePortSchema | undefined =
+    let ports: NodePortSchema | undefined =
       cloneNodePortSchema(node.data.ports as NodePortSchema | undefined) ||
       clonePortSchema(nodeType);
+    let assignerData: VariableAssignerNodeData | undefined;
+
+    if (nodeType === BlockEnum.Assigner) {
+      assignerData = ensureVariableAssignerData(node.data as Record<string, any>);
+      ports = generatePortSchema(assignerData);
+    }
 
     const normalizedMappings = normalizeVariableMappingsForNode(
       nodeType,
-      node.data.variable_mappings as Record<string, any> | undefined
+      (assignerData?.variable_mappings ??
+        (node.data.variable_mappings as Record<string, any> | undefined)) as
+        | Record<string, any>
+        | undefined
     );
 
     return {
       ...node,
       data: {
         ...node.data,
-        ports: clonedPorts,
+        ...(assignerData || {}),
+        ports,
         variable_mappings: normalizedMappings,
       },
     };
@@ -467,36 +548,49 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   // 노드 관리
   setNodes: (nodesOrUpdater) => {
-    if (typeof nodesOrUpdater === 'function') {
-      set((state) => ({ nodes: nodesOrUpdater(state.nodes), hasUnsavedChanges: true }));
-    } else {
-      set({ nodes: nodesOrUpdater, hasUnsavedChanges: true });
-    }
+    set((state) => {
+      const nextNodes =
+        typeof nodesOrUpdater === 'function'
+          ? nodesOrUpdater(state.nodes)
+          : nodesOrUpdater;
+      syncVariableAssignerNodesFromWorkflow(nextNodes);
+      return { nodes: nextNodes, hasUnsavedChanges: true };
+    });
   },
 
   addNode: (node) => {
-    const currentState = get();
-    const newNodes = [...currentState.nodes, node];
-    set({ nodes: newNodes, hasUnsavedChanges: true });
+    set((state) => {
+      const newNodes = [...state.nodes, node];
+      syncVariableAssignerNodesFromWorkflow(newNodes);
+      return { nodes: newNodes, hasUnsavedChanges: true };
+    });
   },
 
   updateNode: (id, data) =>
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
+    set((state) => {
+      const updatedNodes = state.nodes.map((node) =>
         node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-      ),
-      hasUnsavedChanges: true,
-    })),
+      );
+      syncVariableAssignerNodesFromWorkflow(updatedNodes);
+      return {
+        nodes: updatedNodes,
+        hasUnsavedChanges: true,
+      };
+    }),
 
   deleteNode: (id) =>
-    set((state) => ({
-      nodes: state.nodes.filter((node) => node.id !== id),
-      edges: state.edges.filter(
-        (edge) => edge.source !== id && edge.target !== id
-      ),
-      selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
-      hasUnsavedChanges: true,
-    })),
+    set((state) => {
+      const remainingNodes = state.nodes.filter((node) => node.id !== id);
+      syncVariableAssignerNodesFromWorkflow(remainingNodes);
+      return {
+        nodes: remainingNodes,
+        edges: state.edges.filter(
+          (edge) => edge.source !== id && edge.target !== id
+        ),
+        selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
+        hasUnsavedChanges: true,
+      };
+    }),
 
   // 엣지 관리
   setEdges: (edgesOrUpdater) => {
@@ -541,6 +635,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         };
       });
 
+      syncVariableAssignerNodesFromWorkflow(updatedNodes);
       return {
         edges: newEdges,
         nodes: updatedNodes,
@@ -579,6 +674,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         };
       });
 
+      syncVariableAssignerNodesFromWorkflow(updatedNodes);
       return {
         edges: newEdges,
         nodes: updatedNodes,
@@ -609,6 +705,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
         const normalizedGraph = normalizeWorkflowGraph(graph.nodes, graph.edges);
 
+        syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
         set({
           nodes: normalizedGraph.nodes,
           edges: normalizedGraph.edges,
@@ -629,6 +726,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
         const normalizedGraph = normalizeWorkflowGraph(clonedNodes, clonedEdges);
 
+        syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
         set({
           nodes: normalizedGraph.nodes,
           edges: normalizedGraph.edges,
@@ -660,7 +758,19 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         conversationVariables,
       } = get();
 
+      const localErrors = collectVariableAssignerValidationErrors(nodes);
+      if (localErrors.length > 0) {
+        set({
+          validationErrors: localErrors,
+          validationWarnings: [],
+          validationErrorNodeIds: extractErrorNodeIds(localErrors),
+          lastSaveError: 'Variable Assigner validation failed',
+        });
+        throw new Error('Variable Assigner validation failed');
+      }
+
       const normalizedGraph = normalizeWorkflowGraph(nodes, edges);
+      syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
 
       set({
         nodes: normalizedGraph.nodes,
@@ -727,6 +837,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   validateWorkflow: async () => {
     const { nodes, edges } = get();
 
+    const localErrors = collectVariableAssignerValidationErrors(nodes);
+    if (localErrors.length > 0) {
+      set({
+        validationErrors: localErrors,
+        validationWarnings: [],
+        validationErrorNodeIds: extractErrorNodeIds(localErrors),
+      });
+      return false;
+    }
+
     try {
       const result = await workflowApi.validate(nodes, edges);
       const normalizedErrors = normalizeValidationMessages(result.errors, 'error');
@@ -746,6 +866,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // 봇 전용 검증 (저장 전 - 팀 권한/봇 존재 여부 체크)
   validateBotWorkflow: async (botId: string) => {
     const { nodes, edges } = get();
+
+    const localErrors = collectVariableAssignerValidationErrors(nodes);
+    if (localErrors.length > 0) {
+      set({
+        validationErrors: localErrors,
+        validationWarnings: [],
+        validationErrorNodeIds: extractErrorNodeIds(localErrors),
+      });
+      return false;
+    }
 
     try {
       const result = await workflowApi.validateBotWorkflow(botId, nodes, edges);

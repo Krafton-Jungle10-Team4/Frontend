@@ -20,7 +20,7 @@ export enum BlockEnum {
   Code = 'code',
   TemplateTransform = 'template-transform',
   IfElse = 'if-else',
-  Assigner = 'assigner',
+  Assigner = 'variable-assigner',
   Http = 'http',
 }
 
