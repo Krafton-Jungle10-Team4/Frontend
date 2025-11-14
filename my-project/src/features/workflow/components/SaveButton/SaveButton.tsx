@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/button';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/shared/api/errorHandler';
 
 export const SaveButton = () => {
   const { botId } = useParams<{ botId: string }>();
@@ -22,11 +23,9 @@ export const SaveButton = () => {
     }
 
     try {
-      // 1. 봇 전용 검증 (팀 권한/봇 존재 여부 체크)
       setIsValidating(true);
+      // 1. 봇 전용 검증 (팀 권한/봇 존재 여부 체크)
       const isValid = await validateBotWorkflow(botId);
-      setIsValidating(false);
-
       if (!isValid) {
         // 검증 오류는 ValidationPanel에서 표시되므로 토스트 제거
         return;
@@ -36,8 +35,10 @@ export const SaveButton = () => {
       await saveWorkflow(botId);
       toast.success('워크플로우가 저장되었습니다');
     } catch (error) {
-      toast.error('저장 중 오류가 발생했습니다');
+      toast.error(getErrorMessage(error));
       console.error('Save failed:', error);
+    } finally {
+      setIsValidating(false);
     }
   };
 

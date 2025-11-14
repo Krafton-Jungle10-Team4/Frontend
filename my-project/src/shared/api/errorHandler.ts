@@ -57,24 +57,31 @@ export const handleAPIError = (error: any): never => {
       // 1. FastAPI 표준 형식: data.detail (문자열)
       message = data.detail;
     } else if (
+      typeof data.detail === 'object' &&
+      data.detail !== null &&
+      typeof (data.detail as any).message === 'string'
+    ) {
+      // 2. detail 객체 안에 message 필드가 있는 경우
+      message = (data.detail as any).message;
+    } else if (
       typeof data.error === 'object' &&
       data.error !== null &&
       typeof data.error.message === 'string'
     ) {
-      // 2. 서버 공통 포맷: { error: { code, message } }
+      // 3. 서버 공통 포맷: { error: { code, message } }
       message = data.error.message;
     } else if (
       typeof data.message === 'object' &&
       data.message !== null &&
       typeof (data.message as any).message === 'string'
     ) {
-      // 3. 중첩된 message 객체: data.message.message
+      // 4. 중첩된 message 객체: data.message.message
       message = (data.message as any).message;
     } else if (typeof data.message === 'string') {
-      // 4. 단순 message 문자열: data.message
+      // 5. 단순 message 문자열: data.message
       message = data.message;
     } else {
-      // 5. 폴백
+      // 6. 폴백
       message = ERROR_MESSAGES.COMMON.UNKNOWN;
     }
 

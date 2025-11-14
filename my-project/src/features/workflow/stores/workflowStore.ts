@@ -4,6 +4,7 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import { workflowApi } from '../api/workflowApi';
 import { transformFromBackend } from '@/shared/utils/workflowTransform';
 import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
+import { APIError } from '@/shared/api/errorHandler';
 import type {
   NodeTypeResponse,
   WorkflowValidationMessage,
@@ -14,6 +15,129 @@ import { PortType } from '@/shared/types/workflow';
 import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
 import { withEdgeMetadata } from '../utils/edgeHelpers';
 import type { Connection } from '@xyflow/react';
+
+type ValidationPayload = {
+  errors?: unknown;
+  warnings?: unknown;
+};
+
+const stringifyValue = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '';
+    }
+  }
+  return String(value);
+};
+
+const normalizeValidationMessages = (
+  messages: unknown,
+  severity: 'error' | 'warning'
+): WorkflowValidationMessage[] => {
+  if (!Array.isArray(messages)) {
+    return [];
+  }
+
+  return messages
+    .map((entry) => {
+      if (typeof entry === 'string') {
+        return {
+          node_id: null,
+          type: severity,
+          message: entry,
+          severity,
+        };
+      }
+
+      if (entry && typeof entry === 'object') {
+        const candidate = entry as Partial<WorkflowValidationMessage> & {
+          detail?: string;
+        };
+        const text =
+          typeof candidate.message === 'string'
+            ? candidate.message
+            : typeof candidate.detail === 'string'
+            ? candidate.detail
+            : '';
+        const message = text || stringifyValue(entry);
+        if (!message) {
+          return null;
+        }
+
+        return {
+          node_id: candidate.node_id ?? null,
+          type: candidate.type ?? severity,
+          message,
+          severity: candidate.severity ?? severity,
+        };
+      }
+
+      const fallback = stringifyValue(entry);
+      if (!fallback) {
+        return null;
+      }
+
+      return {
+        node_id: null,
+        type: severity,
+        message: fallback,
+        severity,
+      };
+    })
+    .filter(
+      (item): item is WorkflowValidationMessage =>
+        Boolean(item && item.message)
+    );
+};
+
+const buildValidationStateFromPayload = (
+  payload?: ValidationPayload
+): {
+  errors: WorkflowValidationMessage[];
+  warnings: WorkflowValidationMessage[];
+} => ({
+  errors: normalizeValidationMessages(payload?.errors, 'error'),
+  warnings: normalizeValidationMessages(payload?.warnings, 'warning'),
+});
+
+const extractValidationPayloadFromError = (
+  error: APIError
+): ValidationPayload | undefined => {
+  if (!error.details || typeof error.details !== 'object') {
+    return undefined;
+  }
+
+  const data = error.details as Record<string, unknown>;
+  const detail =
+    typeof data.detail === 'object' && data.detail !== null
+      ? (data.detail as Record<string, unknown>)
+      : undefined;
+
+  if (
+    detail &&
+    (Object.prototype.hasOwnProperty.call(detail, 'errors') ||
+      Object.prototype.hasOwnProperty.call(detail, 'warnings'))
+  ) {
+    return detail as ValidationPayload;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(data, 'errors') ||
+    Object.prototype.hasOwnProperty.call(data, 'warnings')
+  ) {
+    return data as ValidationPayload;
+  }
+
+  return undefined;
+};
 
 /**
  * 워크플로우 실행 상태
@@ -600,6 +724,19 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
       return result;
     } catch (error) {
+      if (error instanceof APIError) {
+        const validationPayload = extractValidationPayloadFromError(error);
+        if (validationPayload) {
+          const validationState = buildValidationStateFromPayload(
+            validationPayload
+          );
+          set({
+            validationErrors: validationState.errors,
+            validationWarnings: validationState.warnings,
+          });
+        }
+      }
+
       console.error('Failed to save workflow:', error);
       const errorMessage = error instanceof Error ? error.message : '워크플로우 저장 실패';
       set({ lastSaveError: errorMessage });
