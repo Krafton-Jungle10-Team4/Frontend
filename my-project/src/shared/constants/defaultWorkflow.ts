@@ -1,5 +1,6 @@
 import type { Node, Edge } from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
+import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
 /**
  * Bot 생성 시 사용되는 기본 워크플로우 구조
@@ -15,19 +16,7 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
         title: '시작',
         desc: '워크플로우 시작',
         type: BlockEnum.Start,
-        ports: {
-          inputs: [],
-          outputs: [
-            {
-              name: 'user_message',
-              type: 'string',
-              required: true,
-              default_value: '',
-              description: '최초 사용자 입력',
-              display_name: 'User Message',
-            },
-          ],
-        },
+        ports: clonePortSchema(BlockEnum.Start),
       },
     },
     {
@@ -38,19 +27,7 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
         title: '종료',
         desc: '워크플로우 종료',
         type: BlockEnum.End,
-        ports: {
-          inputs: [
-            {
-              name: 'final_output',
-              type: 'string',
-              required: true,
-              default_value: '',
-              description: '최종 응답',
-              display_name: 'Final Output',
-            },
-          ],
-          outputs: [],
-        },
+        ports: clonePortSchema(BlockEnum.End),
       },
     },
   ],

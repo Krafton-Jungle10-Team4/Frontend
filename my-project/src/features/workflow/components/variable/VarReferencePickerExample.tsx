@@ -52,7 +52,7 @@ export function LLMNodeConfigExample() {
    * 현재 매핑된 변수 가져오기
    */
   const getUserMessageMapping = () => {
-    return node.variable_mappings?.user_message?.source || null;
+    return node.variable_mappings?.query?.source || null;
   };
 
   const getContextMapping = () => {
@@ -65,17 +65,17 @@ export function LLMNodeConfigExample() {
         <Group title="입력 설정" description="노드의 입력 데이터를 설정하세요">
           {/*
             예시 1: 필수 입력 포트 (STRING 타입)
-            - user_message 포트에 변수 연결
+            - query 포트에 변수 연결
             - 다른 노드의 STRING 타입 출력만 표시됨
           */}
           <Field label="사용자 메시지" required>
             <VarReferencePicker
               nodeId={node.id}
-              portName="user_message"
+              portName="query"
               portType={PortType.STRING}
               value={getUserMessageMapping()}
               onChange={(selector) =>
-                handleVariableChange('user_message', selector)
+                handleVariableChange('query', selector)
               }
               placeholder="변수 선택 또는 직접 입력..."
             />

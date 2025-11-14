@@ -20,6 +20,7 @@ import type {
   WorkflowNodeExecution,
 } from '../types/api.types';
 import type { NodePortSchema, PortDefinition } from '@/shared/types/workflow';
+import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
 interface WorkflowDraftPayload {
   graph: ReturnType<typeof transformToBackend>;
@@ -225,12 +226,13 @@ export const workflowApi = {
 };
 
 const mapNodeTypeResponse = (raw: any): NodeTypeResponse => {
-  const ports: NodePortSchema | undefined = raw.input_ports || raw.output_ports
+  const hasPortsPayload = raw.input_ports || raw.output_ports;
+  const ports: NodePortSchema | undefined = hasPortsPayload
     ? {
         inputs: normalizePortList(raw.input_ports),
         outputs: normalizePortList(raw.output_ports),
       }
-    : undefined;
+    : clonePortSchema(raw.type);
 
   return {
     type: raw.type,

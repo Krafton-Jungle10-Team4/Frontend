@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Node, Edge } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import { workflowApi } from '../api/workflowApi';
 import { transformFromBackend } from '@/shared/utils/workflowTransform';
 import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
@@ -8,6 +9,11 @@ import type {
   WorkflowValidationMessage,
   WorkflowVersionSummary,
 } from '../types/api.types';
+import type { NodePortSchema } from '@/shared/types/workflow';
+import { PortType } from '@/shared/types/workflow';
+import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
+import { withEdgeMetadata } from '../utils/edgeHelpers';
+import type { Connection } from '@xyflow/react';
 
 /**
  * 워크플로우 실행 상태
@@ -37,6 +43,7 @@ interface WorkflowState {
   isSaving: boolean;
   validationErrors: WorkflowValidationMessage[];
   validationWarnings: WorkflowValidationMessage[];
+  validationErrorNodeIds: string[];
   isChatVisible: boolean;
   executionState: ExecutionState | null;
   draftVersionId: string | null;
@@ -45,6 +52,8 @@ interface WorkflowState {
   nodeTypes: NodeTypeResponse[];
   nodeTypesLoading: boolean;
   lastSavedAt: string | null;
+  hasUnsavedChanges: boolean;
+  lastSaveError: string | null;
 
   // 노드 관리
   setNodes: (nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => void;
@@ -65,6 +74,10 @@ interface WorkflowState {
   // 검증 (두 가지 방식)
   validateWorkflow: () => Promise<boolean>; // 일반 검증 (실시간 검증용)
   validateBotWorkflow: (botId: string) => Promise<boolean>; // 봇 전용 검증 (저장 전)
+  setValidationErrors: (
+    errors: WorkflowValidationMessage[],
+    warnings: WorkflowValidationMessage[]
+  ) => void; // 외부에서 검증 결과 직접 설정
 
   // 실행 상태 관리
   updateExecutionState: (updates: Partial<ExecutionState>) => void;
@@ -105,6 +118,7 @@ const initialState = {
   isSaving: false,
   validationErrors: [],
   validationWarnings: [],
+  validationErrorNodeIds: [],
   isChatVisible: false,
   executionState: null,
   draftVersionId: null,
@@ -113,6 +127,247 @@ const initialState = {
   nodeTypes: [],
   nodeTypesLoading: false,
   lastSavedAt: null,
+  hasUnsavedChanges: false,
+  lastSaveError: null,
+};
+
+type ValidationMessageInput = WorkflowValidationMessage | string;
+
+const normalizeValidationMessages = (
+  messages: ValidationMessageInput[] | undefined,
+  defaultSeverity: 'error' | 'warning'
+): WorkflowValidationMessage[] => {
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+
+  return messages
+    .map((message) => {
+      if (!message) {
+        return null;
+      }
+
+      if (typeof message === 'string') {
+        return {
+          node_id: null,
+          type: 'validation',
+          message,
+          severity: defaultSeverity,
+        };
+      }
+
+      return {
+        node_id: message.node_id ?? null,
+        type: message.type ?? 'validation',
+        message: message.message ?? '',
+        severity: message.severity ?? defaultSeverity,
+      };
+    })
+    .filter(
+      (message): message is WorkflowValidationMessage =>
+        Boolean(message?.message)
+    );
+};
+
+const extractErrorNodeIds = (
+  errors: WorkflowValidationMessage[]
+): string[] => {
+  const ids = new Set<string>();
+  errors.forEach((error) => {
+    if (error.node_id) {
+      ids.add(error.node_id);
+    }
+  });
+  return Array.from(ids);
+};
+
+const TARGET_PORT_RENAME_MAP: Partial<Record<BlockEnum, Record<string, string>>> = {
+  [BlockEnum.LLM]: { user_message: 'query' },
+  [BlockEnum.End]: { final_output: 'response' },
+};
+
+const SELECTOR_PORT_RENAME_MAP: Record<string, string> = {
+  user_message: 'query',
+};
+
+const normalizeSelectorString = (selector: string): string => {
+  if (!selector.includes('.')) return selector;
+  const [nodeId, portName] = selector.split('.', 2);
+  if (!nodeId || !portName) {
+    return selector;
+  }
+  const normalizedPort = SELECTOR_PORT_RENAME_MAP[portName] || portName;
+  return `${nodeId}.${normalizedPort}`;
+};
+
+const extractSelectorFromMapping = (mapping: any): string | null => {
+  if (!mapping) {
+    return null;
+  }
+  if (typeof mapping === 'string') {
+    return normalizeSelectorString(mapping);
+  }
+  if (typeof mapping === 'object') {
+    if (typeof mapping.variable === 'string') {
+      return normalizeSelectorString(mapping.variable);
+    }
+    if (typeof mapping.source === 'string') {
+      return normalizeSelectorString(mapping.source);
+    }
+    if (typeof mapping.source === 'object' && typeof mapping.source.variable === 'string') {
+      return normalizeSelectorString(mapping.source.variable);
+    }
+  }
+  return null;
+};
+
+const normalizeMappingValue = (targetPort: string, value: any) => {
+  if (!value) return value;
+
+  if (typeof value === 'string') {
+    return normalizeSelectorString(value);
+  }
+
+  if (typeof value === 'object') {
+    if (typeof value.source === 'string') {
+      return {
+        target_port: targetPort,
+        source: {
+          variable: normalizeSelectorString(value.source),
+          value_type: value.value_type ?? PortType.ANY,
+        },
+      };
+    }
+
+    if (value.source && typeof value.source === 'object') {
+      return {
+        ...value,
+        target_port: targetPort,
+        source: {
+          ...value.source,
+          variable: normalizeSelectorString(value.source.variable ?? value.variable ?? ''),
+          value_type: value.source.value_type ?? value.value_type ?? PortType.ANY,
+        },
+      };
+    }
+
+    if (typeof value.variable === 'string') {
+      return {
+        target_port: targetPort,
+        source: {
+          variable: normalizeSelectorString(value.variable),
+          value_type: value.value_type ?? PortType.ANY,
+        },
+      };
+    }
+  }
+
+  return value;
+};
+
+const normalizeVariableMappingsForNode = (
+  nodeType: BlockEnum,
+  mappings?: Record<string, any>
+) => {
+  if (!mappings) return {};
+  const renameMap = TARGET_PORT_RENAME_MAP[nodeType] || {};
+  return Object.entries(mappings).reduce<Record<string, any>>((acc, [key, value]) => {
+    const normalizedKey = renameMap[key] || key;
+    acc[normalizedKey] = normalizeMappingValue(normalizedKey, value);
+    return acc;
+  }, {});
+};
+
+const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
+  const normalizedNodes = nodes.map<Node>((node) => {
+    const nodeType = node.data.type as BlockEnum;
+    const clonedPorts: NodePortSchema | undefined =
+      cloneNodePortSchema(node.data.ports as NodePortSchema | undefined) ||
+      clonePortSchema(nodeType);
+
+    const normalizedMappings = normalizeVariableMappingsForNode(
+      nodeType,
+      node.data.variable_mappings as Record<string, any> | undefined
+    );
+
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        ports: clonedPorts,
+        variable_mappings: normalizedMappings,
+      },
+    };
+  });
+
+  const normalizedEdges = edges.map<Edge>((edge) => ({
+    ...edge,
+    data: edge.data ? { ...edge.data } : undefined,
+  }));
+
+  synchronizeEdgesWithMappings(normalizedNodes, normalizedEdges);
+  return { nodes: normalizedNodes, edges: normalizedEdges };
+};
+
+const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
+  const edgeBuckets = new Map<string, Edge[]>();
+
+  edges.forEach((edge) => {
+    const key = `${edge.source}->${edge.target}`;
+    if (!edgeBuckets.has(key)) {
+      edgeBuckets.set(key, []);
+    }
+    edgeBuckets.get(key)!.push(edge);
+  });
+
+  nodes.forEach((node) => {
+    const mappings = (node.data.variable_mappings || {}) as Record<string, any>;
+
+    Object.entries(mappings).forEach(([targetPort, mapping]) => {
+      const selector = extractSelectorFromMapping(mapping);
+      if (!selector || !selector.includes('.')) {
+        return;
+      }
+
+      const [sourceNodeId, sourcePort] = selector.split('.', 2);
+      if (!sourceNodeId || !sourcePort) {
+        return;
+      }
+
+      const key = `${sourceNodeId}->${node.id}`;
+      const candidates = edgeBuckets.get(key) || [];
+      let edge = candidates.find(
+        (candidate) =>
+          (!candidate.targetHandle || candidate.targetHandle === targetPort) &&
+          (!candidate.sourceHandle || candidate.sourceHandle === sourcePort)
+      );
+
+      if (!edge) {
+        const connection: Connection = {
+          source: sourceNodeId,
+          target: node.id,
+          sourceHandle: sourcePort,
+          targetHandle: targetPort,
+        };
+        const withMeta = withEdgeMetadata(connection, nodes);
+        edge = {
+          id: `edge-${sourceNodeId}-${sourcePort}-${node.id}-${targetPort}`,
+          source: withMeta.source!,
+          target: withMeta.target!,
+          sourceHandle: withMeta.sourceHandle,
+          targetHandle: withMeta.targetHandle,
+          type: withMeta.type || 'custom',
+          data: withMeta.data,
+        };
+        edges.push(edge);
+        candidates.push(edge);
+        edgeBuckets.set(key, candidates);
+      } else {
+        edge.sourceHandle = sourcePort;
+        edge.targetHandle = targetPort;
+      }
+    });
+  });
 };
 
 /**
@@ -127,16 +382,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // 노드 관리
   setNodes: (nodesOrUpdater) => {
     if (typeof nodesOrUpdater === 'function') {
-      set((state) => ({ nodes: nodesOrUpdater(state.nodes) }));
+      set((state) => ({ nodes: nodesOrUpdater(state.nodes), hasUnsavedChanges: true }));
     } else {
-      set({ nodes: nodesOrUpdater });
+      set({ nodes: nodesOrUpdater, hasUnsavedChanges: true });
     }
   },
 
   addNode: (node) => {
     const currentState = get();
     const newNodes = [...currentState.nodes, node];
-    set({ nodes: newNodes });
+    set({ nodes: newNodes, hasUnsavedChanges: true });
   },
 
   updateNode: (id, data) =>
@@ -144,6 +399,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       nodes: state.nodes.map((node) =>
         node.id === id ? { ...node, data: { ...node.data, ...data } } : node
       ),
+      hasUnsavedChanges: true,
     })),
 
   deleteNode: (id) =>
@@ -153,26 +409,96 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         (edge) => edge.source !== id && edge.target !== id
       ),
       selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
+      hasUnsavedChanges: true,
     })),
 
   // 엣지 관리
   setEdges: (edgesOrUpdater) => {
     if (typeof edgesOrUpdater === 'function') {
-      set((state) => ({ edges: edgesOrUpdater(state.edges) }));
+      set((state) => ({ edges: edgesOrUpdater(state.edges), hasUnsavedChanges: true }));
     } else {
-      set({ edges: edgesOrUpdater });
+      set({ edges: edgesOrUpdater, hasUnsavedChanges: true });
     }
   },
 
   addEdge: (edge) =>
-    set((state) => ({
-      edges: [...state.edges, edge],
-    })),
+    set((state) => {
+      // 1. 엣지 추가
+      const newEdges = [...state.edges, edge];
+
+      // 2. variable_mappings 자동 생성
+      const updatedNodes = state.nodes.map((node) => {
+        // target 노드만 업데이트
+        if (node.id !== edge.target) return node;
+
+        const targetPort = edge.targetHandle;
+        const sourceNode = edge.source;
+        const sourcePort = edge.sourceHandle;
+
+        if (!targetPort || !sourceNode || !sourcePort) return node;
+
+        // 기존 variable_mappings 가져오기
+        const currentMappings = node.data?.variable_mappings || {};
+
+        // 새 매핑 추가 (Dify 스타일: "sourceNode.sourcePort")
+        const newMappings = {
+          ...currentMappings,
+          [targetPort]: `${sourceNode}.${sourcePort}`,
+        };
+
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            variable_mappings: newMappings,
+          },
+        };
+      });
+
+      return {
+        edges: newEdges,
+        nodes: updatedNodes,
+        hasUnsavedChanges: true,
+      };
+    }),
 
   deleteEdge: (id) =>
-    set((state) => ({
-      edges: state.edges.filter((edge) => edge.id !== id),
-    })),
+    set((state) => {
+      // 삭제할 엣지 찾기
+      const edgeToDelete = state.edges.find((e) => e.id === id);
+
+      if (!edgeToDelete) {
+        return { edges: state.edges.filter((edge) => edge.id !== id) };
+      }
+
+      // 1. 엣지 삭제
+      const newEdges = state.edges.filter((edge) => edge.id !== id);
+
+      // 2. variable_mappings에서 해당 매핑 제거
+      const updatedNodes = state.nodes.map((node) => {
+        if (node.id !== edgeToDelete.target) return node;
+
+        const targetPort = edgeToDelete.targetHandle;
+        if (!targetPort) return node;
+
+        const currentMappings = node.data?.variable_mappings || {};
+        const { [targetPort]: _, ...remainingMappings } = currentMappings;
+
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            variable_mappings: remainingMappings,
+          },
+        };
+      });
+
+      return {
+        edges: newEdges,
+        nodes: updatedNodes,
+        hasUnsavedChanges: true,
+      };
+    }),
 
   // 워크플로우 불러오기
   loadWorkflow: async (botId: string) => {
@@ -195,13 +521,18 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         );
         const graph = transformFromBackend(detail.graph);
 
+        const normalizedGraph = normalizeWorkflowGraph(graph.nodes, graph.edges);
+
         set({
-          nodes: graph.nodes,
-          edges: graph.edges,
+          nodes: normalizedGraph.nodes,
+          edges: normalizedGraph.edges,
           draftVersionId: detail.id,
           environmentVariables: detail.environment_variables || {},
           conversationVariables: detail.conversation_variables || {},
           lastSavedAt: detail.updated_at,
+          validationErrors: [],
+          validationWarnings: [],
+          validationErrorNodeIds: [],
         });
       } else {
         const clonedNodes = DEFAULT_WORKFLOW.nodes.map((node) => ({
@@ -210,13 +541,18 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         }));
         const clonedEdges = DEFAULT_WORKFLOW.edges.map((edge) => ({ ...edge }));
 
+        const normalizedGraph = normalizeWorkflowGraph(clonedNodes, clonedEdges);
+
         set({
-          nodes: clonedNodes,
-          edges: clonedEdges,
+          nodes: normalizedGraph.nodes,
+          edges: normalizedGraph.edges,
           draftVersionId: null,
           environmentVariables: {},
           conversationVariables: {},
           lastSavedAt: null,
+          validationErrors: [],
+          validationWarnings: [],
+          validationErrorNodeIds: [],
         });
       }
     } catch (error) {
@@ -231,11 +567,24 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   saveWorkflow: async (botId: string) => {
     set({ isSaving: true });
     try {
-      const { nodes, edges, environmentVariables, conversationVariables } = get();
-      const result = await workflowApi.upsertDraftWorkflow(
-        botId,
+      const {
         nodes,
         edges,
+        environmentVariables,
+        conversationVariables,
+      } = get();
+
+      const normalizedGraph = normalizeWorkflowGraph(nodes, edges);
+
+      set({
+        nodes: normalizedGraph.nodes,
+        edges: normalizedGraph.edges,
+      });
+
+      const result = await workflowApi.upsertDraftWorkflow(
+        botId,
+        normalizedGraph.nodes,
+        normalizedGraph.edges,
         {
           environment_variables: environmentVariables,
           conversation_variables: conversationVariables,
@@ -245,11 +594,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       set({
         draftVersionId: result.id,
         lastSavedAt: result.updated_at ?? new Date().toISOString(),
+        hasUnsavedChanges: false,
+        lastSaveError: null,
       });
 
       return result;
     } catch (error) {
       console.error('Failed to save workflow:', error);
+      const errorMessage = error instanceof Error ? error.message : '워크플로우 저장 실패';
+      set({ lastSaveError: errorMessage });
       throw error;
     } finally {
       set({ isSaving: false });
@@ -277,9 +630,12 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     try {
       const result = await workflowApi.validate(nodes, edges);
+      const normalizedErrors = normalizeValidationMessages(result.errors, 'error');
+      const normalizedWarnings = normalizeValidationMessages(result.warnings, 'warning');
       set({
-        validationErrors: result.errors,
-        validationWarnings: result.warnings,
+        validationErrors: normalizedErrors,
+        validationWarnings: normalizedWarnings,
+        validationErrorNodeIds: extractErrorNodeIds(normalizedErrors),
       });
       return result.is_valid;
     } catch (error) {
@@ -294,15 +650,29 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     try {
       const result = await workflowApi.validateBotWorkflow(botId, nodes, edges);
+      const normalizedErrors = normalizeValidationMessages(result.errors, 'error');
+      const normalizedWarnings = normalizeValidationMessages(result.warnings, 'warning');
       set({
-        validationErrors: result.errors,
-        validationWarnings: result.warnings,
+        validationErrors: normalizedErrors,
+        validationWarnings: normalizedWarnings,
+        validationErrorNodeIds: extractErrorNodeIds(normalizedErrors),
       });
       return result.is_valid;
     } catch (error) {
       console.error('Failed to validate bot workflow:', error);
       return false;
     }
+  },
+
+  // 외부에서 검증 결과 직접 설정
+  setValidationErrors: (errors, warnings) => {
+    const normalizedErrors = normalizeValidationMessages(errors, 'error');
+    const normalizedWarnings = normalizeValidationMessages(warnings, 'warning');
+    set({
+      validationErrors: normalizedErrors,
+      validationWarnings: normalizedWarnings,
+      validationErrorNodeIds: extractErrorNodeIds(normalizedErrors),
+    });
   },
 
   // 실행 상태 관리

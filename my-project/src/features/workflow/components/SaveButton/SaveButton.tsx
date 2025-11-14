@@ -6,7 +6,13 @@ import { toast } from 'sonner';
 
 export const SaveButton = () => {
   const { botId } = useParams<{ botId: string }>();
-  const { saveWorkflow, validateBotWorkflow, isSaving } = useWorkflowStore();
+  const {
+    saveWorkflow,
+    validateBotWorkflow,
+    isSaving,
+    hasUnsavedChanges,
+    lastSaveError
+  } = useWorkflowStore();
   const [isValidating, setIsValidating] = useState(false);
 
   const handleSave = async () => {
@@ -36,12 +42,23 @@ export const SaveButton = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      onClick={handleSave}
-      disabled={isSaving || isValidating}
-    >
-      {isSaving ? '저장 중...' : isValidating ? '검증 중...' : '저장'}
-    </Button>
+    <div className="relative">
+      <Button
+        variant="outline"
+        onClick={handleSave}
+        disabled={isSaving || isValidating}
+        className={hasUnsavedChanges ? 'border-orange-500' : ''}
+      >
+        {isSaving ? '저장 중...' : isValidating ? '검증 중...' : '저장'}
+        {hasUnsavedChanges && !isSaving && !isValidating && (
+          <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-orange-500" />
+        )}
+      </Button>
+      {lastSaveError && (
+        <div className="absolute top-full mt-1 text-xs text-red-600 whitespace-nowrap">
+          {lastSaveError}
+        </div>
+      )}
+    </div>
   );
 };

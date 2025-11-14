@@ -19,15 +19,20 @@ interface OutputVarDefinition {
 export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
   [BlockEnum.Start]: [
     {
-      name: 'user_message',
+      name: 'query',
       type: PortType.STRING,
       description: '사용자로부터 받은 입력 메시지',
+    },
+    {
+      name: 'session_id',
+      type: PortType.STRING,
+      description: '세션 식별자',
     },
   ],
 
   [BlockEnum.LLM]: [
     {
-      name: 'result',
+      name: 'response',
       type: PortType.STRING,
       description: 'LLM이 생성한 응답 텍스트',
     },
@@ -37,16 +42,6 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
       description: '토큰 사용량 정보',
       subItems: [
         {
-          name: 'prompt_tokens',
-          type: PortType.NUMBER,
-          description: '프롬프트 토큰 수',
-        },
-        {
-          name: 'completion_tokens',
-          type: PortType.NUMBER,
-          description: '완료 토큰 수',
-        },
-        {
           name: 'total_tokens',
           type: PortType.NUMBER,
           description: '총 토큰 수',
@@ -55,7 +50,13 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
     },
   ],
 
-  [BlockEnum.End]: [],
+  [BlockEnum.End]: [
+    {
+      name: 'final_output',
+      type: PortType.OBJECT,
+      description: '최종 결과 객체',
+    },
+  ],
 
   [BlockEnum.KnowledgeRetrieval]: [
     {

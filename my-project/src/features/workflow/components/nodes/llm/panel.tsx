@@ -111,16 +111,16 @@ export const LLMPanel = () => {
           title="입력 매핑"
           description="이 노드가 사용할 입력을 이전 노드의 출력과 연결하세요"
         >
-          <Field label="사용자 메시지" required>
+          <Field label="질문" required>
             <VarReferencePicker
               nodeId={node.id}
-              portName="user_message"
+              portName="query"
               portType={PortType.STRING}
-              value={node.data.variable_mappings?.user_message?.source || null}
+              value={node.data.variable_mappings?.query?.source || null}
               onChange={(selector) =>
-                handleVariableChange('user_message', selector)
+                handleVariableChange('query', selector)
               }
-              placeholder="Start 노드의 user_message를 선택하세요"
+              placeholder="Start 노드의 query를 선택하세요"
             />
           </Field>
           <Field label="컨텍스트(선택)">

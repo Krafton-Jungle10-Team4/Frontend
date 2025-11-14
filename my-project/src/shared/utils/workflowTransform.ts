@@ -12,6 +12,7 @@ import type {
   NodeVariableMappings,
   VariableMapping,
 } from '@/shared/types/workflow';
+import { PortType } from '@/shared/types/workflow';
 
 /**
  * 프론트엔드 노드/엣지 → 백엔드 스키마 변환
@@ -209,11 +210,21 @@ const serializeVariableMappings = (
   return Object.entries(mappings).reduce<BackendNode['variable_mappings']>(
     (acc, [key, mapping]) => {
       if (!mapping) return acc;
+
+      const source =
+        typeof mapping === 'string'
+          ? { variable: mapping, value_type: PortType.ANY }
+          : mapping.source;
+
+      if (!source || !source.variable) {
+        return acc;
+      }
+
       acc[key] = {
-        target_port: mapping.target_port,
+        target_port: mapping.target_port || key,
         source: {
-          variable: mapping.source.variable,
-          value_type: mapping.source.value_type,
+          variable: source.variable,
+          value_type: source.value_type,
         },
       };
       return acc;

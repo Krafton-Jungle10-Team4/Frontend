@@ -47,6 +47,8 @@ import { withEdgeMetadata } from '../../utils/edgeHelpers';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
 import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
+import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
+import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
 const REACT_FLOW_NODE_TYPES = {
@@ -338,6 +340,9 @@ const WorkflowInner = () => {
         y: contextMenu.y,
       });
 
+      const portSchema =
+        cloneNodePortSchema(nodeType.ports) || clonePortSchema(nodeType.type);
+
       const newNode: Node = {
         id: `${Date.now()}`,
         type: 'custom',
@@ -346,7 +351,7 @@ const WorkflowInner = () => {
           type: nodeType.type as BlockEnum,
           title: nodeType.label || nodeType.type,
           desc: nodeType.description || getNodeDescription(nodeType.type as BlockEnum),
-          ports: nodeType.ports,
+          ports: portSchema,
           ...(nodeType.default_data || {}),
           ...(nodeType.type === BlockEnum.LLM && {
             provider: 'openai',
@@ -448,7 +453,9 @@ const WorkflowInner = () => {
           <UndoRedoButtons />
         </div>
 
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <ValidationPanel className="w-72 shrink-0" />
+
           {/* Preview 버튼 */}
           <Button
             variant="outline"

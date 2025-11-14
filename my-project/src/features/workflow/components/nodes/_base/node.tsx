@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import {
   RiCheckboxCircleFill,
@@ -15,6 +15,7 @@ import { useNodeOutput } from '@features/workflow/hooks/useNodeOutput';
 import { usePortConnection } from '@features/workflow/hooks/usePortConnection';
 import type { NodePortSchema } from '@shared/types/workflow';
 import { OutputVarList } from '../../variable/OutputVarList';
+import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
 
 type BaseNodeProps = {
   children: ReactElement;
@@ -34,12 +35,18 @@ type BaseNodeProps = {
 const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
+  const inputPorts = ports?.inputs ?? [];
+  const outputPorts = ports?.outputs ?? [];
+  const hasCustomPorts = inputPorts.length > 0 || outputPorts.length > 0;
 
   // Fixed: useNodeOutput now properly memoizes empty objects
   const nodeOutputs = useNodeOutput(id);
 
   // Use the actual port connection hook
   const { isPortConnected } = usePortConnection();
+  const hasValidationError = useWorkflowStore(
+    (state) => state.validationErrorNodeIds.includes(id)
+  );
 
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
@@ -71,7 +78,9 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         // 선택 상태에 따른 테두리 색상
         showSelectedBorder
           ? 'border-blue-500'
-          : 'border-gray-200 dark:border-gray-700',
+          : hasValidationError
+            ? 'border-red-400'
+            : 'border-gray-200 dark:border-gray-700',
         // 선택 상태에 따른 그림자
         showSelectedBorder ? 'shadow-xl' : 'shadow-md',
         !data._runningStatus &&
@@ -85,52 +94,55 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         data._dimmed && 'opacity-30'
       )}
     >
-      {/* 포트 시스템 비활성화 - ports 데이터는 유지하되 UI는 렌더링하지 않음 */}
-      {/* {ports && (
+      {hasValidationError && !showSelectedBorder && (
+        <div className="absolute -top-2 right-3 rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white shadow">
+          오류
+        </div>
+      )}
+      {hasCustomPorts && (
         <>
-          {ports.inputs.map((port, index) => (
+          {inputPorts.map((port, index) => (
             <NodePort
               key={`input-${port.name}`}
               port={port}
               nodeId={id}
               direction="input"
               index={index}
-              totalPorts={ports.inputs.length}
+              totalPorts={inputPorts.length}
               isConnected={isPortConnected(id, port.name, 'input')}
             />
           ))}
 
-          {ports.outputs.map((port, index) => (
+          {outputPorts.map((port, index) => (
             <NodePort
               key={`output-${port.name}`}
               port={port}
               nodeId={id}
               direction="output"
               index={index}
-              totalPorts={ports.outputs.length}
+              totalPorts={outputPorts.length}
               isConnected={isPortConnected(id, port.name, 'output')}
               currentValue={nodeOutputs[port.name]}
             />
           ))}
         </>
-      )} */}
+      )}
 
-      {/* 핸들 (모든 노드) */}
-      <>
-        {/* Target Handle (왼쪽 입력) */}
-        <NodeTargetHandle
-          data={data}
-          handleClassName="!top-4 !-left-[9px] !translate-y-0"
-          handleId="target"
-        />
-
-        {/* Source Handle (오른쪽 출력) */}
-        <NodeSourceHandle
-          data={data}
-          handleClassName="!top-4 !-right-[9px] !translate-y-0"
-          handleId="source"
-        />
-      </>
+      {/* 하위 호환: 포트 정의가 없는 노드는 기본 핸들 유지 */}
+      {!hasCustomPorts && (
+        <>
+          <NodeTargetHandle
+            data={data}
+            handleClassName="!top-4 !-left-[9px] !translate-y-0"
+            handleId="target"
+          />
+          <NodeSourceHandle
+            data={data}
+            handleClassName="!top-4 !-right-[9px] !translate-y-0"
+            handleId="source"
+          />
+        </>
+      )}
 
       {/* 노드 헤더 */}
       <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
