@@ -23,3 +23,12 @@ export { useVariableAssignerStore } from './stores/variableAssignerStore';
 // Hooks
 export { useVariableAssigner } from './hooks/useVariableAssigner';
 export { useVariableValidation } from './hooks/useVariableValidation';
+
+// Components
+export { VariableAssignerNode } from './components/VariableAssignerNode';
+export { VariableAssignerPanel } from './components/VariableAssignerPanel';
+export { VarGroupItem } from './components/VarGroupItem';
+export { VarList } from './components/VarList';
+export { GroupHeaderInput } from './components/GroupHeaderInput';
+export { AddVariableButton } from './components/AddVariableButton';
+export { VariablePicker } from './components/VariablePicker';

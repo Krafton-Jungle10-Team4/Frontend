@@ -255,44 +255,6 @@ const initialState = {
   lastSaveError: null,
 };
 
-type ValidationMessageInput = WorkflowValidationMessage | string;
-
-const normalizeValidationMessages = (
-  messages: ValidationMessageInput[] | undefined,
-  defaultSeverity: 'error' | 'warning'
-): WorkflowValidationMessage[] => {
-  if (!messages || messages.length === 0) {
-    return [];
-  }
-
-  return messages
-    .map((message) => {
-      if (!message) {
-        return null;
-      }
-
-      if (typeof message === 'string') {
-        return {
-          node_id: null,
-          type: 'validation',
-          message,
-          severity: defaultSeverity,
-        };
-      }
-
-      return {
-        node_id: message.node_id ?? null,
-        type: message.type ?? 'validation',
-        message: message.message ?? '',
-        severity: message.severity ?? defaultSeverity,
-      };
-    })
-    .filter(
-      (message): message is WorkflowValidationMessage =>
-        Boolean(message?.message)
-    );
-};
-
 const extractErrorNodeIds = (
   errors: WorkflowValidationMessage[]
 ): string[] => {
