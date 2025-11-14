@@ -33,7 +33,7 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
     {
       id: 'end-1',
       type: 'custom',
-      position: { x: 350, y: 150 },
+      position: { x: 550, y: 150 },
       data: {
         title: '종료',
         desc: '워크플로우 종료',
