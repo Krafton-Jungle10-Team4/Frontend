@@ -27,8 +27,19 @@ export function OutputVarList({
   showValues = false,
   showEmptyState = true,
 }: OutputVarListProps) {
-  const node = useWorkflowStore((state) =>
-    state.nodes.find((n) => n.id === nodeId)
+  // 특정 노드만 구독하도록 최적화 - 얕은 비교로 불필요한 리렌더링 방지
+  const node = useWorkflowStore(
+    (state) => state.nodes.find((n) => n.id === nodeId),
+    (prev, next) => {
+      // 노드가 같으면 리렌더링하지 않음
+      if (!prev && !next) return true;
+      if (!prev || !next) return false;
+      return (
+        prev.id === next.id &&
+        prev.data === next.data &&
+        prev.position === next.position
+      );
+    }
   );
 
   const getNodeOutput = useVariablePoolStore((state) => state.getNodeOutput);

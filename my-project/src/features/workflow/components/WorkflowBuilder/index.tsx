@@ -48,13 +48,13 @@ import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
 import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
 
-// 노드 타입 매핑
-const nodeTypes = {
+// React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
+const REACT_FLOW_NODE_TYPES = {
   custom: CustomNode,
 };
 
-// 엣지 타입 매핑
-const edgeTypes = {
+// React Flow 엣지 타입 매핑
+const REACT_FLOW_EDGE_TYPES = {
   custom: CustomEdge,
 };
 
@@ -90,7 +90,7 @@ const WorkflowInner = () => {
     selectNode,
     toggleChatVisibility,
     reset,
-    nodeTypes,
+    nodeTypes: availableNodeTypes,  // 백엔드에서 로드한 노드 타입 정의 목록
     loadNodeTypes,
   } = useWorkflowStore();
 
@@ -133,12 +133,12 @@ const WorkflowInner = () => {
 
   // 노드 타입 사전 로드
   useEffect(() => {
-    if (nodeTypes.length === 0) {
+    if (availableNodeTypes.length === 0) {
       loadNodeTypes().catch((error) => {
         console.error('Failed to load node types:', error);
       });
     }
-  }, [nodeTypes.length, loadNodeTypes]);
+  }, [availableNodeTypes.length, loadNodeTypes]);
 
   useWorkflowAutoSave(botId);
 
@@ -424,8 +424,8 @@ const WorkflowInner = () => {
           onNodeContextMenu={onNodeContextMenu}
           onEdgeContextMenu={onEdgeContextMenu}
           onPaneContextMenu={onPaneContextMenu}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
+          nodeTypes={REACT_FLOW_NODE_TYPES}
+          edgeTypes={REACT_FLOW_EDGE_TYPES}
           fitView
           minZoom={0.25}
           maxZoom={2}
