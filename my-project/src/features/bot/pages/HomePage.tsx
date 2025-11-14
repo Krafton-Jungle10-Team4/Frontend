@@ -14,11 +14,13 @@ import {
 } from '@/widgets';
 import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
+import { BotCreateDialog } from '../components/BotCreateDialog';
 import { useAuth, useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useActivityStore } from '@/features/activity';
 import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';
+import { useBotCreateDialog } from '../hooks/useBotCreateDialog';
 import { useBots } from '../hooks/useBots';
 
 export function HomePage() {
@@ -52,7 +54,14 @@ export function HomePage() {
     isEmpty,
     hasResults,
   } = useFilteredBots({ searchQuery });
-  const { handleCreateBot, handleDeleteBot, isCreatingBot } = useBotActions();
+  const { handleDeleteBot } = useBotActions();
+  const {
+    isOpen: isCreateDialogOpen,
+    isCreating: isCreatingBot,
+    openDialog: openCreateDialog,
+    closeDialog: closeCreateDialog,
+    createBot,
+  } = useBotCreateDialog();
   const { loading: botsLoading, error: botsError } = useBots();
 
   // Bot 카드 클릭 시 워크플로우 페이지로 이동
@@ -115,7 +124,7 @@ export function HomePage() {
 
         {/* Workspace Header */}
         <WorkspaceHeader
-          onCreateBot={handleCreateBot}
+          onCreateBot={openCreateDialog}
           isCreatingBot={isCreatingBot}
           userName={userName}
           botCount={totalCount}
@@ -153,7 +162,7 @@ export function HomePage() {
                 isEmpty={isEmpty}
                 hasResults={hasResults}
                 onDelete={handleDeleteBot}
-                onCreateBot={handleCreateBot}
+                onCreateBot={openCreateDialog}
                 onBotClick={handleBotClick}
               />
             )}
@@ -178,6 +187,15 @@ export function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Bot Create Dialog */}
+      <BotCreateDialog
+        open={isCreateDialogOpen}
+        onOpenChange={closeCreateDialog}
+        language={language}
+        onSubmit={createBot}
+        isCreating={isCreatingBot}
+      />
     </div>
   );
 }

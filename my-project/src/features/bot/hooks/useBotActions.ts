@@ -1,99 +1,27 @@
 /**
  * useBotActions Hook
- * Bot 관련 액션(생성, 삭제 등)을 캡슐화한 커스텀 훅
+ * Bot 관련 액션(삭제 등)을 캡슐화한 커스텀 훅
  */
 
-import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { botApi } from '../api/botApi';
 import { toast } from 'sonner';
-import { DEFAULT_WORKFLOW } from '@/shared/constants/defaultWorkflow';
-
-const CREATE_BOT_TRANSLATIONS = {
-  en: {
-    creating: 'Creating a bot...',
-    success: 'Bot created. Redirecting to workflow.',
-    error: 'Failed to create bot. Please try again.',
-    defaultName: 'New Bot',
-  },
-  ko: {
-    creating: '봇을 생성하는 중입니다...',
-    success: '챗봇을 생성했어요. 워크플로우 화면으로 이동합니다.',
-    error: '챗봇 생성에 실패했습니다. 다시 시도해주세요.',
-    defaultName: '새 챗봇',
-  },
-} as const;
-
-const buildMinimalWorkflow = () => ({
-  nodes: DEFAULT_WORKFLOW.nodes.map((node) => ({
-    ...node,
-    data: { ...node.data },
-  })),
-  edges: [],
-});
 
 /**
  * Bot 관련 액션을 제공하는 커스텀 훅
  */
 export function useBotActions() {
-  const navigate = useNavigate();
-  const [isCreatingBot, setIsCreatingBot] = useState(false);
-
   // Stores
   const deleteBot = useBotStore((state) => state.deleteBot);
   const setBots = useBotStore((state) => state.setBots);
-  const addBot = useBotStore((state) => state.addBot);
-  const botCount = useBotStore((state) => state.bots.length);
   const addActivity = useActivityStore((state) => state.addActivity);
   const user = useAuthStore((state) => state.user);
   const userName = user?.name || 'User';
   const language = useUIStore((state) => state.language);
-
-  /**
-   * 즉시 봇 생성 후 워크플로우 페이지로 이동
-   */
-  const handleCreateBot = useCallback(async () => {
-    if (isCreatingBot) {
-      return;
-    }
-
-    setIsCreatingBot(true);
-    const t = CREATE_BOT_TRANSLATIONS[language];
-    const defaultName = `${t.defaultName} ${botCount + 1}`;
-    const toastId = toast.loading(t.creating);
-
-    try {
-      const newBot = await botApi.create({
-        name: defaultName,
-        workflow: buildMinimalWorkflow(),
-      });
-
-      addBot(newBot);
-      addActivity({
-        type: 'bot_created',
-        botId: newBot.id,
-        botName: newBot.name,
-        message: `${userName} ${
-          language === 'en' ? 'created a bot' : '챗봇을 생성했습니다'
-        }: ${newBot.name}`,
-      });
-
-      toast.success(t.success);
-      navigate(`/bot/${newBot.id}/workflow`, {
-        state: { botName: newBot.name },
-      });
-    } catch (error) {
-      console.error('Failed to create bot:', error);
-      toast.error(t.error);
-    } finally {
-      toast.dismiss(toastId);
-      setIsCreatingBot(false);
-    }
-  }, [isCreatingBot, language, botCount, addBot, addActivity, userName, navigate]);
 
   /**
    * Bot 삭제 및 활동 로그 추가
@@ -181,8 +109,6 @@ export function useBotActions() {
   );
 
   return {
-    handleCreateBot,
     handleDeleteBot,
-    isCreatingBot,
   };
 }
