@@ -108,6 +108,12 @@ export const transformToBackend = (
             constant_value: op.constant_value,
           })),
         }),
+
+        // Answer 노드 변환
+        ...(node.data.type === BlockEnum.Answer && {
+          template: (node.data as any).template || '',
+          description: (node.data as any).description || '',
+        }),
       },
       ports: serializePorts(node.data.ports),
       variable_mappings: serializeVariableMappings(
@@ -239,6 +245,12 @@ export const transformFromBackend = (
             expanded: true,
             selected_operation: undefined,
           },
+        }),
+
+        // Answer 노드 역변환
+        ...(node.type === 'answer' && {
+          template: node.data.template || '',
+          description: node.data.description || '',
         }),
       },
     })),

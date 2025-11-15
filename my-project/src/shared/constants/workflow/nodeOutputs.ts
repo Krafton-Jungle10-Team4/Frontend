@@ -101,7 +101,13 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
     },
   ],
 
-  [BlockEnum.Answer]: [],
+  [BlockEnum.Answer]: [
+    {
+      name: 'final_output',
+      type: PortType.STRING,
+      description: '생성된 최종 응답 텍스트',
+    },
+  ],
 
   [BlockEnum.TemplateTransform]: [
     {
