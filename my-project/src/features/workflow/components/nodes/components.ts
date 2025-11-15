@@ -10,6 +10,7 @@ import MCPNode from './mcp/node';
 import AnswerNode from './answer/node';
 import TemplateTransformNode from './template-transform/node';
 import IfElseNode from './if-else/node';
+import QuestionClassifierNode from './question-classifier/node';
 import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
 
 // Panel 컴포넌트 (설정 UI)
@@ -21,6 +22,7 @@ import { MCPPanel } from './mcp/panel';
 import { AnswerPanel } from './answer/panel';
 import { TemplateTransformPanel } from './template-transform/panel';
 import { IfElsePanel } from './if-else/panel';
+import { QuestionClassifierPanel } from './question-classifier/panel';
 import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
 
 /**
@@ -36,7 +38,11 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.Answer]: AnswerNode,
   [BlockEnum.TemplateTransform]: TemplateTransformNode,
   [BlockEnum.IfElse]: IfElseNode,
+  [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
   [BlockEnum.Assigner]: VariableAssignerNode,
+  [BlockEnum.Http]: (() => null) as any,
+  [BlockEnum.Code]: (() => null) as any,
+  [BlockEnum.KnowledgeBase]: (() => null) as any,
 };
 
 /**
@@ -51,5 +57,6 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.Answer]: AnswerPanel,
   [BlockEnum.TemplateTransform]: TemplateTransformPanel,
   [BlockEnum.IfElse]: IfElsePanel,
+  [BlockEnum.QuestionClassifier]: QuestionClassifierPanel,
   [BlockEnum.Assigner]: VariableAssignerPanel,
 };
