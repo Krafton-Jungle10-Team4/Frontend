@@ -9,3 +9,6 @@ export { Box, Group, Field } from './layout';
 
 // Variable Components
 export { OutputVars, VarItem, VarListInput } from './variable';
+
+// Input Mapping Components
+export { InputMappingSection } from './input-mapping/InputMappingSection';

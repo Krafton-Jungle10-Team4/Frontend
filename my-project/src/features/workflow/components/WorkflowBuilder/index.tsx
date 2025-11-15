@@ -6,7 +6,6 @@ import {
   ReactFlow,
   Background,
   ReactFlowProvider,
-  addEdge,
   useReactFlow,
   applyNodeChanges,
   applyEdgeChanges,
@@ -39,7 +38,6 @@ import { NodeConfigPanel } from '../NodeConfigPanel';
 import { useRealtimeValidation } from '../../hooks/useRealtimeValidation';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useWorkflowShortcuts } from '../../hooks/useWorkflowShortcuts';
-import { usePortConnection } from '../../hooks/usePortConnection';
 import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
@@ -94,6 +92,9 @@ const WorkflowInner = () => {
     reset,
     nodeTypes: availableNodeTypes,  // 백엔드에서 로드한 노드 타입 정의 목록
     loadNodeTypes,
+    addEdge: addWorkflowEdge,
+    deleteEdge: deleteWorkflowEdge,
+    deleteNode: deleteWorkflowNode,
   } = useWorkflowStore();
 
   const { push } = useHistoryStore();
@@ -113,9 +114,6 @@ const WorkflowInner = () => {
 
   // 게시하기 단축키 (Cmd/Ctrl+Shift+P, E)
   useWorkflowShortcuts(botId || '');
-
-  // 포트 연결 관리
-  const { handleConnect: handlePortConnect } = usePortConnection();
 
   // 봇 변경 시 상태 초기화 및 워크플로우 로드
   useEffect(() => {
@@ -199,40 +197,55 @@ const WorkflowInner = () => {
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      const newEdges = applyEdgeChanges(changes, edges);
-      setEdges(newEdges);
-      push(nodes, newEdges);
+      if (!changes.length) return;
+
+      const removals = changes.filter((change) => change.type === 'remove');
+      const otherChanges = changes.filter((change) => change.type !== 'remove');
+
+      if (removals.length) {
+        removals.forEach((change) => {
+          if ('id' in change && change.id) {
+            deleteWorkflowEdge(change.id);
+          }
+        });
+      }
+
+      if (otherChanges.length) {
+        const currentEdges = useWorkflowStore.getState().edges;
+        const nextEdges = applyEdgeChanges(otherChanges, currentEdges);
+        setEdges(nextEdges);
+      }
+
+      const latestState = useWorkflowStore.getState();
+      push(latestState.nodes, latestState.edges);
     },
-    [nodes, edges, setEdges, push]
+    [deleteWorkflowEdge, setEdges, push]
   );
 
   // 노드 연결 처리
   const onConnect = useCallback(
     (connection: Connection) => {
-      // 포트 시스템이 있는 경우 포트 검증 수행
-      const sourceNode = nodes.find((n) => n.id === connection.source);
-      const targetNode = nodes.find((n) => n.id === connection.target);
-
-      // 노드에 ports가 있으면 포트 검증 사용
-      if (sourceNode?.data?.ports && targetNode?.data?.ports) {
-        const isValid = handlePortConnect(connection);
-        if (!isValid) {
-          // 검증 실패 시 연결 중단
-          return;
-        }
-      } else {
-        // 레거시 노드는 기존 방식으로 처리
-        setEdges((eds) => {
-          const updatedEdges = addEdge(
-            withEdgeMetadata(connection, nodes),
-            eds
-          );
-          push(nodes, updatedEdges);
-          return updatedEdges;
-        });
+      if (!connection.source || !connection.target) {
+        return;
       }
+
+      const enriched = withEdgeMetadata(connection, nodes);
+      const newEdge: Edge = {
+        id: `edge-${enriched.source}-${enriched.target}`,
+        source: enriched.source!,
+        target: enriched.target!,
+        sourceHandle: enriched.sourceHandle,
+        targetHandle: enriched.targetHandle,
+        type: enriched.type || 'custom',
+        data: enriched.data,
+      };
+
+      addWorkflowEdge(newEdge);
+
+      const latestState = useWorkflowStore.getState();
+      push(latestState.nodes, latestState.edges);
     },
-    [nodes, setEdges, push, handlePortConnect]
+    [nodes, addWorkflowEdge, push]
   );
 
   const handleAutoLayout = useCallback(() => {
@@ -299,36 +312,22 @@ const WorkflowInner = () => {
   // 노드 삭제
   const handleDeleteNode = useCallback(() => {
     if (contextMenu?.nodeId) {
-      const nodeId = contextMenu.nodeId;
-
-      setNodes((nds) => {
-        const filteredNodes = nds.filter((node) => node.id !== nodeId);
-        setEdges((eds) => {
-          const filteredEdges = eds.filter(
-            (edge) => edge.source !== nodeId && edge.target !== nodeId
-          );
-          push(filteredNodes, filteredEdges);
-          return filteredEdges;
-        });
-        return filteredNodes;
-      });
+      deleteWorkflowNode(contextMenu.nodeId);
+      const latestState = useWorkflowStore.getState();
+      push(latestState.nodes, latestState.edges);
     }
     closeContextMenu();
-  }, [contextMenu, setNodes, setEdges, closeContextMenu, push]);
+  }, [contextMenu, deleteWorkflowNode, closeContextMenu, push]);
 
   // 엣지 삭제
   const handleDeleteEdge = useCallback(() => {
     if (contextMenu?.edgeId) {
-      setEdges((eds) => {
-        const filteredEdges = eds.filter(
-          (edge) => edge.id !== contextMenu.edgeId
-        );
-        push(nodes, filteredEdges);
-        return filteredEdges;
-      });
+      deleteWorkflowEdge(contextMenu.edgeId);
+      const latestState = useWorkflowStore.getState();
+      push(latestState.nodes, latestState.edges);
     }
     closeContextMenu();
-  }, [contextMenu, setEdges, closeContextMenu, push, nodes]);
+  }, [contextMenu, deleteWorkflowEdge, closeContextMenu, push]);
 
   // 노드 추가
   const handleAddNode = useCallback(
@@ -391,14 +390,32 @@ const WorkflowInner = () => {
       }
 
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        setNodes(nodes.filter((node) => !node.selected));
-        setEdges(edges.filter((edge) => !edge.selected));
+        let mutated = false;
+
+        nodes
+          .filter((node) => node.selected)
+          .forEach((node) => {
+            deleteWorkflowNode(node.id);
+            mutated = true;
+          });
+
+        edges
+          .filter((edge) => edge.selected)
+          .forEach((edge) => {
+            deleteWorkflowEdge(edge.id);
+            mutated = true;
+          });
+
+        if (mutated) {
+          const latestState = useWorkflowStore.getState();
+          push(latestState.nodes, latestState.edges);
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [nodes, edges, setNodes, setEdges]);
+  }, [nodes, edges, deleteWorkflowNode, deleteWorkflowEdge, push]);
 
   // 로딩 상태 UI
   if (isLoading) {

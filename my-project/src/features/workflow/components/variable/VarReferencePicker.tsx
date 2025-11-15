@@ -6,8 +6,8 @@ import { Button } from '@shared/components/button';
 import { Input } from '@shared/components/input';
 import { VariableSelector } from './VariableSelector';
 import { VariablePath } from './VariablePath';
-import { useAvailableVariables } from '../../hooks/useAvailableVariables';
-import { useRecentVariables } from '../../hooks/useRecentVariables';
+import { useAvailableVariables } from '@features/workflow/hooks/useAvailableVariables';
+import { useRecentVariables } from '@features/workflow/hooks/useRecentVariables';
 import { ValueSelector, PortType, VariableReference } from '@shared/types/workflow';
 import { RiCodeBoxLine, RiCloseLine } from '@remixicon/react';
 
@@ -168,7 +168,7 @@ export function VarReferencePicker({
                 <div className="text-center py-8 text-gray-400">
                   {searchQuery
                     ? '검색 결과가 없습니다'
-                    : '사용 가능한 변수가 없습니다'}
+                    : '사용 가능한 변수가 없습니다. 먼저 연결선을 생성하세요.'}
                 </div>
               ) : (
                 filteredVariables.map((variable) => (

@@ -1,21 +1,15 @@
 import { memo, useMemo } from 'react';
 import type { ReactElement } from 'react';
-import {
-  RiCheckboxCircleFill,
-  RiErrorWarningFill,
-  RiLoader2Line,
-} from '@remixicon/react';
+import { RiCheckboxCircleFill, RiErrorWarningFill, RiLoader2Line } from '@remixicon/react';
 import type { NodeProps } from '@/shared/types/workflow.types';
 import { NodeRunningStatus } from '@/shared/types/workflow.types';
 import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
-import { NodePort } from './NodePort';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
-import { useNodeOutput } from '@features/workflow/hooks/useNodeOutput';
-import { usePortConnection } from '@features/workflow/hooks/usePortConnection';
 import type { NodePortSchema } from '@shared/types/workflow';
 import { OutputVarList } from '../../variable/OutputVarList';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
+import { BlockEnum } from '@/shared/types/workflow.types';
 
 type BaseNodeProps = {
   children: ReactElement;
@@ -35,17 +29,13 @@ type BaseNodeProps = {
 const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
-  const inputPorts = ports?.inputs ?? [];
-  const outputPorts = ports?.outputs ?? [];
 
-  // Fixed: useNodeOutput now properly memoizes empty objects
-  const nodeOutputs = useNodeOutput(id);
-
-  // Use the actual port connection hook
-  const { isPortConnected } = usePortConnection();
   const hasValidationError = useWorkflowStore(
     (state) => state.validationErrorNodeIds.includes(id)
   );
+  const nodeType = data.type as BlockEnum;
+  const hasInputHandle = nodeType !== BlockEnum.Start;
+  const hasOutputHandle = nodeType !== BlockEnum.End;
 
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
@@ -99,45 +89,11 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         </div>
       )}
       <>
-        {inputPorts.length > 0 ? (
-          inputPorts.map((port, index) => (
-            <NodePort
-              key={`input-${port.name}`}
-              port={port}
-              nodeId={id}
-              direction="input"
-              index={index}
-              totalPorts={inputPorts.length}
-              isConnected={isPortConnected(id, port.name, 'input')}
-            />
-          ))
-        ) : (
-          <NodeTargetHandle
-            data={data}
-            handleClassName="!top-4 !-left-[9px] !translate-y-0"
-            handleId="target"
-          />
+        {hasInputHandle && (
+          <NodeTargetHandle data={data} handleId="target" />
         )}
-
-        {outputPorts.length > 0 ? (
-          outputPorts.map((port, index) => (
-            <NodePort
-              key={`output-${port.name}`}
-              port={port}
-              nodeId={id}
-              direction="output"
-              index={index}
-              totalPorts={outputPorts.length}
-              isConnected={isPortConnected(id, port.name, 'output')}
-              currentValue={nodeOutputs[port.name]}
-            />
-          ))
-        ) : (
-          <NodeSourceHandle
-            data={data}
-            handleClassName="!top-4 !-right-[9px] !translate-y-0"
-            handleId="source"
-          />
+        {hasOutputHandle && (
+          <NodeSourceHandle data={data} handleId="source" />
         )}
       </>
 

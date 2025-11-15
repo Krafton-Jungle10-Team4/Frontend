@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
-import { Box, Group, Field } from '../_base/components/layout';
+import { Box, Group, Field, InputMappingSection } from '../_base/components';
 import { Input } from '@shared/components/input';
 import { Button } from '@shared/components/button';
 import {
@@ -20,8 +20,6 @@ import {
 import { Checkbox } from '@shared/components/checkbox';
 import { Label } from '@shared/components/label';
 import type { TavilySearchNodeType } from '@/shared/types/workflow.types';
-import { VarReferencePicker } from '../../variable/VarReferencePicker';
-import { PortType, type ValueSelector } from '@shared/types/workflow';
 import { tavilyApi } from '../../../api/tavilyApi';
 import { toast } from 'sonner';
 
@@ -38,31 +36,6 @@ export const TavilySearchPanel = () => {
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
-  };
-
-  const handleVariableChange = (
-    portName: string,
-    selector: ValueSelector | null
-  ) => {
-    const currentMappings = (node.data.variable_mappings || {}) as Record<
-      string,
-      {
-        target_port: string;
-        source: ValueSelector;
-      } | undefined
-    >;
-
-    const nextMappings = { ...currentMappings };
-    if (selector) {
-      nextMappings[portName] = {
-        target_port: portName,
-        source: selector,
-      };
-    } else {
-      delete nextMappings[portName];
-    }
-
-    updateNode(selectedNodeId!, { variable_mappings: nextMappings });
   };
 
   const handleTestSearch = async () => {
@@ -98,21 +71,12 @@ export const TavilySearchPanel = () => {
   return (
     <BasePanel>
       <Box>
-        <Group
+        <InputMappingSection
+          nodeId={node.id}
+          ports={node.data.ports}
           title="입력 매핑"
           description="검색할 쿼리를 이전 노드의 출력과 연결하세요"
-        >
-          <Field label="검색 쿼리" required>
-            <VarReferencePicker
-              nodeId={node.id}
-              portName="query"
-              portType={PortType.STRING}
-              value={node.data.variable_mappings?.query?.source || null}
-              onChange={(selector) => handleVariableChange('query', selector)}
-              placeholder="Start 노드의 query를 선택하세요"
-            />
-          </Field>
-        </Group>
+        />
 
         <Group title="검색 옵션" description="검색 깊이와 주제를 설정하세요">
           <Field label="검색 깊이">

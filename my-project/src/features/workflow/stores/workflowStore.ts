@@ -449,6 +449,73 @@ const normalizeVariableMappingsForNode = (
   }, {});
 };
 
+const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+  const legacyMappings = new Map<string, Record<string, any>>();
+
+  edges.forEach((edge) => {
+    if (
+      !edge.source ||
+      !edge.target ||
+      !edge.sourceHandle ||
+      !edge.targetHandle
+    ) {
+      return;
+    }
+
+    const targetNode = nodeMap.get(edge.target);
+    const sourceNode = nodeMap.get(edge.source);
+    if (!targetNode || !sourceNode) {
+      return;
+    }
+
+    const renameMap =
+      TARGET_PORT_RENAME_MAP[(targetNode.data.type as BlockEnum) || BlockEnum.Start] || {};
+    const normalizedTargetPort = renameMap[edge.targetHandle] || edge.targetHandle;
+
+    const targetInputs =
+      ((targetNode.data?.ports as NodePortSchema | undefined)?.inputs) || [];
+    const hasTargetPort = targetInputs.some(
+      (port) => port.name === normalizedTargetPort
+    );
+    if (!hasTargetPort) {
+      return;
+    }
+
+    const normalizedSelector = normalizeSelectorString(
+      `${edge.source}.${edge.sourceHandle}`
+    );
+    if (!normalizedSelector.includes('.')) {
+      return;
+    }
+
+    const sourceOutputs =
+      ((sourceNode.data?.ports as NodePortSchema | undefined)?.outputs) || [];
+    const matchedSourcePort = sourceOutputs.find(
+      (port) => port.name === edge.sourceHandle
+    );
+
+    const mapping = {
+      target_port: normalizedTargetPort,
+      source: {
+        variable: normalizedSelector,
+        value_type: matchedSourcePort?.type ?? PortType.ANY,
+      },
+    };
+
+    if (!legacyMappings.has(edge.target)) {
+      legacyMappings.set(edge.target, {});
+    }
+
+    const existing = legacyMappings.get(edge.target)!;
+    if (!existing[normalizedTargetPort]) {
+      existing[normalizedTargetPort] = mapping;
+    }
+  });
+
+  return legacyMappings;
+};
+
 const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
   const normalizedNodes = nodes.map<Node>((node) => {
     const nodeType = node.data.type as BlockEnum;
@@ -499,74 +566,102 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     };
   });
 
+  const legacyMappingsByNode = buildLegacyMappingsFromEdges(normalizedNodes, edges);
+
+  const nodesWithLegacyMappings = normalizedNodes.map((node) => {
+    const fallback = legacyMappingsByNode.get(node.id);
+    if (!fallback) {
+      return node;
+    }
+
+    const existingMappings =
+      ((node.data.variable_mappings || {}) as Record<string, any>) || {};
+    const mergedMappings = { ...fallback, ...existingMappings };
+
+    if (Object.keys(mergedMappings).length === Object.keys(existingMappings).length) {
+      return node;
+    }
+
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        variable_mappings: mergedMappings,
+      },
+    };
+  });
+
   const normalizedEdges = edges.map<Edge>((edge) => ({
     ...edge,
     data: edge.data ? { ...edge.data } : undefined,
   }));
 
-  synchronizeEdgesWithMappings(normalizedNodes, normalizedEdges);
-  return { nodes: normalizedNodes, edges: normalizedEdges };
+  const syncedEdges = synchronizeEdgesWithMappings(
+    nodesWithLegacyMappings,
+    normalizedEdges
+  );
+  return { nodes: nodesWithLegacyMappings, edges: syncedEdges };
 };
 
 const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
-  const edgeBuckets = new Map<string, Edge[]>();
+  const uniqueEdges = new Map<string, Edge>();
+
+  const ensureEdge = (sourceId?: string, targetId?: string, existing?: Edge) => {
+    if (!sourceId || !targetId) {
+      return;
+    }
+    const key = `${sourceId}->${targetId}`;
+    if (uniqueEdges.has(key)) {
+      return;
+    }
+
+    if (existing) {
+      uniqueEdges.set(key, {
+        ...existing,
+        id: `edge-${sourceId}-${targetId}`,
+        source: sourceId,
+        target: targetId,
+        sourceHandle: undefined,
+        targetHandle: undefined,
+      });
+      return;
+    }
+
+    const connection: Connection = {
+      source: sourceId,
+      target: targetId,
+    };
+    const withMeta = withEdgeMetadata(connection, nodes);
+    uniqueEdges.set(key, {
+      id: `edge-${sourceId}-${targetId}`,
+      source: withMeta.source!,
+      target: withMeta.target!,
+      sourceHandle: undefined,
+      targetHandle: undefined,
+      type: withMeta.type || 'custom',
+      data: withMeta.data,
+    });
+  };
 
   edges.forEach((edge) => {
-    const key = `${edge.source}->${edge.target}`;
-    if (!edgeBuckets.has(key)) {
-      edgeBuckets.set(key, []);
-    }
-    edgeBuckets.get(key)!.push(edge);
+    ensureEdge(edge.source, edge.target, edge);
   });
 
   nodes.forEach((node) => {
     const mappings = (node.data.variable_mappings || {}) as Record<string, any>;
 
-    Object.entries(mappings).forEach(([targetPort, mapping]) => {
+    Object.values(mappings).forEach((mapping) => {
       const selector = extractSelectorFromMapping(mapping);
       if (!selector || !selector.includes('.')) {
         return;
       }
 
-      const [sourceNodeId, sourcePort] = selector.split('.', 2);
-      if (!sourceNodeId || !sourcePort) {
-        return;
-      }
-
-      const key = `${sourceNodeId}->${node.id}`;
-      const candidates = edgeBuckets.get(key) || [];
-      let edge = candidates.find(
-        (candidate) =>
-          (!candidate.targetHandle || candidate.targetHandle === targetPort) &&
-          (!candidate.sourceHandle || candidate.sourceHandle === sourcePort)
-      );
-
-      if (!edge) {
-        const connection: Connection = {
-          source: sourceNodeId,
-          target: node.id,
-          sourceHandle: sourcePort,
-          targetHandle: targetPort,
-        };
-        const withMeta = withEdgeMetadata(connection, nodes);
-        edge = {
-          id: `edge-${sourceNodeId}-${sourcePort}-${node.id}-${targetPort}`,
-          source: withMeta.source!,
-          target: withMeta.target!,
-          sourceHandle: withMeta.sourceHandle,
-          targetHandle: withMeta.targetHandle,
-          type: withMeta.type || 'custom',
-          data: withMeta.data,
-        };
-        edges.push(edge);
-        candidates.push(edge);
-        edgeBuckets.set(key, candidates);
-      } else {
-        edge.sourceHandle = sourcePort;
-        edge.targetHandle = targetPort;
-      }
+      const [sourceNodeId] = selector.split('.', 2);
+      ensureEdge(sourceNodeId, node.id);
     });
   });
+
+  return Array.from(uniqueEdges.values());
 };
 
 /**
@@ -635,148 +730,137 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   addEdge: (edge) =>
     set((state) => {
-      // 1. 엣지 추가
-      const newEdges = [...state.edges, edge];
+      if (!edge.source || !edge.target) {
+        return state;
+      }
 
-      // 2. variable_mappings 자동 생성
-      const updatedNodes = state.nodes.map((node) => {
-        // target 노드만 업데이트
-        if (node.id !== edge.target) return node;
+      const normalizedEdge: Edge = {
+        ...edge,
+        id: `edge-${edge.source}-${edge.target}`,
+        sourceHandle: undefined,
+        targetHandle: undefined,
+        type: edge.type || 'custom',
+      };
 
-        const targetPort = edge.targetHandle;
-        const sourceNode = edge.source;
-        const sourcePort = edge.sourceHandle;
+      const existingEdgeIndex = state.edges.findIndex(
+        (existing) =>
+          existing.source === normalizedEdge.source &&
+          existing.target === normalizedEdge.target
+      );
 
-        if (!targetPort || !sourceNode || !sourcePort) return node;
-
-        // 기존 variable_mappings 가져오기
-        const currentMappings = node.data?.variable_mappings || {};
-
-        // 새 매핑 추가 (Dify 스타일: "sourceNode.sourcePort")
-        const newMappings = {
-          ...currentMappings,
-          [targetPort]: `${sourceNode}.${sourcePort}`,
-        };
-
-        let updatedData: any = {
-          ...node.data,
-          variable_mappings: newMappings,
-        };
-
-        // Assigner 노드: operation metadata 업데이트
-        if (node.data.type === BlockEnum.Assigner) {
-          const match = targetPort.match(/^operation_(\d+)_(target|value)$/);
-          if (match) {
-            const opIndex = parseInt(match[1], 10);
-            const portType = match[2]; // 'target' or 'value'
-            const operations = [...((node.data as AssignerNodeType).operations || [])];
-
-            if (operations[opIndex]) {
-              // 소스 포트의 data_type 추론 (향후 개선 가능)
-              const sourceNodeObj = state.nodes.find(n => n.id === sourceNode);
-              const sourcePortDef = sourceNodeObj?.data.ports?.outputs?.find(p => p.name === sourcePort);
-
-              if (portType === 'target') {
-                operations[opIndex] = {
-                  ...operations[opIndex],
-                  target_variable: {
-                    port_name: targetPort,
-                    data_type: sourcePortDef?.type,
-                  },
-                };
-              } else if (portType === 'value') {
-                operations[opIndex] = {
-                  ...operations[opIndex],
-                  source_variable: {
-                    port_name: targetPort,
-                    data_type: sourcePortDef?.type,
-                  },
-                };
+      let nextEdges: Edge[];
+      if (existingEdgeIndex >= 0) {
+        nextEdges = state.edges.map((existing, index) =>
+          index === existingEdgeIndex
+            ? {
+                ...existing,
+                ...normalizedEdge,
+                data: normalizedEdge.data ?? existing.data,
               }
+            : existing
+        );
+      } else {
+        nextEdges = [...state.edges, normalizedEdge];
+      }
 
-              updatedData = {
-                ...updatedData,
-                operations,
-              };
-            }
-          }
-        }
-
-        return {
-          ...node,
-          data: updatedData,
-        };
-      });
-
-      syncVariableAssignerNodesFromWorkflow(updatedNodes);
       return {
-        edges: newEdges,
-        nodes: updatedNodes,
+        edges: nextEdges,
         hasUnsavedChanges: true,
       };
     }),
 
   deleteEdge: (id) =>
     set((state) => {
-      // 삭제할 엣지 찾기
       const edgeToDelete = state.edges.find((e) => e.id === id);
-
-      if (!edgeToDelete) {
-        return { edges: state.edges.filter((edge) => edge.id !== id) };
-      }
-
-      // 1. 엣지 삭제
       const newEdges = state.edges.filter((edge) => edge.id !== id);
 
-      // 2. variable_mappings에서 해당 매핑 제거
+      if (!edgeToDelete || !edgeToDelete.source || !edgeToDelete.target) {
+        return {
+          edges: newEdges,
+          hasUnsavedChanges: true,
+        };
+      }
+
+      const sourceNodeId = edgeToDelete.source;
+      let nodesChanged = false;
+
       const updatedNodes = state.nodes.map((node) => {
-        if (node.id !== edgeToDelete.target) return node;
+        if (node.id !== edgeToDelete.target) {
+          return node;
+        }
 
-        const targetPort = edgeToDelete.targetHandle;
-        if (!targetPort) return node;
+        const currentMappings =
+          (node.data?.variable_mappings as Record<string, any>) || {};
+        const removedPorts: string[] = [];
+        const nextMappings = Object.entries(currentMappings).reduce<
+          Record<string, any>
+        >((acc, [key, mapping]) => {
+          const selector = extractSelectorFromMapping(mapping);
+          if (selector?.startsWith(`${sourceNodeId}.`)) {
+            removedPorts.push(key);
+            return acc;
+          }
+          acc[key] = mapping;
+          return acc;
+        }, {});
 
-        const currentMappings = node.data?.variable_mappings || {};
-        const { [targetPort]: _, ...remainingMappings } = currentMappings;
+        if (!removedPorts.length) {
+          return node;
+        }
 
         let updatedData: any = {
           ...node.data,
-          variable_mappings: remainingMappings,
+          variable_mappings: nextMappings,
         };
 
-        // Assigner 노드: operation metadata 제거
         if (node.data.type === BlockEnum.Assigner) {
-          const match = targetPort.match(/^operation_(\d+)_(target|value)$/);
-          if (match) {
+          const operations = [
+            ...((node.data as AssignerNodeType).operations || []),
+          ];
+          let mutated = false;
+
+          removedPorts.forEach((targetPort) => {
+            const match = targetPort.match(/^operation_(\d+)_(target|value)$/);
+            if (!match) return;
             const opIndex = parseInt(match[1], 10);
-            const portType = match[2]; // 'target' or 'value'
-            const operations = [...((node.data as AssignerNodeType).operations || [])];
+            const portType = match[2];
+            if (!operations[opIndex]) return;
+            mutated = true;
 
-            if (operations[opIndex]) {
-              if (portType === 'target') {
-                operations[opIndex] = {
-                  ...operations[opIndex],
-                  target_variable: undefined,
-                };
-              } else if (portType === 'value') {
-                operations[opIndex] = {
-                  ...operations[opIndex],
-                  source_variable: undefined,
-                };
-              }
-
-              updatedData = {
-                ...updatedData,
-                operations,
+            if (portType === 'target') {
+              operations[opIndex] = {
+                ...operations[opIndex],
+                target_variable: undefined,
+              };
+            } else if (portType === 'value') {
+              operations[opIndex] = {
+                ...operations[opIndex],
+                source_variable: undefined,
               };
             }
+          });
+
+          if (mutated) {
+            updatedData = {
+              ...updatedData,
+              operations,
+            };
           }
         }
 
+        nodesChanged = true;
         return {
           ...node,
           data: updatedData,
         };
       });
+
+      if (!nodesChanged) {
+        return {
+          edges: newEdges,
+          hasUnsavedChanges: true,
+        };
+      }
 
       syncVariableAssignerNodesFromWorkflow(updatedNodes);
       return {

@@ -119,9 +119,9 @@ export const transformToBackend = (
       source: edge.source,
       target: edge.target,
       type: edge.type || 'custom',
-      source_port: edge.sourceHandle ?? undefined,
-      target_port: edge.targetHandle ?? undefined,
-      data_type: inferEdgeDataType(nodes, edge),
+      source_port: edge.sourceHandle ?? null,
+      target_port: edge.targetHandle ?? null,
+      data_type: inferEdgeDataType(nodes, edge) ?? null,
       data: {
         source_type: edge.data?.sourceType || '',
         target_type: edge.data?.targetType || '',
@@ -346,18 +346,77 @@ const deserializeVariableMappings = (
   );
 };
 
+const extractSelectorFromMapping = (mapping: unknown): string | null => {
+  if (!mapping) return null;
+  if (typeof mapping === 'string') {
+    return mapping;
+  }
+  if (typeof mapping === 'object') {
+    const candidate = mapping as Record<string, any>;
+    if (typeof candidate.variable === 'string') {
+      return candidate.variable;
+    }
+    if (
+      candidate.source &&
+      typeof candidate.source === 'object' &&
+      typeof candidate.source.variable === 'string'
+    ) {
+      return candidate.source.variable;
+    }
+  }
+  return null;
+};
+
 const inferEdgeDataType = (nodes: Node[], edge: Edge): string | undefined => {
   const sourceNode = nodes.find((node) => node.id === edge.source);
-  const sourceHandle = edge.sourceHandle;
-
-  if (!sourceNode || !sourceHandle || !sourceNode.data?.ports) {
+  if (!sourceNode) {
     return undefined;
   }
 
-  const port = sourceNode.data.ports.outputs.find(
-    (output) => output.name === sourceHandle
-  );
-  return port?.type;
+  const sourceHandle = edge.sourceHandle;
+  if (sourceHandle && sourceNode.data?.ports) {
+    const port = sourceNode.data.ports.outputs.find(
+      (output) => output.name === sourceHandle
+    );
+    if (port?.type) {
+      return port.type;
+    }
+  }
+
+  const targetNode = nodes.find((node) => node.id === edge.target);
+  const mappings = (targetNode?.data?.variable_mappings ||
+    {}) as NodeVariableMappings | undefined;
+  if (!mappings || !sourceNode.data?.ports) {
+    return undefined;
+  }
+
+  const outputs = sourceNode.data.ports.outputs || [];
+  for (const mapping of Object.values(mappings)) {
+    const selector = extractSelectorFromMapping(mapping);
+    if (!selector) {
+      continue;
+    }
+
+    if (
+      selector.startsWith('env.') ||
+      selector.startsWith('conv.') ||
+      selector.startsWith('sys.')
+    ) {
+      continue;
+    }
+
+    const [nodeId, portName] = selector.split('.', 2);
+    if (nodeId !== edge.source || !portName) {
+      continue;
+    }
+
+    const matchedPort = outputs.find((output) => output.name === portName);
+    if (matchedPort?.type) {
+      return matchedPort.type;
+    }
+  }
+
+  return undefined;
 };
 
 /**

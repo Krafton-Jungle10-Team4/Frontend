@@ -11,7 +11,7 @@ import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore
 import { useCompletedDocuments } from '@/features/documents/stores/selectors';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { BasePanel } from '../_base/base-panel';
-import { Box, Group, Field } from '../_base/components/layout';
+import { Box, Group, Field, InputMappingSection } from '../_base/components';
 import { Input } from '@shared/components/input';
 import {
   Select,
@@ -110,6 +110,13 @@ export const KnowledgeRetrievalPanel = () => {
   return (
     <BasePanel>
       <Box>
+        <InputMappingSection
+          nodeId={node.id}
+          ports={node.data.ports}
+          title="입력 매핑"
+          description="검색할 쿼리를 이전 노드의 출력과 연결하세요"
+        />
+
         <Group title="데이터 소스">
           <Field label="데이터셋">
             <Input
