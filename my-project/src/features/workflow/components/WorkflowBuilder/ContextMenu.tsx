@@ -20,6 +20,7 @@ const ICON_MAP: Record<string, string> = {
   flag: '🏁',
   message: '💬', // Answer 노드용
   template: '📝', // Template Transform 노드용
+  search: '🔍', // Tavily Search 노드용
   [IF_ELSE_ICON]: '🔀', // IF-ELSE 노드용
   [VARIABLE_ASSIGNER_ICON]: '🧮',
   [QUESTION_CLASSIFIER_ICON]: '🏷️', // Question Classifier 노드용
@@ -36,6 +37,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
   { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
+  { type: 'tavily-search', label: 'Tavily Search', icon: 'search', max_instances: -1, configurable: true },
   cloneIfElseNodeType(),
   cloneVariableAssignerNodeType(),
   cloneQuestionClassifierNodeType(),
