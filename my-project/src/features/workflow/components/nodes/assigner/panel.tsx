@@ -4,7 +4,7 @@
  * 변수 조작 작업 목록 관리
  */
 
-import { RiAddLine } from 'react-icons/ri';
+import { Plus } from 'lucide-react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group } from '../_base/components/layout';
@@ -85,7 +85,7 @@ export const AssignerPanel = () => {
           description="변수를 조작할 작업을 추가하세요"
           extra={
             <Button onClick={handleAddOperation} variant="ghost" size="sm">
-              <RiAddLine className="w-4 h-4 mr-1" />
+              <Plus className="w-4 h-4 mr-1" />
               작업 추가
             </Button>
           }
