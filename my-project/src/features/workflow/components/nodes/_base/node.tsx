@@ -37,7 +37,6 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
   const inputPorts = ports?.inputs ?? [];
   const outputPorts = ports?.outputs ?? [];
-  const hasCustomPorts = inputPorts.length > 0 || outputPorts.length > 0;
 
   // Fixed: useNodeOutput now properly memoizes empty objects
   const nodeOutputs = useNodeOutput(id);
@@ -99,9 +98,9 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
           오류
         </div>
       )}
-      {hasCustomPorts && (
-        <>
-          {inputPorts.map((port, index) => (
+      <>
+        {inputPorts.length > 0 ? (
+          inputPorts.map((port, index) => (
             <NodePort
               key={`input-${port.name}`}
               port={port}
@@ -111,9 +110,17 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
               totalPorts={inputPorts.length}
               isConnected={isPortConnected(id, port.name, 'input')}
             />
-          ))}
+          ))
+        ) : (
+          <NodeTargetHandle
+            data={data}
+            handleClassName="!top-4 !-left-[9px] !translate-y-0"
+            handleId="target"
+          />
+        )}
 
-          {outputPorts.map((port, index) => (
+        {outputPorts.length > 0 ? (
+          outputPorts.map((port, index) => (
             <NodePort
               key={`output-${port.name}`}
               port={port}
@@ -124,25 +131,15 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
               isConnected={isPortConnected(id, port.name, 'output')}
               currentValue={nodeOutputs[port.name]}
             />
-          ))}
-        </>
-      )}
-
-      {/* 하위 호환: 포트 정의가 없는 노드는 기본 핸들 유지 */}
-      {!hasCustomPorts && (
-        <>
-          <NodeTargetHandle
-            data={data}
-            handleClassName="!top-4 !-left-[9px] !translate-y-0"
-            handleId="target"
-          />
+          ))
+        ) : (
           <NodeSourceHandle
             data={data}
             handleClassName="!top-4 !-right-[9px] !translate-y-0"
             handleId="source"
           />
-        </>
-      )}
+        )}
+      </>
 
       {/* 노드 헤더 */}
       <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">

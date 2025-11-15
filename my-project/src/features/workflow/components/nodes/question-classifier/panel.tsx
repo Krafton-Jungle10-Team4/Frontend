@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Label } from '@/shared/components/label';
 import { Input } from '@/shared/components/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/select';
@@ -12,11 +12,19 @@ import { useQuestionClassifier } from './hooks/useQuestionClassifier';
 import type { QuestionClassifierNodeType, MemoryConfig } from '@/shared/types/workflow.types';
 import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
 import { VarReferencePicker } from '@/features/workflow/components/variable/VarReferencePicker';
-import { PortType } from '@/shared/types/workflow';
+import { PortType, type ValueSelector } from '@/shared/types/workflow';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field, OutputVars, VarItem } from '../_base/components';
 import { Textarea } from '@/shared/components/textarea';
 import { Separator } from '@/shared/components/separator';
+
+type VariableMappingRecord = Record<
+  string,
+  {
+    target_port: string;
+    source: ValueSelector;
+  }
+>;
 
 /**
  * Question Classifier 노드 설정 패널
@@ -38,6 +46,26 @@ export function QuestionClassifierPanel() {
     mode: 'chat' as const,
     completion_params: { temperature: 0.7 },
   };
+  const variableMappings = (node.data.variable_mappings || {}) as VariableMappingRecord;
+
+  const selectorFromSegments = (
+    segments?: string[],
+    valueType: PortType = PortType.ANY
+  ): ValueSelector | null => {
+    if (!segments || segments.length === 0) return null;
+    return {
+      variable: segments.join('.'),
+      value_type: valueType,
+    };
+  };
+
+  const currentQuerySelector =
+    variableMappings.query?.source ??
+    selectorFromSegments(qcData?.query_variable_selector, PortType.STRING);
+
+  const currentFilesSelector =
+    variableMappings.files?.source ??
+    selectorFromSegments(qcData?.vision?.variable_selector, PortType.ARRAY_FILE);
 
   const {
     classes,
@@ -58,24 +86,84 @@ export function QuestionClassifierPanel() {
     },
   });
 
+  const updateVariableMapping = (
+    portName: string,
+    selector: ValueSelector | null,
+    portType: PortType
+  ) => {
+    const nextMappings = { ...variableMappings };
+    if (selector) {
+      nextMappings[portName] = {
+        target_port: portName,
+        source: {
+          variable: selector.variable,
+          value_type: selector.value_type ?? portType,
+        },
+      };
+    } else {
+      delete nextMappings[portName];
+    }
+
+    updateNode(selectedNodeId!, {
+      variable_mappings: nextMappings,
+    } as any);
+  };
+
+  const querySelectorKey = currentQuerySelector?.variable ?? '';
+  const storedQueryKey = qcData?.query_variable_selector?.join('.') ?? '';
+
+  useEffect(() => {
+    if (!selectedNodeId) return;
+    if (querySelectorKey && querySelectorKey !== storedQueryKey) {
+      updateNode(selectedNodeId, {
+        query_variable_selector: querySelectorKey.split('.'),
+      } as any);
+    } else if (!querySelectorKey && storedQueryKey) {
+      updateNode(selectedNodeId, {
+        query_variable_selector: [],
+      } as any);
+    }
+  }, [querySelectorKey, storedQueryKey, selectedNodeId, updateNode]);
+
+  const fileSelectorKey = currentFilesSelector?.variable ?? '';
+  const storedFileKey = qcData?.vision?.variable_selector?.join('.') ?? '';
+
+  useEffect(() => {
+    if (!selectedNodeId || !qcData?.vision?.enabled) return;
+    if (fileSelectorKey && fileSelectorKey !== storedFileKey) {
+      updateNode(selectedNodeId, {
+        vision: {
+          ...qcData.vision,
+          variable_selector: fileSelectorKey.split('.'),
+        },
+      } as any);
+    } else if (!fileSelectorKey && storedFileKey) {
+      updateNode(selectedNodeId, {
+        vision: {
+          ...qcData.vision,
+          variable_selector: [],
+        },
+      } as any);
+    }
+  }, [fileSelectorKey, storedFileKey, qcData?.vision?.enabled, selectedNodeId, updateNode, qcData?.vision]);
+
   // 검증
+  const hasQueryVariable = Boolean(currentQuerySelector);
+  const hasVisionFiles = !qcData?.vision?.enabled || Boolean(currentFilesSelector);
   const hasErrors =
     !qcData?.model?.provider ||
     !qcData?.model?.name ||
-    !qcData?.query_variable_selector ||
-    qcData.query_variable_selector.length === 0 ||
+    !hasQueryVariable ||
     classes.length === 0 ||
     classes.some((c) => !c.name) ||
-    (qcData?.vision?.enabled && (!qcData.vision.variable_selector || qcData.vision.variable_selector.length === 0));
+    !hasVisionFiles;
 
   const errors: string[] = [];
   if (!qcData?.model?.provider || !qcData?.model?.name) errors.push('모델을 선택해주세요');
-  if (!qcData?.query_variable_selector || qcData.query_variable_selector.length === 0)
-    errors.push('입력 변수를 선택해주세요');
+  if (!hasQueryVariable) errors.push('입력 변수를 선택해주세요');
   if (classes.length === 0) errors.push('최소 1개의 클래스를 추가해주세요');
   if (classes.some((c) => !c.name)) errors.push('모든 클래스에 이름을 입력해주세요');
-  if (qcData?.vision?.enabled && (!qcData.vision.variable_selector || qcData.vision.variable_selector.length === 0))
-    errors.push('Vision 모드에서는 파일 변수를 선택해주세요');
+  if (!hasVisionFiles) errors.push('Vision 모드에서는 파일 변수를 선택해주세요');
 
   // Memory 핸들러들
   const handleMemoryToggle = (enabled: boolean) => {
@@ -153,20 +241,14 @@ export function QuestionClassifierPanel() {
               nodeId={selectedNodeId!}
               portName="query"
               portType={PortType.STRING}
-              value={
-                qcData?.query_variable_selector && qcData.query_variable_selector.length > 0
-                  ? {
-                      variable: qcData.query_variable_selector.join('.'),
-                      value_type: PortType.STRING,
-                    }
-                  : null
-              }
+              value={currentQuerySelector ?? null}
               onChange={(selector) => {
                 if (selector) {
                   handleQueryVarChange(selector.variable.split('.'));
                 } else {
                   handleQueryVarChange([]);
                 }
+                updateVariableMapping('query', selector, PortType.STRING);
               }}
               placeholder="분류할 텍스트 변수 선택..."
             />
@@ -245,7 +327,15 @@ export function QuestionClassifierPanel() {
         <Group title="Vision 설정" description="이미지를 포함한 질문을 분류할 수 있습니다">
           <div className="flex items-center justify-between">
             <Label>Vision 모드 활성화</Label>
-            <Switch checked={qcData?.vision?.enabled ?? false} onCheckedChange={handleVisionToggle} />
+            <Switch
+              checked={qcData?.vision?.enabled ?? false}
+              onCheckedChange={(enabled) => {
+                handleVisionToggle(enabled);
+                if (!enabled) {
+                  updateVariableMapping('files', null, PortType.ARRAY_FILE);
+                }
+              }}
+            />
           </div>
 
           {qcData?.vision?.enabled && (
@@ -254,20 +344,14 @@ export function QuestionClassifierPanel() {
                 nodeId={selectedNodeId!}
                 portName="files"
                 portType={PortType.ARRAY_FILE}
-                value={
-                  qcData?.vision?.variable_selector && qcData.vision.variable_selector.length > 0
-                    ? {
-                        variable: qcData.vision.variable_selector.join('.'),
-                        value_type: PortType.ARRAY_FILE,
-                      }
-                    : null
-                }
+                value={currentFilesSelector ?? null}
                 onChange={(selector) => {
                   if (selector) {
                     handleVisionFileVarChange(selector.variable.split('.'));
                   } else {
                     handleVisionFileVarChange([]);
                   }
+                  updateVariableMapping('files', selector, PortType.ARRAY_FILE);
                 }}
                 placeholder="이미지 파일 변수 선택..."
               />

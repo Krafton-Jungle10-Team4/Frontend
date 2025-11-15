@@ -3,7 +3,12 @@
  * 프론트엔드 스키마 ↔ 백엔드 스키마 변환
  */
 
-import type { Node, Edge } from '@/shared/types/workflow.types';
+import type {
+  Node,
+  Edge,
+  IfElseNodeType,
+  QuestionClassifierNodeType,
+} from '@/shared/types/workflow.types';
 import type { BackendWorkflow, BackendNode } from '@/shared/types/workflowTransform.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type {
@@ -60,6 +65,22 @@ export const transformToBackend = (
           provider_id: (node.data as any).provider_id || '',
           action: (node.data as any).action || '',
           parameters: (node.data as any).parameters || {},
+        }),
+
+        // If-Else 노드 변환
+        ...(node.data.type === BlockEnum.IfElse && {
+          cases: (node.data as IfElseNodeType).cases || [],
+        }),
+
+        // Question Classifier 노드 변환
+        ...(node.data.type === BlockEnum.QuestionClassifier && {
+          query_variable_selector:
+            (node.data as QuestionClassifierNodeType).query_variable_selector || [],
+          model: (node.data as QuestionClassifierNodeType).model || undefined,
+          classes: (node.data as QuestionClassifierNodeType).classes || [],
+          instruction: (node.data as QuestionClassifierNodeType).instruction || '',
+          memory: (node.data as QuestionClassifierNodeType).memory,
+          vision: (node.data as QuestionClassifierNodeType).vision,
         }),
       },
       ports: serializePorts(node.data.ports),
@@ -147,6 +168,21 @@ export const transformFromBackend = (
           provider_id: node.data.provider_id || '',
           action: node.data.action || '',
           parameters: node.data.parameters || {},
+        }),
+
+        // If-Else 노드 변환
+        ...(node.type === 'if-else' && {
+          cases: (node.data as any).cases || [],
+        }),
+
+        // Question Classifier 노드 변환
+        ...(node.type === 'question-classifier' && {
+          query_variable_selector: node.data.query_variable_selector || [],
+          model: node.data.model,
+          classes: node.data.classes || [],
+          instruction: node.data.instruction || '',
+          memory: node.data.memory,
+          vision: node.data.vision,
         }),
       },
     })),

@@ -89,6 +89,23 @@ function isTypeCompatible(sourceType: PortType, targetType: PortType): boolean {
   if (targetType === PortType.ANY) return true;
   if (sourceType === PortType.ANY) return true;
 
+  // 파일 배열 타입은 배열/파일 계열과 상호 호환
+  if (targetType === PortType.ARRAY_FILE) {
+    return (
+      sourceType === PortType.ARRAY_FILE ||
+      sourceType === PortType.ARRAY ||
+      sourceType === PortType.FILE
+    );
+  }
+
+  if (sourceType === PortType.ARRAY_FILE) {
+    return (
+      targetType === PortType.ARRAY_FILE ||
+      targetType === PortType.ARRAY ||
+      targetType === PortType.ANY
+    );
+  }
+
   // 같은 타입만 호환
   return sourceType === targetType;
 }

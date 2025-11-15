@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Node, Edge } from '@/shared/types/workflow.types';
+import type { Node, Edge, IfElseCase, Topic, VisionConfig } from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import { workflowApi } from '../api/workflowApi';
 import { transformFromBackend } from '@/shared/utils/workflowTransform';
@@ -26,7 +26,7 @@ import {
   cloneQuestionClassifierNodeType,
 } from '../constants/nodeTypes';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
-import type { IfElseCase } from '@/shared/types/workflow.types';
+import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -458,6 +458,12 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     if (nodeType === BlockEnum.IfElse) {
       const cases = (node.data.cases as IfElseCase[]) || [];
       ports = generateIfElsePortSchema(cases);
+    }
+
+    if (nodeType === BlockEnum.QuestionClassifier) {
+      const classes = (node.data.classes as Topic[]) || [];
+      const vision = node.data.vision as VisionConfig | undefined;
+      ports = generateQuestionClassifierPortSchema(classes, vision);
     }
 
     const normalizedMappings = normalizeVariableMappingsForNode(

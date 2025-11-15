@@ -9,6 +9,7 @@ export enum PortType {
   NUMBER = 'number',
   BOOLEAN = 'boolean',
   ARRAY = 'array',
+  ARRAY_FILE = 'array_file',
   OBJECT = 'object',
   FILE = 'file',
   ANY = 'any',

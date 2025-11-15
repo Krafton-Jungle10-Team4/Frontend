@@ -5,6 +5,7 @@ import type { Connection, Edge } from '@xyflow/react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { validatePortConnection } from '../utils/portValidation';
 import type { PortDefinition, NodePortSchema } from '@shared/types/workflow';
+import { PortType } from '@shared/types/workflow';
 
 /**
  * 포트 연결 관리 훅
@@ -52,13 +53,31 @@ export function usePortConnection() {
       const sourcePortInfo = getPortInfo(source, sourcePort, 'output');
       const targetPortInfo = getPortInfo(target, targetPort, 'input');
 
-      if (!sourcePortInfo || !targetPortInfo) {
+      if (!sourcePortInfo) {
         console.error('포트 정보를 찾을 수 없습니다.');
         return false;
       }
 
+      let resolvedTargetPort = targetPortInfo;
+      if (!resolvedTargetPort) {
+        const targetNode = nodes.find((n) => n.id === target);
+        const targetPorts = (targetNode?.data?.ports as NodePortSchema | undefined)
+          ?.inputs;
+        if (targetPorts && targetPorts.length > 0) {
+          console.error('포트 정보를 찾을 수 없습니다.');
+          return false;
+        }
+        resolvedTargetPort = {
+          name: targetPort,
+          type: PortType.ANY,
+          required: false,
+          description: 'default handle',
+          display_name: targetPort,
+        };
+      }
+
       // 포트 연결 검증
-      const validation = validatePortConnection(sourcePortInfo, targetPortInfo);
+      const validation = validatePortConnection(sourcePortInfo, resolvedTargetPort);
 
       if (!validation.valid) {
         console.error('연결 불가:', validation.error);
@@ -80,7 +99,7 @@ export function usePortConnection() {
         targetHandle: targetPort,
         data: {
           sourcePort: sourcePortInfo,
-          targetPort: targetPortInfo,
+          targetPort: resolvedTargetPort,
         },
       };
 

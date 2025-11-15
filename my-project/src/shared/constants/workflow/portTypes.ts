@@ -30,6 +30,12 @@ export const PORT_TYPE_META = {
     bgColor: 'bg-orange-100',
     icon: 'RiListIcon',
   },
+  [PortType.ARRAY_FILE]: {
+    label: '파일 배열',
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-100',
+    icon: 'RiFolderImageLine',
+  },
   [PortType.OBJECT]: {
     label: '객체',
     color: 'text-pink-500',
@@ -58,6 +64,7 @@ export const PORT_TYPE_DEFAULTS: Record<PortType, unknown> = {
   [PortType.NUMBER]: 0,
   [PortType.BOOLEAN]: false,
   [PortType.ARRAY]: [],
+  [PortType.ARRAY_FILE]: [],
   [PortType.OBJECT]: {},
   [PortType.FILE]: null,
   [PortType.ANY]: null,
