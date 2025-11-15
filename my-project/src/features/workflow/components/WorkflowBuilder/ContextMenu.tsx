@@ -5,8 +5,10 @@ import { useWorkflowStore } from '../../stores/workflowStore';
 import {
   VARIABLE_ASSIGNER_ICON,
   IF_ELSE_ICON,
+  QUESTION_CLASSIFIER_ICON,
   cloneVariableAssignerNodeType,
   cloneIfElseNodeType,
+  cloneQuestionClassifierNodeType,
 } from '../../constants/nodeTypes';
 
 // 아이콘 매핑
@@ -20,6 +22,7 @@ const ICON_MAP: Record<string, string> = {
   template: '📝', // Template Transform 노드용
   [IF_ELSE_ICON]: '🔀', // IF-ELSE 노드용
   [VARIABLE_ASSIGNER_ICON]: '🧮',
+  [QUESTION_CLASSIFIER_ICON]: '🏷️', // Question Classifier 노드용
 };
 
 // Fallback 노드 타입 (백엔드 API 실패 시 사용)
@@ -35,6 +38,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
   cloneIfElseNodeType(),
   cloneVariableAssignerNodeType(),
+  cloneQuestionClassifierNodeType(),
 ];
 
 // 아이콘 문자열을 이모지로 변환

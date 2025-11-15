@@ -111,6 +111,26 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
     },
   ],
 
+  [BlockEnum.QuestionClassifier]: [
+    {
+      name: 'class_name',
+      type: PortType.STRING,
+      description: '선택된 클래스 이름',
+    },
+    {
+      name: 'usage',
+      type: PortType.OBJECT,
+      description: 'LLM 토큰 사용량 정보',
+      subItems: [
+        {
+          name: 'total_tokens',
+          type: PortType.NUMBER,
+          description: '총 토큰 수',
+        },
+      ],
+    },
+  ],
+
   // 아직 구현되지 않은 노드 타입들
   [BlockEnum.KnowledgeBase]: [],
   [BlockEnum.Code]: [],

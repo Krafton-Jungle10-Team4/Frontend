@@ -20,7 +20,11 @@ import { generatePortSchema } from '@features/workflow/nodes/variable-assigner/u
 import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/validation';
 import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
 import { VarType } from '@features/workflow/nodes/variable-assigner/types';
-import { cloneVariableAssignerNodeType, cloneIfElseNodeType } from '../constants/nodeTypes';
+import {
+  cloneVariableAssignerNodeType,
+  cloneIfElseNodeType,
+  cloneQuestionClassifierNodeType,
+} from '../constants/nodeTypes';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 import type { IfElseCase } from '@/shared/types/workflow.types';
 
@@ -997,6 +1001,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       const hasIfElse = fetched.some(
         (type) => type.type === BlockEnum.IfElse
       );
+      const hasQuestionClassifier = fetched.some(
+        (type) => type.type === BlockEnum.QuestionClassifier
+      );
 
       let nodeTypes = [...fetched];
       if (!hasVariableAssigner) {
@@ -1004,6 +1011,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       }
       if (!hasIfElse) {
         nodeTypes.push(cloneIfElseNodeType());
+      }
+      if (!hasQuestionClassifier) {
+        nodeTypes.push(cloneQuestionClassifierNodeType());
       }
 
       set({ nodeTypes, nodeTypesLoading: false });
