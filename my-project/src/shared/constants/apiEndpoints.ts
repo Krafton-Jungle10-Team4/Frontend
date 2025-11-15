@@ -139,6 +139,12 @@ export const API_ENDPOINTS = {
     KEY_DETAIL: (keyId: string) => `/api/v1/mcp/keys/${keyId}`,
   },
 
+  // Tavily Search API
+  TAVILY: {
+    SEARCH: '/api/v1/tavily/search',
+    VALIDATE_KEY: '/api/v1/tavily/validate-key',
+  },
+
   // 비용 모니터링 (SnapAgent API)
   COST: {
     USAGE: (botId: string) => `/api/v1/cost/usage/${botId}`,
