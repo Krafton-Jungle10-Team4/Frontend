@@ -26,7 +26,7 @@ export function IfElsePanel({ id, data }: IfElsePanelProps) {
     onUpdate: (newCases) => {
       updateNode(id, {
         cases: newCases,
-      });
+      } as any);
     },
   });
 

@@ -3,6 +3,7 @@ import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
+export const IF_ELSE_ICON = 'branch';
 
 export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.Assigner,
@@ -21,6 +22,18 @@ export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
   },
 };
 
+export const IF_ELSE_NODE_TYPE: NodeTypeResponse = {
+  type: BlockEnum.IfElse,
+  label: 'IF-ELSE',
+  icon: IF_ELSE_ICON,
+  description: 'Conditional branching based on variable conditions',
+  max_instances: -1,
+  configurable: true,
+  default_data: {
+    cases: [],
+  },
+};
+
 export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
   ...VARIABLE_ASSIGNER_NODE_TYPE,
   default_data: {
@@ -32,5 +45,12 @@ export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
       >) || {}),
       groups: [],
     },
+  },
+});
+
+export const cloneIfElseNodeType = (): NodeTypeResponse => ({
+  ...IF_ELSE_NODE_TYPE,
+  default_data: {
+    cases: [],
   },
 });
