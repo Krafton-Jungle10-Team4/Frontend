@@ -24,6 +24,7 @@ import {
   cloneVariableAssignerNodeType,
   cloneIfElseNodeType,
   cloneQuestionClassifierNodeType,
+  cloneTavilySearchNodeType,
 } from '../constants/nodeTypes';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
@@ -1010,6 +1011,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       const hasQuestionClassifier = fetched.some(
         (type) => type.type === BlockEnum.QuestionClassifier
       );
+      const hasTavilySearch = fetched.some(
+        (type) => type.type === BlockEnum.TavilySearch
+      );
 
       let nodeTypes = [...fetched];
       if (!hasVariableAssigner) {
@@ -1020,6 +1024,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       }
       if (!hasQuestionClassifier) {
         nodeTypes.push(cloneQuestionClassifierNodeType());
+      }
+      if (!hasTavilySearch) {
+        nodeTypes.push(cloneTavilySearchNodeType());
       }
 
       set({ nodeTypes, nodeTypesLoading: false });

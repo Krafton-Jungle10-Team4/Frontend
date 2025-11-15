@@ -3,10 +3,12 @@ import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
+import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
 export const IF_ELSE_ICON = 'branch';
 export const QUESTION_CLASSIFIER_ICON = 'classifier';
+export const TAVILY_SEARCH_ICON = 'search';
 
 export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.Assigner,
@@ -103,4 +105,43 @@ export const cloneQuestionClassifierNodeType = (): NodeTypeResponse => ({
     },
   },
   ports: generateQuestionClassifierPortSchema([], { enabled: false }), // 빈 classes에 대한 기본 포트
+});
+
+export const TAVILY_SEARCH_NODE_TYPE: NodeTypeResponse = {
+  type: BlockEnum.TavilySearch,
+  label: 'Tavily Search',
+  icon: TAVILY_SEARCH_ICON,
+  description: '실시간 웹 검색을 수행하는 노드',
+  max_instances: -1,
+  configurable: true,
+  default_data: {
+    search_depth: 'basic',
+    topic: 'general',
+    max_results: 5,
+    include_domains: [],
+    exclude_domains: [],
+    time_range: null,
+    start_date: null,
+    end_date: null,
+    include_answer: false,
+    include_raw_content: false,
+  },
+  ports: clonePortSchema(BlockEnum.TavilySearch),
+};
+
+export const cloneTavilySearchNodeType = (): NodeTypeResponse => ({
+  ...TAVILY_SEARCH_NODE_TYPE,
+  default_data: {
+    search_depth: 'basic',
+    topic: 'general',
+    max_results: 5,
+    include_domains: [],
+    exclude_domains: [],
+    time_range: null,
+    start_date: null,
+    end_date: null,
+    include_answer: false,
+    include_raw_content: false,
+  },
+  ports: clonePortSchema(BlockEnum.TavilySearch),
 });

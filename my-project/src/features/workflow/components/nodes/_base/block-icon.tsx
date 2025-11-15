@@ -8,6 +8,7 @@ import Mcp from '../../icons/Mcp';
 import TemplateTransform from '../../icons/TemplateTransform';
 import IfElse from '../../icons/IfElse';
 import QuestionClassifier from '../../icons/QuestionClassifier';
+import Search from '../../icons/Search';
 import clsx from 'clsx';
 
 type BlockIconProps = {
@@ -41,6 +42,7 @@ const getIcon = (type: BlockEnum, className: string) => {
     [BlockEnum.TemplateTransform]: <TemplateTransform className={className} />,
     [BlockEnum.IfElse]: <IfElse className={className} />,
     [BlockEnum.QuestionClassifier]: <QuestionClassifier className={className} />,
+    [BlockEnum.TavilySearch]: <Search className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -58,6 +60,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.TemplateTransform]: 'bg-amber-500',
   [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
+  [BlockEnum.TavilySearch]: 'bg-util-colors-blue-brand-blue-brand-500',
 };
 
 /**
