@@ -6,6 +6,7 @@ import Answer from '../../icons/Answer';
 import KnowledgeRetrieval from '../../icons/KnowledgeRetrieval';
 import Mcp from '../../icons/Mcp';
 import TemplateTransform from '../../icons/TemplateTransform';
+import IfElse from '../../icons/IfElse';
 import clsx from 'clsx';
 
 type BlockIconProps = {
@@ -27,7 +28,7 @@ const ICON_CONTAINER_SIZE_MAP: Record<string, string> = {
  * 노드 타입별 아이콘 컴포넌트 반환
  */
 const getIcon = (type: BlockEnum, className: string) => {
-  const iconMap = {
+  const iconMap: Partial<Record<BlockEnum, JSX.Element>> = {
     [BlockEnum.Start]: <Home className={className} />,
     [BlockEnum.LLM]: <Llm className={className} />,
     [BlockEnum.End]: <Answer className={className} />,
@@ -37,6 +38,7 @@ const getIcon = (type: BlockEnum, className: string) => {
     [BlockEnum.MCP]: <Mcp className={className} />,
     [BlockEnum.Answer]: <Answer className={className} />,
     [BlockEnum.TemplateTransform]: <TemplateTransform className={className} />,
+    [BlockEnum.IfElse]: <IfElse className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -52,6 +54,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.MCP]: 'bg-purple-500',
   [BlockEnum.Answer]: 'bg-cyan-500',
   [BlockEnum.TemplateTransform]: 'bg-amber-500',
+  [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
 };
 
 /**
