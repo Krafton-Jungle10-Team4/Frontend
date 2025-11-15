@@ -21,6 +21,8 @@ import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/val
 import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
 import { VarType } from '@features/workflow/nodes/variable-assigner/types';
 import { cloneVariableAssignerNodeType, cloneIfElseNodeType } from '../constants/nodeTypes';
+import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
+import type { IfElseCase } from '@/shared/types/workflow.types';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -447,6 +449,11 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     if (nodeType === BlockEnum.Assigner) {
       assignerData = ensureVariableAssignerData(node.data as Record<string, any>);
       ports = generatePortSchema(assignerData);
+    }
+
+    if (nodeType === BlockEnum.IfElse) {
+      const cases = (node.data.cases as IfElseCase[]) || [];
+      ports = generateIfElsePortSchema(cases);
     }
 
     const normalizedMappings = normalizeVariableMappingsForNode(

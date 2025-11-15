@@ -1,6 +1,7 @@
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
+import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
 export const IF_ELSE_ICON = 'branch';
@@ -32,6 +33,7 @@ export const IF_ELSE_NODE_TYPE: NodeTypeResponse = {
   default_data: {
     cases: [],
   },
+  ports: generateIfElsePortSchema([]), // 빈 cases에 대한 기본 포트 (ELSE만 존재)
 };
 
 export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
@@ -53,4 +55,5 @@ export const cloneIfElseNodeType = (): NodeTypeResponse => ({
   default_data: {
     cases: [],
   },
+  ports: generateIfElsePortSchema([]), // 빈 cases에 대한 기본 포트
 });

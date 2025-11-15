@@ -4,17 +4,26 @@ import { CaseList } from './components/CaseList';
 import { useIfElseConfig } from './hooks/useIfElseConfig';
 import type { IfElseNodeType } from '@/shared/types/workflow.types';
 import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
+import { validateCases } from './utils/validation';
+import { Alert, AlertDescription } from '@/shared/components/alert';
+import { AlertCircle } from 'lucide-react';
 
-interface IfElsePanelProps {
-  id: string;
-  data: IfElseNodeType;
-}
+/**
+ * IF-ELSE 노드 설정 패널
+ *
+ * 패턴: LLMPanel과 동일하게 store에서 selectedNodeId와 nodes를 읽음
+ * props를 받지 않고 내부에서 선택된 노드를 찾아 사용
+ */
+export function IfElsePanel() {
+  const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
 
-export function IfElsePanel({ id, data }: IfElsePanelProps) {
-  const updateNode = useWorkflowStore((state) => state.updateNode);
+  // 선택된 노드 찾기
+  const node = nodes.find((n) => n.id === selectedNodeId);
 
-  // 안전한 데이터 접근
-  const initialCases = data?.cases ?? [];
+  if (!node) return null;
+
+  const ifElseData = node.data as IfElseNodeType;
+  const initialCases = ifElseData?.cases ?? [];
 
   const {
     cases,
@@ -25,13 +34,18 @@ export function IfElsePanel({ id, data }: IfElsePanelProps) {
     removeCondition,
     toggleLogicalOperator,
   } = useIfElseConfig({
+    nodeId: selectedNodeId!,
     cases: initialCases,
     onUpdate: (newCases) => {
-      updateNode(id, {
+      updateNode(selectedNodeId!, {
         cases: newCases,
       } as any);
     },
   });
+
+  // 전체 검증 상태
+  const validation = validateCases(cases);
+  const hasErrors = !validation.isValid;
 
   return (
     <div className="space-y-4 p-4">
@@ -43,6 +57,21 @@ export function IfElsePanel({ id, data }: IfElsePanelProps) {
         </p>
       </div>
 
+      {/* 검증 에러 표시 */}
+      {hasErrors && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="text-sm font-medium mb-1">설정을 완료해주세요</div>
+            <ul className="text-xs space-y-1">
+              {validation.errors.map((error, idx) => (
+                <li key={idx}>• {error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* 케이스 목록 */}
       {cases.length === 0 ? (
         <div className="text-sm text-gray-400 italic py-4 text-center">
@@ -50,7 +79,7 @@ export function IfElsePanel({ id, data }: IfElsePanelProps) {
         </div>
       ) : (
         <CaseList
-          nodeId={id}
+          nodeId={selectedNodeId!}
           cases={cases}
           onAddCondition={addCondition}
           onUpdateCondition={updateCondition}
