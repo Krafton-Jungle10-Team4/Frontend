@@ -22,6 +22,7 @@ export enum BlockEnum {
   IfElse = 'if-else',
   Assigner = 'variable-assigner',
   Http = 'http',
+  QuestionClassifier = 'question-classifier',
 }
 
 /**
@@ -295,4 +296,61 @@ export type HttpNodeType = CommonNodeType<{
   headers?: Array<{ key: string; value: string }>;
   body?: string;
   timeout?: number;
+}>;
+
+/**
+ * Question Classifier - Topic (분류 카테고리)
+ */
+export type Topic = {
+  id: string;
+  name: string;
+};
+
+/**
+ * Question Classifier - Model Config
+ */
+export type ModelConfig = {
+  provider: string;
+  name: string;
+  mode: 'chat' | 'completion';
+  completion_params: {
+    temperature: number;
+    max_tokens?: number;
+  };
+};
+
+/**
+ * Question Classifier - Vision Config
+ */
+export type VisionConfig = {
+  enabled: boolean;
+  variable_selector?: string[];
+  detail?: 'auto' | 'low' | 'high';
+};
+
+/**
+ * Question Classifier - Memory Config
+ */
+export type MemoryConfig = {
+  role_prefix: {
+    user: string;
+    assistant: string;
+  };
+  window: {
+    enabled: boolean;
+    size: number;
+  };
+};
+
+/**
+ * Question Classifier 노드 타입
+ */
+export type QuestionClassifierNodeType = CommonNodeType<{
+  type: BlockEnum.QuestionClassifier;
+  query_variable_selector?: string[];
+  model?: ModelConfig;
+  classes?: Topic[];
+  instruction?: string;
+  memory?: MemoryConfig;
+  vision?: VisionConfig;
 }>;
