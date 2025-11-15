@@ -6,7 +6,8 @@ import { memo } from 'react';
  * 조건 분기 처리
  */
 const IfElseNode = ({ data }: NodeProps<IfElseNodeType>) => {
-  const { cases = [] } = data;
+  // 안전한 데이터 접근
+  const cases = data?.cases ?? [];
 
   return (
     <div className="px-3 py-2 space-y-2">
