@@ -9,6 +9,26 @@ import {
   VariablePoolState,
 } from '@shared/types/workflow';
 
+const resolveNestedValue = (value: unknown, key: string): unknown => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    const index = Number(key);
+    if (Number.isNaN(index)) {
+      return undefined;
+    }
+    return value[index];
+  }
+
+  if (typeof value === 'object') {
+    return (value as Record<string, unknown>)[key];
+  }
+
+  return undefined;
+};
+
 /**
  * Variable Pool Store Interface
  *
@@ -197,15 +217,44 @@ export const useVariablePoolStore = create<VariablePoolStore>()(
       },
 
       resolveVariablePath: (path) => {
-        // "node_id.port_name" 파싱
-        const parts = path.split('.');
-        if (parts.length !== 2) {
+        const segments = path.split('.').filter(Boolean);
+        if (!segments.length) {
           console.error(`Invalid variable path: ${path}`);
           return undefined;
         }
 
-        const [nodeId, portName] = parts;
-        return get().getNodeOutput(nodeId, portName);
+        const prefix = segments[0];
+        const remainder = segments.slice(1);
+        const normalized = prefix.toLowerCase();
+
+        if (['env', 'environment'].includes(normalized)) {
+          const key = remainder.join('.') || prefix;
+          return get().environmentVariables[key];
+        }
+
+        if (['conv', 'conversation'].includes(normalized)) {
+          const key = remainder.join('.') || prefix;
+          return get().conversationVariables[key];
+        }
+
+        if (segments.length < 2) {
+          console.error(`Invalid variable selector: ${path}`);
+          return undefined;
+        }
+
+        let value = get().getNodeOutput(prefix, remainder[0]);
+        if (value === undefined) {
+          return undefined;
+        }
+
+        for (const attr of remainder.slice(1)) {
+          value = resolveNestedValue(value, attr);
+          if (value === undefined) {
+            break;
+          }
+        }
+
+        return value;
       },
 
       // === 환경 변수 관리 구현 ===
