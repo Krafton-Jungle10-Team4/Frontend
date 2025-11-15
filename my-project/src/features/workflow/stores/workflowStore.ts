@@ -22,12 +22,15 @@ import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable
 import { VarType } from '@features/workflow/nodes/variable-assigner/types';
 import {
   cloneVariableAssignerNodeType,
+  cloneAssignerNodeType,
   cloneIfElseNodeType,
   cloneQuestionClassifierNodeType,
   cloneTavilySearchNodeType,
 } from '../constants/nodeTypes';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
+import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
+import type { AssignerNodeType, AssignerOperation } from '@/shared/types/workflow.types';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -52,6 +55,9 @@ const stringifyValue = (value: unknown): string => {
 };
 
 const isVariableAssignerNode = (node: Node): boolean =>
+  (node.data.type as BlockEnum) === BlockEnum.VariableAssigner;
+
+const isAssignerNode = (node: Node): boolean =>
   (node.data.type as BlockEnum) === BlockEnum.Assigner;
 
 const ensureVariableAssignerData = (
@@ -451,9 +457,16 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
       clonePortSchema(nodeType);
     let assignerData: VariableAssignerNodeData | undefined;
 
-    if (nodeType === BlockEnum.Assigner) {
+    // Legacy Variable Assigner (single-output)
+    if (nodeType === BlockEnum.VariableAssigner) {
       assignerData = ensureVariableAssignerData(node.data as Record<string, any>);
       ports = generatePortSchema(assignerData);
+    }
+
+    // New Assigner (per-operation ports)
+    if (nodeType === BlockEnum.Assigner) {
+      const operations = (node.data as AssignerNodeType).operations || [];
+      ports = generateAssignerPortSchema(operations);
     }
 
     if (nodeType === BlockEnum.IfElse) {
@@ -645,12 +658,53 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           [targetPort]: `${sourceNode}.${sourcePort}`,
         };
 
+        let updatedData: any = {
+          ...node.data,
+          variable_mappings: newMappings,
+        };
+
+        // Assigner 노드: operation metadata 업데이트
+        if (node.data.type === BlockEnum.Assigner) {
+          const match = targetPort.match(/^operation_(\d+)_(target|value)$/);
+          if (match) {
+            const opIndex = parseInt(match[1], 10);
+            const portType = match[2]; // 'target' or 'value'
+            const operations = [...((node.data as AssignerNodeType).operations || [])];
+
+            if (operations[opIndex]) {
+              // 소스 포트의 data_type 추론 (향후 개선 가능)
+              const sourceNodeObj = state.nodes.find(n => n.id === sourceNode);
+              const sourcePortDef = sourceNodeObj?.data.ports?.outputs?.find(p => p.name === sourcePort);
+
+              if (portType === 'target') {
+                operations[opIndex] = {
+                  ...operations[opIndex],
+                  target_variable: {
+                    port_name: targetPort,
+                    data_type: sourcePortDef?.type,
+                  },
+                };
+              } else if (portType === 'value') {
+                operations[opIndex] = {
+                  ...operations[opIndex],
+                  source_variable: {
+                    port_name: targetPort,
+                    data_type: sourcePortDef?.type,
+                  },
+                };
+              }
+
+              updatedData = {
+                ...updatedData,
+                operations,
+              };
+            }
+          }
+        }
+
         return {
           ...node,
-          data: {
-            ...node.data,
-            variable_mappings: newMappings,
-          },
+          data: updatedData,
         };
       });
 
@@ -684,12 +738,43 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         const currentMappings = node.data?.variable_mappings || {};
         const { [targetPort]: _, ...remainingMappings } = currentMappings;
 
+        let updatedData: any = {
+          ...node.data,
+          variable_mappings: remainingMappings,
+        };
+
+        // Assigner 노드: operation metadata 제거
+        if (node.data.type === BlockEnum.Assigner) {
+          const match = targetPort.match(/^operation_(\d+)_(target|value)$/);
+          if (match) {
+            const opIndex = parseInt(match[1], 10);
+            const portType = match[2]; // 'target' or 'value'
+            const operations = [...((node.data as AssignerNodeType).operations || [])];
+
+            if (operations[opIndex]) {
+              if (portType === 'target') {
+                operations[opIndex] = {
+                  ...operations[opIndex],
+                  target_variable: undefined,
+                };
+              } else if (portType === 'value') {
+                operations[opIndex] = {
+                  ...operations[opIndex],
+                  source_variable: undefined,
+                };
+              }
+
+              updatedData = {
+                ...updatedData,
+                operations,
+              };
+            }
+          }
+        }
+
         return {
           ...node,
-          data: {
-            ...node.data,
-            variable_mappings: remainingMappings,
-          },
+          data: updatedData,
         };
       });
 
@@ -1003,6 +1088,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
       // Check for missing node types and add them if necessary
       const hasVariableAssigner = fetched.some(
+        (type) => type.type === BlockEnum.VariableAssigner
+      );
+      const hasAssigner = fetched.some(
         (type) => type.type === BlockEnum.Assigner
       );
       const hasIfElse = fetched.some(
@@ -1018,6 +1106,9 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       let nodeTypes = [...fetched];
       if (!hasVariableAssigner) {
         nodeTypes.push(cloneVariableAssignerNodeType());
+      }
+      if (!hasAssigner) {
+        nodeTypes.push(cloneAssignerNodeType());
       }
       if (!hasIfElse) {
         nodeTypes.push(cloneIfElseNodeType());

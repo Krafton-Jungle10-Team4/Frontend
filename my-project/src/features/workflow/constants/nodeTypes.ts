@@ -3,6 +3,7 @@ import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
 import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
+import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
 import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
@@ -12,7 +13,7 @@ export const QUESTION_CLASSIFIER_ICON = 'classifier';
 export const TAVILY_SEARCH_ICON = 'search';
 
 export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
-  type: BlockEnum.Assigner,
+  type: BlockEnum.VariableAssigner,
   label: 'Variable Assigner',
   icon: VARIABLE_ASSIGNER_ICON,
   description: 'Collect and regroup variables from previous nodes',
@@ -43,6 +44,7 @@ export const ASSIGNER_NODE_TYPE: NodeTypeResponse = {
       selected_operation: undefined,
     },
   },
+  ports: generateAssignerPortSchema([]), // Empty operations = no ports initially
 };
 
 export const IF_ELSE_NODE_TYPE: NodeTypeResponse = {
@@ -107,6 +109,7 @@ export const cloneAssignerNodeType = (): NodeTypeResponse => ({
       selected_operation: undefined,
     },
   },
+  ports: generateAssignerPortSchema([]), // Empty operations = no ports initially
 });
 
 export const cloneIfElseNodeType = (): NodeTypeResponse => ({

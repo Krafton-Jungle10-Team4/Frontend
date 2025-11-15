@@ -11,6 +11,7 @@ import { Box, Group } from '../_base/components/layout';
 import { Button } from '@shared/components/button';
 import { OperationList } from './OperationList';
 import type { AssignerNodeType, AssignerOperation, WriteMode, AssignerInputType } from '@/shared/types/workflow.types';
+import { generateAssignerPortSchema } from './utils/portSchemaGenerator';
 
 export const AssignerPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
@@ -23,7 +24,6 @@ export const AssignerPanel = () => {
 
   const handleAddOperation = () => {
     const newOperationId = `op_${Date.now()}`;
-    const newOperationIndex = assignerData.operations?.length || 0;
 
     // 새 작업 추가
     const newOperation: AssignerOperation = {
@@ -35,14 +35,13 @@ export const AssignerPanel = () => {
 
     const updatedOperations = [...(assignerData.operations || []), newOperation];
 
+    // 포트 동적 생성
+    const updatedPorts = generateAssignerPortSchema(updatedOperations);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
+      ports: updatedPorts,
     });
-
-    // TODO: 포트 동적 추가 로직
-    // - operation_{index}_target 입력 포트
-    // - operation_{index}_value 입력 포트 (조건부)
-    // - operation_{index}_result 출력 포트
   };
 
   const handleOperationChange = (
@@ -53,8 +52,12 @@ export const AssignerPanel = () => {
       op.id === operationId ? { ...op, ...changes } : op
     );
 
+    // 포트 재생성 (input_type 변경 시 value 포트 유무가 바뀔 수 있음)
+    const updatedPorts = generateAssignerPortSchema(updatedOperations || []);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
+      ports: updatedPorts,
     });
   };
 
@@ -69,12 +72,13 @@ export const AssignerPanel = () => {
       (op) => op.id !== operationId
     );
 
+    // 포트 재생성 (해당 operation의 포트들이 제거됨)
+    const updatedPorts = generateAssignerPortSchema(updatedOperations || []);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
+      ports: updatedPorts,
     });
-
-    // TODO: 포트 제거 로직
-    // - 해당 인덱스의 입력/출력 포트 제거
   };
 
   return (

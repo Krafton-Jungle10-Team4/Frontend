@@ -11,7 +11,7 @@ import AnswerNode from './answer/node';
 import TemplateTransformNode from './template-transform/node';
 import IfElseNode from './if-else/node';
 import QuestionClassifierNode from './question-classifier/node';
-// import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
+import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
 import AssignerNode from './assigner/node';
 import TavilySearchNode from './tavily-search/node';
 
@@ -25,7 +25,7 @@ import { AnswerPanel } from './answer/panel';
 import { TemplateTransformPanel } from './template-transform/panel';
 import { IfElsePanel } from './if-else/panel';
 import { QuestionClassifierPanel } from './question-classifier/panel';
-// import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
+import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
 import { AssignerPanel } from './assigner/panel';
 import { TavilySearchPanel } from './tavily-search/panel';
 
@@ -43,7 +43,8 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.TemplateTransform]: TemplateTransformNode,
   [BlockEnum.IfElse]: IfElseNode,
   [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
-  [BlockEnum.Assigner]: AssignerNode,
+  [BlockEnum.VariableAssigner]: VariableAssignerNode, // Legacy
+  [BlockEnum.Assigner]: AssignerNode, // New
   [BlockEnum.TavilySearch]: TavilySearchNode,
   [BlockEnum.Http]: (() => null) as any,
   [BlockEnum.Code]: (() => null) as any,
@@ -63,6 +64,7 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.TemplateTransform]: TemplateTransformPanel,
   [BlockEnum.IfElse]: IfElsePanel,
   [BlockEnum.QuestionClassifier]: QuestionClassifierPanel,
-  [BlockEnum.Assigner]: AssignerPanel,
+  [BlockEnum.VariableAssigner]: VariableAssignerPanel, // Legacy
+  [BlockEnum.Assigner]: AssignerPanel, // New
   [BlockEnum.TavilySearch]: TavilySearchPanel,
 };

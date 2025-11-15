@@ -20,7 +20,8 @@ export enum BlockEnum {
   Code = 'code',
   TemplateTransform = 'template-transform',
   IfElse = 'if-else',
-  Assigner = 'variable-assigner',
+  VariableAssigner = 'variable-assigner', // Legacy node
+  Assigner = 'assigner', // New node with per-operation ports
   Http = 'http',
   QuestionClassifier = 'question-classifier',
   TavilySearch = 'tavily-search',

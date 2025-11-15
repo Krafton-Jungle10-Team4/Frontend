@@ -8,6 +8,7 @@ import type {
   Edge,
   IfElseNodeType,
   QuestionClassifierNodeType,
+  AssignerNodeType,
 } from '@/shared/types/workflow.types';
 import type { BackendWorkflow, BackendNode } from '@/shared/types/workflowTransform.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
@@ -18,6 +19,7 @@ import type {
   VariableMapping,
 } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
+import * as assignerTransformers from '@/features/workflow/components/nodes/assigner/api/transformers';
 
 /**
  * 프론트엔드 노드/엣지 → 백엔드 스키마 변환
@@ -95,6 +97,16 @@ export const transformToBackend = (
           end_date: (node.data as any).end_date || null,
           include_answer: (node.data as any).include_answer || false,
           include_raw_content: (node.data as any).include_raw_content || false,
+        }),
+
+        // Assigner 노드 변환
+        ...(node.data.type === BlockEnum.Assigner && {
+          version: (node.data as AssignerNodeType).version || '2',
+          operations: ((node.data as AssignerNodeType).operations || []).map(op => ({
+            write_mode: op.write_mode,
+            input_type: op.input_type,
+            constant_value: op.constant_value,
+          })),
         }),
       },
       ports: serializePorts(node.data.ports),
@@ -211,6 +223,22 @@ export const transformFromBackend = (
           end_date: node.data.end_date || null,
           include_answer: node.data.include_answer || false,
           include_raw_content: node.data.include_raw_content || false,
+        }),
+
+        // Assigner 노드 역변환
+        ...(node.type === 'assigner' && {
+          version: node.data.version || '2',
+          operations: (node.data.operations || []).map((op: any, index: number) => ({
+            id: `op_${index}_${Date.now()}`,
+            write_mode: op.write_mode,
+            input_type: op.input_type,
+            constant_value: op.constant_value,
+            // target_variable와 source_variable는 엣지 연결로부터 복원됨
+          })),
+          ui_state: {
+            expanded: true,
+            selected_operation: undefined,
+          },
         }),
       },
     })),
