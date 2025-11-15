@@ -19,6 +19,17 @@ const blockPriority: Record<BlockEnum, number> = {
   [BlockEnum.Start]: 0,
   [BlockEnum.KnowledgeRetrieval]: 1,
   [BlockEnum.LLM]: 2,
+  [BlockEnum.MCP]: 2,
+  [BlockEnum.Answer]: 2,
+  [BlockEnum.KnowledgeBase]: 1,
+  [BlockEnum.Code]: 2,
+  [BlockEnum.TemplateTransform]: 2,
+  [BlockEnum.IfElse]: 2,
+  [BlockEnum.VariableAssigner]: 2,
+  [BlockEnum.Assigner]: 2,
+  [BlockEnum.Http]: 2,
+  [BlockEnum.QuestionClassifier]: 2,
+  [BlockEnum.TavilySearch]: 2,
   [BlockEnum.End]: 3,
 };
 

@@ -11,6 +11,7 @@ export const ASSIGNER_ICON = 'assigner';
 export const IF_ELSE_ICON = 'branch';
 export const QUESTION_CLASSIFIER_ICON = 'classifier';
 export const TAVILY_SEARCH_ICON = 'search';
+export const ANSWER_ICON = 'message';
 
 export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.VariableAssigner,
@@ -177,4 +178,27 @@ export const cloneTavilySearchNodeType = (): NodeTypeResponse => ({
     include_raw_content: false,
   },
   ports: clonePortSchema(BlockEnum.TavilySearch),
+});
+
+export const ANSWER_NODE_TYPE: NodeTypeResponse = {
+  type: BlockEnum.Answer,
+  label: 'Answer',
+  icon: ANSWER_ICON,
+  description: '워크플로우의 최종 응답을 정의합니다',
+  max_instances: -1,
+  configurable: true,
+  default_data: {
+    template: '',
+    description: '',
+  },
+  ports: clonePortSchema(BlockEnum.Answer),
+};
+
+export const cloneAnswerNodeType = (): NodeTypeResponse => ({
+  ...ANSWER_NODE_TYPE,
+  default_data: {
+    template: '',
+    description: '',
+  },
+  ports: clonePortSchema(BlockEnum.Answer),
 });
