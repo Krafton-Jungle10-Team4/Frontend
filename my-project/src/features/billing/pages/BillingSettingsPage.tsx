@@ -105,6 +105,10 @@ export function BillingSettingsPage() {
     }
 
     const { current_plan, usage, billing_cycle } = billingStatus;
+    const botUsage = billingStatus.bot_usage ?? [];
+    const sortedBotUsage = [...botUsage].sort(
+      (a, b) => b.total_cost - a.total_cost
+    );
     const isFreePlan = current_plan.plan_id === 'free';
     const planDetails = mockPlans.find((plan) => plan.plan_id === current_plan.plan_id);
     const creditUsagePercentage =
@@ -336,6 +340,56 @@ export function BillingSettingsPage() {
               </CardContent>
             </Card>
           </div>
+
+          <Card className="rounded-2xl border border-gray-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                {language === 'en' ? 'Bot Usage' : '봇별 사용량'}
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                {language === 'en'
+                  ? 'Cost and token usage for each deployed bot this cycle.'
+                  : '이번 결제 주기 동안 각 봇이 사용한 비용과 토큰 수입니다.'}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {sortedBotUsage.length === 0 ? (
+                <div className="rounded-2xl bg-gray-50 p-6 text-center text-sm text-gray-500">
+                  {language === 'en'
+                    ? 'No bot usage has been recorded yet.'
+                    : '아직 사용량이 기록된 봇이 없습니다.'}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sortedBotUsage.map((bot) => (
+                    <div
+                      key={bot.bot_id}
+                      className="flex items-center justify-between rounded-2xl border border-gray-100 p-4"
+                    >
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {bot.bot_name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {language === 'en'
+                            ? `${bot.total_requests} requests · ${bot.total_tokens} tokens`
+                            : `${bot.total_requests}회 요청 · ${bot.total_tokens} 토큰`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-semibold text-gray-900">
+                          ${bot.total_cost.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {language === 'en' ? 'This cycle' : '이번 주기'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           <Card className="rounded-2xl border border-gray-100 shadow-sm">
             <CardHeader>

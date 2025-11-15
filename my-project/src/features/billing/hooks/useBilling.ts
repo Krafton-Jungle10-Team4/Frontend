@@ -71,12 +71,31 @@ export function useBilling() {
 
         if (!isMounted) return;
 
-        const totalCost = usageResults.reduce((sum, result) => {
-          if (result.status === 'fulfilled') {
-            return sum + result.value.totalCost;
+        const botUsageDetails = bots.map((bot, index) => {
+          const result = usageResults[index];
+          if (result?.status === 'fulfilled') {
+            const summary = result.value;
+            return {
+              bot_id: bot.id,
+              bot_name: bot.name,
+              total_cost: Number(summary.totalCost.toFixed(2)),
+              total_tokens: summary.totalTokens,
+              total_requests: summary.totalRequests,
+            };
           }
-          return sum;
-        }, 0);
+          return {
+            bot_id: bot.id,
+            bot_name: bot.name,
+            total_cost: 0,
+            total_tokens: 0,
+            total_requests: 0,
+          };
+        });
+
+        const totalCost = botUsageDetails.reduce(
+          (sum, usage) => sum + usage.total_cost,
+          0
+        );
 
         const totalCredit = planMeta.credits.amount;
         const creditRemaining = Math.max(totalCredit - totalCost, 0);
@@ -95,6 +114,7 @@ export function useBilling() {
             credit_remaining: Number(creditRemaining.toFixed(2)),
           },
           billing_cycle: billingCycle,
+          bot_usage: botUsageDetails,
         });
         setSyncedPlanId(currentPlanId);
         setError(null);

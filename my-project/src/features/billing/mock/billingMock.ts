@@ -20,6 +20,14 @@ export interface Plan {
   };
 }
 
+export interface BillingBotUsage {
+  bot_id: string;
+  bot_name: string;
+  total_cost: number;
+  total_tokens: number;
+  total_requests: number;
+}
+
 // 현재 사용자/팀의 구독 상태 타입을 정의합니다.
 export interface BillingStatus {
   current_plan: {
@@ -35,6 +43,7 @@ export interface BillingStatus {
     start_date: string;
     end_date: string;
   };
+  bot_usage?: BillingBotUsage[];
 }
 
 // 3가지 구독 플랜에 대한 Mock 데이터 배열입니다.
@@ -120,6 +129,7 @@ export const mockBillingStatus: BillingStatus = {
     start_date: '2025-11-01T00:00:00Z',
     end_date: '2025-11-30T23:59:59Z',
   },
+  bot_usage: [],
 };
 
 // 시나리오: Free 플랜 사용자의 Mock 데이터
@@ -137,4 +147,5 @@ export const mockFreeUserBillingStatus: BillingStatus = {
       start_date: '2025-11-01T00:00:00Z',
       end_date: '2025-11-30T23:59:59Z',
     },
+    bot_usage: [],
   };

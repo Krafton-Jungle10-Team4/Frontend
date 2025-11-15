@@ -63,6 +63,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         start_date: today.toISOString(),
         end_date: endDate.toISOString(),
       },
+      bot_usage: [],
     };
 
     set({ syncedPlanId: null });
