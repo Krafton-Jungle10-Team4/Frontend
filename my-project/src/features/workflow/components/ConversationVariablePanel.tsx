@@ -20,6 +20,7 @@ import {
 import { Label } from '@shared/components/label';
 import { Trash2 } from 'lucide-react';
 import { useWorkflowStore } from '../stores/workflowStore';
+import { useVariablePoolStore } from '../stores/variablePoolStore';
 import type { NodeVariableMappings, ValueSelector } from '@shared/types/workflow';
 
 type VariableType = 'string' | 'number' | 'boolean' | 'object' | 'array';
@@ -117,6 +118,7 @@ type ConversationVariablePanelProps = {
 export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVariablePanelProps) => {
   const conversationVariables = useWorkflowStore((state) => state.conversationVariables);
   const setConversationVariables = useWorkflowStore((state) => state.setConversationVariables);
+  const liveConversationVariables = useVariablePoolStore((state) => state.conversationVariables);
 
   const [items, setItems] = useState<VariableItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -281,6 +283,19 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
           <Button variant="outline" onClick={handleAddVariable} className="w-full">
             + 변수 추가
           </Button>
+
+          <div className="mt-6 space-y-2">
+            <Label className="text-xs text-gray-600 dark:text-gray-300">실시간 미리보기</Label>
+            <div className="rounded-lg border bg-gray-50 dark:bg-gray-900/40 p-3 text-xs text-gray-700 dark:text-gray-200">
+              {liveConversationVariables && Object.keys(liveConversationVariables).length > 0 ? (
+                <pre className="whitespace-pre-wrap text-[11px] leading-relaxed">
+                  {JSON.stringify(liveConversationVariables, null, 2)}
+                </pre>
+              ) : (
+                <p className="text-muted-foreground">워크플로우 실행 중 수집된 대화 변수가 없습니다.</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <SheetFooter className="mt-6">
@@ -295,4 +310,3 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
     </Sheet>
   );
 };
-
