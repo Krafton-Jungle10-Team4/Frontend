@@ -5,6 +5,7 @@ import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/port
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
 export const IF_ELSE_ICON = 'branch';
+export const QUESTION_CLASSIFIER_ICON = 'classifier';
 
 export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.Assigner,
@@ -36,6 +37,26 @@ export const IF_ELSE_NODE_TYPE: NodeTypeResponse = {
   ports: generateIfElsePortSchema([]), // 빈 cases에 대한 기본 포트 (ELSE만 존재)
 };
 
+export const QUESTION_CLASSIFIER_NODE_TYPE: NodeTypeResponse = {
+  type: BlockEnum.QuestionClassifier,
+  label: 'Question Classifier',
+  icon: QUESTION_CLASSIFIER_ICON,
+  description: 'Classify questions into predefined categories using AI',
+  max_instances: -1,
+  configurable: true,
+  default_data: {
+    classes: [],
+    model: {
+      provider: 'openai',
+      name: 'gpt-4',
+      mode: 'chat' as const,
+      completion_params: {
+        temperature: 0.7,
+      },
+    },
+  },
+};
+
 export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
   ...VARIABLE_ASSIGNER_NODE_TYPE,
   default_data: {
@@ -56,4 +77,19 @@ export const cloneIfElseNodeType = (): NodeTypeResponse => ({
     cases: [],
   },
   ports: generateIfElsePortSchema([]), // 빈 cases에 대한 기본 포트
+});
+
+export const cloneQuestionClassifierNodeType = (): NodeTypeResponse => ({
+  ...QUESTION_CLASSIFIER_NODE_TYPE,
+  default_data: {
+    classes: [],
+    model: {
+      provider: 'openai',
+      name: 'gpt-4',
+      mode: 'chat' as const,
+      completion_params: {
+        temperature: 0.7,
+      },
+    },
+  },
 });
