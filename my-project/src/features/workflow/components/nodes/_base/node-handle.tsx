@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import type { CSSProperties } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
@@ -8,6 +9,8 @@ type NodeHandleProps = {
   data: CommonNodeType;
   handleId: string;
   handleClassName?: string;
+  style?: CSSProperties;
+  label?: string;
 };
 
 /**
@@ -15,7 +18,7 @@ type NodeHandleProps = {
  * 노드의 왼쪽에 위치하여 다른 노드로부터 연결을 받음
  */
 export const NodeTargetHandle = memo(
-  ({ data, handleId, handleClassName }: NodeHandleProps) => {
+  ({ data, handleId, handleClassName, style }: NodeHandleProps) => {
     const connected = data._connectedTargetHandleIds?.includes(handleId);
 
     return (
@@ -30,6 +33,7 @@ export const NodeTargetHandle = memo(
           data.type === BlockEnum.Start && 'opacity-0',
           handleClassName
         )}
+        style={style}
         isConnectable={true}
       />
     );
@@ -42,7 +46,7 @@ NodeTargetHandle.displayName = 'NodeTargetHandle';
  * 노드의 오른쪽에 위치하여 다른 노드로 연결을 생성
  */
 export const NodeSourceHandle = memo(
-  ({ data, handleId, handleClassName }: NodeHandleProps) => {
+  ({ data, handleId, handleClassName, style, label }: NodeHandleProps) => {
     const connected = data._connectedSourceHandleIds?.includes(handleId);
 
     return (
@@ -56,6 +60,8 @@ export const NodeSourceHandle = memo(
           connected && '!border-teal-500 !bg-teal-100',
           handleClassName
         )}
+        style={style}
+        title={label}
         isConnectable={true}
       />
     );

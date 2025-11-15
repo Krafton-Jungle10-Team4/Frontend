@@ -1,8 +1,14 @@
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
-import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
-import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
+import {
+  generateIfElsePortSchema,
+  createDefaultIfElseCase,
+} from '../components/nodes/if-else/utils/portSchemaGenerator';
+import {
+  generateQuestionClassifierPortSchema,
+  createDefaultQuestionClassifierClasses,
+} from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
 import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
@@ -113,33 +119,41 @@ export const cloneAssignerNodeType = (): NodeTypeResponse => ({
   ports: generateAssignerPortSchema([]), // Empty operations = no ports initially
 });
 
-export const cloneIfElseNodeType = (): NodeTypeResponse => ({
-  ...IF_ELSE_NODE_TYPE,
-  default_data: {
-    cases: [],
-  },
-  ports: generateIfElsePortSchema([]), // 빈 cases에 대한 기본 포트
-});
+export const cloneIfElseNodeType = (): NodeTypeResponse => {
+  const defaultCases = [createDefaultIfElseCase()];
+  return {
+    ...IF_ELSE_NODE_TYPE,
+    default_data: {
+      cases: defaultCases,
+    },
+    ports: generateIfElsePortSchema(defaultCases),
+  };
+};
 
-export const cloneQuestionClassifierNodeType = (): NodeTypeResponse => ({
-  ...QUESTION_CLASSIFIER_NODE_TYPE,
-  default_data: {
-    classes: [],
-    model: {
-      provider: 'openai',
-      name: 'gpt-4',
-      mode: 'chat' as const,
-      completion_params: {
-        temperature: 0.7,
+export const cloneQuestionClassifierNodeType = (): NodeTypeResponse => {
+  const defaultClasses = createDefaultQuestionClassifierClasses();
+  return {
+    ...QUESTION_CLASSIFIER_NODE_TYPE,
+    default_data: {
+      classes: defaultClasses,
+      model: {
+        provider: 'openai',
+        name: 'gpt-4',
+        mode: 'chat' as const,
+        completion_params: {
+          temperature: 0.7,
+        },
+      },
+      query_variable_selector: [],
+      vision: {
+        enabled: false,
       },
     },
-    query_variable_selector: [],
-    vision: {
+    ports: generateQuestionClassifierPortSchema(defaultClasses, {
       enabled: false,
-    },
-  },
-  ports: generateQuestionClassifierPortSchema([], { enabled: false }), // 빈 classes에 대한 기본 포트
-});
+    }),
+  };
+};
 
 export const TAVILY_SEARCH_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.TavilySearch,

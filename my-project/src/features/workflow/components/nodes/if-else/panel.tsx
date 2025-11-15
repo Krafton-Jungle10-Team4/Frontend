@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/shared/components/alert';
 import { AlertCircle } from 'lucide-react';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group } from '../_base/components/layout';
+import { generateIfElsePortSchema } from './utils/portSchemaGenerator';
 
 /**
  * IF-ELSE 노드 설정 패널
@@ -41,6 +42,7 @@ export function IfElsePanel() {
     onUpdate: (newCases) => {
       updateNode(selectedNodeId!, {
         cases: newCases,
+        ports: generateIfElsePortSchema(newCases),
       } as any);
     },
   });

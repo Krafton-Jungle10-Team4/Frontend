@@ -1,5 +1,6 @@
 import type { NodeProps, QuestionClassifierNodeType } from '@/shared/types/workflow.types';
 import { memo } from 'react';
+import { NodeSourceHandle } from '../_base/node-handle';
 
 /**
  * Question Classifier 노드
@@ -37,16 +38,28 @@ const QuestionClassifierNode = ({ data }: NodeProps<QuestionClassifierNodeType>)
           <div className="text-xs text-gray-400 italic">클래스 없음</div>
         ) : (
           <div className="space-y-1">
-            {classes.map((topic, idx) => (
-              <div
-                key={topic.id}
-                className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5"
-              >
-                <div className="system-xs-medium text-text-primary">
-                  {topic.name || `Class ${idx + 1}`}
+            {classes.map((topic, idx) => {
+              const baseId = topic.id?.startsWith('class_') ? topic.id : `class_${topic.id}`;
+              const handleId = `${baseId}_branch`;
+              const display = topic.name || `Class ${idx + 1}`;
+
+              return (
+                <div
+                  key={topic.id}
+                  className="relative rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5 pr-8"
+                >
+                  <NodeSourceHandle
+                    data={data}
+                    handleId={handleId}
+                    handleClassName="!absolute -right-3 top-1/2 -translate-y-1/2"
+                    label={display}
+                  />
+                  <div className="system-xs-medium text-text-primary">
+                    {display}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

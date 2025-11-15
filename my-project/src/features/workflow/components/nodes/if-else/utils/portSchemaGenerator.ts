@@ -1,6 +1,20 @@
 import type { IfElseCase } from '@/shared/types/workflow.types';
+import { LogicalOperator } from '@/shared/types/workflow.types';
 import type { NodePortSchema, PortDefinition } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
+
+const randomCaseId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `case_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+export const createDefaultIfElseCase = (): IfElseCase => ({
+  case_id: randomCaseId(),
+  logical_operator: LogicalOperator.AND,
+  conditions: [],
+});
 
 /**
  * IF-ELSE 노드의 동적 포트 스키마 생성

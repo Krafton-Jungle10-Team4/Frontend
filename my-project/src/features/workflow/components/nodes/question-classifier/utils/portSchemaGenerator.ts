@@ -2,6 +2,17 @@ import type { Topic, VisionConfig } from '@/shared/types/workflow.types';
 import type { NodePortSchema, PortDefinition } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
 
+const DEFAULT_CLASS_NAMES = [
+  '',
+  '',
+];
+
+export const createDefaultQuestionClassifierClasses = (): Topic[] =>
+  DEFAULT_CLASS_NAMES.map((name, index) => ({
+    id: `class_${index + 1}`,
+    name,
+  }));
+
 /**
  * Question Classifier 노드의 동적 포트 스키마 생성
  *
@@ -60,8 +71,11 @@ export function generateQuestionClassifierPortSchema(
 
   // 3. 각 클래스별 브랜치 출력 추가
   classes.forEach((topic) => {
+    const baseId = topic.id?.startsWith('class_') ? topic.id : `class_${topic.id}`;
+    const branchName = `${baseId}_branch`;
+
     outputs.push({
-      name: `class_${topic.id}_branch`,
+      name: branchName,
       type: PortType.BOOLEAN,
       required: true,
       description: `Branch for class: ${topic.name || 'Unnamed'}`,
