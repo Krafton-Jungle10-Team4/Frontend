@@ -55,22 +55,22 @@ export function validateCase(caseItem: IfElseCase): {
  * 전체 케이스 목록 검증
  */
 export function validateCases(cases: IfElseCase[]): {
-  valid: boolean;
-  error?: string;
+  isValid: boolean;
+  errors: string[];
 } {
+  const errors: string[] = [];
+
   if (cases.length === 0) {
-    return { valid: false, error: '최소 1개 이상의 케이스가 필요합니다' };
+    errors.push('최소 1개 이상의 케이스가 필요합니다');
+    return { isValid: false, errors };
   }
 
   for (let i = 0; i < cases.length; i++) {
     const result = validateCase(cases[i]);
-    if (!result.valid) {
-      return {
-        valid: false,
-        error: `케이스 ${i + 1}: ${result.error}`,
-      };
+    if (!result.valid && result.error) {
+      errors.push(`케이스 ${i + 1}: ${result.error}`);
     }
   }
 
-  return { valid: true };
+  return { isValid: errors.length === 0, errors };
 }

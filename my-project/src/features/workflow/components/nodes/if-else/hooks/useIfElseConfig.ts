@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type {
   IfElseCase,
   IfElseCondition,
@@ -8,12 +8,23 @@ import type {
 } from '@/shared/types/workflow.types';
 
 interface UseIfElseConfigProps {
+  nodeId: string;
   cases: IfElseCase[];
   onUpdate: (cases: IfElseCase[]) => void;
 }
 
-export function useIfElseConfig({ cases: initialCases, onUpdate }: UseIfElseConfigProps) {
+export function useIfElseConfig({ nodeId, cases: initialCases, onUpdate }: UseIfElseConfigProps) {
   const [cases, setCases] = useState<IfElseCase[]>(initialCases || []);
+  const [currentNodeId, setCurrentNodeId] = useState(nodeId);
+
+  // 노드가 변경될 때만 상태 재설정 (상태 누수 방지)
+  // initialCases는 배열이므로 의존성 배열에 넣으면 매번 재렌더링됨
+  useEffect(() => {
+    if (currentNodeId !== nodeId) {
+      setCases(initialCases || []);
+      setCurrentNodeId(nodeId);
+    }
+  }, [nodeId, currentNodeId, initialCases]);
 
   // 변경사항을 부모에 전파
   const notifyUpdate = useCallback(
