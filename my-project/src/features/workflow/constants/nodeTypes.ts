@@ -2,6 +2,7 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import type { NodeTypeResponse } from '../types/api.types';
 import { VarType } from '../nodes/variable-assigner/types';
 import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
+import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
 export const IF_ELSE_ICON = 'branch';
@@ -54,7 +55,12 @@ export const QUESTION_CLASSIFIER_NODE_TYPE: NodeTypeResponse = {
         temperature: 0.7,
       },
     },
+    query_variable_selector: [],
+    vision: {
+      enabled: false,
+    },
   },
+  ports: generateQuestionClassifierPortSchema([], { enabled: false }), // 빈 classes에 대한 기본 포트
 };
 
 export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
@@ -91,5 +97,10 @@ export const cloneQuestionClassifierNodeType = (): NodeTypeResponse => ({
         temperature: 0.7,
       },
     },
+    query_variable_selector: [],
+    vision: {
+      enabled: false,
+    },
   },
+  ports: generateQuestionClassifierPortSchema([], { enabled: false }), // 빈 classes에 대한 기본 포트
 });

@@ -10,6 +10,8 @@ import { AdvancedSettings } from './components/AdvancedSettings';
 import { useQuestionClassifier } from './hooks/useQuestionClassifier';
 import type { QuestionClassifierNodeType } from '@/shared/types/workflow.types';
 import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
+import { VarReferencePicker } from '@/features/workflow/components/variable/VarReferencePicker';
+import { PortType } from '@/shared/types/workflow';
 
 /**
  * Question Classifier 노드 설정 패널
@@ -35,12 +37,16 @@ export function QuestionClassifierPanel() {
     classes,
     handleClassesChange,
     handleModelChange,
+    handleQueryVarChange,
     handleVisionToggle,
+    handleVisionFileVarChange,
     handleInstructionChange,
+    handleMemoryChange,
   } = useQuestionClassifier({
     nodeId: selectedNodeId!,
     classes: initialClasses,
     model: initialModel,
+    visionConfig: qcData?.vision,
     onUpdate: (updates) => {
       updateNode(selectedNodeId!, updates as any);
     },
@@ -48,12 +54,22 @@ export function QuestionClassifierPanel() {
 
   // 검증
   const hasErrors =
-    !qcData?.model?.provider || !qcData?.model?.name || classes.length === 0 || classes.some((c) => !c.name);
+    !qcData?.model?.provider ||
+    !qcData?.model?.name ||
+    !qcData?.query_variable_selector ||
+    qcData.query_variable_selector.length === 0 ||
+    classes.length === 0 ||
+    classes.some((c) => !c.name) ||
+    (qcData?.vision?.enabled && (!qcData.vision.variable_selector || qcData.vision.variable_selector.length === 0));
 
   const errors: string[] = [];
   if (!qcData?.model?.provider || !qcData?.model?.name) errors.push('모델을 선택해주세요');
+  if (!qcData?.query_variable_selector || qcData.query_variable_selector.length === 0)
+    errors.push('입력 변수를 선택해주세요');
   if (classes.length === 0) errors.push('최소 1개의 클래스를 추가해주세요');
   if (classes.some((c) => !c.name)) errors.push('모든 클래스에 이름을 입력해주세요');
+  if (qcData?.vision?.enabled && (!qcData.vision.variable_selector || qcData.vision.variable_selector.length === 0))
+    errors.push('Vision 모드에서는 파일 변수를 선택해주세요');
 
   return (
     <div className="space-y-4 p-4">
@@ -77,6 +93,40 @@ export function QuestionClassifierPanel() {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* 입력 변수 선택 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">입력 변수</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <Label>Query Variable</Label>
+            <VarReferencePicker
+              nodeId={selectedNodeId!}
+              portName="query"
+              portType={PortType.STRING}
+              value={
+                qcData?.query_variable_selector && qcData.query_variable_selector.length > 0
+                  ? {
+                      variable: qcData.query_variable_selector.join('.'),
+                      value_type: PortType.STRING,
+                    }
+                  : null
+              }
+              onChange={(selector) => {
+                if (selector) {
+                  handleQueryVarChange(selector.variable.split('.'));
+                } else {
+                  handleQueryVarChange([]);
+                }
+              }}
+              placeholder="분류할 텍스트 변수 선택..."
+            />
+            <p className="text-xs text-gray-500">분류할 질문이 포함된 변수를 선택하세요</p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 모델 선택 */}
       <Card>
@@ -164,15 +214,38 @@ export function QuestionClassifierPanel() {
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
             <Label>Vision 모드 활성화</Label>
-            <Switch
-              checked={qcData?.vision?.enabled ?? false}
-              onCheckedChange={handleVisionToggle}
-            />
+            <Switch checked={qcData?.vision?.enabled ?? false} onCheckedChange={handleVisionToggle} />
           </div>
           {qcData?.vision?.enabled && (
-            <p className="text-xs text-gray-500">
-              Vision 모드에서는 이미지를 포함한 질문을 분류할 수 있습니다
-            </p>
+            <>
+              <p className="text-xs text-gray-500">Vision 모드에서는 이미지를 포함한 질문을 분류할 수 있습니다</p>
+
+              <div className="space-y-2">
+                <Label>File Variable</Label>
+                <VarReferencePicker
+                  nodeId={selectedNodeId!}
+                  portName="files"
+                  portType={PortType.ARRAY_FILE}
+                  value={
+                    qcData?.vision?.variable_selector && qcData.vision.variable_selector.length > 0
+                      ? {
+                          variable: qcData.vision.variable_selector.join('.'),
+                          value_type: PortType.ARRAY_FILE,
+                        }
+                      : null
+                  }
+                  onChange={(selector) => {
+                    if (selector) {
+                      handleVisionFileVarChange(selector.variable.split('.'));
+                    } else {
+                      handleVisionFileVarChange([]);
+                    }
+                  }}
+                  placeholder="이미지 파일 변수 선택..."
+                />
+                <p className="text-xs text-gray-500">분류에 사용할 이미지 파일 변수를 선택하세요</p>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -190,7 +263,9 @@ export function QuestionClassifierPanel() {
       {/* 고급 설정 */}
       <AdvancedSettings
         instruction={qcData?.instruction ?? ''}
+        memory={qcData?.memory}
         onInstructionChange={handleInstructionChange}
+        onMemoryChange={handleMemoryChange}
       />
 
       {/* 출력 변수 안내 */}
