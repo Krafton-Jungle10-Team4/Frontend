@@ -7,10 +7,12 @@ import {
   ASSIGNER_ICON,
   IF_ELSE_ICON,
   QUESTION_CLASSIFIER_ICON,
+  ANSWER_ICON,
   cloneVariableAssignerNodeType,
   cloneAssignerNodeType,
   cloneIfElseNodeType,
   cloneQuestionClassifierNodeType,
+  cloneAnswerNodeType,
 } from '../../constants/nodeTypes';
 
 // 아이콘 매핑
@@ -27,6 +29,7 @@ const ICON_MAP: Record<string, string> = {
   [VARIABLE_ASSIGNER_ICON]: '🧮',
   [ASSIGNER_ICON]: '⚙️', // Assigner 노드용
   [QUESTION_CLASSIFIER_ICON]: '🏷️', // Question Classifier 노드용
+  [ANSWER_ICON]: '💬', // Answer 노드용 (상수로도 매핑)
 };
 
 // Fallback 노드 타입 (백엔드 API 실패 시 사용)
@@ -38,7 +41,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   { type: 'end', label: 'End', icon: 'flag', max_instances: 1, configurable: false },
 
   // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
-  { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
+  cloneAnswerNodeType(),
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
   { type: 'tavily-search', label: 'Tavily Search', icon: 'search', max_instances: -1, configurable: true },
   cloneIfElseNodeType(),

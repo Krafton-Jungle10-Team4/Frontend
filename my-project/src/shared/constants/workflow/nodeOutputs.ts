@@ -202,6 +202,7 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
   [BlockEnum.KnowledgeBase]: [],
   [BlockEnum.Code]: [],
   [BlockEnum.IfElse]: [],
+  [BlockEnum.VariableAssigner]: [],
   [BlockEnum.Assigner]: [],
   [BlockEnum.Http]: [],
 };
