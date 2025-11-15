@@ -206,13 +206,64 @@ export type TemplateTransformNodeType = CommonNodeType<{
 }>;
 
 /**
- * If-Else 조건 타입
+ * If-Else 비교 연산자
+ */
+export enum ComparisonOperator {
+  // Equality
+  EQUAL = '=',
+  NOT_EQUAL = '≠',
+
+  // Numeric
+  GREATER_THAN = '>',
+  LESS_THAN = '<',
+  GREATER_EQUAL = '≥',
+  LESS_EQUAL = '≤',
+
+  // String
+  CONTAINS = 'contains',
+  IS = 'is',
+  IS_NOT = 'is not',
+
+  // Null/Empty
+  EMPTY = 'empty',
+  NOT_EMPTY = 'not empty',
+}
+
+/**
+ * If-Else 논리 연산자
+ */
+export enum LogicalOperator {
+  AND = 'and',
+  OR = 'or',
+}
+
+/**
+ * 변수 타입
+ */
+export enum VarType {
+  STRING = 'string',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
+}
+
+/**
+ * If-Else 조건
  */
 export type IfElseCondition = {
-  variable: string;
-  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
-  value: string;
-  logicalOperator?: 'AND' | 'OR';
+  id: string;
+  varType: VarType;
+  variable_selector: string; // "node_id.port_name"
+  comparison_operator: ComparisonOperator;
+  value?: string | number | boolean;
+};
+
+/**
+ * If-Else 케이스 (IF, ELIF)
+ */
+export type IfElseCase = {
+  case_id: string;
+  logical_operator: LogicalOperator;
+  conditions: IfElseCondition[];
 };
 
 /**
@@ -220,7 +271,7 @@ export type IfElseCondition = {
  */
 export type IfElseNodeType = CommonNodeType<{
   type: BlockEnum.IfElse;
-  conditions?: IfElseCondition[];
+  cases?: IfElseCase[];
 }>;
 
 /**
