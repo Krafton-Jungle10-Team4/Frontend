@@ -26,7 +26,7 @@ export const ValidationStatus: FC<ValidationStatusProps> = ({
     }
 
     // 2. 변수 참조 추출
-    const varPattern = /\{\{\s*(\w+\.\w+)\s*\}\}/g;
+    const varPattern = /\{\{\s*([-\w]+\.[-\w]+)\s*\}\}/g;
     const matches = [...template.matchAll(varPattern)];
     const variables = matches.map((m) => m[1]);
 

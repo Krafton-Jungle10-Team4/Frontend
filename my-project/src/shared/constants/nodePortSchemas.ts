@@ -214,12 +214,27 @@ const TAVILY_SEARCH_SCHEMA: NodePortSchema = {
   ],
 };
 
+const ANSWER_SCHEMA: NodePortSchema = {
+  inputs: [],
+  outputs: [
+    {
+      name: 'final_output',
+      type: PortType.STRING,
+      required: true,
+      default_value: '',
+      description: '생성된 최종 응답 텍스트',
+      display_name: '최종 출력',
+    },
+  ],
+};
+
 const PORT_SCHEMA_MAP: Record<string, NodePortSchema> = {
   [BlockEnum.Start]: START_SCHEMA,
   [BlockEnum.KnowledgeRetrieval]: KNOWLEDGE_SCHEMA,
   [BlockEnum.LLM]: LLM_SCHEMA,
   [BlockEnum.End]: END_SCHEMA,
   [BlockEnum.TavilySearch]: TAVILY_SEARCH_SCHEMA,
+  [BlockEnum.Answer]: ANSWER_SCHEMA,
 };
 
 export const clonePortSchema = (nodeType: string): NodePortSchema | undefined =>

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field } from '../_base/components/layout';
@@ -20,6 +20,15 @@ export const AnswerPanel = () => {
   const [description, setDescription] = useState(
     (node?.data as AnswerNodeType)?.description || ''
   );
+
+  // Sync local state when selected node changes
+  useEffect(() => {
+    if (node?.data) {
+      const answerData = node.data as AnswerNodeType;
+      setTemplate(answerData.template || '');
+      setDescription(answerData.description || '');
+    }
+  }, [selectedNodeId, node?.data]);
 
   if (!node || !selectedNodeId) return null;
 
