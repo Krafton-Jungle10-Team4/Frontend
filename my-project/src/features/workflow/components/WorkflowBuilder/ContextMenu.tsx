@@ -4,9 +4,11 @@ import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import {
   VARIABLE_ASSIGNER_ICON,
+  ASSIGNER_ICON,
   IF_ELSE_ICON,
   QUESTION_CLASSIFIER_ICON,
   cloneVariableAssignerNodeType,
+  cloneAssignerNodeType,
   cloneIfElseNodeType,
   cloneQuestionClassifierNodeType,
 } from '../../constants/nodeTypes';
@@ -23,6 +25,7 @@ const ICON_MAP: Record<string, string> = {
   search: '🔍', // Tavily Search 노드용
   [IF_ELSE_ICON]: '🔀', // IF-ELSE 노드용
   [VARIABLE_ASSIGNER_ICON]: '🧮',
+  [ASSIGNER_ICON]: '⚙️', // Assigner 노드용
   [QUESTION_CLASSIFIER_ICON]: '🏷️', // Question Classifier 노드용
 };
 
@@ -40,6 +43,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   { type: 'tavily-search', label: 'Tavily Search', icon: 'search', max_instances: -1, configurable: true },
   cloneIfElseNodeType(),
   cloneVariableAssignerNodeType(),
+  cloneAssignerNodeType(),
   cloneQuestionClassifierNodeType(),
 ];
 

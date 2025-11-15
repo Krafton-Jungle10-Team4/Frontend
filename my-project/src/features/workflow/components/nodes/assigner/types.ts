@@ -4,7 +4,8 @@
  * 이 파일은 Assigner 노드 컴포넌트에서 사용하는 헬퍼 타입을 정의합니다.
  */
 
-import type { WriteMode, AssignerInputType, AssignerOperation } from '@/shared/types/workflow.types';
+import { WriteMode } from '@/shared/types/workflow.types';
+import type { AssignerInputType, AssignerOperation } from '@/shared/types/workflow.types';
 
 /**
  * 작업 타입 레이블 맵
