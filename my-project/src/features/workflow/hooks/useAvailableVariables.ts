@@ -18,6 +18,7 @@ export function useAvailableVariables(
 ): VariableReference[] {
   const nodes = useWorkflowStore((state) => state.nodes);
   const edges = useWorkflowStore((state) => state.edges);
+  const conversationVariables = useWorkflowStore((state) => state.conversationVariables);
 
   return useMemo(() => {
     const availableVars: VariableReference[] = [];
@@ -50,8 +51,25 @@ export function useAvailableVariables(
       });
     });
 
+    // 3. 대화 변수 추가
+    Object.entries(conversationVariables || {}).forEach(([key, value]) => {
+      const detectedType = detectPortType(value);
+      if (filterType && !isTypeCompatible(detectedType, filterType)) {
+        return;
+      }
+
+      availableVars.push({
+        nodeId: 'conversation',
+        nodeTitle: '대화 변수',
+        portName: key,
+        portDisplayName: key,
+        type: detectedType,
+        fullPath: `conv.${key}`,
+      });
+    });
+
     return availableVars;
-  }, [nodeId, nodes, edges, filterType]);
+  }, [nodeId, nodes, edges, filterType, conversationVariables]);
 }
 
 /**
@@ -108,4 +126,22 @@ function isTypeCompatible(sourceType: PortType, targetType: PortType): boolean {
 
   // 같은 타입만 호환
   return sourceType === targetType;
+}
+
+function detectPortType(value: unknown): PortType {
+  if (Array.isArray(value)) {
+    return PortType.ARRAY;
+  }
+  switch (typeof value) {
+    case 'string':
+      return PortType.STRING;
+    case 'number':
+      return PortType.NUMBER;
+    case 'boolean':
+      return PortType.BOOLEAN;
+    case 'object':
+      return value === null ? PortType.ANY : PortType.OBJECT;
+    default:
+      return PortType.ANY;
+  }
 }

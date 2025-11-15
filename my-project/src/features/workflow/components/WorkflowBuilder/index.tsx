@@ -55,6 +55,7 @@ import {
   createDefaultQuestionClassifierClasses,
 } from '../nodes/question-classifier/utils/portSchemaGenerator';
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
+import { ConversationVariablePanel } from '../ConversationVariablePanel';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
 const REACT_FLOW_NODE_TYPES = {
@@ -112,6 +113,7 @@ const WorkflowInner = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [panelWidth, setPanelWidth] = useState(320); // 초기 너비 320px (w-80)
   const [isResizing, setIsResizing] = useState(false);
+  const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
   const { screenToFlowPosition } = useReactFlow();
 
   // 실시간 검증 비활성화
@@ -538,6 +540,14 @@ const WorkflowInner = () => {
             정렬
           </Button>
 
+          <Button
+            variant="outline"
+            onClick={() => setConversationPanelOpen(true)}
+            title="대화 변수 관리"
+          >
+            대화 변수
+          </Button>
+
           <WorkflowSettingsDialog />
 
           <SaveButton />
@@ -593,6 +603,11 @@ const WorkflowInner = () => {
       )}
 
       {/* 배포 관련 다이얼로그 */}
+
+      <ConversationVariablePanel
+        open={isConversationPanelOpen}
+        onOpenChange={setConversationPanelOpen}
+      />
       {botId && (
         <>
           <EmbedWebsiteDialog botId={botId} />

@@ -10,8 +10,35 @@ import { BasePanel } from '../_base/base-panel';
 import { Box, Group } from '../_base/components/layout';
 import { Button } from '@shared/components/button';
 import { OperationList } from './OperationList';
-import type { AssignerNodeType, AssignerOperation, WriteMode, AssignerInputType } from '@/shared/types/workflow.types';
+import type {
+  AssignerNodeType,
+  AssignerOperation,
+  WriteMode,
+  AssignerInputType,
+} from '@/shared/types/workflow.types';
 import { generateAssignerPortSchema } from './utils/portSchemaGenerator';
+import type { NodeVariableMappings, NodePortSchema } from '@shared/types/workflow';
+import type { ValueSelector } from '@shared/types/workflow';
+
+const filterMappingsByPorts = (
+  mappings: NodeVariableMappings | undefined,
+  ports?: NodePortSchema
+): NodeVariableMappings | undefined => {
+  if (!mappings || !ports) {
+    return mappings;
+  }
+
+  const allowed = new Set((ports.inputs || []).map((port) => port.name));
+  const next: NodeVariableMappings = {};
+
+  Object.entries(mappings).forEach(([key, mapping]) => {
+    if (allowed.has(key)) {
+      next[key] = mapping;
+    }
+  });
+
+  return Object.keys(next).length ? next : undefined;
+};
 
 export const AssignerPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
@@ -21,6 +48,23 @@ export const AssignerPanel = () => {
   if (!node) return null;
 
   const assignerData = node.data as AssignerNodeType;
+  const variableMappings = (assignerData.variable_mappings || {}) as NodeVariableMappings;
+
+  const handleVariableMappingChange = (portName: string, selector: ValueSelector | null) => {
+    const nextMappings: NodeVariableMappings = { ...variableMappings };
+    if (selector) {
+      nextMappings[portName] = {
+        target_port: portName,
+        source: selector,
+      };
+    } else {
+      delete nextMappings[portName];
+    }
+
+    updateNode(selectedNodeId!, {
+      variable_mappings: Object.keys(nextMappings).length ? nextMappings : undefined,
+    } as any);
+  };
 
   const handleAddOperation = () => {
     const newOperationId = `op_${Date.now()}`;
@@ -38,9 +82,12 @@ export const AssignerPanel = () => {
     // 포트 동적 생성
     const updatedPorts = generateAssignerPortSchema(updatedOperations);
 
+    const filteredMappings = filterMappingsByPorts(variableMappings, updatedPorts);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
       ports: updatedPorts,
+      variable_mappings: filteredMappings,
     });
   };
 
@@ -55,9 +102,12 @@ export const AssignerPanel = () => {
     // 포트 재생성 (input_type 변경 시 value 포트 유무가 바뀔 수 있음)
     const updatedPorts = generateAssignerPortSchema(updatedOperations || []);
 
+    const filteredMappings = filterMappingsByPorts(variableMappings, updatedPorts);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
       ports: updatedPorts,
+      variable_mappings: filteredMappings,
     });
   };
 
@@ -75,9 +125,12 @@ export const AssignerPanel = () => {
     // 포트 재생성 (해당 operation의 포트들이 제거됨)
     const updatedPorts = generateAssignerPortSchema(updatedOperations || []);
 
+    const filteredMappings = filterMappingsByPorts(variableMappings, updatedPorts);
+
     updateNode(selectedNodeId!, {
       operations: updatedOperations,
       ports: updatedPorts,
+      variable_mappings: filteredMappings,
     });
   };
 
@@ -95,9 +148,12 @@ export const AssignerPanel = () => {
             </div>
           ) : (
             <OperationList
+              nodeId={selectedNodeId!}
               operations={assignerData.operations || []}
+              variableMappings={variableMappings}
               onOperationChange={handleOperationChange}
               onOperationRemove={handleOperationRemove}
+              onVariableMappingChange={handleVariableMappingChange}
             />
           )}
 

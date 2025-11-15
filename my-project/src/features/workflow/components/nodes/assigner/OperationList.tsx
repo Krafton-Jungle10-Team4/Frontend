@@ -5,17 +5,25 @@
 
 import { AssignerOperation } from '@/shared/types/workflow.types';
 import { OperationItem } from './OperationItem';
+import type { NodeVariableMappings } from '@shared/types/workflow';
+import type { ValueSelector } from '@shared/types/workflow';
 
 interface OperationListProps {
+  nodeId: string;
   operations: AssignerOperation[];
+  variableMappings?: NodeVariableMappings;
   onOperationChange: (operationId: string, changes: Partial<AssignerOperation>) => void;
   onOperationRemove: (operationId: string) => void;
+  onVariableMappingChange: (portName: string, selector: ValueSelector | null) => void;
 }
 
 export const OperationList = ({
+  nodeId,
   operations,
+  variableMappings,
   onOperationChange,
   onOperationRemove,
+  onVariableMappingChange,
 }: OperationListProps) => {
   if (operations.length === 0) {
     return (
@@ -30,10 +38,13 @@ export const OperationList = ({
       {operations.map((operation, index) => (
         <OperationItem
           key={operation.id}
+          nodeId={nodeId}
           operation={operation}
           index={index}
+          variableMappings={variableMappings}
           onChange={(changes) => onOperationChange(operation.id, changes)}
           onRemove={() => onOperationRemove(operation.id)}
+          onVariableMappingChange={onVariableMappingChange}
         />
       ))}
     </div>
