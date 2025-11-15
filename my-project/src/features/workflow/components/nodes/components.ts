@@ -9,6 +9,7 @@ import KnowledgeRetrievalNode from './knowledge-retrieval/node';
 import MCPNode from './mcp/node';
 import AnswerNode from './answer/node';
 import TemplateTransformNode from './template-transform/node';
+import IfElseNode from './if-else/node';
 import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
 
 // Panel 컴포넌트 (설정 UI)
@@ -19,6 +20,7 @@ import { KnowledgeRetrievalPanel } from './knowledge-retrieval/panel';
 import { MCPPanel } from './mcp/panel';
 import { AnswerPanel } from './answer/panel';
 import { TemplateTransformPanel } from './template-transform/panel';
+import { IfElsePanel } from './if-else/panel';
 import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
 
 /**
@@ -33,6 +35,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.MCP]: MCPNode,
   [BlockEnum.Answer]: AnswerNode,
   [BlockEnum.TemplateTransform]: TemplateTransformNode,
+  [BlockEnum.IfElse]: IfElseNode,
   [BlockEnum.Assigner]: VariableAssignerNode,
 };
 
@@ -47,5 +50,6 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.MCP]: MCPPanel,
   [BlockEnum.Answer]: AnswerPanel,
   [BlockEnum.TemplateTransform]: TemplateTransformPanel,
+  [BlockEnum.IfElse]: IfElsePanel,
   [BlockEnum.Assigner]: VariableAssignerPanel,
 };

@@ -16,6 +16,7 @@ const ICON_MAP: Record<string, string> = {
   flag: '🏁',
   message: '💬', // Answer 노드용
   template: '📝', // Template Transform 노드용
+  branch: '🔀', // IF-ELSE 노드용
   [VARIABLE_ASSIGNER_ICON]: '🧮',
 };
 
@@ -30,6 +31,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   // 🚧 임시: Phase 3-B UI Skeleton (백엔드 연동 전까지)
   { type: 'answer', label: 'Answer', icon: 'message', max_instances: -1, configurable: true },
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
+  { type: 'if-else', label: 'IF-ELSE', icon: 'branch', max_instances: -1, configurable: true },
   cloneVariableAssignerNodeType(),
 ];
 
