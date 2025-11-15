@@ -4,9 +4,10 @@
  * Provider, Model, Prompt, Temperature, Max Tokens 설정
  */
 
+import { useState } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
-import { Box, Group, Field } from '../_base/components/layout';
+import { Box, Group, Field, OutputVars, VarItem } from '../_base/components';
 import { LLMModelSelect } from '../../shared-components/LLMModelSelect';
 import { Input } from '@shared/components/input';
 import { Textarea } from '@shared/components/textarea';
@@ -17,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/components/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/components/collapsible';
+import { RiArrowDownSLine, RiArrowRightSLine } from '@remixicon/react';
 import type { LLMNodeType } from '@/shared/types/workflow.types';
 import { VarReferencePicker } from '../../variable/VarReferencePicker';
 import { PortType, type ValueSelector } from '@shared/types/workflow';
@@ -67,6 +70,7 @@ const extractModelNameFromModel = (model: unknown): string => {
 
 export const LLMPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
@@ -183,38 +187,75 @@ export const LLMPanel = () => {
           </Field>
         </Group>
 
-        <Group title="고급 설정">
-          <Field
-            label="Temperature"
-            description="0: 결정적, 2: 창의적 (기본값: 0.7)"
-          >
-            <Input
-              type="number"
-              min="0"
-              max="2"
-              step="0.1"
-              value={llmData.temperature || 0.7}
-              onChange={(e) =>
-                handleUpdate('temperature', parseFloat(e.target.value))
-              }
-            />
-          </Field>
+        {/* 고급 설정 */}
+        <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <CollapsibleTrigger asChild>
+              <button className="flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-2 py-1 transition-colors">
+                {isAdvancedOpen ? (
+                  <RiArrowDownSLine size={16} className="text-gray-500" />
+                ) : (
+                  <RiArrowRightSLine size={16} className="text-gray-500" />
+                )}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  고급 설정
+                </span>
+              </button>
+            </CollapsibleTrigger>
+          </div>
 
-          <Field
-            label="Max Tokens"
-            description="생성할 최대 토큰 수 (기본값: 4000)"
-          >
-            <Input
-              type="number"
-              min="1"
-              max="8192"
-              value={llmData.maxTokens || 4000}
-              onChange={(e) =>
-                handleUpdate('maxTokens', parseInt(e.target.value, 10))
-              }
-            />
-          </Field>
-        </Group>
+          <CollapsibleContent className="space-y-3 pl-2">
+            <Field
+              label="Temperature"
+              description="0: 결정적, 2: 창의적 (기본값: 0.7)"
+            >
+              <Input
+                type="number"
+                min="0"
+                max="2"
+                step="0.1"
+                value={llmData.temperature || 0.7}
+                onChange={(e) =>
+                  handleUpdate('temperature', parseFloat(e.target.value))
+                }
+              />
+            </Field>
+
+            <Field
+              label="Max Tokens"
+              description="생성할 최대 토큰 수 (기본값: 4000)"
+            >
+              <Input
+                type="number"
+                min="1"
+                max="8192"
+                value={llmData.maxTokens || 4000}
+                onChange={(e) =>
+                  handleUpdate('maxTokens', parseInt(e.target.value, 10))
+                }
+              />
+            </Field>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* 출력 변수 */}
+        <OutputVars title="출력 변수" defaultCollapsed={false}>
+          <VarItem
+            name="response"
+            type={PortType.STRING}
+            description="LLM 응답"
+          />
+          <VarItem
+            name="tokens"
+            type={PortType.NUMBER}
+            description="사용된 토큰 수"
+          />
+          <VarItem
+            name="model"
+            type={PortType.STRING}
+            description="사용된 모델명"
+          />
+        </OutputVars>
       </Box>
     </BasePanel>
   );
