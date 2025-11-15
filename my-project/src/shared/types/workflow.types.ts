@@ -23,6 +23,7 @@ export enum BlockEnum {
   Assigner = 'variable-assigner',
   Http = 'http',
   QuestionClassifier = 'question-classifier',
+  TavilySearch = 'tavily-search',
 }
 
 /**
@@ -353,4 +354,31 @@ export type QuestionClassifierNodeType = CommonNodeType<{
   instruction?: string;
   memory?: MemoryConfig;
   vision?: VisionConfig;
+}>;
+
+/**
+ * Tavily Search 노드 타입
+ */
+export type TavilySearchNodeType = CommonNodeType<{
+  type: BlockEnum.TavilySearch;
+  ports?: NodePortSchema;
+  variable_mappings?: NodeVariableMappings;
+
+  // 검색 옵션
+  search_depth?: 'basic' | 'advanced';
+  topic?: 'general' | 'news' | 'finance';
+  max_results?: number; // 0-20
+
+  // 도메인 필터링
+  include_domains?: string[];
+  exclude_domains?: string[];
+
+  // 시간 필터링
+  time_range?: 'day' | 'week' | 'month' | 'year' | null;
+  start_date?: string; // YYYY-MM-DD
+  end_date?: string; // YYYY-MM-DD
+
+  // 콘텐츠 옵션
+  include_answer?: boolean;
+  include_raw_content?: boolean;
 }>;

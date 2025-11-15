@@ -131,6 +131,73 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
     },
   ],
 
+  [BlockEnum.TavilySearch]: [
+    {
+      name: 'context',
+      type: PortType.STRING,
+      description: '검색 결과를 문자열로 결합 (LLM에 직접 전달 가능)',
+    },
+    {
+      name: 'retrieved_documents',
+      type: PortType.ARRAY,
+      description: 'LLM 노드 호환 문서 배열 (Knowledge 노드와 동일 형식)',
+      subItems: [
+        {
+          name: 'content',
+          type: PortType.STRING,
+          description: '검색 결과 내용',
+        },
+        {
+          name: 'metadata',
+          type: PortType.OBJECT,
+          description: '검색 결과 메타데이터 (title, url, score)',
+        },
+      ],
+    },
+    {
+      name: 'results',
+      type: PortType.ARRAY,
+      description: '원본 Tavily 검색 결과 배열',
+      subItems: [
+        {
+          name: 'title',
+          type: PortType.STRING,
+          description: '검색 결과 제목',
+        },
+        {
+          name: 'url',
+          type: PortType.STRING,
+          description: '검색 결과 URL',
+        },
+        {
+          name: 'content',
+          type: PortType.STRING,
+          description: '검색 결과 내용',
+        },
+        {
+          name: 'score',
+          type: PortType.NUMBER,
+          description: '관련도 점수',
+        },
+      ],
+    },
+    {
+      name: 'answer',
+      type: PortType.STRING,
+      description: 'AI가 생성한 답변 (include_answer=true일 때)',
+    },
+    {
+      name: 'result_count',
+      type: PortType.NUMBER,
+      description: '검색 결과 개수',
+    },
+    {
+      name: 'response_time',
+      type: PortType.NUMBER,
+      description: 'Tavily API 응답 시간 (초)',
+    },
+  ],
+
   // 아직 구현되지 않은 노드 타입들
   [BlockEnum.KnowledgeBase]: [],
   [BlockEnum.Code]: [],

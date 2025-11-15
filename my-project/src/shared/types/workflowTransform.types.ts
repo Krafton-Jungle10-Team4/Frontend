@@ -29,6 +29,17 @@ export interface BackendNode {
     provider_id?: string;
     action?: string;
     parameters?: Record<string, any>;
+    // Tavily Search 노드
+    search_depth?: 'basic' | 'advanced';
+    topic?: 'general' | 'news' | 'finance';
+    max_results?: number;
+    include_domains?: string[];
+    exclude_domains?: string[];
+    time_range?: 'day' | 'week' | 'month' | 'year' | null;
+    start_date?: string;
+    end_date?: string;
+    include_answer?: boolean;
+    include_raw_content?: boolean;
     [key: string]: unknown;
   };
   ports?: {

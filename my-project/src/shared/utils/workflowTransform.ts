@@ -82,6 +82,20 @@ export const transformToBackend = (
           memory: (node.data as QuestionClassifierNodeType).memory,
           vision: (node.data as QuestionClassifierNodeType).vision,
         }),
+
+        // Tavily Search 노드 변환
+        ...(node.data.type === BlockEnum.TavilySearch && {
+          search_depth: (node.data as any).search_depth || 'basic',
+          topic: (node.data as any).topic || 'general',
+          max_results: (node.data as any).max_results || 5,
+          include_domains: (node.data as any).include_domains || [],
+          exclude_domains: (node.data as any).exclude_domains || [],
+          time_range: (node.data as any).time_range || null,
+          start_date: (node.data as any).start_date || null,
+          end_date: (node.data as any).end_date || null,
+          include_answer: (node.data as any).include_answer || false,
+          include_raw_content: (node.data as any).include_raw_content || false,
+        }),
       },
       ports: serializePorts(node.data.ports),
       variable_mappings: serializeVariableMappings(
@@ -183,6 +197,20 @@ export const transformFromBackend = (
           instruction: node.data.instruction || '',
           memory: node.data.memory,
           vision: node.data.vision,
+        }),
+
+        // Tavily Search 노드 역변환
+        ...(node.type === 'tavily-search' && {
+          search_depth: node.data.search_depth || 'basic',
+          topic: node.data.topic || 'general',
+          max_results: node.data.max_results || 5,
+          include_domains: node.data.include_domains || [],
+          exclude_domains: node.data.exclude_domains || [],
+          time_range: node.data.time_range || null,
+          start_date: node.data.start_date || null,
+          end_date: node.data.end_date || null,
+          include_answer: node.data.include_answer || false,
+          include_raw_content: node.data.include_raw_content || false,
         }),
       },
     })),

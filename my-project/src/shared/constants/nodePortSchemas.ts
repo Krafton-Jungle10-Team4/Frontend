@@ -151,11 +151,75 @@ const END_SCHEMA: NodePortSchema = {
   ],
 };
 
+const TAVILY_SEARCH_SCHEMA: NodePortSchema = {
+  inputs: [
+    {
+      name: 'query',
+      type: PortType.STRING,
+      required: true,
+      default_value: '',
+      description: 'Tavily로 검색할 쿼리',
+      display_name: '검색 쿼리',
+    },
+  ],
+  outputs: [
+    {
+      name: 'context',
+      type: PortType.STRING,
+      required: true,
+      default_value: '',
+      description: '검색 결과를 문자열로 결합 (LLM에 직접 전달 가능)',
+      display_name: '검색 컨텍스트',
+    },
+    {
+      name: 'retrieved_documents',
+      type: PortType.ARRAY,
+      required: true,
+      default_value: [],
+      description: 'LLM 노드 호환 문서 배열 (Knowledge 노드와 동일 형식)',
+      display_name: '검색 문서 (배열)',
+    },
+    {
+      name: 'results',
+      type: PortType.ARRAY,
+      required: true,
+      default_value: [],
+      description: '검색 결과 배열 (원본 Tavily 응답)',
+      display_name: '검색 결과',
+    },
+    {
+      name: 'answer',
+      type: PortType.STRING,
+      required: false,
+      default_value: '',
+      description: 'AI가 생성한 답변 (include_answer=true일 때)',
+      display_name: '답변',
+    },
+    {
+      name: 'result_count',
+      type: PortType.NUMBER,
+      required: true,
+      default_value: 0,
+      description: '검색 결과 개수',
+      display_name: '결과 개수',
+    },
+    {
+      name: 'response_time',
+      type: PortType.NUMBER,
+      required: true,
+      default_value: 0,
+      description: '응답 시간 (초)',
+      display_name: '응답 시간',
+    },
+  ],
+};
+
 const PORT_SCHEMA_MAP: Record<string, NodePortSchema> = {
   [BlockEnum.Start]: START_SCHEMA,
   [BlockEnum.KnowledgeRetrieval]: KNOWLEDGE_SCHEMA,
   [BlockEnum.LLM]: LLM_SCHEMA,
   [BlockEnum.End]: END_SCHEMA,
+  [BlockEnum.TavilySearch]: TAVILY_SEARCH_SCHEMA,
 };
 
 export const clonePortSchema = (nodeType: string): NodePortSchema | undefined =>
