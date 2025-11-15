@@ -3,7 +3,7 @@
  * 개별 작업 항목 UI
  */
 
-import { RiDeleteBinLine } from 'react-icons/ri';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@shared/components/button';
 import { Label } from '@shared/components/label';
 import { OperationSelector } from './OperationSelector';
@@ -33,7 +33,7 @@ export const OperationItem = ({
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">작업 {index + 1}</span>
         <Button onClick={onRemove} variant="ghost" size="sm">
-          <RiDeleteBinLine className="w-4 h-4" />
+          <Trash2 className="w-4 h-4" />
         </Button>
       </div>
 
