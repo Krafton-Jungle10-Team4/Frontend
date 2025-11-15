@@ -171,11 +171,12 @@ export type MCPNodeType = CommonNodeType<{
 
 /**
  * Answer 노드 타입
+ * 워크플로우의 최종 응답 출력 노드
  */
 export type AnswerNodeType = CommonNodeType<{
   type: BlockEnum.Answer;
-  responseVariable?: string;
-  responseType?: 'text' | 'json' | 'markdown';
+  template?: string; // 응답 템플릿 (변수 참조 포함)
+  description?: string; // 노드 설명 (선택)
 }>;
 
 /**
