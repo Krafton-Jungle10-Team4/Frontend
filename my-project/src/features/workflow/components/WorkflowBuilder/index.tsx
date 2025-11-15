@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@shared/components/button';
-import type { Node, Edge } from '@/shared/types/workflow.types';
+import type { Node, Edge, IfElseCase, Topic, VisionConfig } from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
@@ -46,6 +46,14 @@ import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
 import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
 import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
+import {
+  generateIfElsePortSchema,
+  createDefaultIfElseCase,
+} from '../nodes/if-else/utils/portSchemaGenerator';
+import {
+  generateQuestionClassifierPortSchema,
+  createDefaultQuestionClassifierClasses,
+} from '../nodes/question-classifier/utils/portSchemaGenerator';
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
@@ -339,8 +347,35 @@ const WorkflowInner = () => {
         y: contextMenu.y,
       });
 
-      const portSchema =
+      let portSchema =
         cloneNodePortSchema(nodeType.ports) || clonePortSchema(nodeType.type);
+
+      const defaultData = {
+        ...(nodeType.default_data || {}),
+      } as Record<string, any>;
+
+      if (nodeType.type === BlockEnum.IfElse) {
+        const currentCases = Array.isArray(defaultData.cases)
+          ? (defaultData.cases as IfElseCase[])
+          : [];
+        const ensuredCases =
+          currentCases.length > 0 ? currentCases : [createDefaultIfElseCase()];
+        defaultData.cases = ensuredCases;
+        portSchema = generateIfElsePortSchema(ensuredCases);
+      }
+
+      if (nodeType.type === BlockEnum.QuestionClassifier) {
+        const currentClasses = Array.isArray(defaultData.classes)
+          ? (defaultData.classes as Topic[])
+          : [];
+        const ensuredClasses =
+          currentClasses.length > 0
+            ? currentClasses
+            : createDefaultQuestionClassifierClasses();
+        defaultData.classes = ensuredClasses;
+        const vision = defaultData.vision as VisionConfig | undefined;
+        portSchema = generateQuestionClassifierPortSchema(ensuredClasses, vision);
+      }
 
       const newNode: Node = {
         id: `${Date.now()}`,
@@ -351,7 +386,7 @@ const WorkflowInner = () => {
           title: nodeType.label || nodeType.type,
           desc: nodeType.description || getNodeDescription(nodeType.type as BlockEnum),
           ports: portSchema,
-          ...(nodeType.default_data || {}),
+          ...defaultData,
           ...(nodeType.type === BlockEnum.LLM && {
             provider: 'openai',
             model: { provider: 'openai', name: 'gpt-4o-mini' },

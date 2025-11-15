@@ -6,6 +6,7 @@ import type {
   VarType,
   ComparisonOperator,
 } from '@/shared/types/workflow.types';
+import { createDefaultIfElseCase } from '../utils/portSchemaGenerator';
 
 interface UseIfElseConfigProps {
   nodeId: string;
@@ -14,17 +15,24 @@ interface UseIfElseConfigProps {
 }
 
 export function useIfElseConfig({ nodeId, cases: initialCases, onUpdate }: UseIfElseConfigProps) {
-  const [cases, setCases] = useState<IfElseCase[]>(initialCases || []);
+  const initialNormalizedCases =
+    initialCases && initialCases.length > 0 ? initialCases : [createDefaultIfElseCase()];
+  const [cases, setCases] = useState<IfElseCase[]>(initialNormalizedCases);
   const [currentNodeId, setCurrentNodeId] = useState(nodeId);
 
   // 노드가 변경될 때만 상태 재설정 (상태 누수 방지)
   // initialCases는 배열이므로 의존성 배열에 넣으면 매번 재렌더링됨
   useEffect(() => {
     if (currentNodeId !== nodeId) {
-      setCases(initialCases || []);
+      const nextCases =
+        initialCases && initialCases.length > 0 ? initialCases : [createDefaultIfElseCase()];
+      setCases(nextCases);
       setCurrentNodeId(nodeId);
+      if (!initialCases || initialCases.length === 0) {
+        onUpdate(nextCases);
+      }
     }
-  }, [nodeId, currentNodeId, initialCases]);
+  }, [nodeId, currentNodeId, initialCases, onUpdate]);
 
   // 변경사항을 부모에 전파
   const notifyUpdate = useCallback(
@@ -37,17 +45,16 @@ export function useIfElseConfig({ nodeId, cases: initialCases, onUpdate }: UseIf
 
   // 케이스 추가 (ELIF)
   const addCase = useCallback(() => {
-    const newCase: IfElseCase = {
-      case_id: crypto.randomUUID(),
-      logical_operator: 'and' as LogicalOperator,
-      conditions: [],
-    };
+    const newCase: IfElseCase = createDefaultIfElseCase();
     notifyUpdate([...cases, newCase]);
   }, [cases, notifyUpdate]);
 
   // 케이스 삭제
   const removeCase = useCallback(
     (caseId: string) => {
+      if (cases.length <= 1) {
+        return;
+      }
       notifyUpdate(cases.filter((c) => c.case_id !== caseId));
     },
     [cases, notifyUpdate]

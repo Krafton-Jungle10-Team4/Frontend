@@ -36,6 +36,8 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   const nodeType = data.type as BlockEnum;
   const hasInputHandle = nodeType !== BlockEnum.Start;
   const hasOutputHandle = nodeType !== BlockEnum.End;
+  const disableDefaultOutputHandle =
+    nodeType === BlockEnum.IfElse || nodeType === BlockEnum.QuestionClassifier;
 
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
@@ -89,10 +91,8 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         </div>
       )}
       <>
-        {hasInputHandle && (
-          <NodeTargetHandle data={data} handleId="target" />
-        )}
-        {hasOutputHandle && (
+        {hasInputHandle && <NodeTargetHandle data={data} handleId="target" />}
+        {hasOutputHandle && !disableDefaultOutputHandle && (
           <NodeSourceHandle data={data} handleId="source" />
         )}
       </>

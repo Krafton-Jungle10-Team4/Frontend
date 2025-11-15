@@ -28,8 +28,14 @@ import {
   cloneTavilySearchNodeType,
   cloneAnswerNodeType,
 } from '../constants/nodeTypes';
-import { generateIfElsePortSchema } from '../components/nodes/if-else/utils/portSchemaGenerator';
-import { generateQuestionClassifierPortSchema } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
+import {
+  generateIfElsePortSchema,
+  createDefaultIfElseCase,
+} from '../components/nodes/if-else/utils/portSchemaGenerator';
+import {
+  generateQuestionClassifierPortSchema,
+  createDefaultQuestionClassifierClasses,
+} from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
 import type { AssignerNodeType, AssignerOperation } from '@/shared/types/workflow.types';
 
@@ -523,6 +529,8 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     let ports: NodePortSchema | undefined =
       cloneNodePortSchema(node.data.ports as NodePortSchema | undefined) ||
       clonePortSchema(nodeType);
+    let normalizedIfElseCases: IfElseCase[] | undefined;
+    let normalizedClassifierClasses: Topic[] | undefined;
     let assignerData: VariableAssignerNodeData | undefined;
 
     // Legacy Variable Assigner (single-output)
@@ -538,12 +546,20 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     }
 
     if (nodeType === BlockEnum.IfElse) {
-      const cases = (node.data.cases as IfElseCase[]) || [];
+      let cases = (node.data.cases as IfElseCase[]) || [];
+      if (!cases.length) {
+        cases = [createDefaultIfElseCase()];
+      }
+      normalizedIfElseCases = cases;
       ports = generateIfElsePortSchema(cases);
     }
 
     if (nodeType === BlockEnum.QuestionClassifier) {
-      const classes = (node.data.classes as Topic[]) || [];
+      let classes = (node.data.classes as Topic[]) || [];
+      if (!classes.length) {
+        classes = createDefaultQuestionClassifierClasses();
+      }
+      normalizedClassifierClasses = classes;
       const vision = node.data.vision as VisionConfig | undefined;
       ports = generateQuestionClassifierPortSchema(classes, vision);
     }
@@ -556,7 +572,7 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
         | undefined
     );
 
-    return {
+    const nextData: any = {
       ...node,
       data: {
         ...node.data,
@@ -565,6 +581,15 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
         variable_mappings: normalizedMappings,
       },
     };
+
+    if (normalizedIfElseCases) {
+      nextData.data.cases = normalizedIfElseCases;
+    }
+    if (normalizedClassifierClasses) {
+      nextData.data.classes = normalizedClassifierClasses;
+    }
+
+    return nextData;
   });
 
   const legacyMappingsByNode = buildLegacyMappingsFromEdges(normalizedNodes, edges);
@@ -738,8 +763,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       const normalizedEdge: Edge = {
         ...edge,
         id: `edge-${edge.source}-${edge.target}`,
-        sourceHandle: undefined,
-        targetHandle: undefined,
+        sourceHandle: edge.sourceHandle || undefined,
+        targetHandle: edge.targetHandle || undefined,
         type: edge.type || 'custom',
       };
 
