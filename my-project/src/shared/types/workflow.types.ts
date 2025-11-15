@@ -277,14 +277,64 @@ export type IfElseNodeType = CommonNodeType<{
 }>;
 
 /**
- * Assigner 노드 타입
+ * Assigner WriteMode 작업 타입
+ */
+export enum WriteMode {
+  // 기본 작업 (모든 타입)
+  OVERWRITE = 'over-write',
+  CLEAR = 'clear',
+  SET = 'set',
+
+  // 배열 작업
+  APPEND = 'append',
+  EXTEND = 'extend',
+  REMOVE_FIRST = 'remove-first',
+  REMOVE_LAST = 'remove-last',
+
+  // 산술 작업 (number 전용)
+  INCREMENT = '+=',
+  DECREMENT = '-=',
+  MULTIPLY = '*=',
+  DIVIDE = '/=',
+}
+
+/**
+ * Assigner 입력 타입
+ */
+export enum AssignerInputType {
+  VARIABLE = 'variable',
+  CONSTANT = 'constant',
+}
+
+/**
+ * Assigner 작업 정의
+ */
+export type AssignerOperation = {
+  id: string;
+  write_mode: WriteMode;
+  input_type: AssignerInputType;
+  target_variable?: {
+    port_name: string;
+    data_type?: string;
+  };
+  constant_value?: any;
+  source_variable?: {
+    port_name: string;
+    data_type?: string;
+  };
+};
+
+/**
+ * Assigner 노드 타입 (v2)
  */
 export type AssignerNodeType = CommonNodeType<{
   type: BlockEnum.Assigner;
-  assignments?: Array<{
-    variable: string;
-    value: string;
-  }>;
+  version?: '2';
+  operations: AssignerOperation[];
+  ui_state?: {
+    expanded: boolean;
+    selected_operation?: number;
+  };
 }>;
 
 /**
