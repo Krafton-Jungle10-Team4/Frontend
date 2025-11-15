@@ -87,18 +87,25 @@ export const AssignerPanel = () => {
         <Group
           title="작업 목록"
           description="변수를 조작할 작업을 추가하세요"
-          extra={
-            <Button onClick={handleAddOperation} variant="ghost" size="sm">
-              <Plus className="w-4 h-4 mr-1" />
-              작업 추가
-            </Button>
-          }
         >
-          <OperationList
-            operations={assignerData.operations || []}
-            onOperationChange={handleOperationChange}
-            onOperationRemove={handleOperationRemove}
-          />
+          {/* 작업이 없을 때 안내 메시지 */}
+          {assignerData.operations?.length === 0 ? (
+            <div className="text-sm text-gray-400 italic py-4 text-center">
+              작업을 추가하여 시작하세요
+            </div>
+          ) : (
+            <OperationList
+              operations={assignerData.operations || []}
+              onOperationChange={handleOperationChange}
+              onOperationRemove={handleOperationRemove}
+            />
+          )}
+
+          {/* 작업 추가 버튼 */}
+          <Button onClick={handleAddOperation} variant="outline" className="w-full">
+            <Plus className="w-4 h-4 mr-1" />
+            작업 추가
+          </Button>
         </Group>
       </Box>
     </BasePanel>
