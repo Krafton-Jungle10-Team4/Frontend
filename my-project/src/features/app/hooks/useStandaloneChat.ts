@@ -112,6 +112,11 @@ export function useStandaloneChat(widgetKey: string | undefined) {
   const [chatError, setChatError] = useState<string | null>(null);
   const { session, saveSession, clearSession } = useSessionManager(widgetKey);
 
+  useEffect(() => {
+    setMessages([]);
+    setChatError(null);
+  }, [widgetKey]);
+
   const initializeSession = useCallback(async () => {
     if (!widgetKey) {
       setError('Widget key가 없습니다');
@@ -192,6 +197,20 @@ export function useStandaloneChat(widgetKey: string | undefined) {
       };
       const assistantId = `assistant-${Date.now()}`;
 
+      const markAssistantError = (message: string) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantId
+              ? {
+                  ...msg,
+                  content: message,
+                  sources: [],
+                }
+              : msg
+          )
+        );
+      };
+
       setMessages((prev) => [
         ...prev,
         userMessage,
@@ -246,9 +265,11 @@ export function useStandaloneChat(widgetKey: string | undefined) {
                 /401|403|expired/i.test(err.message)
               ) {
                 setChatError('세션이 만료되어 다시 연결 중입니다.');
+                setMessages([]);
                 clearSession();
                 void initializeSession();
               } else {
+                markAssistantError('응답을 가져오지 못했습니다. 다시 시도해주세요.');
                 setChatError(
                   err instanceof Error
                     ? err.message
@@ -260,6 +281,7 @@ export function useStandaloneChat(widgetKey: string | undefined) {
         );
       } catch (err) {
         setSending(false);
+        markAssistantError('메시지 전송에 실패했습니다.');
         setChatError(
           err instanceof Error ? err.message : '메시지 전송에 실패했습니다.'
         );

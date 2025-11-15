@@ -74,12 +74,25 @@ export function usePublishActions(botId: string) {
   }, [botId, saveWorkflow, updateStatus, createOrUpdateDeployment, widgetConfig]);
 
   /**
+   * 앱 실행 가능 여부 판단
+   */
+  const canRunApp =
+    deployment?.bot_id === botId &&
+    deployment?.status === 'published' &&
+    Boolean(deployment?.widget_key);
+
+  /**
    * 앱 실행
-   * 향후 구현: 백엔드에서 미리보기 URL 제공 시 새 탭에서 열기
+   * 독립 실행형 챗봇 페이지를 새 탭에서 열기
    */
   const runApp = useCallback(() => {
-    toast.info('앱 실행 기능은 준비 중입니다');
-  }, []);
+    if (!canRunApp || !deployment?.widget_key) {
+      toast.error('앱을 실행하려면 봇을 게시하고 Widget Key를 발급받아야 합니다.');
+      return;
+    }
+    const appUrl = `${window.location.origin}/app/${deployment.widget_key}`;
+    window.open(appUrl, '_blank', 'noopener');
+  }, [canRunApp, deployment]);
 
   /**
    * 사이트에 삽입
@@ -111,5 +124,6 @@ export function usePublishActions(botId: string) {
     embedWebsite,
     openExplore,
     apiReference,
+    canRunApp,
   };
 }

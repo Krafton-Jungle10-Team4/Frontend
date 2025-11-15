@@ -16,6 +16,11 @@ import { Button } from '@shared/components/button';
 import { Badge } from '@shared/components/badge';
 import { useDeploymentStore } from '@/features/deployment/stores/deploymentStore';
 import { DEPLOYMENT_STATUS_LABELS } from '@/features/deployment/types/deployment';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@shared/components/tooltip';
 import { usePublishActions } from '../../hooks/usePublishActions';
 
 interface PublishDropdownProps {
@@ -70,6 +75,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     embedWebsite,
     openExplore,
     apiReference,
+    canRunApp,
   } = usePublishActions(botId);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -133,10 +139,25 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         <DropdownMenuSeparator />
 
         {/* 메뉴 항목들 */}
-        <DropdownMenuItem onClick={runApp}>
-          <Play className="mr-2 h-4 w-4" />
-          앱 실행
-        </DropdownMenuItem>
+        {canRunApp ? (
+          <DropdownMenuItem onClick={runApp}>
+            <Play className="mr-2 h-4 w-4" />앱 실행
+          </DropdownMenuItem>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuItem
+                onSelect={(event) => event.preventDefault()}
+                className="cursor-not-allowed opacity-70"
+              >
+                <Play className="mr-2 h-4 w-4" />앱 실행 (게시 필요)
+              </DropdownMenuItem>
+            </TooltipTrigger>
+            <TooltipContent>
+              봇을 게시하고 Widget Key를 발급받으면 실행할 수 있습니다.
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         <DropdownMenuItem onClick={embedWebsite}>
           <Code className="mr-2 h-4 w-4" />
