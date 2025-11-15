@@ -7,6 +7,7 @@ import { Textarea } from '@shared/components/textarea';
 import type { AnswerNodeType } from '@/shared/types/workflow.types';
 import { VariableSelector } from './VariableSelector';
 import { ValidationStatus } from './ValidationStatus';
+import { TemplateSyntaxHint } from '../common/TemplateSyntaxHint';
 
 export const AnswerPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
@@ -112,9 +113,7 @@ export const AnswerPanel = () => {
                 rows={10}
                 className="font-mono text-sm"
               />
-              <p className="text-xs text-gray-500">
-                변수 형식: {`{{node_id.port_name}}`}
-              </p>
+              <TemplateSyntaxHint />
             </div>
           </Field>
 
