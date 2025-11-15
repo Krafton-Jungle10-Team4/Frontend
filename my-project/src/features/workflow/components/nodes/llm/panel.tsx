@@ -22,6 +22,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/com
 import { RiArrowDownSLine, RiArrowRightSLine } from '@remixicon/react';
 import type { LLMNodeType } from '@/shared/types/workflow.types';
 import { PortType } from '@shared/types/workflow';
+import { TemplateSyntaxHint } from '../common/TemplateSyntaxHint';
 
 /**
  * model 값에서 provider 추출
@@ -131,12 +132,15 @@ export const LLMPanel = () => {
 
         <Group title="프롬프트 설정" description="모델에 전달할 프롬프트를 작성하세요">
           <Field label="프롬프트" required>
-            <Textarea
-              value={llmData.prompt || ''}
-              onChange={(e) => handleUpdate('prompt', e.target.value)}
-              rows={6}
-              placeholder="프롬프트를 입력하세요..."
-            />
+            <div className="space-y-2">
+              <Textarea
+                value={llmData.prompt || ''}
+                onChange={(e) => handleUpdate('prompt', e.target.value)}
+                rows={6}
+                placeholder="프롬프트를 입력하세요..."
+              />
+              <TemplateSyntaxHint />
+            </div>
           </Field>
         </Group>
 
