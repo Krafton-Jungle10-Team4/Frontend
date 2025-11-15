@@ -131,4 +131,13 @@ export const router = createBrowserRouter([
         Component: module.WidgetChatPage,
       })),
   },
+
+  // Standalone App - 독립 실행형 챗봇 페이지 (RootLayout 없음)
+  {
+    path: '/app/:widgetKey',
+    lazy: () =>
+      import('@/features/app').then((module) => ({
+        Component: module.StandaloneAppPage,
+      })),
+  },
 ]);
