@@ -1,23 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
+import { useState } from 'react';
 import { Label } from '@/shared/components/label';
 import { Input } from '@/shared/components/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/select';
 import { Switch } from '@/shared/components/switch';
 import { Alert, AlertDescription } from '@/shared/components/alert';
 import { AlertCircle } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/collapsible';
+import { RiArrowDownSLine, RiArrowRightSLine } from '@remixicon/react';
 import { ClassList } from './components/ClassList';
-import { AdvancedSettings } from './components/AdvancedSettings';
 import { useQuestionClassifier } from './hooks/useQuestionClassifier';
-import type { QuestionClassifierNodeType } from '@/shared/types/workflow.types';
+import type { QuestionClassifierNodeType, MemoryConfig } from '@/shared/types/workflow.types';
 import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
 import { VarReferencePicker } from '@/features/workflow/components/variable/VarReferencePicker';
 import { PortType } from '@/shared/types/workflow';
+import { BasePanel } from '../_base/base-panel';
+import { Box, Group, Field, OutputVars, VarItem } from '../_base/components';
+import { Textarea } from '@/shared/components/textarea';
+import { Separator } from '@/shared/components/separator';
 
 /**
  * Question Classifier 노드 설정 패널
  */
 export function QuestionClassifierPanel() {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // 선택된 노드 찾기
   const node = nodes.find((n) => n.id === selectedNodeId);
@@ -71,37 +77,78 @@ export function QuestionClassifierPanel() {
   if (qcData?.vision?.enabled && (!qcData.vision.variable_selector || qcData.vision.variable_selector.length === 0))
     errors.push('Vision 모드에서는 파일 변수를 선택해주세요');
 
+  // Memory 핸들러들
+  const handleMemoryToggle = (enabled: boolean) => {
+    if (enabled) {
+      handleMemoryChange({
+        role_prefix: {
+          user: 'User',
+          assistant: 'Assistant',
+        },
+        window: {
+          enabled: true,
+          size: 10,
+        },
+      });
+    } else {
+      handleMemoryChange(undefined);
+    }
+  };
+
+  const handleMemoryWindowToggle = (enabled: boolean) => {
+    if (!qcData?.memory) return;
+    handleMemoryChange({
+      ...qcData.memory,
+      window: {
+        ...qcData.memory.window,
+        enabled,
+      },
+    });
+  };
+
+  const handleMemoryWindowSizeChange = (size: number) => {
+    if (!qcData?.memory) return;
+    handleMemoryChange({
+      ...qcData.memory,
+      window: {
+        ...qcData.memory.window,
+        size,
+      },
+    });
+  };
+
+  const handleRolePrefixChange = (role: 'user' | 'assistant', prefix: string) => {
+    if (!qcData?.memory) return;
+    handleMemoryChange({
+      ...qcData.memory,
+      role_prefix: {
+        ...qcData.memory.role_prefix,
+        [role]: prefix,
+      },
+    });
+  };
+
   return (
-    <div className="space-y-4 p-4">
-      {/* 헤더 */}
-      <div>
-        <h3 className="text-sm font-semibold mb-1">Question Classifier 설정</h3>
-        <p className="text-xs text-gray-500">AI를 사용하여 질문을 미리 정의된 카테고리로 분류합니다</p>
-      </div>
+    <BasePanel>
+      <Box>
+        {/* 검증 에러 표시 */}
+        {hasErrors && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="text-sm font-medium mb-1">설정을 완료해주세요</div>
+              <ul className="text-xs space-y-1">
+                {errors.map((error, idx) => (
+                  <li key={idx}>• {error}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {/* 검증 에러 표시 */}
-      {hasErrors && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="text-sm font-medium mb-1">설정을 완료해주세요</div>
-            <ul className="text-xs space-y-1">
-              {errors.map((error, idx) => (
-                <li key={idx}>• {error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* 입력 변수 선택 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">입력 변수</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-2">
-            <Label>Query Variable</Label>
+        {/* 입력 변수 */}
+        <Group title="입력 변수" description="분류할 질문이 포함된 변수를 선택하세요">
+          <Field label="Query Variable" required>
             <VarReferencePicker
               nodeId={selectedNodeId!}
               portName="query"
@@ -123,19 +170,12 @@ export function QuestionClassifierPanel() {
               }}
               placeholder="분류할 텍스트 변수 선택..."
             />
-            <p className="text-xs text-gray-500">분류할 질문이 포함된 변수를 선택하세요</p>
-          </div>
-        </CardContent>
-      </Card>
+          </Field>
+        </Group>
 
-      {/* 모델 선택 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">모델 설정</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-2">
-            <Label>Provider</Label>
+        {/* 모델 설정 */}
+        <Group title="모델 설정" description="사용할 LLM 제공자와 모델을 선택하세요">
+          <Field label="Provider" required>
             <Select
               value={qcData?.model?.provider || 'openai'}
               onValueChange={(value) => handleModelChange({ provider: value })}
@@ -149,14 +189,10 @@ export function QuestionClassifierPanel() {
                 <SelectItem value="google">Google</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label>Model</Label>
-            <Select
-              value={qcData?.model?.name || 'gpt-4'}
-              onValueChange={(value) => handleModelChange({ name: value })}
-            >
+          <Field label="Model" required>
+            <Select value={qcData?.model?.name || 'gpt-4'} onValueChange={(value) => handleModelChange({ name: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="모델 선택" />
               </SelectTrigger>
@@ -166,6 +202,7 @@ export function QuestionClassifierPanel() {
                     <SelectItem value="gpt-4">GPT-4</SelectItem>
                     <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
                     <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                    <SelectItem value="gpt-4-vision-preview">GPT-4 Vision</SelectItem>
                   </>
                 )}
                 {qcData?.model?.provider === 'anthropic' && (
@@ -183,10 +220,9 @@ export function QuestionClassifierPanel() {
                 )}
               </SelectContent>
             </Select>
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label>Temperature</Label>
+          <Field label="Temperature" description="0: 결정적, 1: 창의적 (기본값: 0.7)">
             <Input
               type="number"
               min={0}
@@ -202,96 +238,173 @@ export function QuestionClassifierPanel() {
                 })
               }
             />
-          </div>
-        </CardContent>
-      </Card>
+          </Field>
+        </Group>
 
-      {/* Vision 설정 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Vision 설정</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        {/* Vision 설정 */}
+        <Group title="Vision 설정" description="이미지를 포함한 질문을 분류할 수 있습니다">
           <div className="flex items-center justify-between">
             <Label>Vision 모드 활성화</Label>
             <Switch checked={qcData?.vision?.enabled ?? false} onCheckedChange={handleVisionToggle} />
           </div>
+
           {qcData?.vision?.enabled && (
-            <>
-              <p className="text-xs text-gray-500">Vision 모드에서는 이미지를 포함한 질문을 분류할 수 있습니다</p>
-
-              <div className="space-y-2">
-                <Label>File Variable</Label>
-                <VarReferencePicker
-                  nodeId={selectedNodeId!}
-                  portName="files"
-                  portType={PortType.ARRAY_FILE}
-                  value={
-                    qcData?.vision?.variable_selector && qcData.vision.variable_selector.length > 0
-                      ? {
-                          variable: qcData.vision.variable_selector.join('.'),
-                          value_type: PortType.ARRAY_FILE,
-                        }
-                      : null
+            <Field label="File Variable" required>
+              <VarReferencePicker
+                nodeId={selectedNodeId!}
+                portName="files"
+                portType={PortType.ARRAY_FILE}
+                value={
+                  qcData?.vision?.variable_selector && qcData.vision.variable_selector.length > 0
+                    ? {
+                        variable: qcData.vision.variable_selector.join('.'),
+                        value_type: PortType.ARRAY_FILE,
+                      }
+                    : null
+                }
+                onChange={(selector) => {
+                  if (selector) {
+                    handleVisionFileVarChange(selector.variable.split('.'));
+                  } else {
+                    handleVisionFileVarChange([]);
                   }
-                  onChange={(selector) => {
-                    if (selector) {
-                      handleVisionFileVarChange(selector.variable.split('.'));
-                    } else {
-                      handleVisionFileVarChange([]);
-                    }
-                  }}
-                  placeholder="이미지 파일 변수 선택..."
-                />
-                <p className="text-xs text-gray-500">분류에 사용할 이미지 파일 변수를 선택하세요</p>
-              </div>
-            </>
+                }}
+                placeholder="이미지 파일 변수 선택..."
+              />
+            </Field>
           )}
-        </CardContent>
-      </Card>
+        </Group>
 
-      {/* 클래스 관리 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">분류 카테고리</CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* 클래스 관리 */}
+        <Group title="분류 카테고리" description="질문을 분류할 카테고리를 관리하세요">
           <ClassList classes={classes} onChange={handleClassesChange} />
-        </CardContent>
-      </Card>
+        </Group>
 
-      {/* 고급 설정 */}
-      <AdvancedSettings
-        instruction={qcData?.instruction ?? ''}
-        memory={qcData?.memory}
-        onInstructionChange={handleInstructionChange}
-        onMemoryChange={handleMemoryChange}
-      />
+        {/* 고급 설정 */}
+        <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <CollapsibleTrigger asChild>
+              <button className="flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-2 py-1 transition-colors">
+                {isAdvancedOpen ? (
+                  <RiArrowDownSLine size={16} className="text-gray-500" />
+                ) : (
+                  <RiArrowRightSLine size={16} className="text-gray-500" />
+                )}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  고급 설정
+                </span>
+              </button>
+            </CollapsibleTrigger>
+          </div>
 
-      {/* 출력 변수 안내 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">출력 변수</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-xs">
-          <div className="flex items-center gap-2">
-            <code className="px-2 py-1 bg-gray-100 rounded">class_name</code>
-            <span className="text-gray-600">→ 선택된 클래스 이름 (string)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <code className="px-2 py-1 bg-gray-100 rounded">usage</code>
-            <span className="text-gray-600">→ LLM 토큰 사용량 (object)</span>
-          </div>
-          {classes.map((topic) => (
-            <div key={topic.id} className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-gray-100 rounded text-[10px]">
-                class_{topic.id}_branch
-              </code>
-              <span className="text-gray-600">→ {topic.name || 'Unnamed'} 선택 여부 (boolean)</span>
+          <CollapsibleContent className="space-y-3 pl-2">
+            <Field label="추가 지시사항" description="분류 정확도를 높이기 위한 추가 컨텍스트를 제공할 수 있습니다">
+              <Textarea
+                value={qcData?.instruction ?? ''}
+                onChange={(e) => handleInstructionChange(e.target.value)}
+                placeholder="LLM에게 전달할 추가 컨텍스트나 분류 기준을 입력하세요&#10;예: 다음 기준으로 질문을 분류해주세요:&#10;- 제품 문의: 제품 사용법, 기능 관련&#10;- 기술 지원: 오류, 버그 관련"
+                className="min-h-[100px]"
+              />
+            </Field>
+
+            <Separator className="my-4" />
+
+            {/* Memory 설정 */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>대화 기록 메모리</Label>
+                  <p className="text-xs text-gray-500 mt-1">이전 대화 내용을 참고하여 분류</p>
+                </div>
+                <Switch checked={!!qcData?.memory} onCheckedChange={handleMemoryToggle} />
+              </div>
+
+              {qcData?.memory && (
+                <div className="space-y-3 pl-4 border-l-2 border-gray-200">
+                  {/* Role Prefixes */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">역할 접두사</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="user-prefix" className="text-xs text-gray-600">
+                          사용자
+                        </Label>
+                        <Input
+                          id="user-prefix"
+                          value={qcData.memory.role_prefix.user}
+                          onChange={(e) => handleRolePrefixChange('user', e.target.value)}
+                          placeholder="User"
+                          className="text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="assistant-prefix" className="text-xs text-gray-600">
+                          어시스턴트
+                        </Label>
+                        <Input
+                          id="assistant-prefix"
+                          value={qcData.memory.role_prefix.assistant}
+                          onChange={(e) => handleRolePrefixChange('assistant', e.target.value)}
+                          placeholder="Assistant"
+                          className="text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Memory Window */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">대화 기록 제한</Label>
+                      <Switch checked={qcData.memory.window.enabled} onCheckedChange={handleMemoryWindowToggle} />
+                    </div>
+
+                    {qcData.memory.window.enabled && (
+                      <div className="space-y-1">
+                        <Label htmlFor="window-size" className="text-xs text-gray-600">
+                          최대 메시지 수
+                        </Label>
+                        <Input
+                          id="window-size"
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={qcData.memory.window.size}
+                          onChange={(e) => handleMemoryWindowSizeChange(parseInt(e.target.value, 10))}
+                          className="text-xs"
+                        />
+                        <p className="text-xs text-gray-500">참고할 이전 대화 메시지 개수 (1-100)</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* 출력 변수 */}
+        <OutputVars title="출력 변수" defaultCollapsed={false}>
+          <VarItem
+            name="class_name"
+            type={PortType.STRING}
+            description="선택된 클래스 이름"
+          />
+          <VarItem
+            name="usage"
+            type={PortType.OBJECT}
+            description="LLM 토큰 사용량"
+          />
+          {classes.map((topic) => (
+            <VarItem
+              key={topic.id}
+              name={`class_${topic.id}_branch`}
+              type={PortType.BOOLEAN}
+              description={`${topic.name || 'Unnamed'} 선택 여부`}
+            />
           ))}
-        </CardContent>
-      </Card>
-    </div>
+        </OutputVars>
+      </Box>
+    </BasePanel>
   );
 }
