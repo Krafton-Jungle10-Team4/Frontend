@@ -13,6 +13,9 @@ interface IfElsePanelProps {
 export function IfElsePanel({ id, data }: IfElsePanelProps) {
   const updateNode = useWorkflowStore((state) => state.updateNode);
 
+  // 안전한 데이터 접근
+  const initialCases = data?.cases ?? [];
+
   const {
     cases,
     addCase,
@@ -22,7 +25,7 @@ export function IfElsePanel({ id, data }: IfElsePanelProps) {
     removeCondition,
     toggleLogicalOperator,
   } = useIfElseConfig({
-    cases: data.cases || [],
+    cases: initialCases,
     onUpdate: (newCases) => {
       updateNode(id, {
         cases: newCases,
