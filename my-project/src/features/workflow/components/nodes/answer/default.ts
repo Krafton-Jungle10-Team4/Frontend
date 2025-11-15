@@ -7,6 +7,7 @@ import type { AnswerNodeType } from '@/shared/types/workflow.types';
 export const DEFAULT_ANSWER_CONFIG: Partial<AnswerNodeType> = {
   type: BlockEnum.Answer,
   title: 'Answer',
-  responseVariable: '',
-  responseType: 'text',
+  desc: '최종 응답',
+  template: '',
+  description: '',
 };

@@ -1,62 +1,128 @@
-/**
- * Answer 노드 설정 패널
- *
- * 최종 응답 생성 설정 (응답 변수, 응답 타입)
- */
-
+import { useState, useRef, useCallback } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field } from '../_base/components/layout';
-import { Input } from '@shared/components/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@shared/components/select';
+import { Label } from '@shared/components/label';
+import { Textarea } from '@shared/components/textarea';
 import type { AnswerNodeType } from '@/shared/types/workflow.types';
+import { VariableSelector } from './VariableSelector';
+import { ValidationStatus } from './ValidationStatus';
 
 export const AnswerPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
-  if (!node) return null;
+  const [template, setTemplate] = useState(
+    (node?.data as AnswerNodeType)?.template || ''
+  );
+  const [description, setDescription] = useState(
+    (node?.data as AnswerNodeType)?.description || ''
+  );
 
-  const answerData = node.data as AnswerNodeType;
+  if (!node || !selectedNodeId) return null;
 
-  const handleUpdate = (field: string, value: unknown) => {
-    updateNode(selectedNodeId!, { [field]: value });
-  };
+  // 변수 삽입 핸들러
+  const handleInsertVariable = useCallback(
+    (variable: string) => {
+      if (!textareaRef.current) return;
+
+      const textarea = textareaRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      // 커서 위치에 변수 삽입
+      const before = template.substring(0, start);
+      const after = template.substring(end);
+      const newTemplate = `${before}{{${variable}}}${after}`;
+
+      setTemplate(newTemplate);
+
+      // 데이터 업데이트
+      updateNode(selectedNodeId, {
+        template: newTemplate,
+      });
+
+      // 커서 위치 조정
+      const newPosition = start + variable.length + 4; // {{}}
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newPosition, newPosition);
+      }, 0);
+    },
+    [template, selectedNodeId, updateNode]
+  );
+
+  // 템플릿 변경 핸들러
+  const handleTemplateChange = useCallback(
+    (value: string) => {
+      setTemplate(value);
+      updateNode(selectedNodeId, {
+        template: value,
+      });
+    },
+    [selectedNodeId, updateNode]
+  );
+
+  // 설명 변경 핸들러
+  const handleDescriptionChange = useCallback(
+    (value: string) => {
+      setDescription(value);
+      updateNode(selectedNodeId, {
+        description: value,
+      });
+    },
+    [selectedNodeId, updateNode]
+  );
 
   return (
     <BasePanel>
       <Box>
-        <Group title="응답 설정" description="워크플로우 최종 응답을 설정하세요">
-          <Field label="응답 변수" required>
-            <Input
-              value={answerData.responseVariable || ''}
-              onChange={(e) => handleUpdate('responseVariable', e.target.value)}
-              placeholder="{{llm.result}}"
+        <Group
+          title="응답 템플릿"
+          description="워크플로우의 최종 응답을 정의합니다"
+        >
+          {/* 템플릿 에디터 */}
+          <Field label="템플릿" required>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  변수를 삽입하려면 아래 버튼을 클릭하세요
+                </span>
+                <VariableSelector
+                  nodeId={selectedNodeId}
+                  onSelect={handleInsertVariable}
+                />
+              </div>
+              <Textarea
+                ref={textareaRef}
+                value={template}
+                onChange={(e) => handleTemplateChange(e.target.value)}
+                placeholder="예: 사용자 질문: {{start_1.user_message}}&#10;&#10;AI 답변: {{llm_1.response}}"
+                rows={10}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-gray-500">
+                변수 형식: {`{{node_id.port_name}}`}
+              </p>
+            </div>
+          </Field>
+
+          {/* 설명 (선택) */}
+          <Field label="설명 (선택)">
+            <Textarea
+              value={description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              placeholder="이 Answer 노드의 용도를 설명하세요"
+              rows={2}
             />
           </Field>
 
-          <Field label="응답 타입">
-            <Select
-              value={answerData.responseType || 'text'}
-              onValueChange={(value) => handleUpdate('responseType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="타입 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="text">텍스트</SelectItem>
-                <SelectItem value="json">JSON</SelectItem>
-                <SelectItem value="markdown">Markdown</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+          {/* 유효성 검사 상태 */}
+          <div className="mt-4">
+            <ValidationStatus nodeId={selectedNodeId} template={template} />
+          </div>
         </Group>
       </Box>
     </BasePanel>
