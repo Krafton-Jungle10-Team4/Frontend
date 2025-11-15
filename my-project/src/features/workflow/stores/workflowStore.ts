@@ -20,7 +20,7 @@ import { generatePortSchema } from '@features/workflow/nodes/variable-assigner/u
 import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/validation';
 import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
 import { VarType } from '@features/workflow/nodes/variable-assigner/types';
-import { cloneVariableAssignerNodeType } from '../constants/nodeTypes';
+import { cloneVariableAssignerNodeType, cloneIfElseNodeType } from '../constants/nodeTypes';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -982,12 +982,23 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({ nodeTypesLoading: true });
     try {
       const fetched = await workflowApi.getNodeTypes();
+
+      // Check for missing node types and add them if necessary
       const hasVariableAssigner = fetched.some(
         (type) => type.type === BlockEnum.Assigner
       );
-      const nodeTypes = hasVariableAssigner
-        ? fetched
-        : [...fetched, cloneVariableAssignerNodeType()];
+      const hasIfElse = fetched.some(
+        (type) => type.type === BlockEnum.IfElse
+      );
+
+      let nodeTypes = [...fetched];
+      if (!hasVariableAssigner) {
+        nodeTypes.push(cloneVariableAssignerNodeType());
+      }
+      if (!hasIfElse) {
+        nodeTypes.push(cloneIfElseNodeType());
+      }
+
       set({ nodeTypes, nodeTypesLoading: false });
       return nodeTypes;
     } catch (error) {

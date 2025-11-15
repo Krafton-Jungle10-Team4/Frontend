@@ -2,7 +2,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
 import { ConditionItem } from './ConditionItem';
-import type { IfElseCase, IfElseCondition, LogicalOperator } from '@/shared/types/workflow.types';
+import type { IfElseCase, IfElseCondition } from '@/shared/types/workflow.types';
 
 interface CaseItemProps {
   nodeId: string;
