@@ -6,6 +6,7 @@ import { generateQuestionClassifierPortSchema } from '../components/nodes/questi
 import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
 export const VARIABLE_ASSIGNER_ICON = 'variableAssigner';
+export const ASSIGNER_ICON = 'assigner';
 export const IF_ELSE_ICON = 'branch';
 export const QUESTION_CLASSIFIER_ICON = 'classifier';
 export const TAVILY_SEARCH_ICON = 'search';
@@ -23,6 +24,23 @@ export const VARIABLE_ASSIGNER_NODE_TYPE: NodeTypeResponse = {
     advanced_settings: {
       group_enabled: false,
       groups: [],
+    },
+  },
+};
+
+export const ASSIGNER_NODE_TYPE: NodeTypeResponse = {
+  type: BlockEnum.Assigner,
+  label: 'Assigner',
+  icon: ASSIGNER_ICON,
+  description: 'Manipulate variables with various operations (set, append, arithmetic)',
+  max_instances: -1,
+  configurable: true,
+  default_data: {
+    version: '2',
+    operations: [],
+    ui_state: {
+      expanded: true,
+      selected_operation: undefined,
     },
   },
 };
@@ -75,6 +93,18 @@ export const cloneVariableAssignerNodeType = (): NodeTypeResponse => ({
         unknown
       >) || {}),
       groups: [],
+    },
+  },
+});
+
+export const cloneAssignerNodeType = (): NodeTypeResponse => ({
+  ...ASSIGNER_NODE_TYPE,
+  default_data: {
+    version: '2',
+    operations: [],
+    ui_state: {
+      expanded: true,
+      selected_operation: undefined,
     },
   },
 });
