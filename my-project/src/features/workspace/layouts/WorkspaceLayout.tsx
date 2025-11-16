@@ -48,7 +48,6 @@ export function WorkspaceLayout() {
       <Header
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        workspaceName={`${user?.name || 'Workspace'}`}
         userName={user?.name || 'User'}
         userEmail={user?.email || ''}
         language={language}
