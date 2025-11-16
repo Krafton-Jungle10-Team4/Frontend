@@ -67,15 +67,29 @@ export const costApi = {
     endDate,
   }: GetBotUsageParams): Promise<BotUsageSummary> {
     try {
+      const startDateParam = formatDateParam(startDate);
+      const endDateParam = formatDateParam(endDate);
+      
+      console.log(`[Billing] Fetching usage for bot ${botId}`, {
+        startDate: startDateParam,
+        endDate: endDateParam,
+      });
+
       const { data } = await apiClient.get<BotUsageApiResponse>(
         API_ENDPOINTS.COST.USAGE(botId),
         {
           params: {
-            start_date: formatDateParam(startDate),
-            end_date: formatDateParam(endDate),
+            start_date: startDateParam,
+            end_date: endDateParam,
           },
         }
       );
+
+      console.log(`[Billing] Usage data received for bot ${botId}`, {
+        total_cost: data.total_cost,
+        total_tokens: data.total_tokens,
+        total_requests: data.total_requests,
+      });
 
       return transformUsageResponse(data);
     } catch (error) {
@@ -95,11 +109,13 @@ export const costApi = {
             {
               status,
               errorCode,
+              errorMessage: error.message,
             }
           );
           return createEmptyUsageSummary(botId, startDate, endDate);
         }
       }
+      console.error(`[Billing] Error fetching usage for bot ${botId}`, error);
       throw error;
     }
   },

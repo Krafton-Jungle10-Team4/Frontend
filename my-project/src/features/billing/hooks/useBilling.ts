@@ -59,6 +59,12 @@ export function useBilling() {
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+        console.log('[Billing] Fetching usage for bots', {
+          botCount: bots.length,
+          monthStart: monthStart.toISOString(),
+          endDate: now.toISOString(),
+        });
+
         const usageResults = await Promise.allSettled(
           bots.map((bot) =>
             costApi.getBotUsage({
@@ -75,14 +81,17 @@ export function useBilling() {
           const result = usageResults[index];
           if (result?.status === 'fulfilled') {
             const summary = result.value;
-            return {
+            const usage = {
               bot_id: bot.id,
               bot_name: bot.name,
               total_cost: Number(summary.totalCost.toFixed(2)),
               total_tokens: summary.totalTokens,
               total_requests: summary.totalRequests,
             };
+            console.log(`[Billing] Bot ${bot.name} usage:`, usage);
+            return usage;
           }
+          console.warn(`[Billing] Failed to fetch usage for bot ${bot.name}`, result?.status === 'rejected' ? result.reason : 'Unknown error');
           return {
             bot_id: bot.id,
             bot_name: bot.name,
@@ -101,6 +110,13 @@ export function useBilling() {
         const creditRemaining = Math.max(totalCredit - totalCost, 0);
 
         const billingCycle = status?.billing_cycle ?? getBillingCycle();
+
+        console.log('[Billing] Total usage calculated', {
+          totalCost,
+          totalCredit,
+          creditRemaining,
+          botUsageDetails,
+        });
 
         setStatus({
           current_plan:
