@@ -211,4 +211,8 @@ export const botApi = {
 
     return botApi.getById(id);
   },
+
+  enableWorkflowV2: async (id: string): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.BOTS.ENABLE_WORKFLOW_V2(id), {});
+  },
 } as const;

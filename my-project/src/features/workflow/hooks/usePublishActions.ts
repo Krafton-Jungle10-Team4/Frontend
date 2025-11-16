@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useDeploymentStore } from '@/features/deployment/stores/deploymentStore';
 import { useWorkflowStore } from '../stores/workflowStore';
+import { botApi } from '@/features/bot/api/botApi';
 
 export function usePublishActions(botId: string) {
   const {
@@ -85,14 +86,23 @@ export function usePublishActions(botId: string) {
    * 앱 실행
    * 독립 실행형 챗봇 페이지를 새 탭에서 열기
    */
-  const runApp = useCallback(() => {
+  const runApp = useCallback(async () => {
     if (!canRunApp || !deployment?.widget_key) {
       toast.error('앱을 실행하려면 봇을 게시하고 Widget Key를 발급받아야 합니다.');
       return;
     }
+
+    try {
+      await botApi.enableWorkflowV2(botId);
+    } catch (error) {
+      console.error('Failed to enable workflow V2 mode:', error);
+      toast.error('워크플로우 V2 모드를 활성화하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
     const appUrl = `${window.location.origin}/app/${deployment.widget_key}`;
     window.open(appUrl, '_blank', 'noopener');
-  }, [canRunApp, deployment]);
+  }, [botId, canRunApp, deployment]);
 
   /**
    * 사이트에 삽입

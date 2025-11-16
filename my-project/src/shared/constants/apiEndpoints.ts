@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/api/v1/bots/${id}`,
     DELETE: (id: string) => `/api/v1/bots/${id}`,
     STATUS: (id: string) => `/api/v1/bots/${id}/status`,
+    ENABLE_WORKFLOW_V2: (id: string) => `/api/v1/bots/${id}/workflow-v2/enable`,
     // 배포 관리
     DEPLOY: (botId: string) => `/api/v1/bots/${botId}/deploy`,
     DEPLOYMENT: (botId: string) => `/api/v1/bots/${botId}/deployment`,
