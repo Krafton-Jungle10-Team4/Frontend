@@ -66,7 +66,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="w-[90vw] sm:w-[65vw] sm:!max-w-4xl">
         <DialogHeader>
           <DialogTitle>문서 업로드</DialogTitle>
           <DialogDescription>

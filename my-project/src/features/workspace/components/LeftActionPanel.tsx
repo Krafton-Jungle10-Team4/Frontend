@@ -93,7 +93,6 @@ export function LeftActionPanel({
           onClick={onImportFromFile}
           variant="outline"
           className="w-full justify-start gap-2"
-          disabled
         >
           <RiFileTextLine className="h-4 w-4" />
           파일에서 가져오기

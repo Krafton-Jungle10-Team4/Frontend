@@ -96,13 +96,13 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={`
-          border-2 border-dashed rounded-lg p-8
+          group border-2 border-dashed rounded-lg p-8
           flex flex-col items-center justify-center
           cursor-pointer transition-colors
           ${
             isDragActive
               ? 'border-primary bg-primary/5'
-              : 'border-border hover:border-primary/50'
+              : 'border-border hover:border-green-400 hover:bg-green-50/50'
           }
         `}
       >
@@ -114,15 +114,15 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange
           onChange={handleFileChange}
           className="hidden"
         />
-        <Upload className="h-10 w-10 text-muted-foreground mb-4" />
+        <Upload className="h-10 w-10 text-muted-foreground mb-4 transition-colors group-hover:text-green-500" />
         {isDragActive ? (
           <p className="text-sm text-muted-foreground">파일을 여기에 놓아주세요...</p>
         ) : (
           <div className="text-center">
-            <p className="text-sm font-medium mb-1">
+            <p className="text-sm font-medium mb-1 transition-colors group-hover:text-green-600">
               파일을 드래그하거나 클릭하여 선택하세요
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground transition-colors group-hover:text-green-500">
               PDF, TXT, DOCX (최대 10MB)
             </p>
           </div>
