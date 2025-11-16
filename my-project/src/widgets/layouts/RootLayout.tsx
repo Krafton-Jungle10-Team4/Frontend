@@ -4,7 +4,7 @@ import { PricingModal } from '@/features/billing/components/PricingModal';
 
 export function RootLayout() {
   return (
-    <div className="h-screen bg-background font-pretendard">
+    <div className="h-screen font-pretendard bg-[#f5f7fb]">
       <Outlet />
       <Toaster position="top-center" />
       <PricingModal />

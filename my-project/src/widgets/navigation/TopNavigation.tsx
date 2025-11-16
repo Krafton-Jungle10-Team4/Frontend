@@ -127,16 +127,16 @@ export function TopNavigation({
           {showSidebarToggle && (
             <button
               onClick={onToggleSidebar}
-              className="p-2 hover:bg-white/70 rounded-full transition-colors flex-shrink-0"
+              className="p-2 hover:bg-white hover:shadow-md rounded-full transition-all duration-200 flex-shrink-0 hover:scale-105 active:scale-95"
             >
-              <PanelLeft size={18} className="text-gray-600" />
+              <PanelLeft size={18} className="text-gray-600 transition-colors duration-200" />
             </button>
           )}
           <button
             onClick={onLogoClick ?? onHomeClick}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            <span className="text-2xl font-semibold text-gray-900 leading-none tracking-tight">
+            <span className="text-2xl font-semibold text-gray-700 leading-none tracking-tight">
               <span style={{ color: brandAccent }}>S</span>
               nap
               <span style={{ color: brandAccent }}>A</span>
@@ -152,12 +152,12 @@ export function TopNavigation({
             <Button
               variant="default"
               size="sm"
-              className="rounded-full px-5 ml-2 border-none shadow-sm"
+              className="rounded-full px-5 ml-2 border-none shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:brightness-110"
               style={{ backgroundColor: brandAccent }}
               onClick={openPricingModal}
             >
               <Zap size={14} className="mr-1.5" />
-              Free / {t.upgrade}
+              Free · {t.upgrade}
             </Button>
           )}
         </div>
@@ -173,9 +173,9 @@ export function TopNavigation({
             variant="outline"
             size="sm"
             onClick={() => onLanguageChange(language === 'en' ? 'ko' : 'en')}
-            className="text-sm gap-1 sm:gap-2 rounded-full border-none bg-white shadow-sm"
+            className="text-sm gap-1 sm:gap-2 rounded-full border-none bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:bg-gray-50"
           >
-            <Languages size={16} />
+            <Languages size={16} className="transition-colors duration-200" />
             <span className="hidden sm:inline">
               {language === 'en' ? '한국어' : 'English'}
             </span>
@@ -183,15 +183,15 @@ export function TopNavigation({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus:outline-none flex items-center gap-2">
-                <Avatar className="w-9 h-9 cursor-pointer hover:opacity-80 transition-opacity">
+              <button className="focus:outline-none flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1 hover:bg-white hover:shadow-md">
+                <Avatar className="w-9 h-9 cursor-pointer transition-all duration-200">
                   <AvatarFallback className="bg-teal-500 text-white">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm text-gray-700 inline-flex items-center gap-1">
+                <span className="text-sm text-gray-700 inline-flex items-center gap-1 transition-colors duration-200">
                   {userName}
-                  <ChevronDown size={12} />
+                  <ChevronDown size={12} className="transition-transform duration-200 group-hover:translate-y-0.5" />
                 </span>
               </button>
             </DropdownMenuTrigger>

@@ -21,8 +21,8 @@ export const AuthCallbackPage = () => {
     const processCallback = async () => {
       try {
         await handleAuthCallback();
-        // 성공 시 홈으로 이동
-        navigate(ROUTES.HOME, { replace: true });
+        // 성공 시 워크스페이스 스튜디오로 이동
+        navigate(ROUTES.WORKSPACE_STUDIO, { replace: true });
       } catch (err) {
         console.error('OAuth callback failed:', err);
         // 실패 시 로그인 페이지로 이동

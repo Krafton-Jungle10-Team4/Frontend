@@ -58,7 +58,9 @@ export function TopActions({
           variant={showOnlyMine ? 'default' : 'outline'}
           size="sm"
           onClick={() => onShowOnlyMineChange(!showOnlyMine)}
+          className="flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
         >
+          <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
           내가 만든 앱
         </Button>
       )}
@@ -66,8 +68,8 @@ export function TopActions({
       {/* 태그 필터 드롭다운 */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <RiFilterLine className="h-4 w-4" />
+          <Button variant="outline" size="sm" className="gap-2 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md">
+            <RiFilterLine className="h-4 w-4 transition-colors duration-200" />
             태그
             {selectedTags.length > 0 && (
               <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
@@ -99,7 +101,7 @@ export function TopActions({
       <SearchBar
         value={searchQuery}
         onChange={onSearchChange}
-        placeholder="앱 검색..."
+        placeholder=""
         className="flex-1"
       />
 
@@ -109,17 +111,17 @@ export function TopActions({
           variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
           size="sm"
           onClick={() => onViewModeChange('grid')}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 active:scale-90"
         >
-          <RiGridLine className="h-4 w-4" />
+          <RiGridLine className="h-4 w-4 transition-colors duration-200" />
         </Button>
         <Button
           variant={viewMode === 'list' ? 'secondary' : 'ghost'}
           size="sm"
           onClick={() => onViewModeChange('list')}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 active:scale-90"
         >
-          <RiListUnordered className="h-4 w-4" />
+          <RiListUnordered className="h-4 w-4 transition-colors duration-200" />
         </Button>
       </div>
     </div>

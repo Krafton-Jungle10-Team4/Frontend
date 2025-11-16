@@ -30,21 +30,24 @@ export function LeftActionPanel({
     return (
       <div
         className={cn(
-          'hidden w-64 flex-shrink-0 flex-col gap-4 border-r border-border bg-muted/30 p-6 md:flex',
+          'hidden w-64 flex-shrink-0 flex-col gap-4 rounded-lg bg-background p-6 border border-gray-200/60 shadow-sm transition-all duration-200 hover:border-gray-300/80 hover:shadow-md md:flex',
           className
         )}
       >
         <div className="mb-2">
-          <h2 className="text-lg font-semibold">앱 만들기</h2>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+            <h2 className="text-lg font-semibold">에이전트 만들기</h2>
+          </div>
           <p className="text-sm text-muted-foreground">
-            새로운 봇을 만들어보세요
+            새로운 에이전트를 만들어보세요
           </p>
         </div>
 
         <Button
           onClick={onCreateBlank}
           variant="outline"
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
         >
           <RiAddLine className="h-4 w-4" />
           빈 상태로 시작
@@ -53,7 +56,7 @@ export function LeftActionPanel({
         <Button
           onClick={onCreateFromTemplate}
           variant="outline"
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
         >
           <RiFileTextLine className="h-4 w-4" />
           템플릿에서 시작
@@ -66,7 +69,7 @@ export function LeftActionPanel({
     return (
       <div
         className={cn(
-          'hidden w-64 flex-shrink-0 flex-col gap-4 border-r border-border bg-muted/30 p-6 md:flex',
+          'hidden w-64 flex-shrink-0 flex-col gap-4 rounded-lg bg-background p-6 border border-gray-200/60 shadow-sm transition-all duration-200 hover:border-gray-300/80 hover:shadow-md md:flex',
           className
         )}
       >
