@@ -51,6 +51,7 @@ export const AssignerPanel = () => {
   const variableMappings = (assignerData.variable_mappings || {}) as NodeVariableMappings;
 
   const handleVariableMappingChange = (portName: string, selector: ValueSelector | null) => {
+    // 1. variable_mappings 업데이트 (기존 로직 유지)
     const nextMappings: NodeVariableMappings = { ...variableMappings };
     if (selector) {
       nextMappings[portName] = {
@@ -61,9 +62,44 @@ export const AssignerPanel = () => {
       delete nextMappings[portName];
     }
 
-    updateNode(selectedNodeId!, {
-      variable_mappings: Object.keys(nextMappings).length ? nextMappings : undefined,
-    } as any);
+    // 2. 포트 이름에서 작업 인덱스와 타입 추출
+    const match = portName.match(/^operation_(\d+)_(target|value)$/);
+
+    if (match) {
+      const operationIndex = parseInt(match[1], 10);
+      const portType = match[2]; // "target" or "value"
+
+      // 3. operation.target_variable 동기화 (UI 표시용)
+      let updatedOperations = assignerData.operations;
+
+      if (portType === 'target') {
+        updatedOperations = assignerData.operations?.map((op, idx) => {
+          if (idx === operationIndex) {
+            return {
+              ...op,
+              target_variable: selector
+                ? {
+                    port_name: (selector as any).variable || selector[selector.length - 1] as string, // 변수 이름
+                    data_type: op.target_variable?.data_type, // 기존 타입 정보 유지
+                  }
+                : undefined,
+            };
+          }
+          return op;
+        });
+      }
+
+      // 4. 단일 업데이트로 두 데이터 소스 모두 갱신
+      updateNode(selectedNodeId!, {
+        operations: updatedOperations,
+        variable_mappings: Object.keys(nextMappings).length ? nextMappings : undefined,
+      } as any);
+    } else {
+      // 포트 이름 형식이 맞지 않으면 기존 로직 실행 (fallback)
+      updateNode(selectedNodeId!, {
+        variable_mappings: Object.keys(nextMappings).length ? nextMappings : undefined,
+      } as any);
+    }
   };
 
   const handleAddOperation = () => {
