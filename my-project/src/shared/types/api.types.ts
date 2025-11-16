@@ -189,6 +189,9 @@ export interface BotListItemApiResponse {
   edgeCount: number;
   createdAt: string;
   updatedAt: string | null;
+  category?: string;
+  tags?: string[];
+  createdBy?: number;
 }
 
 export interface BotListResponseV2 {
