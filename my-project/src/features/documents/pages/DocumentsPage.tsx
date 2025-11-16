@@ -75,49 +75,51 @@ export const LegacyDocumentsView: React.FC<LegacyDocumentsViewProps> = ({ botId:
   };
 
   return (
-    <div className="space-y-4 p-6">
-      {/* Header with Upload and Refresh buttons */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">문서 관리</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            업로드된 문서를 관리합니다
-          </p>
+    <div className="h-full w-full overflow-auto bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header with Upload and Refresh buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">문서 관리</h1>
+            <p className="text-gray-600">
+              업로드된 문서를 관리합니다
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={!selectedBotId}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              새로고침
+            </Button>
+            <Button
+              onClick={() => setUploadModalOpen(true)}
+              disabled={!selectedBotId}
+            >
+              <FileUp className="mr-2 h-4 w-4" />
+              업로드
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={!selectedBotId}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            새로고침
-          </Button>
-          <Button
-            onClick={() => setUploadModalOpen(true)}
-            disabled={!selectedBotId}
-          >
-            <FileUp className="mr-2 h-4 w-4" />
-            업로드
-          </Button>
-        </div>
+
+        {/* Document List */}
+        {!selectedBotId ? (
+          <div className="text-sm text-gray-500">
+            봇을 먼저 선택해주세요
+          </div>
+        ) : (
+          <DocumentList documents={documents} onDelete={handleDelete} />
+        )}
+
+        {/* Upload Modal */}
+        <DocumentUploadModal
+          open={uploadModalOpen}
+          onClose={() => setUploadModalOpen(false)}
+        />
       </div>
-
-      {/* Document List */}
-      {!selectedBotId ? (
-        <div className="flex items-center justify-center h-32 text-sm text-gray-400">
-          봇을 먼저 선택해주세요
-        </div>
-      ) : (
-        <DocumentList documents={documents} onDelete={handleDelete} />
-      )}
-
-      {/* Upload Modal */}
-      <DocumentUploadModal
-        open={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-      />
     </div>
   );
 };

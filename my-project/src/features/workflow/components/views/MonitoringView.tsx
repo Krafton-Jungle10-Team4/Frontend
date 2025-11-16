@@ -40,24 +40,22 @@ const MonitoringView = () => {
   const summary = useMemo(() => calculateSummary(usageData), [usageData]);
 
   return (
-    <div className="h-full w-full overflow-auto bg-background">
-      <div className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl">Usage</h1>
-          <p className="text-muted-foreground">
+    <div className="h-full w-full overflow-auto bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Usage</h1>
+          <p className="text-gray-600">
             Monitor workflow executions, token usage, and cost estimates
           </p>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8">
         {!botId && (
-          <div className="mb-6 text-sm text-muted-foreground">
+          <div className="text-sm text-gray-500">
             워크플로우 사용 현황을 보려면 먼저 봇을 선택하세요.
           </div>
         )}
         {error && (
-          <div className="mb-6 text-sm text-red-500">
+          <div className="text-sm text-red-500">
             {error}
           </div>
         )}
@@ -85,7 +83,7 @@ const MonitoringView = () => {
         </div>
 
         {loading ? (
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-gray-500">
             실행 이력을 불러오는 중입니다...
           </div>
         ) : (

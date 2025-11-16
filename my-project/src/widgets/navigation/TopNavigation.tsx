@@ -136,7 +136,7 @@ export function TopNavigation({
             onClick={onLogoClick ?? onHomeClick}
             className="flex items-center gap-3 transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            <span className="text-2xl font-semibold text-gray-700 leading-none tracking-tight">
+            <span className="text-[1.8rem] font-semibold text-gray-700 leading-none tracking-tight">
               <span style={{ color: brandAccent }}>S</span>
               nap
               <span style={{ color: brandAccent }}>A</span>
@@ -152,10 +152,10 @@ export function TopNavigation({
             <Button
               variant="default"
               size="sm"
-              className="rounded-full px-5 ml-2 border-2 border-sky-200 bg-gradient-to-r from-sky-400 to-blue-500 text-white font-semibold shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:brightness-110"
+              className="rounded-full px-3.5 ml-2 border-2 border-sky-200 bg-gradient-to-r from-sky-400 to-blue-500 text-white font-semibold shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:brightness-110 text-xs py-1"
               onClick={() => navigate('/pricing')}
             >
-              <Sparkles size={14} className="mr-1.5 text-white" />
+              <Sparkles size={11} className="mr-1 text-white" />
               Free · {t.upgrade}
             </Button>
           )}
