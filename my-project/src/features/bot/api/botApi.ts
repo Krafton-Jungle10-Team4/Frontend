@@ -38,6 +38,9 @@ function transformBotDetailResponse(apiResponse: BotDetailPayload): Bot {
     status: apiResponse.isActive ? 'active' : 'inactive',
     messagesCount: 0,
     errorsCount: 0,
+    category: ((apiResponse as any).category as any) || 'workflow',
+    tags: (apiResponse as any).tags || [],
+    createdBy: (apiResponse as any).createdBy || 0,
     createdAt,
     updatedAt,
     workflow: apiResponse.workflow
@@ -55,6 +58,9 @@ function transformBotListItem(item: BotListItemApiResponse): Bot {
     status: item.isActive ? 'active' : 'inactive',
     messagesCount: 0,
     errorsCount: 0,
+    category: (item.category as any) || 'workflow',
+    tags: item.tags || [],
+    createdBy: item.createdBy || 0,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt || item.createdAt,
     workflow: null,
@@ -74,6 +80,9 @@ function createMockBot(dto: CreateBotDto): Bot {
     status: 'active',
     messagesCount: 0,
     errorsCount: 0,
+    category: dto.category || 'workflow',
+    tags: dto.tags || [],
+    createdBy: 0,
     createdAt: now,
     updatedAt: now,
   };
@@ -86,14 +95,40 @@ export const botApi = {
   /**
    * 모든 봇 조회
    */
-  getAll: async (params?: { search?: string }): Promise<Bot[]> => {
-    const { data } = await apiClient.get<BotListResponseV2>(
-      API_ENDPOINTS.BOTS.LIST,
-      {
-        params,
-      }
-    );
+  getAll: async (params?: {
+    search?: string;
+    category?: string;
+    tags?: string[];
+    onlyMine?: boolean;
+  }): Promise<Bot[]> => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.search) {
+      queryParams.append('search', params.search);
+    }
+    if (params?.category) {
+      queryParams.append('category', params.category);
+    }
+    if (params?.tags && params.tags.length > 0) {
+      params.tags.forEach(tag => {
+        queryParams.append('tags', tag);
+      });
+    }
+    if (params?.onlyMine !== undefined) {
+      queryParams.append('onlyMine', String(params.onlyMine));
+    }
+
+    const url = `${API_ENDPOINTS.BOTS.LIST}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const { data } = await apiClient.get<BotListResponseV2>(url);
     return data.data.map(transformBotListItem);
+  },
+
+  /**
+   * 사용 가능한 태그 목록 조회
+   */
+  getTags: async (): Promise<string[]> => {
+    const { data } = await apiClient.get<string[]>(API_ENDPOINTS.BOTS.TAGS);
+    return data;
   },
 
   /**
@@ -116,9 +151,11 @@ export const botApi = {
       // CreateBotDto → CreateBotRequest 변환
       const request: CreateBotRequest = {
         name: dto.name,
-        goal: dto.goal as any, // BotGoal enum으로 변환됨
+        goal: dto.goal as any,
         personality: dto.personality,
         knowledge: dto.knowledge,
+        category: dto.category,
+        tags: dto.tags || [],
       };
 
       // workflow가 제공되면 백엔드 스키마로 변환하여 추가
@@ -189,9 +226,18 @@ export const botApi = {
 
   /**
    * 봇 삭제
+   * Mock 봇(로컬에만 존재)인 경우 404가 발생할 수 있으므로 404는 무시
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(API_ENDPOINTS.BOTS.DELETE(id));
+    try {
+      await apiClient.delete(API_ENDPOINTS.BOTS.DELETE(id));
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.warn(`Bot ${id} not found on server (possibly a mock bot), ignoring 404`);
+        return;
+      }
+      throw error;
+    }
   },
 
   /**

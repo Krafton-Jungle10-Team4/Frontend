@@ -69,6 +69,7 @@ export const API_ENDPOINTS = {
     DEPLOYMENT: (botId: string) => `/api/v1/bots/${botId}/deployment`,
     DEPLOYMENT_STATUS: (botId: string) =>
       `/api/v1/bots/${botId}/deployment/status`,
+    TAGS: '/api/v1/bots/tags',
   },
 
   // 워크플로우 관리 (SnapAgent API)
