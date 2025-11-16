@@ -1,4 +1,3 @@
-
 import type React from 'react';
 import { useCallback, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -18,14 +17,16 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import {
-  AlignHorizontalJustifyCenter,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
+import { AlignHorizontalJustifyCenter, Eye, EyeOff } from 'lucide-react';
 
 import { Button } from '@shared/components/button';
-import type { Node, Edge, IfElseCase, Topic, VisionConfig } from '@/shared/types/workflow.types';
+import type {
+  Node,
+  Edge,
+  IfElseCase,
+  Topic,
+  VisionConfig,
+} from '@/shared/types/workflow.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
@@ -45,7 +46,10 @@ import { withEdgeMetadata } from '../../utils/edgeHelpers';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
 import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
-import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
+import {
+  clonePortSchema,
+  cloneNodePortSchema,
+} from '@/shared/constants/nodePortSchemas';
 import {
   generateIfElsePortSchema,
   createDefaultIfElseCase,
@@ -99,7 +103,7 @@ const WorkflowInner = () => {
     selectNode,
     toggleChatVisibility,
     reset,
-    nodeTypes: availableNodeTypes,  // 백엔드에서 로드한 노드 타입 정의 목록
+    nodeTypes: availableNodeTypes, // 백엔드에서 로드한 노드 타입 정의 목록
     loadNodeTypes,
     addEdge: addWorkflowEdge,
     deleteEdge: deleteWorkflowEdge,
@@ -111,7 +115,7 @@ const WorkflowInner = () => {
   // Deployment store는 다이얼로그 컴포넌트 내부에서 사용됨
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [panelWidth, setPanelWidth] = useState(320); // 초기 너비 320px (w-80)
+  const [panelWidth, setPanelWidth] = useState(480); // 초기 너비 480px
   const [isResizing, setIsResizing] = useState(false);
   const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
   const { screenToFlowPosition } = useReactFlow();
@@ -376,7 +380,10 @@ const WorkflowInner = () => {
             : createDefaultQuestionClassifierClasses();
         defaultData.classes = ensuredClasses;
         const vision = defaultData.vision as VisionConfig | undefined;
-        portSchema = generateQuestionClassifierPortSchema(ensuredClasses, vision);
+        portSchema = generateQuestionClassifierPortSchema(
+          ensuredClasses,
+          vision
+        );
       }
 
       const newNode: Node = {
@@ -386,7 +393,9 @@ const WorkflowInner = () => {
         data: {
           type: nodeType.type as BlockEnum,
           title: nodeType.label || nodeType.type,
-          desc: nodeType.description || getNodeDescription(nodeType.type as BlockEnum),
+          desc:
+            nodeType.description ||
+            getNodeDescription(nodeType.type as BlockEnum),
           ports: portSchema,
           ...defaultData,
           ...(nodeType.type === BlockEnum.LLM && {
@@ -517,7 +526,9 @@ const WorkflowInner = () => {
           <Button
             variant="outline"
             onClick={toggleChatVisibility}
-            title={isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'}
+            title={
+              isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'
+            }
             className="!text-blue-600 hover:!text-blue-700"
           >
             {isChatVisible ? (
