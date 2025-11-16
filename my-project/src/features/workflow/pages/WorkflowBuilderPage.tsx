@@ -1,6 +1,5 @@
-import { useState, useMemo, memo, useEffect } from 'react';
+import { useState, memo, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { Home, Spline, Activity, FileText, BookOpen } from 'lucide-react';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
@@ -11,11 +10,13 @@ import { LegacyDocumentsView } from '@/features/documents/pages/DocumentsPage';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 import { useWorkflowStore } from '../stores/workflowStore';
-import { TopNavigation, WorkspaceSidebar, type MenuItem } from '@/widgets';
+import { TopNavigation } from '@/widgets';
 import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
+import { NavigationTabs } from '@/features/workspace/components/NavigationTabs';
+import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
 
 // Memoized wrapper to prevent unnecessary re-renders
 const KnowledgeView = memo(({ botId }: { botId?: string }) => {
@@ -102,11 +103,13 @@ export const WorkflowBuilderPage = () => {
   const userName = user?.name || 'User';
   const userEmail = user?.email || '';
 
-  // UI store - 언어 설정 및 사이드바 상태
-  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
-  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
+  // UI store - 언어 설정
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
+
+  // Workspace store - 탭 상태
+  const workspaceActiveTab = useWorkspaceStore((state) => state.activeTab);
+  const setWorkspaceActiveTab = useWorkspaceStore((state) => state.setActiveTab);
 
   // Bot 이름 가져오기 (navigation state에서)
   const state = location.state as { botName?: string } | null;
@@ -123,46 +126,10 @@ export const WorkflowBuilderPage = () => {
     }
   };
 
-  // Workflow-specific menu items
-  const workflowMenuItems = useMemo((): MenuItem[] => {
-    const labels =
-      language === 'ko'
-        ? ['홈', '오케스트레이션', '지식', '모니터링', '로그 및 어노테이션']
-        : ['Home', 'Orchestration', 'Knowledge', 'Monitoring', 'Logs & Annotations'];
-
-    return [
-      {
-        id: 'home',
-        icon: Home,
-        label: labels[0],
-        onClick: () => navigate('/home'),
-      },
-      {
-        id: 'flow',
-        icon: Spline,
-        label: labels[1],
-        onClick: () => setActiveView('flow'),
-      },
-      {
-        id: 'knowledge',
-        icon: BookOpen,
-        label: labels[2],
-        onClick: () => setActiveView('knowledge'),
-      },
-      {
-        id: 'monitoring',
-        icon: Activity,
-        label: labels[3],
-        onClick: () => setActiveView('monitoring'),
-      },
-      {
-        id: 'logs',
-        icon: FileText,
-        label: labels[4],
-        onClick: () => setActiveView('logs'),
-      },
-    ];
-  }, [language, navigate]);
+  const handleWorkspaceTabChange = (tab: 'explore' | 'studio' | 'knowledge' | 'tools') => {
+    setWorkspaceActiveTab(tab);
+    navigate(`/workspace/${tab}`);
+  };
 
   const renderContent = () => {
     switch (activeView) {
@@ -180,19 +147,8 @@ export const WorkflowBuilderPage = () => {
   };
 
   return (
-    <div className="h-screen flex bg-gray-50">
-      {/* Workspace Sidebar */}
-      <WorkspaceSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        userName={userName}
-        currentPage={botName}
-        language={language}
-        menuItems={workflowMenuItems}
-        activeItemId={activeView}
-      />
-
-      {/* Workflow Sidebar - 전체 높이 */}
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Workflow Sidebar (플로팅 위젯) */}
       <WorkflowSlimSidebar
         activeView={activeView}
         onViewChange={setActiveView}
@@ -202,14 +158,22 @@ export const WorkflowBuilderPage = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
         <TopNavigation
-          onToggleSidebar={() => setSidebarOpen(true)}
+          onToggleSidebar={() => {}}
           userName={userName}
           userEmail={userEmail}
-          onHomeClick={() => navigate('/home')}
+          onHomeClick={() => navigate('/workspace/studio')}
           language={language}
           onLanguageChange={setLanguage}
           onLogout={handleLogout}
           currentPage={botName}
+          showSidebarToggle={false}
+          navigationTabs={
+            <NavigationTabs
+              activeTab={workspaceActiveTab}
+              onTabChange={handleWorkspaceTabChange}
+              language={language}
+            />
+          }
         />
 
         {/* Content */}

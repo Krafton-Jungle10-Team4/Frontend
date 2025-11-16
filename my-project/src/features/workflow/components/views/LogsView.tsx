@@ -35,15 +35,17 @@ const LogsView = () => {
     workflowApi
       .listWorkflowRuns(botId, { limit: 20 })
       .then((response) => {
-        setRuns(response.runs);
-        if (response.runs.length > 0) {
-          setSelectedRunId(response.runs[0].id);
+        const runsList = response?.runs || [];
+        setRuns(runsList);
+        if (runsList.length > 0) {
+          setSelectedRunId(runsList[0].id);
         }
         setError(null);
       })
       .catch((err) => {
         console.error('Failed to load workflow runs:', err);
         setError('실행 이력을 불러올 수 없습니다.');
+        setRuns([]);
       })
       .finally(() => setLoadingRuns(false));
   }, [botId]);
