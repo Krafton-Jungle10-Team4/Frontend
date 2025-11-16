@@ -4,6 +4,8 @@ import { sendMessageStream } from '@/features/chat/api/chatApi';
 import { toast } from 'sonner';
 import type { Source } from '@/shared/types/api.types';
 import type { WorkflowNodeEvent } from '@/shared/types/streaming.types';
+import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
+import { NodeRunningStatus, type CommonEdgeType, BlockEnum } from '@/shared/types/workflow.types';
 
 interface Message {
   id: string;
@@ -89,6 +91,9 @@ export function ChatPreviewPanel({
   const [nodeEvents, setNodeEvents] = useState<WorkflowNodeEvent[]>([]);
   const typingBufferRef = useRef('');
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
+  // 워크플로우 노드 상태 업데이트
+  const { updateNode, edges, setEdges } = useWorkflowStore();
 
   const ensureSessionId = () => {
     if (!sessionIdRef.current) {
@@ -165,6 +170,30 @@ export function ChatPreviewPanel({
     stopTypingAnimation();
     setIsTyping(false);
     setNodeEvents([]);
+    
+    // 모든 노드와 엣지 상태 초기화
+    const { nodes } = useWorkflowStore.getState();
+    nodes.forEach((node) => {
+      updateNode(node.id, {
+        _runningStatus: NodeRunningStatus.NotStart,
+      });
+    });
+    setEdges((currentEdges) =>
+      currentEdges.map((edge) => {
+        const currentData = (edge.data || {}) as Partial<CommonEdgeType>;
+        const sourceNode = useWorkflowStore.getState().nodes.find(n => n.id === edge.source);
+        const targetNode = useWorkflowStore.getState().nodes.find(n => n.id === edge.target);
+        return {
+          ...edge,
+          data: {
+            ...currentData,
+            sourceType: currentData.sourceType || sourceNode?.data?.type || BlockEnum.LLM,
+            targetType: currentData.targetType || targetNode?.data?.type || BlockEnum.LLM,
+            _sourceRunningStatus: undefined,
+          } as CommonEdgeType,
+        };
+      })
+    );
   };
 
   const handleNodeEventUpdate = (event: WorkflowNodeEvent) => {
@@ -177,6 +206,51 @@ export function ChatPreviewPanel({
       updated[existingIndex] = event;
       return updated;
     });
+
+    // 노드 실행 상태 업데이트 (Dify 스타일: 실행 경로 추적)
+    const statusMap: Record<string, NodeRunningStatus> = {
+      'running': NodeRunningStatus.Running,
+      'completed': NodeRunningStatus.Succeeded,
+      'failed': NodeRunningStatus.Failed,
+      'pending': NodeRunningStatus.Waiting,
+      'skipped': NodeRunningStatus.Stopped,
+    };
+
+    const runningStatus = statusMap[event.status] || NodeRunningStatus.NotStart;
+    
+    // 노드 상태 업데이트
+    updateNode(event.node_id, {
+      _runningStatus: runningStatus,
+    });
+
+    // 노드가 완료되면 해당 노드에서 나가는 엣지도 업데이트 (Dify 스타일: 실행 경로 추적)
+    const outgoingEdges = edges.filter((edge) => edge.source === event.node_id);
+    if (outgoingEdges.length > 0) {
+      const edgeStatusMap: Record<string, NodeRunningStatus> = {
+        'completed': NodeRunningStatus.Succeeded, // 초록색
+        'running': NodeRunningStatus.Running,    // 파란색
+        'failed': NodeRunningStatus.Failed,      // 빨간색
+      };
+      
+      const edgeStatus = edgeStatusMap[event.status];
+      if (edgeStatus) {
+        setEdges((currentEdges) =>
+          currentEdges.map((edge) => {
+            if (edge.source === event.node_id) {
+              const currentData = edge.data as CommonEdgeType | undefined;
+              return {
+                ...edge,
+                data: {
+                  ...currentData,
+                  _sourceRunningStatus: edgeStatus,
+                } as CommonEdgeType,
+              };
+            }
+            return edge;
+          })
+        );
+      }
+    }
   };
 
   const waitForTypingToFinish = () => {
