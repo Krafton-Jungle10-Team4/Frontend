@@ -27,7 +27,7 @@ const planVisualConfig: Record<
     badgeLabel: '무료로 시작',
     border: 'border-gray-200',
     gradient: 'from-white via-white to-gray-50',
-    button: 'bg-gray-900 text-white hover:bg-gray-900/90',
+    button: '!bg-white !text-teal-500 !border-2 !border-teal-400 hover:!bg-teal-50 shadow-none',
     icon: 'text-gray-500',
   },
   pro: {

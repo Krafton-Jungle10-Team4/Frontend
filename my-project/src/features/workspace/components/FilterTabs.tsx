@@ -49,7 +49,7 @@ export function FilterTabs({
     >
       <div className="relative inline-flex items-center gap-0 bg-muted/50 rounded-lg p-1">
         <div
-          className="absolute h-[calc(100%-8px)] bg-primary rounded-md transition-all duration-300 ease-out"
+          className="absolute h-[calc(100%-8px)] bg-teal-500 rounded-md transition-all duration-300 ease-out"
           style={{
             left: `${indicatorStyle.left}px`,
             width: `${indicatorStyle.width}px`,

@@ -20,7 +20,7 @@ export function NavigationTabs({
   onTabChange,
   language,
 }: NavigationTabsProps) {
-  const brandAccent = '#1CC8A0';
+  const brandAccent = '#14b8a6';
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [indicatorStyle, setIndicatorStyle] = useState({

@@ -6,3 +6,5 @@
 export { FilterTabs, type FilterTab } from './FilterTabs';
 export { LeftActionPanel } from './LeftActionPanel';
 export { TopActions, type ViewMode } from './TopActions';
+export { TemplateCard } from './TemplateCard';
+export { MyBotsSidebar } from './MyBotsSidebar';
