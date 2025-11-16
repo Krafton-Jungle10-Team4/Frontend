@@ -141,12 +141,13 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // deployment 404는 정상 상황이므로 에러 로그 생략
-    const isDeploymentNotFound =
+    // deployment 404 및 cost 404는 정상 상황이므로 에러 로그 생략
+    const isExpected404 =
       error.response?.status === 404 &&
-      originalRequest.url?.includes('/deployment');
+      (originalRequest.url?.includes('/deployment') ||
+       originalRequest.url?.includes('/cost/usage'));
 
-    if (!isDeploymentNotFound) {
+    if (!isExpected404) {
       console.error('❌ [Response Error]', error.response?.status, error.config?.url);
       console.error('❌ [Error Details]', error.response?.data);
     }
