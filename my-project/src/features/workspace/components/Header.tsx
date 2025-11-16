@@ -4,7 +4,6 @@ import { NavigationTabs } from './NavigationTabs';
 interface HeaderProps {
   activeTab: 'explore' | 'studio' | 'knowledge' | 'tools';
   onTabChange: (tab: HeaderProps['activeTab']) => void;
-  workspaceName: string;
   userName: string;
   userEmail: string;
   language: 'en' | 'ko';
@@ -17,7 +16,6 @@ interface HeaderProps {
 export function Header({
   activeTab,
   onTabChange,
-  workspaceName,
   userName,
   userEmail,
   language,
@@ -46,7 +44,6 @@ export function Header({
         language={language}
         onLanguageChange={onLanguageChange}
         onLogout={onLogout}
-        workspaceLabel={workspaceName}
         serviceName="SnapAgent"
         activeTabLabel={activeTabLabel}
         showSidebarToggle={false}

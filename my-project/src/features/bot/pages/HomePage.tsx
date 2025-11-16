@@ -128,7 +128,7 @@ export function HomePage() {
           onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
           userEmail={userEmail}
-          onHomeClick={() => navigate('/home')}
+        onHomeClick={() => navigate('/workspace/studio')}
           language={language}
           onLanguageChange={setLanguage}
           onLogout={handleLogout}
