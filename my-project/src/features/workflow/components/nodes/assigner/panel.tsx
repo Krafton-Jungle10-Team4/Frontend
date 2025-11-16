@@ -75,12 +75,17 @@ export const AssignerPanel = () => {
       if (portType === 'target') {
         updatedOperations = assignerData.operations?.map((op, idx) => {
           if (idx === operationIndex) {
+            // Extract port name from selector.variable (format: "node_id.port_name")
+            const extractedPortName = selector?.variable
+              ? selector.variable.split('.').pop() ?? selector.variable
+              : undefined;
+
             return {
               ...op,
               target_variable: selector
                 ? {
-                    port_name: (selector as any).variable || selector[selector.length - 1] as string, // 변수 이름
-                    data_type: op.target_variable?.data_type, // 기존 타입 정보 유지
+                    port_name: extractedPortName ?? '',
+                    data_type: selector.value_type ?? op.target_variable?.data_type,
                   }
                 : undefined,
             };
