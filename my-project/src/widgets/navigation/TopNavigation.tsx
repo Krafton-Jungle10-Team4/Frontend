@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import {
   PanelLeft,
   Languages,
@@ -9,6 +10,8 @@ import {
   LogOut,
   Zap,
   Crown,
+  Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useBilling } from '@/features/billing/hooks/useBilling';
@@ -32,7 +35,11 @@ interface TopNavigationProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onLogout?: () => Promise<void> | void;
-  currentPage?: string; // 현재 페이지 이름 (선택사항)
+  serviceName?: string;
+  activeTabLabel?: string;
+  onLogoClick?: () => void;
+  navigationTabs?: ReactNode;
+  showSidebarToggle?: boolean;
 }
 
 const PlanDisplay = () => {
@@ -62,9 +69,7 @@ const PlanDisplay = () => {
   const config = planConfig[plan_id];
 
   return (
-    <div
-      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.className}`}
-    >
+    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm bg-white text-gray-800`}>
       {config.icon}
       <span>{name}</span>
     </div>
@@ -79,16 +84,20 @@ export function TopNavigation({
   language,
   onLanguageChange,
   onLogout,
-  currentPage,
+  serviceName = 'SnapAgent',
+  activeTabLabel,
+  onLogoClick,
+  navigationTabs,
+  showSidebarToggle = true,
 }: TopNavigationProps) {
   const { openPricingModal } = useUIStore();
   const { isFreePlan } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
+  const brandAccent = '#1CC8A0';
 
   const translations = {
     en: {
       workspace: "'s Workspace",
-      home: 'Home',
       upgrade: 'Upgrade',
       accountSettings: 'Account Settings',
       linkSocialAccounts: 'Link social accounts',
@@ -99,7 +108,6 @@ export function TopNavigation({
     },
     ko: {
       workspace: '의 워크스페이스',
-      home: '홈',
       upgrade: '업그레이드',
       accountSettings: '계정 설정',
       linkSocialAccounts: '소셜 계정 연결',
@@ -113,115 +121,132 @@ export function TopNavigation({
   const t = translations[language];
 
   return (
-    <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6">
-      <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0 flex-1">
-        <button
-          onClick={onToggleSidebar}
-          className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
-        >
-          <PanelLeft size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onHomeClick}
-          className="hover:text-gray-900 transition-colors truncate hidden sm:inline"
-        >
-          {userName}
-          {t.workspace}
-        </button>
-        <span className="text-gray-400 hidden sm:inline">{'>'}</span>
-        <span className="font-semibold text-gray-900 truncate">
-          {currentPage || t.home}
-        </span>
-        {isFreePlan && (
-          <Button
-            variant="default"
-            size="sm"
-            className="ml-4 transition-transform hover:scale-105"
-            onClick={openPricingModal}
-          >
-            <Zap size={14} className="mr-1.5" />
-            {t.upgrade}
-          </Button>
-        )}
-      </div>
-      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onLanguageChange(language === 'en' ? 'ko' : 'en')}
-          className="text-sm gap-1 sm:gap-2"
-        >
-          <Languages size={16} />
-          <span className="hidden sm:inline">
-            {language === 'en' ? '한국어' : 'English'}
-          </span>
-        </Button>
-
-        <PlanDisplay />
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="focus:outline-none">
-              <Avatar className="w-8 h-8 cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarFallback className="bg-teal-500 text-white">
-                  {userInitial}
-                </AvatarFallback>
-              </Avatar>
+    <div className="bg-[#f5f7fb] border-b border-[#e3e7f3]">
+      <div className="relative flex h-20 items-center px-4 sm:px-6">
+        <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0">
+          {showSidebarToggle && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-2 hover:bg-white/70 rounded-full transition-colors flex-shrink-0"
+            >
+              <PanelLeft size={18} className="text-gray-600" />
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 p-0">
-            {/* User Info */}
-            <div className="p-4 border-b">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-10 h-10">
+          )}
+          <button
+            onClick={onLogoClick ?? onHomeClick}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <span className="text-2xl font-semibold text-gray-900 leading-none tracking-tight">
+              <span style={{ color: brandAccent }}>S</span>
+              nap
+              <span style={{ color: brandAccent }}>A</span>
+              gent
+            </span>
+          </button>
+          {activeTabLabel && (
+            <span className="hidden md:inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-600">
+              {activeTabLabel}
+            </span>
+          )}
+          {isFreePlan && (
+            <Button
+              variant="default"
+              size="sm"
+              className="rounded-full px-5 ml-2 border-none shadow-sm"
+              style={{ backgroundColor: brandAccent }}
+              onClick={openPricingModal}
+            >
+              <Zap size={14} className="mr-1.5" />
+              Free / {t.upgrade}
+            </Button>
+          )}
+        </div>
+
+        {navigationTabs && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            {navigationTabs}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onLanguageChange(language === 'en' ? 'ko' : 'en')}
+            className="text-sm gap-1 sm:gap-2 rounded-full border-none bg-white shadow-sm"
+          >
+            <Languages size={16} />
+            <span className="hidden sm:inline">
+              {language === 'en' ? '한국어' : 'English'}
+            </span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="focus:outline-none flex items-center gap-2">
+                <Avatar className="w-9 h-9 cursor-pointer hover:opacity-80 transition-opacity">
                   <AvatarFallback className="bg-teal-500 text-white">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="text-sm">{userName}</p>
-                  <p className="text-xs text-gray-500">{userEmail}</p>
+                <span className="text-sm text-gray-700 inline-flex items-center gap-1">
+                  {userName}
+                  <ChevronDown size={12} />
+                </span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 p-0">
+              <div className="p-4 border-b bg-[#f8f9ff]">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-teal-500 text-white">
+                      {userInitial}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm">{userName}</p>
+                    <p className="text-xs text-gray-500">{userEmail}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Menu Items */}
-            <div className="py-2">
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <Settings size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.accountSettings}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <Link2 size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.linkSocialAccounts}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <KeyRound size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.changePassword}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <Bug size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.reportBug}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                <Palette size={16} className="mr-3 text-gray-600" />
-                <span className="text-sm">{t.appearance}</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {onLogout && (
-                <DropdownMenuItem
-                  className="px-4 py-2 cursor-pointer text-red-600 focus:text-red-600"
-                  onClick={() => {
-                    void onLogout();
-                  }}
-                >
-                  <LogOut size={16} className="mr-3 text-gray-600" />
-                  <span className="text-sm">{t.signOut}</span>
+              <div className="py-2">
+                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                  <Settings size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.accountSettings}</span>
                 </DropdownMenuItem>
-              )}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                  <Link2 size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.linkSocialAccounts}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                  <KeyRound size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.changePassword}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                  <Bug size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.reportBug}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                  <Palette size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.appearance}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {onLogout && (
+                  <DropdownMenuItem
+                    className="px-4 py-2 cursor-pointer text-red-600 focus:text-red-600"
+                    onClick={() => {
+                      void onLogout();
+                    }}
+                  >
+                    <LogOut size={16} className="mr-3 text-gray-600" />
+                    <span className="text-sm">{t.signOut}</span>
+                  </DropdownMenuItem>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );

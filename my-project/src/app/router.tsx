@@ -84,7 +84,54 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
-          // Home - Bot 목록 페이지
+          // Workspace routes - 새로운 워크스페이스 레이아웃
+          {
+            path: 'workspace',
+            lazy: () =>
+              import('@/features/workspace').then((module) => ({
+                Component: module.WorkspaceLayout,
+              })),
+            children: [
+              // Default redirect to studio
+              {
+                index: true,
+                element: <Navigate to="/workspace/studio" replace />,
+              },
+              // Explore (마켓플레이스)
+              {
+                path: 'explore',
+                lazy: () =>
+                  import('@/features/workspace').then((module) => ({
+                    Component: module.ExplorePage,
+                  })),
+              },
+              // Studio (봇 관리)
+              {
+                path: 'studio',
+                lazy: () =>
+                  import('@/features/workspace').then((module) => ({
+                    Component: module.StudioPage,
+                  })),
+              },
+              // Knowledge (지식 관리)
+              {
+                path: 'knowledge',
+                lazy: () =>
+                  import('@/features/workspace').then((module) => ({
+                    Component: module.KnowledgePage,
+                  })),
+              },
+              // Tools (도구)
+              {
+                path: 'tools',
+                lazy: () =>
+                  import('@/features/workspace').then((module) => ({
+                    Component: module.ToolsPage,
+                  })),
+              },
+            ],
+          },
+          // Home - Bot 목록 페이지 (기존 유지, 추후 deprecated)
           {
             path: 'home',
             lazy: () =>
