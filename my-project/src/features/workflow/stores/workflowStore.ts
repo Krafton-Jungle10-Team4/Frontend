@@ -39,6 +39,7 @@ import {
 import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
 import type { AssignerNodeType, AssignerOperation } from '@/shared/types/workflow.types';
 import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
+import { sanitizeEdgeForLogicalTargets } from '../utils/logicalNodeGuards';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -694,9 +695,13 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     };
   });
 
+  const sanitizedEdges = normalizedEdges.map((edge) =>
+    sanitizeEdgeForLogicalTargets(edge, normalizedNodes)
+  );
+
   const legacyMappingsByNode = buildLegacyMappingsFromEdges(
     normalizedNodes,
-    normalizedEdges
+    sanitizedEdges
   );
 
   const nodesWithLegacyMappings = normalizedNodes.map((node) => {
@@ -724,7 +729,7 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
 
   const syncedEdges = synchronizeEdgesWithMappings(
     nodesWithLegacyMappings,
-    normalizedEdges
+    sanitizedEdges
   );
   return { nodes: nodesWithLegacyMappings, edges: syncedEdges };
 };
@@ -856,11 +861,19 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   // 엣지 관리
   setEdges: (edgesOrUpdater) => {
-    if (typeof edgesOrUpdater === 'function') {
-      set((state) => ({ edges: edgesOrUpdater(state.edges), hasUnsavedChanges: true }));
-    } else {
-      set({ edges: edgesOrUpdater, hasUnsavedChanges: true });
-    }
+    set((state) => {
+      const nextEdges =
+        typeof edgesOrUpdater === 'function'
+          ? edgesOrUpdater(state.edges)
+          : edgesOrUpdater;
+      const sanitizedEdges = (nextEdges || []).map((edge) =>
+        sanitizeEdgeForLogicalTargets(edge, state.nodes)
+      );
+      return {
+        edges: sanitizedEdges,
+        hasUnsavedChanges: true,
+      };
+    });
   },
 
   addEdge: (edge) =>
@@ -876,11 +889,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         targetHandle: edge.targetHandle || undefined,
         type: edge.type || 'custom',
       };
+      const sanitizedEdge = sanitizeEdgeForLogicalTargets(
+        normalizedEdge,
+        state.nodes
+      );
 
       const existingEdgeIndex = state.edges.findIndex(
         (existing) =>
-          existing.source === normalizedEdge.source &&
-          existing.target === normalizedEdge.target
+          existing.source === sanitizedEdge.source &&
+          existing.target === sanitizedEdge.target
       );
 
       let nextEdges: Edge[];
@@ -889,13 +906,13 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           index === existingEdgeIndex
             ? {
                 ...existing,
-                ...normalizedEdge,
-                data: normalizedEdge.data ?? existing.data,
+                ...sanitizedEdge,
+                data: sanitizedEdge.data ?? existing.data,
               }
             : existing
         );
       } else {
-        nextEdges = [...state.edges, normalizedEdge];
+        nextEdges = [...state.edges, sanitizedEdge];
       }
 
       return {

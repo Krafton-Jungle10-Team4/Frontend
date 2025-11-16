@@ -27,34 +27,10 @@ export const createDefaultIfElseCase = (): IfElseCase => ({
  * - ELSE 브랜치 하나 (else)
  */
 export function generateIfElsePortSchema(cases: IfElseCase[]): NodePortSchema {
-  // 1. 모든 조건에서 사용된 변수 추출
-  const variableSelectors = new Set<string>();
+  // IfElse는 입력 포트를 사용하지 않는다.
+  const inputs: PortDefinition[] = [];
 
-  cases.forEach((caseItem) => {
-    caseItem.conditions.forEach((condition) => {
-      if (condition.variable_selector) {
-        variableSelectors.add(condition.variable_selector);
-      }
-    });
-  });
-
-  // 2. 입력 포트 생성 (각 변수마다)
-  const inputs: PortDefinition[] = Array.from(variableSelectors).map(
-    (selector) => {
-      // selector 형식: "node_id.port_name"
-      const displayName = selector.split('.').pop() || selector;
-
-      return {
-        name: selector,
-        type: PortType.ANY, // 타입은 조건에서 varType 기반으로 결정되므로 ANY
-        required: false,
-        description: `Variable: ${selector}`,
-        display_name: displayName,
-      };
-    }
-  );
-
-  // 3. 출력 포트 생성 (각 케이스 + ELSE)
+  // 출력 포트 생성 (각 케이스 + ELSE)
   const outputs: PortDefinition[] = [];
 
   // IF/ELIF 케이스별 출력

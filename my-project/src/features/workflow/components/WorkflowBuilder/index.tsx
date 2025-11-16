@@ -43,6 +43,7 @@ import { PublishDropdown } from '../PublishDropdown';
 import { EmbedWebsiteDialog, ApiReferenceDialog } from '@features/deployment';
 import { computeWorkflowAutoLayout } from '../../utils/autoLayout';
 import { withEdgeMetadata } from '../../utils/edgeHelpers';
+import { sanitizeConnectionForLogicalTargets } from '../../utils/logicalNodeGuards';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowAutoSave } from '../../hooks/useWorkflowAutoSave';
 import { WorkflowSettingsDialog } from '../WorkflowSettingsDialog';
@@ -243,7 +244,8 @@ const WorkflowInner = () => {
         return;
       }
 
-      const enriched = withEdgeMetadata(connection, nodes);
+      const sanitizedConnection = sanitizeConnectionForLogicalTargets(connection, nodes);
+      const enriched = withEdgeMetadata(sanitizedConnection, nodes);
       const newEdge: Edge = {
         id: `edge-${enriched.source}-${enriched.target}`,
         source: enriched.source!,
