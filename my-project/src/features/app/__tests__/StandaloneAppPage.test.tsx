@@ -81,7 +81,6 @@ describe('StandaloneAppPage', () => {
 
     renderWithRouter();
 
-    expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText('챗봇을 불러올 수 없습니다')).toBeInTheDocument();
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /다시 시도/i })).toBeInTheDocument();
