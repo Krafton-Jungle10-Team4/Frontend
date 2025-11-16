@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   PanelLeft,
   Languages,
@@ -13,7 +14,6 @@ import {
   Sparkles,
   ChevronDown,
 } from 'lucide-react';
-import { useUIStore } from '@/shared/stores/uiStore';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import { Button } from '@/shared/components/button';
@@ -90,7 +90,7 @@ export function TopNavigation({
   navigationTabs,
   showSidebarToggle = true,
 }: TopNavigationProps) {
-  const { openPricingModal } = useUIStore();
+  const navigate = useNavigate();
   const { isFreePlan } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
   const brandAccent = '#1CC8A0';
@@ -152,11 +152,10 @@ export function TopNavigation({
             <Button
               variant="default"
               size="sm"
-              className="rounded-full px-5 ml-2 border-none shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:brightness-110"
-              style={{ backgroundColor: brandAccent }}
-              onClick={openPricingModal}
+              className="rounded-full px-5 ml-2 border-2 border-sky-200 bg-gradient-to-r from-sky-400 to-blue-500 text-white font-semibold shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 hover:brightness-110"
+              onClick={() => navigate('/pricing')}
             >
-              <Zap size={14} className="mr-1.5" />
+              <Sparkles size={14} className="mr-1.5 text-white" />
               Free · {t.upgrade}
             </Button>
           )}

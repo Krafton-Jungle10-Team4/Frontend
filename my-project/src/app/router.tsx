@@ -151,6 +151,14 @@ export const router = createBrowserRouter([
                 Component: module.BillingSettingsPage,
               })),
           },
+          // Pricing Page
+          {
+            path: 'pricing',
+            lazy: () =>
+              import('@/features/billing').then((module) => ({
+                Component: module.PricingPage,
+              })),
+          },
           // Deployment routes - 배포 관리
           {
             path: 'deployment/:botId',

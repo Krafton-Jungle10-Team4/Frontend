@@ -28,7 +28,6 @@ export function BillingSettingsPage() {
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
-  const openPricingModal = useUIStore((state) => state.openPricingModal);
 
   const handleCancelSubscription = () => {
     upgradePlan('free');
@@ -198,7 +197,7 @@ export function BillingSettingsPage() {
               <Button
                 variant="outline"
                 className="border-white/80 bg-white text-teal-600 hover:bg-white/90 hover:text-teal-700"
-                onClick={openPricingModal}
+                onClick={() => navigate('/pricing')}
               >
                 <Zap className="h-4 w-4" />
                 {language === 'en' ? 'Manage Plan' : '플랜 변경'}
