@@ -51,7 +51,7 @@ export function LandingPage() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      navigate('/home');
+      navigate('/workspace/studio');
     } else {
       navigate('/login');
     }
