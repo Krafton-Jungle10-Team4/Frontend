@@ -1,6 +1,5 @@
 import { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, Spline, Activity, FileText, BookOpen } from 'lucide-react';
+import { Spline, Activity, FileText, BookOpen } from 'lucide-react';
 export type SidebarView = 'flow' | 'monitoring' | 'logs' | 'knowledge';
 
 export interface WorkflowSlimSidebarProps {
@@ -14,11 +13,6 @@ const WorkflowSlimSidebar = ({
   onViewChange,
   onLogoClick,
 }: WorkflowSlimSidebarProps) => {
-  const navigate = useNavigate();
-
-  const handleHomeClick = () => {
-    navigate('/home');
-  };
 
   const menuItems: { id: SidebarView; icon: React.ElementType }[] = [
     { id: 'flow', icon: Spline },
@@ -28,24 +22,17 @@ const WorkflowSlimSidebar = ({
   ];
 
   return (
-    <div className="w-12 h-full bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 gap-6">
-      <button
-        onClick={onLogoClick}
-        className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg hover:opacity-80 transition-opacity"
-      ></button>
+    <div className="fixed left-4 top-20 z-50 w-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col items-center py-4 gap-4">
       <div className="flex flex-col gap-4 flex-1">
-        <button
-          onClick={handleHomeClick}
-          className="p-2 text-gray-400 hover:text-gray-600"
-        >
-          <Home size={20} />
-        </button>
-        <div className="border-t border-gray-200 my-2 mx-auto w-4/5" />
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onViewChange(item.id)}
-            className="p-2 text-gray-400 hover:text-gray-600"
+            className={`p-2 rounded-lg transition-colors ${
+              activeView === item.id
+                ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
           >
             <item.icon size={20} />
           </button>

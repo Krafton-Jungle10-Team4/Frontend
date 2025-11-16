@@ -501,12 +501,15 @@ const WorkflowInner = () => {
         </ReactFlow>
       </div>
 
-      {/* 상단 툴바 - 캔버스 위 오버레이 (absolute 고정) */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+      {/* 하단 Undo/Redo 버튼 - 왼쪽 하단 고정 */}
+      <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
         <div className="pointer-events-auto">
           <UndoRedoButtons />
         </div>
+      </div>
 
+      {/* 상단 툴바 - 캔버스 위 오버레이 (absolute 고정) */}
+      <div className="absolute top-4 left-4 right-4 z-10 flex justify-end items-center pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <ValidationPanel className="w-72 shrink-0" />
 
