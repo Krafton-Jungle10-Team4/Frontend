@@ -8,6 +8,7 @@ import {
 } from '@/shared/components/dropdown-menu';
 import { formatTimeAgo } from '@/shared/utils/format';
 import type { Language } from '@/shared/types';
+import { TagBadge } from '@/shared/components/TagBadge';
 
 export interface BotCardData {
   id: string;
@@ -17,6 +18,7 @@ export interface BotCardData {
   nodeCount: number;
   edgeCount: number;
   estimatedCost: number;
+  tags?: string[];
 }
 
 interface BotCardProps {
@@ -118,6 +120,13 @@ export function BotCard({
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
+              {bot.tags && bot.tags.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {bot.tags.map((tag) => (
+                    <TagBadge key={tag} tag={tag} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <StatsRow />
@@ -195,6 +204,13 @@ export function BotCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {bot.tags && bot.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1">
+          {bot.tags.map((tag) => (
+            <TagBadge key={tag} tag={tag} />
+          ))}
+        </div>
+      )}
       <div className="mt-4">
         <StatsGrid />
       </div>

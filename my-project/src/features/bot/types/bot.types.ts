@@ -5,6 +5,9 @@
 
 import type { Node, Edge } from '@/shared/types/workflow.types';
 
+// ============= Bot Category & Tags =============
+export type BotCategory = 'workflow' | 'chatflow' | 'chatbot' | 'agent';
+
 // ============= Bot Entity Types =============
 export interface Bot {
   id: string;
@@ -14,6 +17,9 @@ export interface Bot {
   status: 'draft' | 'active' | 'inactive' | 'error';
   messagesCount: number;
   errorsCount: number;
+  category: BotCategory;
+  tags: string[];
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
 
@@ -35,6 +41,8 @@ export interface CreateBotDto {
     nodes: Node[];
     edges: Edge[];
   };
+  category?: BotCategory;
+  tags?: string[];
 }
 
 export interface UpdateBotDto {
@@ -49,6 +57,8 @@ export interface UpdateBotDto {
     edges: Edge[];
   };
   status?: 'draft' | 'active' | 'inactive' | 'error';
+  category?: BotCategory;
+  tags?: string[];
 }
 
 // ============= Bot Form Types =============
@@ -84,6 +94,8 @@ export interface BotState {
 export interface BotFilterOptions {
   search?: string;
   status?: Bot['status'];
+  category?: BotCategory;
+  tags?: string[];
   sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'messagesCount';
   sortOrder?: 'asc' | 'desc';
 }

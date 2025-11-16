@@ -9,6 +9,9 @@ import { botApi } from '../api/botApi';
 
 interface UseBotsOptions {
   searchQuery?: string;
+  category?: string;
+  tags?: string[];
+  onlyMine?: boolean;
   autoFetch?: boolean;
 }
 
@@ -16,7 +19,7 @@ interface UseBotsOptions {
  * Bot 목록을 조회하고 관리하는 커스텀 훅
  */
 export function useBots(options: UseBotsOptions = {}) {
-  const { searchQuery, autoFetch = true } = options;
+  const { searchQuery, category, tags, onlyMine, autoFetch = true } = options;
 
   const { bots, loading, error, setBots, setLoading, setError } = useBotStore();
 
@@ -26,7 +29,12 @@ export function useBots(options: UseBotsOptions = {}) {
     const fetchBots = async () => {
       setLoading(true);
       try {
-        const data = await botApi.getAll({ search: searchQuery });
+        const data = await botApi.getAll({
+          search: searchQuery,
+          category,
+          tags,
+          onlyMine,
+        });
         setBots(data);
         setError(null);
       } catch (err) {
@@ -37,7 +45,7 @@ export function useBots(options: UseBotsOptions = {}) {
     };
 
     fetchBots();
-  }, [searchQuery, autoFetch, setBots, setLoading, setError]);
+  }, [searchQuery, category, tags, onlyMine, autoFetch, setBots, setLoading, setError]);
 
   return { bots, loading, error };
 }
