@@ -69,7 +69,8 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
           data._runningStatus === NodeRunningStatus.Succeeded &&
           !showSelectedBorder,
         showFailedBorder:
-          data._runningStatus === NodeRunningStatus.Failed &&
+          (data._runningStatus === NodeRunningStatus.Failed ||
+            data._runningStatus === NodeRunningStatus.Exception) &&
           !showSelectedBorder,
       };
     }, [data._runningStatus, showSelectedBorder]);
@@ -131,7 +132,8 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
           data._runningStatus === NodeRunningStatus.Succeeded && (
             <RiCheckboxCircleFill className="h-3.5 w-3.5 text-text-success" />
           )}
-        {data._runningStatus === NodeRunningStatus.Failed && (
+        {(data._runningStatus === NodeRunningStatus.Failed ||
+          data._runningStatus === NodeRunningStatus.Exception) && (
           <RiErrorWarningFill className="h-3.5 w-3.5 text-text-destructive" />
         )}
       </div>
@@ -143,13 +145,15 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
       {ports &&
         (data._runningStatus === NodeRunningStatus.Running ||
           data._runningStatus === NodeRunningStatus.Succeeded ||
-          data._runningStatus === NodeRunningStatus.Failed) && (
+          data._runningStatus === NodeRunningStatus.Failed ||
+          data._runningStatus === NodeRunningStatus.Exception) && (
           <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2 rounded-b-[13px]">
             <OutputVarList
               nodeId={id}
               showValues={
                 data._runningStatus === NodeRunningStatus.Succeeded ||
-                data._runningStatus === NodeRunningStatus.Failed
+                data._runningStatus === NodeRunningStatus.Failed ||
+                data._runningStatus === NodeRunningStatus.Exception
               }
               showEmptyState={false}
             />
