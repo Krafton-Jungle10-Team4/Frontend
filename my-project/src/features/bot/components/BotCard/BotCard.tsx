@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bot as BotIcon, MoreVertical, Trash2 } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2, Shield, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,7 +105,7 @@ export function BotCard({
   if (viewMode === 'list') {
     return (
       <div
-        className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+        className="border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
         onClick={handleCardClick}
       >
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -120,13 +120,33 @@ export function BotCard({
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
-              {bot.tags && bot.tags.length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {bot.tags.map((tag) => (
-                    <TagBadge key={tag} tag={tag} />
-                  ))}
-                </div>
-              )}
+              <div className="mt-1">
+                {bot.tags && bot.tags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {bot.tags.map((tag) => (
+                      <TagBadge key={tag} tag={tag} />
+                    ))}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 border-2 border-dashed border-gray-300 rounded-lg text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all duration-200"
+                  >
+                    <Shield size={14} className="text-gray-400" />
+                    태그 추가
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <StatsRow />
@@ -163,7 +183,7 @@ export function BotCard({
 
   return (
     <div
-      className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+      className="border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
       onClick={handleCardClick}
     >
       <div className="flex items-start justify-between">
@@ -204,14 +224,34 @@ export function BotCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {bot.tags && bot.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1">
-          {bot.tags.map((tag) => (
-            <TagBadge key={tag} tag={tag} />
-          ))}
-        </div>
-      )}
-      <div className="mt-4">
+      <div className="mt-3">
+        {bot.tags && bot.tags.length > 0 ? (
+          <div className="flex flex-wrap gap-2 items-center">
+            {bot.tags.map((tag) => (
+              <TagBadge key={tag} tag={tag} />
+            ))}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="inline-flex items-center gap-1.5 px-2 py-1 border-2 border-dashed border-gray-300 rounded-md text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all duration-200"
+          >
+            <Shield size={12} className="text-gray-400" />
+            태그 추가
+          </button>
+        )}
+      </div>
+      <div className="mt-2">
         <StatsGrid />
       </div>
     </div>

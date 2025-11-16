@@ -70,7 +70,7 @@ export function WorkspaceHeader({
                     onClick={onCreateBot}
                     disabled={isLimitReached || isCreatingBot}
                     aria-busy={isCreatingBot}
-                    className="bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base px-3 sm:px-4"
+                    className="bg-blue-500 hover:bg-blue-600 hover:shadow-md text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base px-3 sm:px-4 transition-all duration-200 hover:scale-105 active:scale-95"
                   >
                     <span className="hidden sm:inline">
                       {isCreatingBot ? t.creating : t.createBot}

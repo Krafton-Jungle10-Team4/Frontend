@@ -9,4 +9,5 @@ export const ROUTES = {
   AUTH_CALLBACK: '/auth/callback',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
+  WORKSPACE_STUDIO: '/workspace/studio',
 } as const;

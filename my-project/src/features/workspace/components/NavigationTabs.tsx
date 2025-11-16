@@ -1,3 +1,4 @@
+import { useRef, useEffect, useState } from 'react';
 import { Compass, LayoutGrid, BookOpen, Wrench } from 'lucide-react';
 import { cn } from '@/shared/components/utils';
 
@@ -20,9 +21,41 @@ export function NavigationTabs({
   language,
 }: NavigationTabsProps) {
   const brandAccent = '#1CC8A0';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    width: 0,
+    left: 0,
+  });
+
+  useEffect(() => {
+    const activeTabElement = tabRefs.current[activeTab];
+    const containerElement = containerRef.current;
+
+    if (activeTabElement && containerElement) {
+      const containerRect = containerElement.getBoundingClientRect();
+      const tabRect = activeTabElement.getBoundingClientRect();
+
+      setIndicatorStyle({
+        width: tabRect.width,
+        left: tabRect.left - containerRect.left,
+      });
+    }
+  }, [activeTab]);
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1 bg-transparent">
+    <div ref={containerRef} className="relative flex items-center gap-2 px-3 py-1 bg-transparent">
+      <div
+        className="absolute rounded-full shadow transition-all duration-300 ease-out"
+        style={{
+          backgroundColor: brandAccent,
+          width: `${indicatorStyle.width}px`,
+          height: '32px',
+          left: `${indicatorStyle.left}px`,
+          top: '4px',
+          pointerEvents: 'none',
+        }}
+      />
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -30,27 +63,25 @@ export function NavigationTabs({
         return (
           <button
             key={tab.id}
+            ref={(el) => {
+              tabRefs.current[tab.id] = el;
+            }}
             onClick={() => onTabChange(tab.id as any)}
             className={cn(
-              'flex items-center gap-2 px-4 py-1.5 rounded-full text-sm transition-all',
+              'relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
               isActive
-                ? 'text-white shadow'
-                : 'text-[#6b7280] hover:text-[#1e2a5a]'
+                ? 'text-white hover:scale-105 active:scale-95'
+                : 'text-[#374151] hover:text-[#1e2a5a] hover:bg-white/50 hover:shadow-sm hover:scale-105 active:scale-95'
             )}
             aria-current={isActive ? 'page' : undefined}
-            style={
-              isActive
-                ? { backgroundColor: brandAccent }
-                : { backgroundColor: 'transparent', border: '1px solid transparent' }
-            }
           >
             <Icon
               className={cn(
-                'h-4 w-4 transition-colors',
-                isActive ? 'text-white' : 'text-[#9ca3af]'
+                'h-4 w-4 transition-colors duration-200',
+                isActive ? 'text-white' : 'text-[#4b5563]'
               )}
             />
-            <span className="font-medium">{tab.label[language]}</span>
+            <span className="font-medium transition-colors duration-200">{tab.label[language]}</span>
           </button>
         );
       })}

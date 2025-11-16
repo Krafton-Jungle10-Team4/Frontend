@@ -44,7 +44,7 @@ export function WorkspaceLayout() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen">
       <Header
         activeTab={activeTab}
         onTabChange={handleTabChange}

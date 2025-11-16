@@ -179,67 +179,67 @@ export function StudioPage() {
         isCreating={isCreating}
       />
 
-      <div className="flex h-full overflow-hidden">
-        {/* 왼쪽 액션 패널 */}
+      <div className="flex h-full overflow-hidden p-6 gap-4">
+        {/* 카드 1: 앱 만들기 */}
         <LeftActionPanel
           variant="studio"
           onCreateBlank={handleCreateBlank}
           onCreateFromTemplate={handleCreateFromTemplate}
         />
 
-      {/* 메인 콘텐츠 영역 */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* 필터 탭 */}
-        <div className="border-b border-border bg-background px-6 pt-6">
-          <FilterTabs
-            tabs={categoryTabs}
-            activeTab={studioFilters.type}
-            onTabChange={handleCategoryChange}
-          />
-        </div>
-
-        {/* 상단 액션 영역 */}
-        <div className="border-b border-border bg-background px-6 py-4">
-          <TopActions
-            searchQuery={studioFilters.searchQuery}
-            onSearchChange={handleSearchChange}
-            selectedTags={studioFilters.tags}
-            onTagsChange={handleTagsChange}
-            availableTags={availableTags}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showOnlyMine={studioFilters.onlyMine}
-            onShowOnlyMineChange={handleOnlyMineChange}
-          />
-        </div>
-
-        {/* 봇 목록 */}
-        <div className="flex-1 overflow-y-auto bg-muted/30 p-6">
-          {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <p className="text-sm text-muted-foreground">로딩 중...</p>
+        {/* 오른쪽 영역 */}
+        <div className="flex flex-1 flex-col gap-4 overflow-hidden">
+          {/* 카드 2: 필터 탭 + 상단 액션 */}
+          <div className="rounded-lg bg-background border border-gray-200/60 shadow-sm transition-all duration-200 hover:border-gray-300/80 hover:shadow-md">
+            <div className="px-6 pt-6">
+              <FilterTabs
+                tabs={categoryTabs}
+                activeTab={studioFilters.type}
+                onTabChange={handleCategoryChange}
+              />
             </div>
-          ) : error ? (
-            <div className="flex h-64 items-center justify-center">
-              <p className="text-sm text-destructive">
-                오류가 발생했습니다: {error.message}
-              </p>
+            <div className="px-6 py-4">
+              <TopActions
+                searchQuery={studioFilters.searchQuery}
+                onSearchChange={handleSearchChange}
+                selectedTags={studioFilters.tags}
+                onTagsChange={handleTagsChange}
+                availableTags={availableTags}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                showOnlyMine={studioFilters.onlyMine}
+                onShowOnlyMineChange={handleOnlyMineChange}
+              />
             </div>
-          ) : (
-            <BotList
-              bots={filteredBots}
-              searchQuery={studioFilters.searchQuery}
-              viewMode={viewMode}
-              language={language}
-              isEmpty={bots.length === 0 && !studioFilters.searchQuery}
-              hasResults={filteredBots.length > 0}
-              onDelete={handleBotDelete}
-              onCreateBot={handleCreateBlank}
-              onBotClick={handleBotClick}
-            />
-          )}
+          </div>
+
+          {/* 카드 3: 봇 목록 */}
+          <div className="flex-1 overflow-y-auto rounded-lg bg-background p-6 border border-gray-200/60 shadow-sm transition-all duration-200 hover:border-gray-300/80 hover:shadow-md">
+            {loading ? (
+              <div className="flex h-64 items-center justify-center">
+                <p className="text-sm text-muted-foreground">로딩 중...</p>
+              </div>
+            ) : error ? (
+              <div className="flex h-64 items-center justify-center">
+                <p className="text-sm text-destructive">
+                  오류가 발생했습니다: {error.message}
+                </p>
+              </div>
+            ) : (
+              <BotList
+                bots={filteredBots}
+                searchQuery={studioFilters.searchQuery}
+                viewMode={viewMode}
+                language={language}
+                isEmpty={bots.length === 0 && !studioFilters.searchQuery}
+                hasResults={filteredBots.length > 0}
+                onDelete={handleBotDelete}
+                onCreateBot={handleCreateBlank}
+                onBotClick={handleBotClick}
+              />
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </>
   );
