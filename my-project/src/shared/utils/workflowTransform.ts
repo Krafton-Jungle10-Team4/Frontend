@@ -20,6 +20,7 @@ import type {
 } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
 import * as assignerTransformers from '@/features/workflow/components/nodes/assigner/api/transformers';
+import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
 
 /**
  * 프론트엔드 노드/엣지 → 백엔드 스키마 변환
@@ -117,22 +118,39 @@ export const transformToBackend = (
       },
       ports: serializePorts(node.data.ports),
       variable_mappings: serializeVariableMappings(
-        node.data.variable_mappings as NodeVariableMappings | undefined
+        node.data.variable_mappings as NodeVariableMappings | undefined,
+        nodes,
+        node.id
       ),
     })),
-    edges: edges.map((edge) => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      type: edge.type || 'custom',
-      source_port: edge.sourceHandle ?? null,
-      target_port: edge.targetHandle ?? null,
-      data_type: inferEdgeDataType(nodes, edge) ?? null,
-      data: {
-        source_type: edge.data?.sourceType || '',
-        target_type: edge.data?.targetType || '',
-      },
-    })),
+    edges: edges.map((edge) => {
+      const normalizedSourceHandle =
+        normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ??
+        edge.sourceHandle ?? null;
+      const normalizedTargetHandle =
+        normalizeHandleId(edge.target, edge.targetHandle, nodes, 'inputs') ??
+        edge.targetHandle ?? null;
+
+      const normalizedEdge: Edge = {
+        ...edge,
+        sourceHandle: normalizedSourceHandle ?? undefined,
+        targetHandle: normalizedTargetHandle ?? undefined,
+      };
+
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        type: edge.type || 'custom',
+        source_port: normalizedSourceHandle,
+        target_port: normalizedTargetHandle,
+        data_type: inferEdgeDataType(nodes, normalizedEdge) ?? null,
+        data: {
+          source_type: edge.data?.sourceType || '',
+          target_type: edge.data?.targetType || '',
+        },
+      };
+    }),
   };
 };
 
@@ -307,13 +325,18 @@ const deserializePorts = (
 };
 
 const serializeVariableMappings = (
-  mappings?: NodeVariableMappings
+  mappings: NodeVariableMappings | undefined,
+  nodes: Node[],
+  currentNodeId: string
 ) => {
   if (!mappings) return undefined;
 
   return Object.entries(mappings).reduce<BackendNode['variable_mappings']>(
     (acc, [key, mapping]) => {
       if (!mapping) return acc;
+
+      const normalizedTarget =
+        normalizeHandleId(currentNodeId, key, nodes, 'inputs') || key;
 
       const source =
         typeof mapping === 'string'
@@ -324,11 +347,13 @@ const serializeVariableMappings = (
         return acc;
       }
 
-      acc[key] = {
-        target_port: mapping.target_port || key,
+      const normalizedSource = normalizeSelectorVariable(source.variable, nodes);
+
+      acc[normalizedTarget] = {
+        target_port: normalizedTarget,
         source: {
-          variable: source.variable,
-          value_type: source.value_type,
+          variable: normalizedSource,
+          value_type: source.value_type ?? PortType.ANY,
         },
       };
       return acc;

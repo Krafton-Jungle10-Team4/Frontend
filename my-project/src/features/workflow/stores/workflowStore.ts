@@ -38,6 +38,7 @@ import {
 } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
 import type { AssignerNodeType, AssignerOperation } from '@/shared/types/workflow.types';
+import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -128,6 +129,79 @@ const collectVariableAssignerValidationErrors = (
 
     return acc;
   }, []);
+};
+
+const validateBasicWorkflowStructure = (
+  nodes: Node[],
+  edges: Edge[]
+): WorkflowValidationMessage[] => {
+  const errors: WorkflowValidationMessage[] = [];
+  const answerNodes = nodes.filter(
+    (node) => (node.data.type as BlockEnum) === BlockEnum.Answer
+  );
+  if (answerNodes.length === 0) {
+    errors.push({
+      node_id: null,
+      type: 'validation',
+      message: '최종 응답을 위해 Answer 노드가 필요합니다.',
+      severity: 'error',
+    });
+  }
+
+  const startNode = nodes.find((node) => (node.data.type as BlockEnum) === BlockEnum.Start);
+  if (!startNode) {
+    errors.push({
+      node_id: null,
+      type: 'validation',
+      message: 'Start 노드가 필요합니다.',
+      severity: 'error',
+    });
+  } else if (!edges.some((edge) => edge.source === startNode.id)) {
+    errors.push({
+      node_id: startNode.id,
+      type: 'validation',
+      message: 'Start 노드는 최소 한 개의 노드와 연결되어야 합니다.',
+      severity: 'error',
+    });
+  }
+
+  const endNode = nodes.find((node) => (node.data.type as BlockEnum) === BlockEnum.End);
+  if (!endNode) {
+    errors.push({
+      node_id: null,
+      type: 'validation',
+      message: 'End 노드가 필요합니다.',
+      severity: 'error',
+    });
+  } else {
+    if (!edges.some((edge) => edge.target === endNode.id)) {
+      errors.push({
+        node_id: endNode.id,
+        type: 'validation',
+        message: 'End 노드에는 최소 한 개의 입력 연결이 필요합니다.',
+        severity: 'error',
+      });
+    }
+
+    const endMappings =
+      ((endNode.data.variable_mappings || {}) as Record<string, any>) || {};
+    const hasResponseMapping = Boolean(endMappings.response);
+    const hasResponseEdge = edges.some(
+      (edge) =>
+        edge.target === endNode.id && (!edge.targetHandle || edge.targetHandle === 'response')
+    );
+
+    if (!hasResponseMapping && !hasResponseEdge) {
+      errors.push({
+        node_id: endNode.id,
+        type: 'validation',
+        message: "End 노드의 'response' 입력이 연결되지 않았습니다.",
+        severity: 'error',
+      });
+    }
+  }
+
+  return errors;
 };
 
 const normalizeValidationMessages = (
@@ -478,7 +552,12 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
 
     const renameMap =
       TARGET_PORT_RENAME_MAP[(targetNode.data.type as BlockEnum) || BlockEnum.Start] || {};
-    const normalizedTargetPort = renameMap[edge.targetHandle] || edge.targetHandle;
+    const normalizedTargetHandle =
+      normalizeHandleId(edge.target, edge.targetHandle, nodes, 'inputs') ||
+      edge.targetHandle;
+    const normalizedTargetPort =
+      (normalizedTargetHandle && renameMap[normalizedTargetHandle]) ||
+      normalizedTargetHandle;
 
     const targetInputs =
       ((targetNode.data?.ports as NodePortSchema | undefined)?.inputs) || [];
@@ -489,8 +568,15 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
       return;
     }
 
-    const normalizedSelector = normalizeSelectorString(
-      `${edge.source}.${edge.sourceHandle}`
+    const normalizedSourceHandle =
+      normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ||
+      edge.sourceHandle;
+    const selectorBase = normalizedSourceHandle
+      ? `${edge.source}.${normalizedSourceHandle}`
+      : `${edge.source}.${edge.sourceHandle}`;
+    const normalizedSelector = normalizeSelectorVariable(
+      normalizeSelectorString(selectorBase),
+      nodes
     );
     if (!normalizedSelector.includes('.')) {
       return;
@@ -499,7 +585,7 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
     const sourceOutputs =
       ((sourceNode.data?.ports as NodePortSchema | undefined)?.outputs) || [];
     const matchedSourcePort = sourceOutputs.find(
-      (port) => port.name === edge.sourceHandle
+      (port) => port.name === normalizedSourceHandle
     );
 
     const mapping = {
@@ -592,7 +678,26 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     return nextData;
   });
 
-  const legacyMappingsByNode = buildLegacyMappingsFromEdges(normalizedNodes, edges);
+  const normalizedEdges = edges.map<Edge>((edge) => {
+    const normalizedSourceHandle =
+      normalizeHandleId(edge.source, edge.sourceHandle, normalizedNodes, 'outputs') ||
+      edge.sourceHandle || undefined;
+    const normalizedTargetHandle =
+      normalizeHandleId(edge.target, edge.targetHandle, normalizedNodes, 'inputs') ||
+      edge.targetHandle || undefined;
+
+    return {
+      ...edge,
+      sourceHandle: normalizedSourceHandle,
+      targetHandle: normalizedTargetHandle,
+      data: edge.data ? { ...edge.data } : undefined,
+    };
+  });
+
+  const legacyMappingsByNode = buildLegacyMappingsFromEdges(
+    normalizedNodes,
+    normalizedEdges
+  );
 
   const nodesWithLegacyMappings = normalizedNodes.map((node) => {
     const fallback = legacyMappingsByNode.get(node.id);
@@ -617,11 +722,6 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     };
   });
 
-  const normalizedEdges = edges.map<Edge>((edge) => ({
-    ...edge,
-    data: edge.data ? { ...edge.data } : undefined,
-  }));
-
   const syncedEdges = synchronizeEdgesWithMappings(
     nodesWithLegacyMappings,
     normalizedEdges
@@ -642,13 +742,22 @@ const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
     }
 
     if (existing) {
+      const normalizedSourceHandle =
+        normalizeHandleId(sourceId, existing.sourceHandle, nodes, 'outputs') ||
+        existing.sourceHandle ||
+        undefined;
+      const normalizedTargetHandle =
+        normalizeHandleId(targetId, existing.targetHandle, nodes, 'inputs') ||
+        existing.targetHandle ||
+        undefined;
+
       uniqueEdges.set(key, {
         ...existing,
         id: `edge-${sourceId}-${targetId}`,
         source: sourceId,
         target: targetId,
-        sourceHandle: undefined,
-        targetHandle: undefined,
+        sourceHandle: normalizedSourceHandle,
+        targetHandle: normalizedTargetHandle,
       });
       return;
     }
@@ -971,6 +1080,17 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         environmentVariables,
         conversationVariables,
       } = get();
+
+      const structuralErrors = validateBasicWorkflowStructure(nodes, edges);
+      if (structuralErrors.length > 0) {
+        set({
+          validationErrors: structuralErrors,
+          validationWarnings: [],
+          validationErrorNodeIds: extractErrorNodeIds(structuralErrors),
+          lastSaveError: 'Workflow structure validation failed',
+        });
+        throw new Error('Workflow structure validation failed');
+      }
 
       const localErrors = collectVariableAssignerValidationErrors(nodes);
       if (localErrors.length > 0) {

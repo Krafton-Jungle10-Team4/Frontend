@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { RiCheckboxCircleFill, RiErrorWarningFill, RiLoader2Line } from '@remixicon/react';
 import type { NodeProps } from '@/shared/types/workflow.types';
@@ -38,6 +38,20 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   const hasOutputHandle = nodeType !== BlockEnum.End;
   const disableDefaultOutputHandle =
     nodeType === BlockEnum.IfElse || nodeType === BlockEnum.QuestionClassifier;
+
+  const pickPortName = useCallback((portList?: NodePortSchema['inputs']) => {
+    if (!portList || portList.length === 0) return undefined;
+    const requiredPort = portList.find((port) => port.required);
+    return requiredPort?.name || portList[0]?.name;
+  }, []);
+
+  const defaultInputHandleId = useMemo(() => {
+    return pickPortName(ports?.inputs) || 'target';
+  }, [pickPortName, ports?.inputs]);
+
+  const defaultOutputHandleId = useMemo(() => {
+    return pickPortName(ports?.outputs) || 'source';
+  }, [pickPortName, ports?.outputs]);
 
   const isLoading =
     data._runningStatus === NodeRunningStatus.Running ||
@@ -91,9 +105,11 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         </div>
       )}
       <>
-        {hasInputHandle && <NodeTargetHandle data={data} handleId="target" />}
+        {hasInputHandle && (
+          <NodeTargetHandle data={data} handleId={defaultInputHandleId} />
+        )}
         {hasOutputHandle && !disableDefaultOutputHandle && (
-          <NodeSourceHandle data={data} handleId="source" />
+          <NodeSourceHandle data={data} handleId={defaultOutputHandleId} />
         )}
       </>
 
