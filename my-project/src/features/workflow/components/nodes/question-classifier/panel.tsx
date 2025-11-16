@@ -17,6 +17,7 @@ import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field, OutputVars, VarItem } from '../_base/components';
 import { Textarea } from '@/shared/components/textarea';
 import { Separator } from '@/shared/components/separator';
+import { LLMModelSelect } from '../../shared-components/LLMModelSelect';
 
 type VariableMappingRecord = Record<
   string,
@@ -260,7 +261,7 @@ export function QuestionClassifierPanel() {
           <Field label="Provider" required>
             <Select
               value={qcData?.model?.provider || 'openai'}
-              onValueChange={(value) => handleModelChange({ provider: value })}
+              onValueChange={(value) => handleModelChange({ provider: value, name: '' })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Provider 선택" />
@@ -269,39 +270,19 @@ export function QuestionClassifierPanel() {
                 <SelectItem value="openai">OpenAI</SelectItem>
                 <SelectItem value="anthropic">Anthropic</SelectItem>
                 <SelectItem value="google">Google</SelectItem>
+                <SelectItem value="bedrock">AWS Bedrock</SelectItem>
               </SelectContent>
             </Select>
           </Field>
 
           <Field label="Model" required>
-            <Select value={qcData?.model?.name || 'gpt-4'} onValueChange={(value) => handleModelChange({ name: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="모델 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                {qcData?.model?.provider === 'openai' && (
-                  <>
-                    <SelectItem value="gpt-4">GPT-4</SelectItem>
-                    <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-                    <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                    <SelectItem value="gpt-4-vision-preview">GPT-4 Vision</SelectItem>
-                  </>
-                )}
-                {qcData?.model?.provider === 'anthropic' && (
-                  <>
-                    <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-                    <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-                    <SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
-                  </>
-                )}
-                {qcData?.model?.provider === 'google' && (
-                  <>
-                    <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
-                    <SelectItem value="gemini-pro-vision">Gemini Pro Vision</SelectItem>
-                  </>
-                )}
-              </SelectContent>
-            </Select>
+            <LLMModelSelect
+              selectedProvider={qcData?.model?.provider || 'openai'}
+              value={qcData?.model?.name || ''}
+              onChange={(modelId) => {
+                handleModelChange({ name: modelId });
+              }}
+            />
           </Field>
 
           <Field label="Temperature" description="0: 결정적, 1: 창의적 (기본값: 0.7)">
