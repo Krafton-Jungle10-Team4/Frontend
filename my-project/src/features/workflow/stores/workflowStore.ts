@@ -734,6 +734,110 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
   return { nodes: nodesWithLegacyMappings, edges: syncedEdges };
 };
 
+/**
+ * 노드 간 최단 거리 계산 (BFS)
+ * @param sourceNodeId 시작 노드 ID
+ * @param targetNodeId 목표 노드 ID
+ * @param nodes 모든 노드
+ * @param edges 모든 엣지
+ * @returns 최단 거리 (연결되지 않으면 Infinity)
+ */
+const calculateShortestPath = (
+  sourceNodeId: string,
+  targetNodeId: string,
+  nodes: Node[],
+  edges: Edge[]
+): number => {
+  if (sourceNodeId === targetNodeId) {
+    return 0;
+  }
+
+  // 엣지 그래프 구성: { sourceId: [targetId, ...] }
+  const graph: Record<string, string[]> = {};
+  edges.forEach((edge) => {
+    if (!graph[edge.source]) {
+      graph[edge.source] = [];
+    }
+    graph[edge.source].push(edge.target);
+  });
+
+  // BFS로 최단 거리 계산
+  const queue: Array<{ nodeId: string; distance: number }> = [
+    { nodeId: sourceNodeId, distance: 0 },
+  ];
+  const visited = new Set<string>();
+
+  while (queue.length > 0) {
+    const { nodeId, distance } = queue.shift()!;
+
+    if (nodeId === targetNodeId) {
+      return distance;
+    }
+
+    if (visited.has(nodeId)) {
+      continue;
+    }
+    visited.add(nodeId);
+
+    const neighbors = graph[nodeId] || [];
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        queue.push({ nodeId: neighbor, distance: distance + 1 });
+      }
+    }
+  }
+
+  return Infinity; // 연결되지 않음
+};
+
+/**
+ * 특정 노드가 분기 노드의 직접 타겟인지 확인
+ * @param nodeId 확인할 노드 ID
+ * @param nodes 모든 노드
+ * @param edges 모든 엣지
+ * @returns 분기 노드의 직접 타겟이면 true
+ */
+const isDirectTargetOfBranchNode = (
+  nodeId: string,
+  nodes: Node[],
+  edges: Edge[]
+): boolean => {
+  const branchNodeTypes = [BlockEnum.IfElse, BlockEnum.QuestionClassifier];
+
+  // 해당 노드로 들어오는 엣지 확인
+  const incomingEdges = edges.filter((edge) => edge.target === nodeId);
+
+  for (const edge of incomingEdges) {
+    const sourceNode = nodes.find((n) => n.id === edge.source);
+    if (!sourceNode) {
+      continue;
+    }
+
+    const sourceType = sourceNode.data.type as BlockEnum;
+    if (!branchNodeTypes.includes(sourceType)) {
+      continue;
+    }
+
+    // 분기 노드의 특수 포트(if, else, class_*_branch)로부터의 연결인지 확인
+    const sourceHandle = edge.sourceHandle || '';
+    if (
+      sourceType === BlockEnum.IfElse &&
+      (sourceHandle === 'if' || sourceHandle === 'else')
+    ) {
+      return true;
+    }
+    if (
+      sourceType === BlockEnum.QuestionClassifier &&
+      sourceHandle.startsWith('class_') &&
+      sourceHandle.endsWith('_branch')
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
   const uniqueEdges = new Map<string, Edge>();
 
@@ -783,10 +887,12 @@ const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
     });
   };
 
+  // 1. 명시적으로 생성된 엣지 추가
   edges.forEach((edge) => {
     ensureEdge(edge.source, edge.target, edge);
   });
 
+  // 2. variable_mappings로부터 자동 엣지 생성 (조건부)
   nodes.forEach((node) => {
     const mappings = (node.data.variable_mappings || {}) as Record<string, any>;
 
@@ -797,7 +903,35 @@ const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
       }
 
       const [sourceNodeId] = selector.split('.', 2);
-      ensureEdge(sourceNodeId, node.id);
+
+      // ⭐️ Start 노드로부터의 자동 엣지 생성 조건부 처리
+      if (sourceNodeId === 'start-1') {
+        // 1. 사용자가 명시적으로 연결한 엣지가 있는지 확인
+        const hasExplicitEdge = edges.some(
+          (edge) => edge.source === sourceNodeId && edge.target === node.id
+        );
+        if (hasExplicitEdge) {
+          // 이미 명시적 엣지가 있으면 추가 생성 불필요
+          return;
+        }
+
+        // 2. 노드 간 최단 거리 계산
+        const distance = calculateShortestPath(
+          sourceNodeId,
+          node.id,
+          nodes,
+          edges
+        );
+
+        // 3. 거리가 1이면 엣지 생성, 2 이상이면 생성하지 않음 (variable_mappings만으로 참조)
+        if (distance === 1) {
+          ensureEdge(sourceNodeId, node.id);
+        }
+        // distance >= 2인 경우: variable_mappings만으로 참조 가능하므로 엣지 생성 안 함
+      } else {
+        // Start 노드가 아닌 다른 노드 참조는 기존 로직 유지
+        ensureEdge(sourceNodeId, node.id);
+      }
     });
   });
 
