@@ -33,11 +33,27 @@ const convertPortDefinition = (
     array: PortType.ARRAY,
     object: PortType.OBJECT,
     any: PortType.ANY,
+    file: PortType.FILE,
+    array_file: PortType.ARRAY_FILE,
   };
+
+  const mappedType = typeMap[port.type];
+
+  if (!mappedType) {
+    console.warn(`Unknown port type "${port.type}" for port "${port.name}", defaulting to ANY`);
+    return {
+      name: port.name,
+      type: PortType.ANY,
+      required: port.required,
+      description: port.description || '',
+      display_name: port.display_name || port.name,
+      default_value: port.default_value,
+    };
+  }
 
   return {
     name: port.name,
-    type: typeMap[port.type] || PortType.ANY,
+    type: mappedType,
     required: port.required,
     description: port.description || '',
     display_name: port.display_name || port.name,
@@ -77,7 +93,7 @@ interface TemplateState {
   // Export actions
   openExportDialog: () => void;
   closeExportDialog: () => void;
-  validateExport: (graph: { nodes: Node[]; edges: any[] }) => Promise<void>;
+  validateExport: (workflowId: string, versionId: string) => Promise<void>;
   exportTemplate: (config: ExportConfig) => Promise<WorkflowTemplate>;
 
   // Import actions
@@ -157,10 +173,10 @@ export const useTemplateStore = create<TemplateState>()(
         set({ isExportDialogOpen: false, exportValidation: null }),
 
       // Validate export
-      validateExport: async (graph) => {
+      validateExport: async (workflowId, versionId) => {
         set({ isLoading: true, error: null });
         try {
-          const validation = await templateApi.validateExport(graph);
+          const validation = await templateApi.validateExport(workflowId, versionId);
           set({ exportValidation: validation, isLoading: false });
 
           if (!validation.is_valid) {

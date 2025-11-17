@@ -32,7 +32,7 @@ export interface TemplateMetadata {
  */
 export interface PortDefinition {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'any';
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'any' | 'file' | 'array_file';
   required: boolean;
   description?: string;
   display_name?: string;

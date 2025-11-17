@@ -14,6 +14,7 @@ export enum VarType {
   ARRAY_NUMBER = 'array[number]',
   ARRAY_OBJECT = 'array[object]',
   FILE = 'file',
+  ARRAY_FILE = 'array_file',
   ANY = 'any',
 }
 

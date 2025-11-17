@@ -14,6 +14,7 @@ const COMPATIBILITY_MATRIX: Record<PortType, Set<PortType>> = {
   [PortType.ARRAY]: new Set([PortType.ARRAY, PortType.ANY]),
   [PortType.OBJECT]: new Set([PortType.OBJECT, PortType.ANY]),
   [PortType.FILE]: new Set([PortType.FILE, PortType.ANY]),
+  [PortType.ARRAY_FILE]: new Set([PortType.ARRAY_FILE, PortType.ANY]),
   [PortType.ANY]: new Set([
     PortType.STRING,
     PortType.NUMBER,
@@ -21,6 +22,7 @@ const COMPATIBILITY_MATRIX: Record<PortType, Set<PortType>> = {
     PortType.ARRAY,
     PortType.OBJECT,
     PortType.FILE,
+    PortType.ARRAY_FILE,
     PortType.ANY,
   ]),
 };

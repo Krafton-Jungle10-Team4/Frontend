@@ -17,6 +17,7 @@ const PORT_TYPE_TO_VAR_TYPE: Record<PortType, VarType> = {
   [PortType.ARRAY]: VarType.ARRAY,
   [PortType.OBJECT]: VarType.OBJECT,
   [PortType.FILE]: VarType.FILE,
+  [PortType.ARRAY_FILE]: VarType.ARRAY_FILE,
   [PortType.ANY]: VarType.ANY,
 };
 
