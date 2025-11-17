@@ -19,8 +19,8 @@ export interface TemplateMetadata {
   tags: string[];
   category?: string;
   visibility: 'private' | 'team' | 'public';
-  source_workflow_id?: string;
-  source_version_id?: string;
+  source_workflow_id: string;
+  source_version_id: string;
   node_count: number;
   edge_count: number;
   estimated_tokens?: number;
@@ -48,9 +48,9 @@ export interface TemplateGraph {
 }
 
 /**
- * 워크플로우 템플릿 (완전한 구조)
+ * 워크플로우 템플릿 요약 (목록용, graph 제외)
  */
-export interface WorkflowTemplate {
+export interface WorkflowTemplateSummary {
   id: string;
   name: string;
   description?: string;
@@ -59,10 +59,16 @@ export interface WorkflowTemplate {
   updated_at?: string;
   author: Author;
   metadata: TemplateMetadata;
-  graph: TemplateGraph;
   input_schema: PortDefinition[];
   output_schema: PortDefinition[];
   thumbnail_url?: string;
+}
+
+/**
+ * 워크플로우 템플릿 (완전한 구조, 상세 조회용)
+ */
+export interface WorkflowTemplate extends WorkflowTemplateSummary {
+  graph: TemplateGraph;
 }
 
 /**
@@ -95,8 +101,6 @@ export interface ExportValidation {
   detected_output_ports: PortDefinition[];
   errors: string[];
   warnings: string[];
-  node_count: number;
-  edge_count: number;
 }
 
 /**
@@ -116,7 +120,7 @@ export interface ImportValidation {
  * 템플릿 목록 응답
  */
 export interface TemplateListResponse {
-  templates: WorkflowTemplate[];
+  templates: WorkflowTemplateSummary[];
   pagination: {
     total: number;
     skip: number;
