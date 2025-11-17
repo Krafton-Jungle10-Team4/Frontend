@@ -204,6 +204,14 @@ export const NODE_OUTPUTS: Record<BlockEnum, OutputVarDefinition[]> = {
     },
   ],
 
+  [BlockEnum.ImportedWorkflow]: [
+    {
+      name: 'output',
+      type: PortType.ANY,
+      description: '템플릿 워크플로우 실행 결과 (템플릿의 출력 스키마에 따라 다름)',
+    },
+  ],
+
   // 아직 구현되지 않은 노드 타입들
   [BlockEnum.KnowledgeBase]: [],
   [BlockEnum.Code]: [],
