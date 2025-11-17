@@ -97,6 +97,8 @@ export interface ExportValidation {
   has_published_version: boolean;
   has_start_node: boolean;
   has_end_node: boolean;
+  node_count: number;
+  edge_count: number;
   detected_input_ports: PortDefinition[];
   detected_output_ports: PortDefinition[];
   errors: string[];

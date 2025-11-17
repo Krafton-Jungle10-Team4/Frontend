@@ -36,7 +36,13 @@ export const TemplateImportDialog = memo(() => {
   // 템플릿 목록 로드
   useEffect(() => {
     if (isImportDialogOpen) {
-      loadTemplates({ search, category, visibility });
+      // Build filters object with only non-empty values
+      const filters = {
+        ...(search.trim() && { search: search.trim() }),
+        ...(category && { category }),
+        ...(visibility && { visibility }),
+      };
+      loadTemplates(filters);
     }
   }, [isImportDialogOpen, search, category, visibility, loadTemplates]);
 

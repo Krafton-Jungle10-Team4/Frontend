@@ -72,13 +72,13 @@ export const TemplateExportDialog = memo(() => {
 
   // 다이얼로그 오픈 시 검증 실행
   useEffect(() => {
-    if (isExportDialogOpen && botId && draftVersionId) {
+    if (isExportDialogOpen) {
       setIsValidating(true);
-      validateExport(botId, draftVersionId).finally(() => {
+      validateExport().finally(() => {
         setIsValidating(false);
       });
     }
-  }, [isExportDialogOpen, botId, draftVersionId, validateExport]);
+  }, [isExportDialogOpen, validateExport]);
 
   const onSubmit = async (data: ExportFormData) => {
     if (!botId || !draftVersionId) return;

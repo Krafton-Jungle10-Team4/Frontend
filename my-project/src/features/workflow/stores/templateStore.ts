@@ -94,7 +94,7 @@ interface TemplateState {
   // Export actions
   openExportDialog: () => void;
   closeExportDialog: () => void;
-  validateExport: (workflowId: string, versionId: string) => Promise<void>;
+  validateExport: () => Promise<void>;
   exportTemplate: (config: ExportConfig) => Promise<WorkflowTemplate>;
 
   // Import actions
@@ -174,10 +174,14 @@ export const useTemplateStore = create<TemplateState>()(
         set({ isExportDialogOpen: false, exportValidation: null }),
 
       // Validate export
-      validateExport: async (workflowId, versionId) => {
+      validateExport: async () => {
         set({ isLoading: true, error: null });
         try {
-          const validation = await templateApi.validateExport(workflowId, versionId);
+          // Get live nodes and edges from workflow store
+          const workflowStore = useWorkflowStore.getState();
+          const { nodes, edges } = workflowStore;
+
+          const validation = await templateApi.validateExport({ nodes, edges });
           set({ exportValidation: validation, isLoading: false });
 
           if (!validation.is_valid) {
@@ -254,10 +258,36 @@ export const useTemplateStore = create<TemplateState>()(
       importTemplate: async (templateId, position) => {
         set({ isLoading: true, error: null });
         try {
-          // 템플릿 조회
+          // 1. Import 검증 먼저 수행
+          const validation = await templateApi.validateImport(templateId);
+
+          // 2. 검증 실패 시 중단
+          if (!validation.is_valid || !validation.is_compatible) {
+            const errorMessages = [
+              ...validation.errors,
+              ...(validation.missing_node_types.length > 0
+                ? [`호환되지 않는 노드 타입: ${validation.missing_node_types.join(', ')}`]
+                : []),
+            ];
+
+            set({ isLoading: false });
+            toast.error('템플릿 Import 불가', {
+              description: errorMessages.join('. '),
+            });
+            throw new Error(errorMessages.join('. '));
+          }
+
+          // 3. 경고가 있으면 사용자에게 표시
+          if (validation.warnings.length > 0) {
+            toast.warning('Import 경고', {
+              description: validation.warnings.join('. '),
+            });
+          }
+
+          // 4. 템플릿 조회
           const template = await templateApi.get(templateId);
 
-          // ImportedWorkflowNode 생성
+          // 5. ImportedWorkflowNode 생성
           // ReactFlow는 'custom' 타입만 인식하고, data.type으로 실제 노드 타입 구분
           const nodeId = `imported_${template.id}_${Date.now()}`;
           const node: Node<{
@@ -289,11 +319,11 @@ export const useTemplateStore = create<TemplateState>()(
             },
           };
 
-          // workflowStore에 노드 추가
+          // 6. workflowStore에 노드 추가
           const workflowStore = useWorkflowStore.getState();
           workflowStore.addNode(node);
 
-          // 사용 기록
+          // 7. 사용 기록
           try {
             await templateApi.recordUsage(templateId, {
               workflow_id: workflowStore.botId || 'unknown',
