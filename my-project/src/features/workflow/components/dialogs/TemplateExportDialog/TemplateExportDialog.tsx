@@ -2,7 +2,7 @@
  * TemplateExportDialog - 템플릿 Export 다이얼로그
  */
 import { memo, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Loader2, Check, X } from 'lucide-react';
 import {
   Dialog,
@@ -58,17 +58,15 @@ export const TemplateExportDialog = memo(() => {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<ExportFormData>({
     defaultValues: {
+      category: '',
       visibility: 'private',
       tags: '',
     },
   });
-
-  const selectedVisibility = watch('visibility');
 
   // 다이얼로그 오픈 시 검증 실행
   useEffect(() => {
@@ -199,18 +197,24 @@ export const TemplateExportDialog = memo(() => {
             {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">카테고리</Label>
-              <Select onValueChange={(value) => setValue('category', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="카테고리 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEMPLATE_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="카테고리 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TEMPLATE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             {/* Tags */}
@@ -229,28 +233,29 @@ export const TemplateExportDialog = memo(() => {
             {/* Visibility */}
             <div className="space-y-2">
               <Label htmlFor="visibility">공개 범위</Label>
-              <Select
-                value={selectedVisibility}
-                onValueChange={(value) =>
-                  setValue('visibility', value as 'private' | 'team' | 'public')
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEMPLATE_VISIBILITY_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      <div>
-                        <p className="font-medium">{opt.label}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {opt.description}
-                        </p>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="visibility"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TEMPLATE_VISIBILITY_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          <div>
+                            <p className="font-medium">{opt.label}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {opt.description}
+                            </p>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             {/* Detected Ports Preview */}
