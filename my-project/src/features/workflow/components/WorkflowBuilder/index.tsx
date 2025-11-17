@@ -288,6 +288,69 @@ const WorkflowInner = () => {
     }
   }, [selectNode, isChatVisible, toggleChatVisibility]);
 
+  /**
+   * 노드 타입을 기반으로 읽기 쉬운 노드 ID를 생성합니다.
+   * @param nodeType - 노드 타입 (BlockEnum)
+   * @param existingNodes - 기존 노드 배열
+   * @returns 읽기 쉬운 형식의 노드 ID
+   */
+  const generateReadableNodeId = useCallback(
+    (nodeType: BlockEnum, existingNodes: Node[]): string => {
+      // 노드 타입별 베이스 ID 매핑
+      const typeToBaseId: Record<BlockEnum, string> = {
+        [BlockEnum.Start]: 'start',
+        [BlockEnum.End]: 'end',
+        [BlockEnum.LLM]: 'llm',
+        [BlockEnum.Answer]: 'answer',
+        [BlockEnum.KnowledgeRetrieval]: 'knowledge',
+        [BlockEnum.KnowledgeBase]: 'knowledgeBase',
+        [BlockEnum.MCP]: 'mcp',
+        [BlockEnum.Code]: 'code',
+        [BlockEnum.TemplateTransform]: 'template',
+        [BlockEnum.IfElse]: 'condition',
+        [BlockEnum.VariableAssigner]: 'varAssigner',
+        [BlockEnum.Assigner]: 'assigner',
+        [BlockEnum.Http]: 'http',
+        [BlockEnum.QuestionClassifier]: 'classifier',
+        [BlockEnum.TavilySearch]: 'tavilySearch',
+      };
+
+      const baseId = typeToBaseId[nodeType] || nodeType.replace(/-/g, '');
+
+      // 같은 베이스 ID를 가진 노드들 찾기
+      const sameTypeNodes = existingNodes.filter((node) => {
+        // 정확한 베이스 ID로 시작하고, 바로 뒤에 숫자가 오거나 끝나는 경우만
+        const pattern = new RegExp(`^${baseId}(\\d+)?$`);
+        return pattern.test(node.id);
+      });
+
+      // 첫 번째 노드인 경우 숫자 없이 반환
+      if (sameTypeNodes.length === 0) {
+        return baseId;
+      }
+
+      // 사용 중인 숫자 찾기
+      const usedNumbers = sameTypeNodes
+        .map((node) => {
+          const match = node.id.match(new RegExp(`^${baseId}(\\d+)?$`));
+          if (match) {
+            return match[1] ? parseInt(match[1], 10) : 1;
+          }
+          return 0;
+        })
+        .filter((num) => num > 0);
+
+      // 다음 사용 가능한 숫자 찾기
+      if (usedNumbers.length === 0) {
+        return `${baseId}2`;
+      }
+
+      const maxNumber = Math.max(...usedNumbers);
+      return `${baseId}${maxNumber + 1}`;
+    },
+    []
+  );
+
   // 노드 우클릭 핸들러
   const onNodeContextMenu: NodeMouseHandler = useCallback((event, node) => {
     event.preventDefault();
@@ -389,7 +452,7 @@ const WorkflowInner = () => {
       }
 
       const newNode: Node = {
-        id: `${Date.now()}`,
+        id: generateReadableNodeId(nodeType.type as BlockEnum, nodes),
         type: 'custom',
         position,
         data: {
@@ -421,7 +484,7 @@ const WorkflowInner = () => {
       });
       closeContextMenu();
     },
-    [contextMenu, screenToFlowPosition, setNodes, closeContextMenu, push, edges]
+    [contextMenu, screenToFlowPosition, setNodes, closeContextMenu, push, edges, generateReadableNodeId, nodes]
   );
 
   // 키보드 이벤트 (Delete/Backspace)
