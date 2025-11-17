@@ -6,11 +6,11 @@ import { Download, Eye, User } from 'lucide-react';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
 import { Card, CardHeader, CardContent, CardFooter } from '@/shared/components/card';
-import type { WorkflowTemplate } from '../../../types/template.types';
+import type { WorkflowTemplateSummary } from '../../../types/template.types';
 import { format } from 'date-fns';
 
 interface TemplateCardProps {
-  template: WorkflowTemplate;
+  template: WorkflowTemplateSummary;
   onImport: (templateId: string) => void;
 }
 
