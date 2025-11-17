@@ -176,7 +176,7 @@ export const API_ENDPOINTS = {
     UPLOAD: '/api/v1/templates/upload',
     DELETE: (id: string) => `/api/v1/templates/${id}`,
     UPDATE: (id: string) => `/api/v1/templates/${id}`,
-    USAGE: (id: string) => `/api/v1/templates/${id}/usage`,
+    USE: (id: string) => `/api/v1/templates/${id}/use`,
     DOWNLOAD: (id: string) => `/api/v1/templates/${id}/download`,
   },
 } as const;
