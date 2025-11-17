@@ -124,6 +124,37 @@ export const documentsApi = {
       },
     });
   },
+
+  /**
+   * 문서 목록 조회
+   * 
+   * 인증: JWT Bearer Token (로그인 필수)
+   * 엔드포인트: GET /api/v1/documents/list
+   * 
+   * @param params 조회 파라미터
+   * @returns DocumentListResponse
+   */
+  listDocuments: async (params?: {
+    bot_id?: string;
+    status?: 'queued' | 'processing' | 'done' | 'failed';
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    documents: DocumentInfo[];
+    total: number;
+    limit: number;
+    offset: number;
+  }> => {
+    const { data } = await apiClient.get(API_ENDPOINTS.DOCUMENTS.LIST, {
+      params: {
+        bot_id: params?.bot_id,
+        status: params?.status,
+        limit: params?.limit ?? 50,
+        offset: params?.offset ?? 0,
+      },
+    });
+    return data;
+  },
 };
 
 /**

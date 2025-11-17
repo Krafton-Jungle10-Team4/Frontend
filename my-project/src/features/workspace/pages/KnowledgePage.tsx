@@ -8,7 +8,7 @@ import { RiAddLine } from '@remixicon/react';
 import type { Knowledge } from '@/data/mockKnowledge';
 import { useUIStore } from '@shared/stores/uiStore';
 import { DocumentUploadModal } from '@/features/documents/components/monitoring/DocumentUploadModal';
-import { knowledgeApi } from '../api/knowledgeApi';
+import { documentsApi } from '@/features/documents/api/documentsApi';
 
 export function KnowledgePage() {
   const { language } = useUIStore();
@@ -20,36 +20,50 @@ export function KnowledgePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 지식 목록 조회
+  // 문서 목록 조회 (Document API 사용)
   useEffect(() => {
-    const fetchKnowledge = async () => {
+    const fetchDocuments = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await knowledgeApi.getKnowledgeList({
-          search: searchQuery || undefined,
-          tags: selectedTags.length > 0 ? selectedTags : undefined,
-          include_documents: true,
+        const response = await documentsApi.listDocuments({
+          status: 'done', // 완료된 문서만 조회
+          limit: 100,
+          offset: 0,
         });
-        setKnowledgeList(data);
 
-        // 태그 목록 추출
+        // Document를 Knowledge 형식으로 변환
+        const knowledgeList: Knowledge[] = response.documents.map((doc) => ({
+          id: doc.document_id,
+          user_id: '', // Document API에는 user_id가 없음
+          name: doc.original_filename,
+          description: `${doc.file_extension.toUpperCase()} 파일 (${(doc.file_size / 1024).toFixed(2)} KB)`,
+          tags: [doc.bot_id, doc.status], // bot_id와 status를 태그로 사용
+          document_count: 1,
+          documents: [doc],
+          created_at: doc.created_at,
+          updated_at: doc.updated_at || doc.created_at,
+        }));
+
+        setKnowledgeList(knowledgeList);
+
+        // 태그 목록 추출 (bot_id와 status)
         const tagSet = new Set<string>();
-        data.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
+        knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
         setAllTags(Array.from(tagSet));
       } catch (err) {
-        console.error('Failed to fetch knowledge:', err);
+        console.error('Failed to fetch documents:', err);
         setError(
           language === 'ko'
-            ? '지식 목록을 불러오는데 실패했습니다.'
-            : 'Failed to load knowledge list.'
+            ? '문서 목록을 불러오는데 실패했습니다.'
+            : 'Failed to load document list.'
         );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchKnowledge();
+    fetchDocuments();
   }, [searchQuery, selectedTags, language]);
 
   const filteredKnowledge = useMemo(() => {
