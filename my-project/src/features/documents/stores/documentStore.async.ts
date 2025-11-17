@@ -4,11 +4,8 @@ import { documentsAsyncApi } from '../api/documentsApi.async';
 import { documentsApi } from '../api/documentsApi';
 import { POLLING_CONFIG } from '../constants/documentConstants';
 import { useBotStore } from '@features/bot/stores/botStore';
-import type {
-  DocumentWithStatus,
-  DocumentListRequest,
-  DocumentStatus,
-} from '../types/document.types';
+import type { DocumentWithStatus, DocumentListRequest } from '../types/document.types';
+import { DocumentStatus } from '../types/document.types';
 
 interface PollingState {
   documentId: string;
@@ -73,6 +70,21 @@ interface AsyncDocumentStore {
   clearError: () => void;
 }
 
+const normalizeDocumentStatus = (status: DocumentStatus | string): DocumentStatus => {
+  const statusValue = status?.toString() ?? '';
+
+  if (statusValue === 'completed') {
+    return DocumentStatus.DONE;
+  }
+
+  if ((Object.values(DocumentStatus) as string[]).includes(statusValue)) {
+    return statusValue as DocumentStatus;
+  }
+
+  console.warn('[DocumentStore] Unknown document status received:', status);
+  return DocumentStatus.QUEUED;
+};
+
 export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
   subscribeWithSelector(
     devtools(
@@ -122,7 +134,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
               fileExtension,
               fileSize: file.size,
               mimeType: file.type,
-              status: 'queued' as DocumentStatus,
+              status: DocumentStatus.QUEUED,
               retryCount: 0,
               createdAt: new Date().toISOString(),
               metadata: {},
@@ -197,20 +209,21 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
           if (!pollingState) return;
 
           try {
-            const status = await documentsAsyncApi.getStatus(documentId);
+            const statusResponse = await documentsAsyncApi.getStatus(documentId);
+            const nextStatus = normalizeDocumentStatus(statusResponse.status);
 
             // Update document
             const document = documents.get(documentId);
             if (document) {
               const updated: DocumentWithStatus = {
                 ...document,
-                status: status.status,
-                errorMessage: status.errorMessage,
-                chunkCount: status.chunkCount,
-                processingTime: status.processingTime,
-                completedAt: status.completedAt,
+                status: nextStatus,
+                errorMessage: statusResponse.errorMessage,
+                chunkCount: statusResponse.chunkCount,
+                processingTime: statusResponse.processingTime,
+                completedAt: statusResponse.completedAt,
                 // Persist progressPercent from status API, fallback to existing value
-                progressPercent: status.progressPercent ?? document.progressPercent,
+                progressPercent: statusResponse.progressPercent ?? document.progressPercent,
               };
 
               documents.set(documentId, updated);
@@ -218,8 +231,8 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
 
               // Stop polling if completed
               if (
-                status.status === 'done' ||
-                status.status === 'failed'
+                nextStatus === DocumentStatus.DONE ||
+                nextStatus === DocumentStatus.FAILED
               ) {
                 get().stopPolling(documentId);
               }
@@ -277,11 +290,15 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             const documents = new Map<string, DocumentWithStatus>();
             response.documents.forEach((doc) => {
               const existingDoc = existingDocuments.get(doc.documentId);
-              documents.set(doc.documentId, {
+              const normalizedStatus = normalizeDocumentStatus(doc.status);
+              const updatedDoc: DocumentWithStatus = {
                 ...doc,
+                status: normalizedStatus,
                 // Preserve progressPercent: use new value if available, otherwise keep existing
                 progressPercent: doc.progressPercent ?? existingDoc?.progressPercent,
-              });
+              };
+
+              documents.set(doc.documentId, updatedDoc);
             });
 
             set({
@@ -295,9 +312,10 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
 
             // Start polling for processing documents
             response.documents.forEach((doc) => {
+              const normalizedStatus = normalizeDocumentStatus(doc.status);
               if (
-                doc.status === 'queued' ||
-                doc.status === 'processing'
+                normalizedStatus === DocumentStatus.QUEUED ||
+                normalizedStatus === DocumentStatus.PROCESSING
               ) {
                 get().startPolling(doc.documentId);
               }
@@ -319,7 +337,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             const documents = new Map(get().documents);
             const document = documents.get(documentId);
             if (document) {
-              document.status = 'queued' as DocumentStatus;
+              document.status = DocumentStatus.QUEUED;
               document.errorMessage = undefined;
               document.retryCount++;
               // Reset progressPercent for retry
