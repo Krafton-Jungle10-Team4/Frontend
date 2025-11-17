@@ -15,6 +15,7 @@ import { templateApi } from '../api/templateApi';
 import { downloadTemplateAsFile } from '../api/fileHandler';
 import { useWorkflowStore } from './workflowStore';
 import type { Node } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import { PortType } from '@/shared/types/workflow/port.types';
 import type { PortDefinition as WorkflowPortDefinition } from '@/shared/types/workflow/port.types';
 import { toast } from 'sonner';
@@ -257,7 +258,7 @@ export const useTemplateStore = create<TemplateState>()(
           const template = await templateApi.get(templateId);
 
           // ImportedWorkflowNode 생성
-          // Note: 'imported-workflow'는 아직 BlockEnum에 없으므로 문자열 리터럴 사용
+          // ReactFlow는 'custom' 타입만 인식하고, data.type으로 실제 노드 타입 구분
           const nodeId = `imported_${template.id}_${Date.now()}`;
           const node: Node<{
             template_id: string;
@@ -268,10 +269,10 @@ export const useTemplateStore = create<TemplateState>()(
             internal_graph: typeof template.graph;
           }> = {
             id: nodeId,
-            type: 'imported-workflow',
+            type: 'custom', // ReactFlow에서 인식하는 노드 타입
             position,
             data: {
-              type: 'imported-workflow' as any, // BlockEnum에 ImportedWorkflow 추가 전까지 임시
+              type: BlockEnum.ImportedWorkflow, // 실제 노드 타입 (CustomNode가 사용)
               title: template.name,
               desc: template.description,
               template_id: template.id,

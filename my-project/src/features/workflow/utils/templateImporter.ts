@@ -3,6 +3,7 @@
  */
 import type { Node, Edge } from '@xyflow/react';
 import type { WorkflowTemplate } from '../types/template.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import { validateTemplate } from './templateValidator';
 
 /**
@@ -22,12 +23,13 @@ export function createImportedNodeFromTemplate(
   const nodeId = `imported_${template.id}_${Date.now()}`;
 
   // 부모 노드 생성 (ImportedWorkflowNode)
+  // ReactFlow는 'custom' 타입만 인식하고, data.type으로 실제 노드 타입 구분
   const parentNode: Node = {
     id: nodeId,
-    type: 'imported-workflow',
+    type: 'custom', // ReactFlow에서 인식하는 노드 타입
     position,
     data: {
-      type: 'imported-workflow',
+      type: BlockEnum.ImportedWorkflow, // 실제 노드 타입 (CustomNode가 사용)
       title: template.name,
       desc: template.description,
       template_id: template.id,
@@ -90,7 +92,7 @@ export function createImportedNodeFromTemplate(
  * Imported 노드인지 확인
  */
 export function isImportedNode(node: Node): boolean {
-  return node.type === 'imported-workflow';
+  return node.type === 'custom' && (node.data as any)?.type === BlockEnum.ImportedWorkflow;
 }
 
 /**

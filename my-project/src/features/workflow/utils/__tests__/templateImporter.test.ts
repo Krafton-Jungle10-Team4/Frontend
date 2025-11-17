@@ -15,6 +15,7 @@ import {
   toggleImportedNodeExpansion,
 } from '../templateImporter';
 import type { WorkflowTemplate } from '../../types/template.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 
 describe('templateImporter', () => {
   const createMockTemplate = (): WorkflowTemplate => ({
@@ -99,7 +100,8 @@ describe('templateImporter', () => {
       const position = { x: 100, y: 100 };
       const result = createImportedNodeFromTemplate(template, position, false);
 
-      expect(result.node.type).toBe('imported-workflow');
+      expect(result.node.type).toBe('custom');
+      expect(result.node.data.type).toBe(BlockEnum.ImportedWorkflow);
       expect(result.node.position).toEqual(position);
       expect(result.node.data.template_id).toBe('tpl_abc123');
       expect(result.node.data.is_expanded).toBe(false);
@@ -112,7 +114,8 @@ describe('templateImporter', () => {
       const position = { x: 100, y: 100 };
       const result = createImportedNodeFromTemplate(template, position, true);
 
-      expect(result.node.type).toBe('imported-workflow');
+      expect(result.node.type).toBe('custom');
+      expect(result.node.data.type).toBe(BlockEnum.ImportedWorkflow);
       expect(result.node.data.is_expanded).toBe(true);
       expect(result.childNodes).toHaveLength(3);
       expect(result.childEdges).toHaveLength(2);
@@ -197,15 +200,26 @@ describe('templateImporter', () => {
     it('imported 노드를 올바르게 식별해야 함', () => {
       const node: Node = {
         id: 'test',
-        type: 'imported-workflow',
+        type: 'custom',
         position: { x: 0, y: 0 },
-        data: {},
+        data: { type: BlockEnum.ImportedWorkflow },
       };
 
       expect(isImportedNode(node)).toBe(true);
     });
 
     it('일반 노드는 false를 반환해야 함', () => {
+      const node: Node = {
+        id: 'test',
+        type: 'custom',
+        position: { x: 0, y: 0 },
+        data: { type: BlockEnum.LLM },
+      };
+
+      expect(isImportedNode(node)).toBe(false);
+    });
+
+    it('type이 custom이 아니면 false를 반환해야 함', () => {
       const node: Node = {
         id: 'test',
         type: 'llm',
@@ -345,22 +359,27 @@ describe('templateImporter', () => {
     it('imported 노드의 모든 child 노드 ID를 반환해야 함', () => {
       const parentId = 'imported_tpl_123_1234567890123';
       const nodes: Node[] = [
-        { id: parentId, type: 'imported-workflow', position: { x: 0, y: 0 }, data: {} },
+        {
+          id: parentId,
+          type: 'custom',
+          position: { x: 0, y: 0 },
+          data: { type: BlockEnum.ImportedWorkflow }
+        },
         {
           id: `${parentId}_node1`,
-          type: 'start',
+          type: 'custom',
           position: { x: 0, y: 0 },
-          data: {},
+          data: { type: BlockEnum.Start },
           parentNode: parentId,
         },
         {
           id: `${parentId}_node2`,
-          type: 'llm',
+          type: 'custom',
           position: { x: 0, y: 0 },
-          data: {},
+          data: { type: BlockEnum.LLM },
           parentNode: parentId,
         },
-        { id: 'other_node', type: 'llm', position: { x: 0, y: 0 }, data: {} },
+        { id: 'other_node', type: 'custom', position: { x: 0, y: 0 }, data: { type: BlockEnum.LLM } },
       ];
 
       const childIds = getChildNodeIds(parentId, nodes);
@@ -373,7 +392,12 @@ describe('templateImporter', () => {
     it('child가 없으면 빈 배열 반환', () => {
       const parentId = 'imported_tpl_123_1234567890123';
       const nodes: Node[] = [
-        { id: parentId, type: 'imported-workflow', position: { x: 0, y: 0 }, data: {} },
+        {
+          id: parentId,
+          type: 'custom',
+          position: { x: 0, y: 0 },
+          data: { type: BlockEnum.ImportedWorkflow }
+        },
       ];
 
       const childIds = getChildNodeIds(parentId, nodes);

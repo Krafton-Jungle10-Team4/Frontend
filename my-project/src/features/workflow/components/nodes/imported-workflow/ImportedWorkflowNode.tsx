@@ -14,14 +14,14 @@ import { IMPORTED_NODE_SIZE } from '../../../constants/templateDefaults';
 
 export const ImportedWorkflowNode = memo(
   ({ id, data, selected }: NodeProps<ImportedWorkflowNodeData>) => {
-    const { updateNodeData } = useWorkflowStore();
+    const updateNode = useWorkflowStore((state) => state.updateNode);
     const isExpanded = data.is_expanded ?? false;
 
     const handleToggleExpand = useCallback(() => {
-      updateNodeData(id, {
+      updateNode(id, {
         is_expanded: !isExpanded,
       });
-    }, [id, isExpanded, updateNodeData]);
+    }, [id, isExpanded, updateNode]);
 
     const size = isExpanded
       ? IMPORTED_NODE_SIZE.expanded
