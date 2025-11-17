@@ -10,7 +10,6 @@ import type {
   ExportValidation,
   ImportValidation,
   TemplateOperationResult,
-  TemplateGraph,
 } from '../types/template.types';
 
 export const templateApi = {
@@ -47,12 +46,21 @@ export const templateApi = {
 
   /**
    * Export 검증
-   * API 명세에 따라 그래프 데이터를 request body로 전송
+   * API 명세에 따라 workflow_id, version_id를 query parameter로 전송
    */
-  validateExport: async (graph: TemplateGraph): Promise<ExportValidation> => {
+  validateExport: async (
+    workflowId: string,
+    versionId: string
+  ): Promise<ExportValidation> => {
     const response = await apiClient.post<ExportValidation>(
       API_ENDPOINTS.TEMPLATES.VALIDATE_EXPORT,
-      graph
+      null,
+      {
+        params: {
+          workflow_id: workflowId,
+          version_id: versionId,
+        },
+      }
     );
     return response.data;
   },
