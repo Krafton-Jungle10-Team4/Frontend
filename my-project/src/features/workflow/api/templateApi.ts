@@ -46,21 +46,15 @@ export const templateApi = {
 
   /**
    * Export 검증
-   * API 명세에 따라 workflow_id, version_id를 query parameter로 전송
+   * API 명세에 따라 { nodes, edges } 를 body로 전송
    */
-  validateExport: async (
-    workflowId: string,
-    versionId: string
-  ): Promise<ExportValidation> => {
+  validateExport: async (payload: {
+    nodes: any[];
+    edges: any[];
+  }): Promise<ExportValidation> => {
     const response = await apiClient.post<ExportValidation>(
       API_ENDPOINTS.TEMPLATES.VALIDATE_EXPORT,
-      null,
-      {
-        params: {
-          workflow_id: workflowId,
-          version_id: versionId,
-        },
-      }
+      payload
     );
     return response.data;
   },
