@@ -26,6 +26,21 @@ export type {
 
 export { BlockEnum, NodeRunningStatus } from '@/shared/types/workflow.types';
 
+// Template Types
+export type {
+  WorkflowTemplate,
+  WorkflowTemplateSummary,
+  TemplateListResponse,
+  ExportConfig,
+  ExportValidation,
+  ImportValidation,
+  TemplateOperationResult,
+  TemplateGraph,
+  PortDefinition,
+  TemplateMetadata,
+  Author,
+} from './types/template.types';
+
 // Routes (Router에서만 사용)
 export { workflowRoutes } from './routes';
 

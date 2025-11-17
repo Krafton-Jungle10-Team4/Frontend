@@ -127,3 +127,16 @@ export interface TemplateListResponse {
     limit: number;
   };
 }
+
+/**
+ * 템플릿 작업 결과 (Export/Upload/Update 응답)
+ * API 명세에 따라 최소한의 정보만 반환됨
+ */
+export interface TemplateOperationResult {
+  id: string;
+  name: string;
+  version: string;
+  created_at?: string;
+  updated_at?: string;
+  message?: string;
+}
