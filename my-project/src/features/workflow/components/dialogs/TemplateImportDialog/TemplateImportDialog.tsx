@@ -78,13 +78,12 @@ export const TemplateImportDialog = memo(() => {
             />
           </div>
 
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category || undefined} onValueChange={setCategory}>
             <SelectTrigger className="w-[180px]">
               <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="카테고리" />
+              <SelectValue placeholder="전체 카테고리" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">전체</SelectItem>
               {TEMPLATE_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
@@ -93,12 +92,11 @@ export const TemplateImportDialog = memo(() => {
             </SelectContent>
           </Select>
 
-          <Select value={visibility} onValueChange={setVisibility}>
+          <Select value={visibility || undefined} onValueChange={setVisibility}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="공개 범위" />
+              <SelectValue placeholder="전체 공개범위" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">전체</SelectItem>
               <SelectItem value="private">비공개</SelectItem>
               <SelectItem value="team">팀 공유</SelectItem>
               <SelectItem value="public">공개</SelectItem>
