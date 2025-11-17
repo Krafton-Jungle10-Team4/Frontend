@@ -165,4 +165,18 @@ export const API_ENDPOINTS = {
     DELETE: (knowledgeId: string) => `/api/v1/knowledge/${knowledgeId}`,
     TAGS: '/api/v1/knowledge/tags',
   },
+
+  // 템플릿 관리 (SnapAgent API)
+  TEMPLATES: {
+    LIST: '/api/v1/templates',
+    DETAIL: (id: string) => `/api/v1/templates/${id}`,
+    EXPORT: '/api/v1/templates/export',
+    VALIDATE_EXPORT: '/api/v1/templates/validate-export',
+    VALIDATE_IMPORT: (id: string) => `/api/v1/templates/${id}/validate-import`,
+    UPLOAD: '/api/v1/templates/upload',
+    DELETE: (id: string) => `/api/v1/templates/${id}`,
+    UPDATE: (id: string) => `/api/v1/templates/${id}`,
+    USAGE: (id: string) => `/api/v1/templates/${id}/usage`,
+    DOWNLOAD: (id: string) => `/api/v1/templates/${id}/download`,
+  },
 } as const;
