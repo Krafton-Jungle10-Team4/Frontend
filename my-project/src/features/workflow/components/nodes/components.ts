@@ -14,6 +14,7 @@ import QuestionClassifierNode from './question-classifier/node';
 import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerNode';
 import AssignerNode from './assigner/node';
 import TavilySearchNode from './tavily-search/node';
+import { ImportedWorkflowNode } from './imported-workflow';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
@@ -28,6 +29,7 @@ import { QuestionClassifierPanel } from './question-classifier/panel';
 import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigner/components/VariableAssignerPanel';
 import { AssignerPanel } from './assigner/panel';
 import { TavilySearchPanel } from './tavily-search/panel';
+import { ImportedWorkflowPanel } from './imported-workflow';
 
 /**
  * 노드 타입 → 캔버스 컴포넌트 매핑
@@ -46,6 +48,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.VariableAssigner]: VariableAssignerNode, // Legacy
   [BlockEnum.Assigner]: AssignerNode, // New
   [BlockEnum.TavilySearch]: TavilySearchNode,
+  [BlockEnum.ImportedWorkflow]: ImportedWorkflowNode,
   [BlockEnum.Http]: (() => null) as any,
   [BlockEnum.Code]: (() => null) as any,
   [BlockEnum.KnowledgeBase]: (() => null) as any,
@@ -67,4 +70,5 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.VariableAssigner]: VariableAssignerPanel, // Legacy
   [BlockEnum.Assigner]: AssignerPanel, // New
   [BlockEnum.TavilySearch]: TavilySearchPanel,
+  [BlockEnum.ImportedWorkflow]: ImportedWorkflowPanel,
 };

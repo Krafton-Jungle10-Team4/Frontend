@@ -25,6 +25,7 @@ export enum BlockEnum {
   Http = 'http',
   QuestionClassifier = 'question-classifier',
   TavilySearch = 'tavily-search',
+  ImportedWorkflow = 'imported-workflow',
 }
 
 /**
