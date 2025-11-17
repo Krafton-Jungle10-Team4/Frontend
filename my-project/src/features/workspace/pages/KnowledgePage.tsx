@@ -1,28 +1,59 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LeftActionPanel } from '../components/LeftActionPanel';
 import { KnowledgeCard } from '../components/KnowledgeCard';
 import { SearchBar } from '@shared/components/SearchBar';
 import { TagBadge } from '@shared/components/TagBadge';
 import { Button } from '@shared/components/button';
 import { RiAddLine } from '@remixicon/react';
-import { mockKnowledge } from '@/data/mockKnowledge';
+import type { Knowledge } from '@/data/mockKnowledge';
 import { useUIStore } from '@shared/stores/uiStore';
 import { DocumentUploadModal } from '@/features/documents/components/monitoring/DocumentUploadModal';
+import { knowledgeApi } from '../api/knowledgeApi';
 
 export function KnowledgePage() {
   const { language } = useUIStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [knowledgeList, setKnowledgeList] = useState<Knowledge[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const allTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    mockKnowledge.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
-    return Array.from(tagSet);
-  }, []);
+  // 지식 목록 조회
+  useEffect(() => {
+    const fetchKnowledge = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await knowledgeApi.getKnowledgeList({
+          search: searchQuery || undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
+          include_documents: true,
+        });
+        setKnowledgeList(data);
+
+        // 태그 목록 추출
+        const tagSet = new Set<string>();
+        data.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
+        setAllTags(Array.from(tagSet));
+      } catch (err) {
+        console.error('Failed to fetch knowledge:', err);
+        setError(
+          language === 'ko'
+            ? '지식 목록을 불러오는데 실패했습니다.'
+            : 'Failed to load knowledge list.'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKnowledge();
+  }, [searchQuery, selectedTags, language]);
 
   const filteredKnowledge = useMemo(() => {
-    return mockKnowledge.filter((knowledge) => {
+    return knowledgeList.filter((knowledge) => {
       if (
         searchQuery &&
         !knowledge.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -40,7 +71,7 @@ export function KnowledgePage() {
 
       return true;
     });
-  }, [searchQuery, selectedTags]);
+  }, [knowledgeList, searchQuery, selectedTags]);
 
   const handleTagClick = (tag: string) => {
     setSelectedTags((prev) =>
@@ -128,7 +159,22 @@ export function KnowledgePage() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {filteredKnowledge.length === 0 ? (
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-muted-foreground">
+                {language === 'ko' ? '로딩 중...' : 'Loading...'}
+              </p>
+            </div>
+          ) : error ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <p className="text-destructive mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>
+                  {language === 'ko' ? '다시 시도' : 'Retry'}
+                </Button>
+              </div>
+            </div>
+          ) : filteredKnowledge.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
                 <p className="text-muted-foreground mb-4">

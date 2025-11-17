@@ -155,4 +155,14 @@ export const API_ENDPOINTS = {
     DAILY_USAGE: (botId: string) => `/api/v1/cost/usage/${botId}/daily`,
     PRICING: '/api/v1/cost/pricing',
   },
+
+  // 지식 관리 (SnapAgent API)
+  KNOWLEDGE: {
+    LIST: '/api/v1/knowledge',
+    DETAIL: (knowledgeId: string) => `/api/v1/knowledge/${knowledgeId}`,
+    CREATE: '/api/v1/knowledge',
+    UPDATE: (knowledgeId: string) => `/api/v1/knowledge/${knowledgeId}`,
+    DELETE: (knowledgeId: string) => `/api/v1/knowledge/${knowledgeId}`,
+    TAGS: '/api/v1/knowledge/tags',
+  },
 } as const;
