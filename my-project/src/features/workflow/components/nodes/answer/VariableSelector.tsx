@@ -21,16 +21,30 @@ export const VariableSelector: FC<VariableSelectorProps> = ({
   nodeId,
   onSelect,
 }) => {
-  const { nodes } = useWorkflowStore();
+  const { nodes, edges } = useWorkflowStore();
 
-  // 현재 노드보다 앞에 있는 노드들의 출력 포트 수집
+  // Upstream 경로의 모든 노드 출력 포트 수집
   const availableVariables = useMemo(() => {
-    // 현재 노드 인덱스 찾기
-    const currentIndex = nodes.findIndex((n) => n.id === nodeId);
-    if (currentIndex === -1) return [];
+    // BFS로 현재 노드까지 도달 가능한 모든 upstream 노드 찾기
+    const upstreamIds = new Set<string>();
+    const queue = [nodeId];
+    const visited = new Set<string>([nodeId]);
 
-    // 앞쪽 노드들만 필터링
-    const upstreamNodes = nodes.slice(0, currentIndex);
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+
+      // 현재 노드로 들어오는 모든 엣지 찾기
+      const incomingEdges = edges.filter((edge) => edge.target === currentId);
+
+      incomingEdges.forEach((edge) => {
+        const sourceId = edge.source;
+        if (!visited.has(sourceId)) {
+          visited.add(sourceId);
+          upstreamIds.add(sourceId);
+          queue.push(sourceId); // 재귀적으로 upstream 탐색
+        }
+      });
+    }
 
     // 각 노드의 출력 포트 수집
     const variables: Array<{
@@ -40,8 +54,13 @@ export const VariableSelector: FC<VariableSelectorProps> = ({
       ports: Array<{ name: string; displayName: string; type: string }>;
     }> = [];
 
-    upstreamNodes.forEach((node) => {
-      if (node.data.ports?.outputs && node.data.ports.outputs.length > 0) {
+    nodes.forEach((node) => {
+      // Upstream 노드이고 출력 포트가 있는 경우만
+      if (
+        upstreamIds.has(node.id) &&
+        node.data.ports?.outputs &&
+        node.data.ports.outputs.length > 0
+      ) {
         variables.push({
           nodeId: node.id,
           nodeTitle: node.data.title || node.id,
@@ -56,7 +75,7 @@ export const VariableSelector: FC<VariableSelectorProps> = ({
     });
 
     return variables;
-  }, [nodes, nodeId]);
+  }, [nodes, edges, nodeId]);
 
   if (availableVariables.length === 0) {
     return (
