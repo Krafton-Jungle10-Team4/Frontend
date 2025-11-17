@@ -50,7 +50,15 @@ export const transformToBackend = (
             (typeof (node.data as any).model === 'string'
               ? (node.data as any).model
               : 'gpt-4o-mini'),
-          prompt_template: (node.data as any).prompt || '',
+          prompt_template: (() => {
+            const prompt = (node.data as any).prompt || '';
+            // Ensure {context} placeholder exists and is properly formatted
+            if (prompt.includes('{{context}}') || prompt.includes('{context}')) {
+              // Normalize to single braces for backend
+              return prompt.replace(/\{\{context\}\}/g, '{context}').replace(/\{context\}/g, '{{context}}');
+            }
+            return prompt;
+          })(),
           temperature: (node.data as any).temperature || 0.7,
           max_tokens: (node.data as any).maxTokens || 500,
         }),
@@ -117,11 +125,75 @@ export const transformToBackend = (
         }),
       },
       ports: serializePorts(node.data.ports),
-      variable_mappings: serializeVariableMappings(
-        node.data.variable_mappings as NodeVariableMappings | undefined,
-        nodes,
-        node.id
-      ),
+      variable_mappings: (() => {
+        let mappings = node.data.variable_mappings as NodeVariableMappings | undefined;
+
+        // For LLM nodes, ensure 'context' is properly mapped if used in template
+        if (node.data.type === BlockEnum.LLM) {
+          const promptTemplate = (node.data as any).prompt || '';
+          const hasContextPlaceholder = promptTemplate.includes('{context}') ||
+                                       promptTemplate.includes('{{context}}');
+
+          if (hasContextPlaceholder) {
+            if (!mappings) {
+              mappings = {};
+            }
+            // Ensure context mapping exists
+            if (!mappings.context) {
+              mappings.context = {
+                target_port: 'context',
+                source: {
+                  variable: '',  // Will be connected via edge or manually set
+                  value_type: 'string'
+                }
+              };
+            }
+          }
+        }
+
+        // For Assigner nodes, ensure all necessary mappings exist
+        if (node.data.type === BlockEnum.Assigner) {
+          const operations = (node.data as AssignerNodeType).operations || [];
+          if (!mappings) {
+            mappings = {};
+          }
+
+          operations.forEach((operation, index) => {
+            // Check if operation needs a value input
+            const needsValue = operation.write_mode !== 'CLEAR' &&
+                             operation.write_mode !== 'REMOVE_FIRST' &&
+                             operation.write_mode !== 'REMOVE_LAST';
+
+            // Ensure target port mapping exists
+            const targetPortName = `operation_${index}_target`;
+            if (!mappings![targetPortName]) {
+              mappings![targetPortName] = {
+                target_port: targetPortName,
+                source: {
+                  variable: '',
+                  value_type: 'any'
+                }
+              };
+            }
+
+            // Ensure value port mapping exists if needed
+            if (needsValue && operation.input_type === 'VARIABLE') {
+              const valuePortName = `operation_${index}_value`;
+              if (!mappings![valuePortName]) {
+                mappings![valuePortName] = {
+                  target_port: valuePortName,
+                  source: {
+                    variable: '',
+                    value_type: 'any'
+                  }
+                };
+              }
+            }
+          });
+        }
+
+        return serializeVariableMappings(mappings, nodes, node.id);
+      })(),
     })),
     edges: edges.map((edge) => {
       const normalizedSourceHandle =
@@ -343,7 +415,8 @@ const serializeVariableMappings = (
           ? { variable: mapping, value_type: PortType.ANY }
           : mapping.source;
 
-      if (!source || !source.variable) {
+      // Allow empty variable string for default mappings
+      if (!source || source.variable === null || source.variable === undefined) {
         return acc;
       }
 

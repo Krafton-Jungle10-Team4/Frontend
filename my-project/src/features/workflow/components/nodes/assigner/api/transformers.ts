@@ -40,15 +40,52 @@ function operationFromBackend(
  * @returns 백엔드 API 요청 포맷
  */
 export function toBackendFormat(data: AssignerNodeType) {
+  const operations = (data.operations || []).map(operationToBackend);
+  let variable_mappings = data.variable_mappings || {};
+
+  // Ensure variable_mappings for all operation ports
+  operations.forEach((operation, index) => {
+    // Check if operation needs a value input
+    const needsValue = operation.write_mode !== 'CLEAR' &&
+                       operation.write_mode !== 'REMOVE_FIRST' &&
+                       operation.write_mode !== 'REMOVE_LAST';
+
+    // Ensure target port mapping exists
+    const targetPortName = `operation_${index}_target`;
+    if (!variable_mappings[targetPortName]) {
+      variable_mappings[targetPortName] = {
+        target_port: targetPortName,
+        source: {
+          variable: '',
+          value_type: 'any'
+        }
+      };
+    }
+
+    // Ensure value port mapping exists if needed
+    if (needsValue && operation.input_type === 'VARIABLE') {
+      const valuePortName = `operation_${index}_value`;
+      if (!variable_mappings[valuePortName]) {
+        variable_mappings[valuePortName] = {
+          target_port: valuePortName,
+          source: {
+            variable: '',
+            value_type: 'any'
+          }
+        };
+      }
+    }
+  });
+
   return {
     type: 'assigner',
     config: {
       version: data.version || '2',
-      operations: (data.operations || []).map(operationToBackend),
+      operations: operations,
     },
     // ui_state는 프론트엔드 전용이므로 백엔드에 보내지 않음
     ports: data.ports,
-    variable_mappings: data.variable_mappings,
+    variable_mappings: variable_mappings,
   };
 }
 
