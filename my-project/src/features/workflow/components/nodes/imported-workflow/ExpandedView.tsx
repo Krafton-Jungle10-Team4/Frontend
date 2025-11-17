@@ -1,20 +1,37 @@
 /**
  * ExpandedView - 확장된 상태의 템플릿 노드 (내부 그래프 표시)
  */
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { ReactFlow, Background, Controls, type Node } from '@xyflow/react';
 import { toast } from 'sonner';
 import type { ExpandedViewProps } from '../../../types/import-node.types';
-import CustomNode from '../index';
+import { NodeComponentMap } from '../components';
+import BaseNode from '../_base/node';
 import { ReadOnlyOverlay } from './ReadOnlyOverlay';
-
-// ReactFlow에서 사용할 노드 타입 매핑 (모든 노드는 'custom' 타입으로 래핑됨)
-const REACT_FLOW_NODE_TYPES = {
-  custom: CustomNode,
-};
+import type { CommonNodeType } from '@/shared/types/workflow.types';
+import type { NodeProps } from '@xyflow/react';
 
 export const ExpandedView = memo(
   ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
+    // CustomNode를 useMemo로 생성하여 순환 참조 방지
+    const CustomNode = useMemo(() => {
+      return memo((props: NodeProps) => {
+        const data = props.data as CommonNodeType;
+        const NodeComponent = NodeComponentMap[data.type];
+
+        return (
+          <BaseNode id={props.id} data={data} selected={props.selected}>
+            <NodeComponent data={data} />
+          </BaseNode>
+        );
+      });
+    }, []);
+
+    // ReactFlow에서 사용할 노드 타입 매핑
+    const nodeTypes = useMemo(() => ({
+      custom: CustomNode,
+    }), [CustomNode]);
+
     // 내부 노드들을 읽기 전용으로 설정
     const readOnlyNodes: Node[] = internalGraph.nodes.map((node) => ({
       ...node,
@@ -54,7 +71,7 @@ export const ExpandedView = memo(
         <ReactFlow
           nodes={readOnlyNodes}
           edges={readOnlyEdges}
-          nodeTypes={REACT_FLOW_NODE_TYPES}
+          nodeTypes={nodeTypes}
           onNodeClick={handleNodeClick}
           nodesDraggable={false}
           nodesConnectable={false}
