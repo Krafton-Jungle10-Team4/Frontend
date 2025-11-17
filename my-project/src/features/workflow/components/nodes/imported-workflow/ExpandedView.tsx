@@ -5,8 +5,13 @@ import { memo, useCallback } from 'react';
 import { ReactFlow, Background, Controls, type Node } from '@xyflow/react';
 import { toast } from 'sonner';
 import type { ExpandedViewProps } from '../../../types/import-node.types';
-import { NodeComponentMap } from '../components';
+import CustomNode from '../index';
 import { ReadOnlyOverlay } from './ReadOnlyOverlay';
+
+// ReactFlow에서 사용할 노드 타입 매핑 (모든 노드는 'custom' 타입으로 래핑됨)
+const REACT_FLOW_NODE_TYPES = {
+  custom: CustomNode,
+};
 
 export const ExpandedView = memo(
   ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
@@ -14,6 +19,7 @@ export const ExpandedView = memo(
     const readOnlyNodes: Node[] = internalGraph.nodes.map((node) => ({
       ...node,
       id: `${nodeId}_${node.id}`,
+      type: 'custom', // ReactFlow에서 인식할 수 있도록 'custom' 타입 명시
       draggable: false,
       connectable: false,
       deletable: false,
@@ -48,7 +54,7 @@ export const ExpandedView = memo(
         <ReactFlow
           nodes={readOnlyNodes}
           edges={readOnlyEdges}
-          nodeTypes={NodeComponentMap}
+          nodeTypes={REACT_FLOW_NODE_TYPES}
           onNodeClick={handleNodeClick}
           nodesDraggable={false}
           nodesConnectable={false}
