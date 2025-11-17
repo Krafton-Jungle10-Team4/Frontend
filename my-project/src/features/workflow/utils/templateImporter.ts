@@ -109,7 +109,8 @@ export function getParentTemplateId(node: Node): string | null {
   }
 
   // ID 형식: imported_{template_id}_{timestamp}_{original_node_id}
-  const match = node.id.match(/^imported_([^_]+)_\d+/);
+  // template_id는 tpl_abc123 형식으로 underscore를 포함할 수 있음
+  const match = node.id.match(/^imported_(.+)_(\d{13})(?:_.*)?$/);
   return match ? match[1] : null;
 }
 
