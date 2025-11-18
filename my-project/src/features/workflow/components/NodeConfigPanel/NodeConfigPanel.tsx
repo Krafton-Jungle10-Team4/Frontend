@@ -39,5 +39,5 @@ export const NodeConfigPanel = () => {
   }
 
   // 동적으로 Panel 컴포넌트 렌더링
-  return <PanelComponent />;
+  return <PanelComponent data={node.data} />;
 };

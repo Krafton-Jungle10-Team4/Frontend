@@ -108,8 +108,14 @@ export type NodeProps<T = object> = {
 /**
  * Start 노드 타입
  */
+export type StartPortBinding =
+  | { type: 'user_message' }
+  | { type: 'session_id' }
+  | { type: 'literal'; value?: string };
+
 export type StartNodeType = CommonNodeType<{
   type: BlockEnum.Start;
+  port_bindings?: Record<string, StartPortBinding>;
 }>;
 
 /**

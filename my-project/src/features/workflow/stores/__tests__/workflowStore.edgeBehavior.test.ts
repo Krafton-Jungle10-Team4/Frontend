@@ -139,4 +139,160 @@ describe('workflowStore edge behavior', () => {
     expect(updatedTarget?.data.variable_mappings?.query).toBeUndefined();
     expect(updatedTarget?.data.variable_mappings?.context).toBeDefined();
   });
+
+  it('creates variable mappings when a new edge targets a known port', () => {
+    const nodes: Node[] = [
+      {
+        id: 'start-1',
+        type: 'custom',
+        position: { x: 0, y: 0 },
+        data: {
+          type: BlockEnum.Start,
+          title: '시작',
+          desc: '',
+          ports: {
+            inputs: [],
+            outputs: [
+              {
+                name: 'query',
+                type: PortType.STRING,
+                required: true,
+                default_value: null,
+                description: '',
+                display_name: '질문',
+              },
+            ],
+          },
+          variable_mappings: {},
+        },
+      },
+      {
+        id: 'imported_tpl',
+        type: 'custom',
+        position: { x: 200, y: 0 },
+        data: {
+          type: BlockEnum.ImportedWorkflow,
+          title: '템플릿',
+          desc: '',
+          ports: {
+            inputs: [
+              {
+                name: 'query',
+                type: PortType.STRING,
+                required: true,
+                default_value: null,
+                description: '',
+                display_name: '질문',
+              },
+            ],
+            outputs: [],
+          },
+          variable_mappings: {},
+        },
+      },
+    ];
+
+    useWorkflowStore.setState({
+      nodes,
+      edges: [],
+    });
+
+    const { addEdge } = useWorkflowStore.getState();
+    addEdge({
+      id: 'edge-start-imported',
+      source: 'start-1',
+      target: 'imported_tpl',
+      sourceHandle: 'query',
+      targetHandle: 'input',
+      type: 'custom',
+      data: {
+        sourceType: BlockEnum.Start,
+        targetType: BlockEnum.ImportedWorkflow,
+      },
+    });
+
+    const updatedTemplate = useWorkflowStore
+      .getState()
+      .nodes.find((node) => node.id === 'imported_tpl');
+    expect(updatedTemplate?.data.variable_mappings?.query?.target_port).toBe('query');
+    expect(updatedTemplate?.data.variable_mappings?.query?.source.variable).toBe('start-1.query');
+  });
+
+  it('skips automatic mappings when port types are incompatible', () => {
+    const nodes: Node[] = [
+      {
+        id: 'start-1',
+        type: 'custom',
+        position: { x: 0, y: 0 },
+        data: {
+          type: BlockEnum.Start,
+          title: '시작',
+          desc: '',
+          ports: {
+            inputs: [],
+            outputs: [
+              {
+                name: 'query',
+                type: PortType.STRING,
+                required: true,
+                default_value: null,
+                description: '',
+                display_name: '질문',
+              },
+            ],
+          },
+          variable_mappings: {},
+        },
+      },
+      {
+        id: 'imported_tpl',
+        type: 'custom',
+        position: { x: 200, y: 0 },
+        data: {
+          type: BlockEnum.ImportedWorkflow,
+          title: '템플릿',
+          desc: '',
+          ports: {
+            inputs: [
+              {
+                name: 'query',
+                type: PortType.NUMBER,
+                required: true,
+                default_value: null,
+                description: '',
+                display_name: '숫자',
+              },
+            ],
+            outputs: [],
+          },
+          variable_mappings: {},
+        },
+      },
+    ];
+
+    useWorkflowStore.setState({
+      nodes,
+      edges: [],
+    });
+
+    const { addEdge } = useWorkflowStore.getState();
+    addEdge({
+      id: 'edge-start-imported',
+      source: 'start-1',
+      target: 'imported_tpl',
+      sourceHandle: 'query',
+      targetHandle: 'input',
+      type: 'custom',
+      data: {
+        sourceType: BlockEnum.Start,
+        targetType: BlockEnum.ImportedWorkflow,
+      },
+    });
+
+    const updatedTemplate = useWorkflowStore
+      .getState()
+      .nodes.find((node) => node.id === 'imported_tpl');
+
+    expect(updatedTemplate?.data.variable_mappings).toEqual({});
+  });
 });

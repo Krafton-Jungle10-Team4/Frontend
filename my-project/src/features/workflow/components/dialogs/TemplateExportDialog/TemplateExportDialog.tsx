@@ -1,7 +1,7 @@
 /**
  * TemplateExportDialog - 템플릿 Export 다이얼로그
  */
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Loader2, Check, X } from 'lucide-react';
 import {
@@ -71,6 +71,11 @@ export const TemplateExportDialog = memo(() => {
   const handleDialogChange = (open: boolean) => {
     if (!open) {
       handleClose();
+    }
+  };
+
+  useEffect(() => {
+    if (!isExportDialogOpen) {
       return;
     }
 
@@ -78,7 +83,7 @@ export const TemplateExportDialog = memo(() => {
     validateExport().finally(() => {
       setIsValidating(false);
     });
-  };
+  }, [isExportDialogOpen, validateExport]);
 
   const onSubmit = async (data: ExportFormData) => {
     if (!botId || !draftVersionId) return;

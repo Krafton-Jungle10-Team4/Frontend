@@ -69,3 +69,16 @@ export const PORT_TYPE_DEFAULTS: Record<PortType, unknown> = {
   [PortType.FILE]: null,
   [PortType.ANY]: null,
 };
+
+export const isPortTypeCompatible = (
+  source?: PortType,
+  target?: PortType
+) => {
+  if (!source || !target) {
+    return false;
+  }
+  if (source === target) {
+    return true;
+  }
+  return source === PortType.ANY || target === PortType.ANY;
+};

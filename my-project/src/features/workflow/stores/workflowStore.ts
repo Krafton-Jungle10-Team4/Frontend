@@ -40,6 +40,7 @@ import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/p
 import type { AssignerNodeType } from '@/shared/types/workflow.types';
 import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
 import { sanitizeEdgeForLogicalTargets } from '../utils/logicalNodeGuards';
+import { isPortTypeCompatible } from '@/shared/constants/workflow/portTypes';
 
 type ValidationPayload = {
   errors?: unknown;
@@ -528,80 +529,114 @@ const normalizeVariableMappingsForNode = (
   }, {});
 };
 
+type EdgeMappingResult = {
+  targetNodeId: string;
+  targetPort: string;
+  mapping: {
+    target_port: string;
+    source: {
+      variable: string;
+      value_type: PortType;
+    };
+  };
+};
+
+const createMappingFromEdge = (
+  edge: Edge,
+  nodes: Node[],
+  nodeMap?: Map<string, Node>
+): EdgeMappingResult | null => {
+  if (!edge.source || !edge.target) {
+    return null;
+  }
+
+  const targetNode = nodeMap?.get(edge.target) ?? nodes.find((node) => node.id === edge.target);
+  const sourceNode = nodeMap?.get(edge.source) ?? nodes.find((node) => node.id === edge.source);
+  if (!targetNode || !sourceNode) {
+    return null;
+  }
+
+  const renameMap =
+    TARGET_PORT_RENAME_MAP[(targetNode.data.type as BlockEnum) || BlockEnum.Start] || {};
+  const normalizedTargetHandle =
+    normalizeHandleId(edge.target, edge.targetHandle, nodes, 'inputs') ||
+    edge.targetHandle ||
+    null;
+  if (!normalizedTargetHandle) {
+    return null;
+  }
+  const normalizedTargetPort =
+    (normalizedTargetHandle && renameMap[normalizedTargetHandle]) || normalizedTargetHandle;
+
+  const targetInputs =
+    ((targetNode.data?.ports as NodePortSchema | undefined)?.inputs) || [];
+  const targetPortDefinition = targetInputs.find(
+    (port) => port.name === normalizedTargetPort
+  );
+  if (!targetPortDefinition) {
+    return null;
+  }
+
+  const normalizedSourceHandle =
+    normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ||
+    edge.sourceHandle ||
+    null;
+  if (!normalizedSourceHandle) {
+    return null;
+  }
+
+  const selectorBase = `${edge.source}.${normalizedSourceHandle}`;
+  const normalizedSelector = normalizeSelectorVariable(
+    normalizeSelectorString(selectorBase),
+    nodes
+  );
+  if (!normalizedSelector.includes('.')) {
+    return null;
+  }
+
+  const sourceOutputs =
+    ((sourceNode.data?.ports as NodePortSchema | undefined)?.outputs) || [];
+  const matchedSourcePort = sourceOutputs.find(
+    (port) => port.name === normalizedSourceHandle
+  );
+  if (!matchedSourcePort) {
+    return null;
+  }
+
+  if (!isPortTypeCompatible(matchedSourcePort.type, targetPortDefinition.type as PortType)) {
+    return null;
+  }
+
+  return {
+    targetNodeId: targetNode.id,
+    targetPort: normalizedTargetPort,
+    mapping: {
+      target_port: normalizedTargetPort,
+      source: {
+        variable: normalizedSelector,
+        value_type: matchedSourcePort.type ?? PortType.ANY,
+      },
+    },
+  };
+};
+
 const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
   const nodeMap = new Map(nodes.map((node) => [node.id, node]));
   const legacyMappings = new Map<string, Record<string, any>>();
 
   edges.forEach((edge) => {
-    if (!edge.source || !edge.target) {
+    const mappingResult = createMappingFromEdge(edge, nodes, nodeMap);
+    if (!mappingResult) {
       return;
     }
 
-    const targetNode = nodeMap.get(edge.target);
-    const sourceNode = nodeMap.get(edge.source);
-    if (!targetNode || !sourceNode) {
-      return;
+    if (!legacyMappings.has(mappingResult.targetNodeId)) {
+      legacyMappings.set(mappingResult.targetNodeId, {});
     }
 
-    const renameMap =
-      TARGET_PORT_RENAME_MAP[(targetNode.data.type as BlockEnum) || BlockEnum.Start] || {};
-    const normalizedTargetHandle =
-      normalizeHandleId(edge.target, edge.targetHandle, nodes, 'inputs') ||
-      edge.targetHandle ||
-      null;
-    if (!normalizedTargetHandle) {
-      return;
-    }
-    const normalizedTargetPort =
-      (normalizedTargetHandle && renameMap[normalizedTargetHandle]) ||
-      normalizedTargetHandle;
-
-    const targetInputs =
-      ((targetNode.data?.ports as NodePortSchema | undefined)?.inputs) || [];
-    const hasTargetPort = targetInputs.some(
-      (port) => port.name === normalizedTargetPort
-    );
-    if (!hasTargetPort) {
-      return;
-    }
-
-    const normalizedSourceHandle =
-      normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ||
-      edge.sourceHandle ||
-      null;
-    if (!normalizedSourceHandle) {
-      return;
-    }
-    const selectorBase = `${edge.source}.${normalizedSourceHandle}`;
-    const normalizedSelector = normalizeSelectorVariable(
-      normalizeSelectorString(selectorBase),
-      nodes
-    );
-    if (!normalizedSelector.includes('.')) {
-      return;
-    }
-
-    const sourceOutputs =
-      ((sourceNode.data?.ports as NodePortSchema | undefined)?.outputs) || [];
-    const matchedSourcePort = sourceOutputs.find(
-      (port) => port.name === normalizedSourceHandle
-    );
-
-    const mapping = {
-      target_port: normalizedTargetPort,
-      source: {
-        variable: normalizedSelector,
-        value_type: matchedSourcePort?.type ?? PortType.ANY,
-      },
-    };
-
-    if (!legacyMappings.has(edge.target)) {
-      legacyMappings.set(edge.target, {});
-    }
-
-    const existing = legacyMappings.get(edge.target)!;
-    if (!existing[normalizedTargetPort]) {
-      existing[normalizedTargetPort] = mapping;
+    const existing = legacyMappings.get(mappingResult.targetNodeId)!;
+    if (!existing[mappingResult.targetPort]) {
+      existing[mappingResult.targetPort] = mappingResult.mapping;
     }
   });
 
@@ -978,6 +1013,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         state.nodes
       );
 
+      const mappingResult = createMappingFromEdge(sanitizedEdge, state.nodes);
       const existingEdgeIndex = state.edges.findIndex(
         (existing) =>
           existing.source === sanitizedEdge.source &&
@@ -999,8 +1035,44 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         nextEdges = [...state.edges, sanitizedEdge];
       }
 
+      let nodesChanged = false;
+      let nextNodes = state.nodes;
+
+      if (mappingResult) {
+        nextNodes = state.nodes.map((node) => {
+          if (node.id !== mappingResult.targetNodeId) {
+            return node;
+          }
+
+          const currentMappings =
+            (node.data?.variable_mappings as Record<string, any>) || {};
+          const prevMapping = currentMappings[mappingResult.targetPort];
+          const prevSelector = extractSelectorFromMapping(prevMapping);
+          if (prevSelector === mappingResult.mapping.source.variable) {
+            return node;
+          }
+
+          nodesChanged = true;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              variable_mappings: {
+                ...currentMappings,
+                [mappingResult.targetPort]: mappingResult.mapping,
+              },
+            },
+          };
+        });
+      }
+
+      if (nodesChanged) {
+        syncVariableAssignerNodesFromWorkflow(nextNodes);
+      }
+
       return {
         edges: nextEdges,
+        nodes: nodesChanged ? nextNodes : state.nodes,
         hasUnsavedChanges: true,
       };
     }),
