@@ -11,6 +11,7 @@ import BaseNode from '../_base/node';
 import { ReadOnlyOverlay } from './ReadOnlyOverlay';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
 import type { NodeProps } from '@xyflow/react';
+import { BlockEnum } from '@/shared/types/workflow.types';
 
 export const ExpandedView = memo(
   ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
@@ -60,6 +61,18 @@ export const ExpandedView = memo(
       return memo((props: NodeProps) => {
         const data = props.data as CommonNodeType;
         const NodeComponent = NodeComponentMap[data.type];
+
+        // ImportedWorkflowNode는 렌더링하지 않음 (무한 루프 방지)
+        if (!NodeComponent || data.type === BlockEnum.ImportedWorkflow) {
+          console.warn('[ExpandedView] Skipping unsupported node type:', data.type);
+          return (
+            <BaseNode id={props.id} data={data} selected={props.selected}>
+              <div className="text-xs text-muted-foreground p-2">
+                Unsupported: {data.type}
+              </div>
+            </BaseNode>
+          );
+        }
 
         return (
           <BaseNode id={props.id} data={data} selected={props.selected}>
