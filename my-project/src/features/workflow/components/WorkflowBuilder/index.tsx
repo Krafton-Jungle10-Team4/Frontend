@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
@@ -125,7 +125,9 @@ const WorkflowInner = () => {
   const [panelWidth, setPanelWidth] = useState(480); // 초기 너비 480px
   const [isResizing, setIsResizing] = useState(false);
   const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
+  const prevBotIdRef = useRef<string | undefined>();
+  const initialFitViewDoneRef = useRef(false);
 
   // 실시간 검증 비활성화
   useRealtimeValidation(false);
@@ -160,6 +162,33 @@ const WorkflowInner = () => {
       });
     }
   }, [availableNodeTypes.length, loadNodeTypes]);
+
+  // 워크플로우 로드 완료 후 fitView 호출
+  useEffect(() => {
+    const botIdChanged = prevBotIdRef.current !== botId;
+    if (botIdChanged) {
+      initialFitViewDoneRef.current = false;
+    }
+    prevBotIdRef.current = botId;
+
+    console.log('[WorkflowBuilder] fitView useEffect triggered:', {
+      botIdChanged,
+      isLoading,
+      nodesLength: nodes.length,
+      initialFitViewDone: initialFitViewDoneRef.current,
+    });
+
+    if (!isLoading && nodes.length > 0 && !initialFitViewDoneRef.current) {
+      console.log('[WorkflowBuilder] Setting timeout for fitView');
+      // React Flow의 DOM이 완전히 렌더링될 때까지 대기
+      const timer = setTimeout(() => {
+        console.log('[WorkflowBuilder] Calling fitView now');
+        fitView({ padding: 0.15, duration: 300 });
+        initialFitViewDoneRef.current = true;
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [botId, isLoading, nodes.length, fitView]);
 
   useWorkflowAutoSave(botId);
 
@@ -493,6 +522,18 @@ const WorkflowInner = () => {
     [contextMenu, screenToFlowPosition, setNodes, closeContextMenu, push, edges, generateReadableNodeId, nodes]
   );
 
+  // ReactFlow 초기화 완료 콜백
+  const handleReactFlowInit = useCallback(() => {
+    console.log('[WorkflowBuilder] ReactFlow onInit called, nodes:', nodes.length);
+    if (nodes.length > 0 && !initialFitViewDoneRef.current) {
+      setTimeout(() => {
+        console.log('[WorkflowBuilder] onInit: Calling fitView');
+        fitView({ padding: 0.15, duration: 300 });
+        initialFitViewDoneRef.current = true;
+      }, 100);
+    }
+  }, [nodes.length, fitView]);
+
   // 키보드 이벤트 (Delete/Backspace)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -563,9 +604,9 @@ const WorkflowInner = () => {
           onNodeContextMenu={onNodeContextMenu}
           onEdgeContextMenu={onEdgeContextMenu}
           onPaneContextMenu={onPaneContextMenu}
+          onInit={handleReactFlowInit}
           nodeTypes={REACT_FLOW_NODE_TYPES}
           edgeTypes={REACT_FLOW_EDGE_TYPES}
-          fitView
           minZoom={0.25}
           maxZoom={2}
           defaultEdgeOptions={{

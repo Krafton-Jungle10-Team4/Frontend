@@ -1,8 +1,8 @@
 /**
  * ExpandedView - 확장된 상태의 템플릿 노드 (내부 그래프 표시)
  */
-import { memo, useCallback, useMemo } from 'react';
-import { ReactFlow, Background, Controls, ReactFlowProvider, type Node } from '@xyflow/react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { ReactFlow, Background, Controls, ReactFlowProvider, type Node, useReactFlow } from '@xyflow/react';
 import { toast } from 'sonner';
 import { AlertCircle } from 'lucide-react';
 import type { ExpandedViewProps } from '../../../types/import-node.types';
@@ -14,6 +14,63 @@ import type { CommonNodeType } from '@/shared/types/workflow.types';
 import type { NodeProps } from '@xyflow/react';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import { SUPPORTED_NODE_TYPES } from '../../../constants/templateDefaults';
+import { calculateTemplateGraphBounds } from '../../../utils/templateBounds';
+
+const ReadOnlyFlow = memo(
+  ({
+    nodes,
+    edges,
+    nodeTypes,
+    edgeTypes,
+    onNodeClick,
+  }: {
+    nodes: Node[];
+    edges: any[];
+    nodeTypes: any;
+    edgeTypes: any;
+    onNodeClick: (event: React.MouseEvent, node: Node) => void;
+  }) => {
+    const { fitView } = useReactFlow();
+
+    useEffect(() => {
+      if (!nodes.length) return;
+      fitView({
+        padding: 0.15,
+        includeHiddenNodes: true,
+        minZoom: 0.2,
+        maxZoom: 1.5,
+        nodes: nodes.map((n) => ({ id: n.id })),
+        duration: 300,
+      });
+    }, [fitView, nodes]);
+
+    return (
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodeClick={onNodeClick}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        nodesFocusable={false}
+        edgesFocusable={false}
+        elementsSelectable={false}
+        panOnDrag={true}
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        preventScrolling={true}
+        minZoom={0.2}
+        maxZoom={1.5}
+        defaultEdgeOptions={{ type: 'custom' }}
+      >
+        <Background />
+        <Controls showInteractive={false} />
+      </ReactFlow>
+    );
+  }
+);
+ReadOnlyFlow.displayName = 'ReadOnlyFlow';
 
 export const ExpandedView = memo(
   ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
@@ -146,6 +203,10 @@ export const ExpandedView = memo(
     // Safe access with default empty arrays
     const safeNodes = internalGraph.nodes || [];
     const safeEdges = internalGraph.edges || [];
+    const bounds = useMemo(
+      () => calculateTemplateGraphBounds(safeNodes),
+      [safeNodes]
+    );
 
     // 각 노드의 필수 필드 검증 (디버깅 로그 포함)
     console.log('[ExpandedView] Validating node structures:', {
@@ -232,13 +293,14 @@ export const ExpandedView = memo(
             connectable: false,
             deletable: false,
             selectable: true, // 선택은 가능 (확인용)
-            parentNode: resolvedNodeId,
             position: {
-              x: node.position?.x ?? 0,
-              y: node.position?.y ?? 0,
+              x: (node.position?.x ?? 0) + bounds.offsetX,
+              y: (node.position?.y ?? 0) + bounds.offsetY,
             },
             style: {
               ...node.style,
+              width: 240, // BaseNode와 동일한 폭
+              height: node.style?.height ?? 100, // 기본 높이
               opacity: 0.8,
               filter: 'grayscale(10%)',
             },
@@ -295,30 +357,21 @@ export const ExpandedView = memo(
     );
 
     return (
-      <div className="relative h-[350px] rounded-b-lg overflow-hidden border-t">
+      <div
+        className="relative rounded-b-lg overflow-auto border-t"
+        style={{
+          width: `${bounds.width}px`,
+          height: `${bounds.height}px`,
+        }}
+      >
         <ReactFlowProvider>
-          <ReactFlow
+          <ReadOnlyFlow
             nodes={readOnlyNodes}
             edges={readOnlyEdges}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             onNodeClick={handleNodeClick}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            nodesFocusable={false}
-            edgesFocusable={false}
-            elementsSelectable={false}
-            panOnDrag={true}
-            zoomOnScroll={true}
-            zoomOnPinch={true}
-            preventScrolling={true}
-            fitView
-            fitViewOptions={{ padding: 0.2 }}
-            defaultEdgeOptions={{ type: 'custom' }}
-          >
-            <Background />
-            <Controls showInteractive={false} />
-          </ReactFlow>
+          />
         </ReactFlowProvider>
 
         {/* Read-only overlay */}

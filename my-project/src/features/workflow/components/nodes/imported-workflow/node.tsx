@@ -9,14 +9,41 @@ import { cn } from '@/shared/utils/cn';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
 import { CollapsedView } from './CollapsedView';
 import { ExpandedView } from './ExpandedView';
-import { useWorkflowStore } from '../../../stores/workflowStore';
 import { StatusIndicator } from '../_base/StatusIndicator';
 import { IMPORTED_NODE_SIZE } from '../../../constants/templateDefaults';
 import { NodeRunningStatus } from '@/shared/types/workflow.types';
+import { calculateTemplateGraphBounds, TEMPLATE_HEADER_OFFSET } from '../../../utils/templateBounds';
+import { isNodeInTemplate } from '../../../utils/templateImporter';
+import { useWorkflowStore } from '../../../stores/workflowStore';
+
+const LAYOUT_PADDING = 60;
+const DEFAULT_NODE_WIDTH = 320;
+const DEFAULT_NODE_HEIGHT = 180;
+
+type LayoutShift = { nodeId: string; dx: number; dy: number };
+
+const estimateNodeBounds = (node: any) => {
+  const width =
+    typeof node?.style?.width === 'number'
+      ? node.style.width
+      : (node?.data?.width as number) || DEFAULT_NODE_WIDTH;
+  const height =
+    typeof node?.style?.height === 'number'
+      ? node.style.height
+      : (node?.data?.height as number) || DEFAULT_NODE_HEIGHT;
+
+  return { width, height };
+};
+
+const rectsOverlap = (
+  a: { left: number; right: number; top: number; bottom: number },
+  b: { left: number; right: number; top: number; bottom: number }
+) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
 export const ImportedWorkflowNode = memo(
-  ({ id, data, selected }: NodeProps<ImportedWorkflowNodeData>) => {
+  ({ id, data, selected, xPos, yPos }: NodeProps<ImportedWorkflowNodeData>) => {
     const updateNode = useWorkflowStore((state) => state.updateNode);
+    const setNodes = useWorkflowStore((state) => state.setNodes);
     const updateNodeInternals = useUpdateNodeInternals();
     const isExpanded = data.is_expanded ?? false;
 
@@ -56,16 +83,142 @@ export const ImportedWorkflowNode = memo(
       return portName || 'output';
     }, [pickPortName, data.ports?.outputs]);
 
-    const handleToggleExpand = useCallback(() => {
-      updateNode(id, {
-        is_expanded: !isExpanded,
-      });
-    }, [id, isExpanded, updateNode]);
+    // 노드 크기 계산 (확장 시 동적 계산)
+    const size = useMemo(() => {
+      if (!isExpanded) {
+        return IMPORTED_NODE_SIZE.collapsed;
+      }
 
-    // 노드 크기 계산
-    const size = isExpanded
-      ? IMPORTED_NODE_SIZE.expanded
-      : IMPORTED_NODE_SIZE.collapsed;
+      const bounds = calculateTemplateGraphBounds(data.internal_graph?.nodes);
+
+      console.log('[ImportedWorkflowNode] Calculated expanded size:', {
+        nodeId: id,
+        nodeCount: data.internal_graph?.nodes?.length || 0,
+        bounds,
+      });
+
+      return {
+        width: bounds.width,
+        minHeight: bounds.height + TEMPLATE_HEADER_OFFSET, // 헤더와 패딩 추가
+      };
+    }, [isExpanded, data.internal_graph, id]);
+
+    const handleToggleExpand = useCallback(() => {
+      // 이미 확장된 상태 -> 접기: 이전에 밀어낸 노드를 원래 위치로 복원
+      if (isExpanded) {
+        const shiftInfo = data._layoutShift;
+        if (shiftInfo?.shifts?.length) {
+          const shiftMap = new Map<string, LayoutShift>();
+          shiftInfo.shifts.forEach((s) => shiftMap.set(s.nodeId, s));
+
+          setNodes((prev) =>
+            prev.map((node) => {
+              const shift = shiftMap.get(node.id);
+              if (!shift) return node;
+              return {
+                ...node,
+                position: {
+                  x: node.position.x - (shift.dx ?? 0),
+                  y: node.position.y - (shift.dy ?? 0),
+                },
+              };
+            })
+          );
+        }
+
+        updateNode(id, {
+          is_expanded: false,
+          _layoutShift: undefined,
+        });
+        return;
+      }
+
+      // 확장: 영역 확장분을 계산하여 겹치는 노드를 밀어냄
+      const expandedHeight = size.minHeight ?? IMPORTED_NODE_SIZE.expanded.minHeight;
+      const collapsedHeight = IMPORTED_NODE_SIZE.collapsed.minHeight;
+
+      const collapsedBounds = {
+        left: xPos,
+        right: xPos + IMPORTED_NODE_SIZE.collapsed.width,
+        top: yPos,
+        bottom: yPos + collapsedHeight,
+      };
+      const expandedBounds = {
+        left: xPos,
+        right: xPos + size.width,
+        top: yPos,
+        bottom: yPos + expandedHeight,
+      };
+
+      const horizontalGrowth = expandedBounds.right - collapsedBounds.right;
+      const verticalGrowth = expandedBounds.bottom - collapsedBounds.bottom;
+
+      const extraRightArea = {
+        left: collapsedBounds.right,
+        right: expandedBounds.right,
+        top: expandedBounds.top,
+        bottom: expandedBounds.bottom,
+      };
+      const extraBottomArea = {
+        left: expandedBounds.left,
+        right: expandedBounds.right,
+        top: collapsedBounds.bottom,
+        bottom: expandedBounds.bottom,
+      };
+
+      const shifts: LayoutShift[] = [];
+      setNodes((prev) =>
+        prev.map((node) => {
+          if (node.id === id || node.parentNode || isNodeInTemplate(node)) {
+            return node;
+          }
+
+          const { width, height } = estimateNodeBounds(node);
+          const nodeBounds = {
+            left: node.position.x,
+            right: node.position.x + width,
+            top: node.position.y,
+            bottom: node.position.y + height,
+          };
+
+          const overlapsRight =
+            horizontalGrowth > 0 && rectsOverlap(nodeBounds, extraRightArea);
+          const overlapsBottom =
+            verticalGrowth > 0 && rectsOverlap(nodeBounds, extraBottomArea);
+
+          if (!overlapsRight && !overlapsBottom) {
+            return node;
+          }
+
+          const dx = overlapsRight ? horizontalGrowth + LAYOUT_PADDING : 0;
+          const dy = overlapsBottom ? verticalGrowth + LAYOUT_PADDING : 0;
+          shifts.push({ nodeId: node.id, dx, dy });
+
+          return {
+            ...node,
+            position: {
+              x: node.position.x + dx,
+              y: node.position.y + dy,
+            },
+          };
+        })
+      );
+
+      updateNode(id, {
+        is_expanded: true,
+        _layoutShift: shifts.length ? { shifts } : undefined,
+      });
+    }, [
+      data._layoutShift,
+      id,
+      isExpanded,
+      setNodes,
+      size.minHeight,
+      size.width,
+      updateNode,
+      xPos,
+      yPos,
+    ]);
 
     // React Flow에 핸들 변경 알림 (초기 마운트 시, 포트 변경 시, 확장/축소 시)
     // 단, internal_graph가 유효한 경우에만 실행
@@ -117,7 +270,7 @@ export const ImportedWorkflowNode = memo(
       <div
         className={cn(
           'relative rounded-lg border-2 border-dashed',
-          'bg-background/80 backdrop-blur',
+          'bg-white',
           'shadow-md transition-all duration-200',
           // 선택 상태
           selected && 'ring-2 ring-primary shadow-lg',

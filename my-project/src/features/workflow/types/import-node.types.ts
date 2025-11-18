@@ -32,6 +32,11 @@ export interface ImportedWorkflowNodeData {
 
   // 변수 매핑 (외부 → 내부)
   variable_mappings: Record<string, string>;
+
+  // 레이아웃 보정 메타 (프론트엔드 전용, 저장 대상 아님)
+  _layoutShift?: {
+    shifts: { nodeId: string; dx: number; dy: number }[];
+  };
 }
 
 /**
