@@ -16,6 +16,8 @@ type BaseNodeProps = {
   data: NodeProps['data'];
   selected?: boolean;
   id: string;
+  customHeader?: ReactElement;
+  disableDefaultHeader?: boolean;
 };
 
 /**
@@ -26,7 +28,7 @@ type BaseNodeProps = {
  * - BlockIcon, StatusIcon, NodeHandle 표시
  * - 포트 시스템 지원 (하위 호환)
  */
-const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
+const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHeader }: BaseNodeProps) => {
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
 
@@ -114,29 +116,33 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         )}
       </>
 
-      {/* 노드 헤더 */}
-      <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
-        <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
-        <div
-          title={data.title}
-          className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
-        >
-          {data.title}
-        </div>
+      {/* 노드 헤더 - 커스텀 헤더 또는 기본 헤더 */}
+      {!disableDefaultHeader && (
+        customHeader || (
+          <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
+            <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
+            <div
+              title={data.title}
+              className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
+            >
+              {data.title}
+            </div>
 
-        {/* 상태 아이콘 */}
-        {isLoading && (
-          <RiLoader2Line className="h-3.5 w-3.5 animate-spin text-text-accent" />
-        )}
-        {!isLoading &&
-          data._runningStatus === NodeRunningStatus.Succeeded && (
-            <RiCheckboxCircleFill className="h-3.5 w-3.5 text-text-success" />
-          )}
-        {(data._runningStatus === NodeRunningStatus.Failed ||
-          data._runningStatus === NodeRunningStatus.Exception) && (
-          <RiErrorWarningFill className="h-3.5 w-3.5 text-text-destructive" />
-        )}
-      </div>
+            {/* 상태 아이콘 */}
+            {isLoading && (
+              <RiLoader2Line className="h-3.5 w-3.5 animate-spin text-text-accent" />
+            )}
+            {!isLoading &&
+              data._runningStatus === NodeRunningStatus.Succeeded && (
+                <RiCheckboxCircleFill className="h-3.5 w-3.5 text-text-success" />
+              )}
+            {(data._runningStatus === NodeRunningStatus.Failed ||
+              data._runningStatus === NodeRunningStatus.Exception) && (
+              <RiErrorWarningFill className="h-3.5 w-3.5 text-text-destructive" />
+            )}
+          </div>
+        )
+      )}
 
       {/* 노드 내용 */}
       {children}

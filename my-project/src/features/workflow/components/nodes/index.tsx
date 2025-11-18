@@ -1,8 +1,10 @@
 import { memo } from 'react';
 import type { NodeProps } from '@xyflow/react';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
+import { BlockEnum } from '@/shared/types/workflow.types';
 import { NodeComponentMap } from './components';
 import BaseNode from './_base/node';
+import { ImportedWorkflowNode } from './imported-workflow/node';
 
 /**
  * CustomNode - 모든 워크 플로우 노드의 래퍼
@@ -10,6 +12,11 @@ import BaseNode from './_base/node';
  */
 const CustomNode = memo((props: NodeProps) => {
   const data = props.data as CommonNodeType;
+
+  // ImportedWorkflow는 BaseNode를 건너뛰고 자체 렌더링 (BaseNode를 내부에서 사용)
+  if (data.type === BlockEnum.ImportedWorkflow) {
+    return <ImportedWorkflowNode {...props} />;
+  }
 
   // 노드 타입에 맞는 컴포넌트 선택
   const NodeComponent = NodeComponentMap[data.type];
