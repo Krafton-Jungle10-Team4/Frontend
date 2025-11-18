@@ -17,6 +17,11 @@ import type {
   WorkflowVersionDetail,
 } from '../types/api.types';
 import type {
+  LibraryMetadata,
+  PublishWorkflowRequest,
+  WorkflowVersion,
+} from '../types/workflow.types';
+import type {
   WorkflowNodeExecution,
   WorkflowRunDetail,
   WorkflowRunSummary,
@@ -154,11 +159,16 @@ export const workflowApi = {
    */
   publishWorkflowVersion: async (
     botId: string,
-    versionId: string
-  ): Promise<WorkflowVersionSummary> => {
+    versionId: string,
+    libraryMetadata?: LibraryMetadata
+  ): Promise<WorkflowVersion> => {
+    const requestBody: PublishWorkflowRequest = libraryMetadata
+      ? { library_metadata: libraryMetadata }
+      : {};
+
     const { data } = await apiClient.post(
       API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSION_PUBLISH(botId, versionId),
-      {}
+      requestBody
     );
     return data;
   },
