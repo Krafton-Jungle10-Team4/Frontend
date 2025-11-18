@@ -18,15 +18,7 @@ export const ImportedWorkflowPanel = memo(
   ({ data }: ImportedWorkflowPanelProps) => {
     const { loadTemplate } = useTemplateStore();
 
-  // 노드가 없거나 타입이 맞지 않는 경우 처리
-  if (!node || node.data.type !== 'imported-workflow') {
-    return null;
-  }
-
-  // 타입 캐스팅 (안전한 변환)
-  const data = node.data as unknown as ImportedWorkflowNodeData;
-
-  const handleViewTemplate = () => {
+    const handleViewTemplate = () => {
     if (data.template_id) {
       loadTemplate(data.template_id);
     }
