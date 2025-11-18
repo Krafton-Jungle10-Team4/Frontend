@@ -12,6 +12,7 @@ import { ReadOnlyOverlay } from './ReadOnlyOverlay';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
 import type { NodeProps } from '@xyflow/react';
 import { BlockEnum } from '@/shared/types/workflow.types';
+import { SUPPORTED_NODE_TYPES } from '../../../constants/templateDefaults';
 
 export const ExpandedView = memo(
   ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
@@ -31,23 +32,23 @@ export const ExpandedView = memo(
           <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-muted/30">
             <AlertCircle className="w-12 h-12 text-destructive mb-4" />
             <h3 className="font-semibold text-lg mb-2">
-              템플릿 데이터를 불러올 수 없습니다
+              템플릿 데이터 검증 실패
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
               템플릿의 내부 워크플로우 정보가 누락되었습니다.
               <br />
-              템플릿을 다시 가져오거나 관리자에게 문의하세요.
+              이 템플릿은 유효하지 않으며 사용할 수 없습니다.
             </p>
             <div className="text-xs bg-muted p-3 rounded-md max-w-md">
               <p className="font-mono">Template ID: {templateId}</p>
               <p className="font-mono">Node ID: {nodeId}</p>
               <p className="text-destructive mt-2 font-mono">
-                internal_graph: {
+                Error: {
                   !internalGraph
-                    ? 'undefined'
+                    ? 'internal_graph is undefined'
                     : (!internalGraph.nodes || !internalGraph.edges)
-                    ? 'partial data (missing nodes or edges)'
-                    : 'unknown error'
+                    ? 'missing nodes or edges arrays'
+                    : 'unknown validation error'
                 }
               </p>
             </div>
@@ -56,19 +57,67 @@ export const ExpandedView = memo(
       );
     }
 
-    // CustomNode를 useMemo로 생성하여 순환 참조 방지
+    // Validate node types - reject templates with unsupported node types
+    const unsupportedNodes = internalGraph.nodes
+      .map((node: any) => ({
+        id: node.id,
+        type: node.data?.type
+      }))
+      .filter(({ type }) => type && !SUPPORTED_NODE_TYPES.includes(type as any));
+
+    if (unsupportedNodes.length > 0) {
+      const unsupportedTypes = [...new Set(unsupportedNodes.map(n => n.type))];
+      console.error('[ExpandedView] Template contains unsupported node types:', {
+        nodeId,
+        templateId,
+        unsupportedTypes,
+        unsupportedNodes,
+        supportedTypes: SUPPORTED_NODE_TYPES
+      });
+
+      return (
+        <div className="relative h-[350px] rounded-b-lg overflow-hidden border-t">
+          <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-muted/30">
+            <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+            <h3 className="font-semibold text-lg mb-2">
+              지원하지 않는 노드 타입 포함
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              이 템플릿은 현재 지원하지 않는 노드 타입을 포함하고 있습니다.
+              <br />
+              템플릿을 업데이트하거나 다른 템플릿을 사용하세요.
+            </p>
+            <div className="text-xs bg-muted p-3 rounded-md max-w-md space-y-2">
+              <p className="font-mono">Template ID: {templateId}</p>
+              <p className="font-mono">Node ID: {nodeId}</p>
+              <div className="text-destructive mt-2">
+                <p className="font-semibold mb-1">지원하지 않는 노드 타입:</p>
+                <p className="font-mono">{unsupportedTypes.join(', ')}</p>
+              </div>
+              <div className="text-muted-foreground mt-2">
+                <p className="font-semibold mb-1">영향받는 노드 수:</p>
+                <p className="font-mono">{unsupportedNodes.length}개</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // CustomNode를 useMemo로 생성
+    // NOTE: ImportedWorkflow 노드는 위의 validation에서 이미 거부되므로 여기서는 처리 불필요
     const CustomNode = useMemo(() => {
       return memo((props: NodeProps) => {
         const data = props.data as CommonNodeType;
         const NodeComponent = NodeComponentMap[data.type];
 
-        // ImportedWorkflowNode는 렌더링하지 않음 (무한 루프 방지)
-        if (!NodeComponent || data.type === BlockEnum.ImportedWorkflow) {
-          console.warn('[ExpandedView] Skipping unsupported node type:', data.type);
+        // 지원하지 않는 노드 컴포넌트인 경우 (예상치 못한 경우)
+        if (!NodeComponent) {
+          console.error('[ExpandedView] No component found for node type:', data.type);
           return (
             <BaseNode id={props.id} data={data} selected={props.selected}>
-              <div className="text-xs text-muted-foreground p-2">
-                Unsupported: {data.type}
+              <div className="text-xs text-destructive p-2">
+                ERROR: Unknown node type: {data.type}
               </div>
             </BaseNode>
           );
