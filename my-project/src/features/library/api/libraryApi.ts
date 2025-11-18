@@ -23,7 +23,7 @@ export const getLibraryAgents = async (
   params.append('page', String(filters.page || 1));
   params.append('page_size', String(filters.page_size || 20));
 
-  const { data } = await apiClient.get(`/library/agents?${params.toString()}`);
+  const { data } = await apiClient.get(`/api/v1/library/agents?${params.toString()}`);
   return data;
 };
 
@@ -33,7 +33,7 @@ export const getLibraryAgents = async (
 export const getLibraryAgentDetail = async (
   versionId: string  // UUID 문자열
 ): Promise<LibraryAgentDetail> => {
-  const { data } = await apiClient.get(`/library/agents/${versionId}`);
+  const { data } = await apiClient.get(`/api/v1/library/agents/${versionId}`);
   return data;
 };
 
@@ -44,7 +44,7 @@ export const importLibraryAgent = async (
   targetBotId: string,
   sourceVersionId: string  // UUID 문자열
 ): Promise<WorkflowVersion> => {
-  const { data } = await apiClient.post(`/bots/${targetBotId}/import`, {
+  const { data } = await apiClient.post(`/api/v1/bots/${targetBotId}/import`, {
     source_version_id: sourceVersionId
   });
   return data;

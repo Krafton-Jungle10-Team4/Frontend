@@ -17,7 +17,7 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { AlignHorizontalJustifyCenter, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { AlignHorizontalJustifyCenter, Eye, EyeOff } from 'lucide-react';
 
 import { Button } from '@shared/components/button';
 import type {
@@ -112,9 +112,6 @@ const WorkflowInner = () => {
   } = useWorkflowStore();
 
   const { push } = useHistoryStore();
-
-  // Template store
-  const { openExportDialog, openImportDialog } = useTemplateStore();
 
   // Deployment store는 다이얼로그 컴포넌트 내부에서 사용됨
 
@@ -630,28 +627,6 @@ const WorkflowInner = () => {
       <div className="absolute top-4 left-4 right-4 z-10 flex justify-end items-center pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <ValidationPanel className="w-72 shrink-0" />
-
-          {/* Export Button */}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={openExportDialog}
-            className="gap-1.5"
-          >
-            <Download className="w-4 h-4" />
-            <span className="text-xs">템플릿으로 내보내기</span>
-          </Button>
-
-          {/* Import Button */}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={openImportDialog}
-            className="gap-1.5"
-          >
-            <Upload className="w-4 h-4" />
-            <span className="text-xs">템플릿 가져오기</span>
-          </Button>
 
           {/* Preview 버튼 */}
           <Button
