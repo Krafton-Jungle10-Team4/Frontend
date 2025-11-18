@@ -171,7 +171,7 @@ export const LLMPanel = () => {
                 value={llmData.prompt || ''}
                 onChange={(e) => handleUpdate('prompt', e.target.value)}
                 rows={10}
-                placeholder="프롬프트를 입력하세요...&#10;&#10;예: {{context}}를 사용하여 답변하세요&#10;또는 {{nodeId.portName}} 형식으로 직접 참조할 수 있습니다"
+                placeholder="프롬프트를 입력하세요...&#10;&#10;💡 팁: 입력 매핑에서 연결된 변수는 {{변수명}} 형식으로 사용하세요&#10;예: {{context}}, {{query}}&#10;&#10;다른 노드를 직접 참조하려면 {{nodeId.portName}} 형식 사용"
                 className="font-mono text-sm"
               />
               <TemplateSyntaxHint />

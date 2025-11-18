@@ -109,7 +109,7 @@ export const AnswerPanel = () => {
                 ref={textareaRef}
                 value={template}
                 onChange={(e) => handleTemplateChange(e.target.value)}
-                placeholder="예: 사용자 질문: {{start_1.user_message}}&#10;&#10;AI 답변: {{llm_1.response}}"
+                placeholder="변수 선택기를 사용하여 사용 가능한 변수를 삽입하세요&#10;&#10;예: {{1763305619209.response}}&#10;또는 변수 선택기에서 직접 선택"
                 rows={10}
                 className="font-mono text-sm"
               />
