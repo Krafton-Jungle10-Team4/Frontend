@@ -9,9 +9,17 @@ import {
 } from '@/shared/components/dialog';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/select';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { apiClient } from '@/shared/api/client';
 import { toast } from 'sonner';
+import { useBotStore } from '@/features/bot/stores/botStore';
 
 interface DeploymentDialogProps {
   open: boolean;
@@ -21,47 +29,59 @@ interface DeploymentDialogProps {
 }
 
 interface Deployment {
-  id: string;
-  workflow_version_id: string;
-  is_active: boolean;
-  deployed_at: string;
+  deployment_id: string;
+  workflow_version_id?: string;
+  status: string;
+  created_at: string;
   bot_id: string;
-  bot_name?: string;
 }
 
-export function DeploymentDialog({ open, onClose, versionId, agentName }: DeploymentDialogProps) {
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
+export function DeploymentDialog({ open, onClose, versionId, botId, agentName }: DeploymentDialogProps) {
+  const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [selectedBotId, setSelectedBotId] = useState<string>(botId || '');
+  const { bots, fetchBots } = useBotStore();
 
   useEffect(() => {
-    if (open && versionId) {
-      fetchDeployments();
+    if (open) {
+      fetchBots();
     }
-  }, [open, versionId]);
+  }, [open, fetchBots]);
 
-  const fetchDeployments = async () => {
+  useEffect(() => {
+    if (open && versionId && selectedBotId) {
+      fetchDeployment();
+    }
+  }, [open, versionId, selectedBotId]);
+
+  const fetchDeployment = async () => {
     setIsFetching(true);
     try {
-      const { data } = await apiClient.get(`/library/agents/${versionId}/deployments`);
-      setDeployments(data || []);
+      const { data } = await apiClient.get(`/bots/${selectedBotId}/deployment`);
+      setDeployment(data || null);
     } catch (error: any) {
-      console.error('Failed to fetch deployments:', error);
-      if (error.response?.status !== 404) {
-        toast.error('배포 목록을 불러올 수 없습니다.');
-      }
-      setDeployments([]);
+      console.error('Failed to fetch deployment:', error);
+      setDeployment(null);
     } finally {
       setIsFetching(false);
     }
   };
 
   const handleDeploy = async () => {
+    if (!selectedBotId) {
+      toast.error('배포할 봇을 선택하세요.');
+      return;
+    }
     setIsLoading(true);
     try {
-      await apiClient.post(`/library/agents/${versionId}/deploy`);
+      await apiClient.post(`/bots/${selectedBotId}/deploy`, {
+        status: 'published',
+        workflow_version_id: versionId,
+        widget_config: {},
+      });
       toast.success('에이전트가 성공적으로 배포되었습니다.');
-      await fetchDeployments();
+      await fetchDeployment();
     } catch (error: any) {
       console.error('Failed to deploy:', error);
       toast.error(error.response?.data?.detail || '배포에 실패했습니다.');
@@ -70,11 +90,15 @@ export function DeploymentDialog({ open, onClose, versionId, agentName }: Deploy
     }
   };
 
-  const handleDeactivate = async (deploymentId: string) => {
+  const handleDeactivate = async () => {
     try {
-      await apiClient.delete(`/deployments/${deploymentId}`);
+      if (!selectedBotId) {
+        toast.error('봇을 선택하세요.');
+        return;
+      }
+      await apiClient.delete(`/bots/${selectedBotId}/deployment`);
       toast.success('배포가 비활성화되었습니다.');
-      await fetchDeployments();
+      await fetchDeployment();
     } catch (error: any) {
       console.error('Failed to deactivate deployment:', error);
       toast.error(error.response?.data?.detail || '배포 비활성화에 실패했습니다.');
@@ -103,6 +127,26 @@ export function DeploymentDialog({ open, onClose, versionId, agentName }: Deploy
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Bot Selector */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">배포할 봇 선택</p>
+            <Select
+              value={selectedBotId}
+              onValueChange={(value) => setSelectedBotId(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="봇을 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {bots.map((bot) => (
+                  <SelectItem key={bot.bot_id} value={bot.bot_id}>
+                    {bot.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {isFetching ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -110,46 +154,36 @@ export function DeploymentDialog({ open, onClose, versionId, agentName }: Deploy
             </div>
           ) : (
             <>
-              {/* Current Deployments */}
-              {deployments.length > 0 ? (
-                <div>
-                  <h3 className="font-semibold mb-3">현재 배포 목록</h3>
-                  <div className="space-y-2">
-                    {deployments.map((deployment) => (
-                      <div
-                        key={deployment.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            {deployment.is_active ? (
-                              <CheckCircle2 className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-gray-400" />
-                            )}
-                            <span className="font-medium">
-                              {deployment.bot_name || deployment.bot_id}
-                            </span>
-                            <Badge variant={deployment.is_active ? 'default' : 'secondary'}>
-                              {deployment.is_active ? '활성' : '비활성'}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            배포일: {formatDate(deployment.deployed_at)}
-                          </p>
-                        </div>
-                        {deployment.is_active && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeactivate(deployment.id)}
-                          >
-                            비활성화
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+              {/* Current Deployment */}
+              {deployment ? (
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      {deployment.status === 'published' ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-gray-400" />
+                      )}
+                      <span className="font-medium">
+                        {deployment.bot_id}
+                      </span>
+                      <Badge variant={deployment.status === 'published' ? 'default' : 'secondary'}>
+                        {deployment.status === 'published' ? '활성' : deployment.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      생성일: {formatDate(deployment.created_at)}
+                    </p>
                   </div>
+                  {deployment.status === 'published' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDeactivate}
+                    >
+                      비활성화
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
@@ -158,14 +192,14 @@ export function DeploymentDialog({ open, onClose, versionId, agentName }: Deploy
               )}
 
               {/* Info */}
-              <div className="bg-muted p-3 rounded-lg text-sm">
-                <p className="font-medium mb-1">배포 안내</p>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  <li>이 에이전트 버전을 새로운 봇에 배포할 수 있습니다.</li>
-                  <li>배포하면 해당 봇의 기존 활성 배포가 비활성화됩니다.</li>
-                  <li>배포된 버전은 챗봇 API에서 실행됩니다.</li>
-                </ul>
-              </div>
+            <div className="bg-muted p-3 rounded-lg text-sm">
+              <p className="font-medium mb-1">배포 안내</p>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>이 에이전트 버전을 원하는 봇에 배포할 수 있습니다.</li>
+                <li>배포하면 해당 봇의 기존 활성 배포가 비활성화됩니다.</li>
+                <li>배포된 버전은 챗봇 API에서 실행됩니다.</li>
+              </ul>
+            </div>
             </>
           )}
         </div>

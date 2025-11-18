@@ -13,7 +13,7 @@ import { Badge } from '@/shared/components/badge';
 import { Search, X } from 'lucide-react';
 
 const CATEGORIES = [
-  { value: '', label: '전체 카테고리' },
+  { value: 'all', label: '전체 카테고리' },
   { value: 'RAG', label: 'RAG' },
   { value: 'LLM', label: 'LLM' },
   { value: 'Agent', label: 'Agent' },
@@ -21,9 +21,9 @@ const CATEGORIES = [
 ];
 
 const VISIBILITY_OPTIONS = [
-  { value: '', label: '전체 공개 범위' },
+  { value: 'all', label: '전체 공개 범위' },
   { value: 'private', label: '비공개' },
-  { value: 'team', label: '팀' },
+  // 팀 공개는 현재 백엔드에서 지원하지 않음
   { value: 'public', label: '공개' },
 ];
 
@@ -38,13 +38,15 @@ export function LibraryFilters() {
   };
 
   const handleCategoryChange = (category: string) => {
-    setFilters({ category: category || undefined, page: 1 });
-    fetchAgents({ category: category || undefined, page: 1 });
+    const actualCategory = category === 'all' ? undefined : category;
+    setFilters({ category: actualCategory, page: 1 });
+    fetchAgents({ category: actualCategory, page: 1 });
   };
 
   const handleVisibilityChange = (visibility: string) => {
-    setFilters({ visibility: visibility || undefined, page: 1 });
-    fetchAgents({ visibility: visibility || undefined, page: 1 });
+    const actualVisibility = visibility === 'all' ? undefined : visibility;
+    setFilters({ visibility: actualVisibility, page: 1 });
+    fetchAgents({ visibility: actualVisibility, page: 1 });
   };
 
   const handleAddTag = () => {
@@ -89,7 +91,7 @@ export function LibraryFilters() {
       {/* Filters Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Category */}
-        <Select value={filters.category || ''} onValueChange={handleCategoryChange}>
+        <Select value={filters.category || 'all'} onValueChange={handleCategoryChange}>
           <SelectTrigger>
             <SelectValue placeholder="카테고리 선택" />
           </SelectTrigger>
@@ -103,7 +105,7 @@ export function LibraryFilters() {
         </Select>
 
         {/* Visibility */}
-        <Select value={filters.visibility || ''} onValueChange={handleVisibilityChange}>
+        <Select value={filters.visibility || 'all'} onValueChange={handleVisibilityChange}>
           <SelectTrigger>
             <SelectValue placeholder="공개 범위 선택" />
           </SelectTrigger>
