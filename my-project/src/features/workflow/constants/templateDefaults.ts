@@ -51,6 +51,7 @@ export const SUPPORTED_NODE_TYPES = [
   'question-classifier',
   'mcp',
   'tavily-search',
+  'imported-workflow',
 ] as const;
 
 /**

@@ -242,22 +242,7 @@ export function validateBusinessRules(
     });
   }
 
-  // 8. imported-workflow 노드 거부 (중첩 방지) (NEW!)
-  const hasImportedWorkflow = template.graph.nodes.some(
-    (node: any) => node.data?.type === 'imported-workflow'
-  );
-  if (hasImportedWorkflow) {
-    errors.push(
-      '템플릿은 다른 템플릿(ImportedWorkflow)을 포함할 수 없습니다. ' +
-      '중첩된 템플릿 구조는 지원하지 않습니다.'
-    );
-    console.error('[validateBusinessRules] Nested template detected:', {
-      templateId: template.id,
-      importedWorkflowNodes: template.graph.nodes
-        .filter((node: any) => node.data?.type === 'imported-workflow')
-        .map((node: any) => ({ id: node.id, templateId: (node.data as any)?.template_id })),
-    });
-  }
+  // 8. imported-workflow 허용 (중첩 템플릿 경고 없음)
 
   // 9. 포트 스키마 확인
   // NOTE: input_schema와 output_schema는 배열이기만 하면 됨 (비어있을 수 있음)
