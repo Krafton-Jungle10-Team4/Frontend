@@ -32,9 +32,36 @@ export const ImportedWorkflowNode = memo(
       : IMPORTED_NODE_SIZE.collapsed;
 
     // React Flow에 핸들 변경 알림 (초기 마운트 시, 포트 변경 시, 확장/축소 시)
+    // 단, internal_graph가 유효한 경우에만 실행
     useEffect(() => {
-      updateNodeInternals(id);
-    }, [id, data.ports, isExpanded, updateNodeInternals]);
+      // internal_graph 유효성 검증
+      const isInternalGraphValid =
+        data.internal_graph &&
+        data.internal_graph.nodes &&
+        Array.isArray(data.internal_graph.nodes) &&
+        data.internal_graph.edges &&
+        Array.isArray(data.internal_graph.edges);
+
+      if (isInternalGraphValid) {
+        console.log('[ImportedWorkflowNode] Updating node internals:', {
+          nodeId: id,
+          isExpanded,
+          nodeCount: data.internal_graph.nodes.length,
+          edgeCount: data.internal_graph.edges.length,
+        });
+        updateNodeInternals(id);
+      } else {
+        console.warn('[ImportedWorkflowNode] Skipping updateNodeInternals - invalid internal_graph:', {
+          nodeId: id,
+          isExpanded,
+          hasInternalGraph: !!data.internal_graph,
+          hasNodes: !!data.internal_graph?.nodes,
+          hasEdges: !!data.internal_graph?.edges,
+          isNodesArray: Array.isArray(data.internal_graph?.nodes),
+          isEdgesArray: Array.isArray(data.internal_graph?.edges),
+        });
+      }
+    }, [id, data.ports, isExpanded, updateNodeInternals, data.internal_graph]);
 
     // 실행 상태에 따른 테두리 색상 계산
     const { showRunningBorder, showSuccessBorder, showFailedBorder } = useMemo(() => {
