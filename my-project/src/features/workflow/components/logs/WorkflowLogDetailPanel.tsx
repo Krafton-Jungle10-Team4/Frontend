@@ -9,7 +9,7 @@ import {
 } from '@/shared/components/sheet';
 import { Button } from '@/shared/components/button';
 import { Skeleton } from '@/shared/components/skeleton';
-import { workflowApi } from '../../../api/workflowApi';
+import { workflowApi } from '../../api/workflowApi';
 import type {
   WorkflowRunDetail,
   WorkflowLogFilters,
