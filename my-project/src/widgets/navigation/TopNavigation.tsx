@@ -13,6 +13,7 @@ import {
   Crown,
   Sparkles,
   ChevronDown,
+  CreditCard,
 } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
@@ -99,6 +100,7 @@ export function TopNavigation({
     en: {
       workspace: "'s Workspace",
       upgrade: 'Upgrade',
+      billing: 'Billing & Usage',
       accountSettings: 'Account Settings',
       linkSocialAccounts: 'Link social accounts',
       changePassword: 'Change password',
@@ -109,6 +111,7 @@ export function TopNavigation({
     ko: {
       workspace: '의 워크스페이스',
       upgrade: '업그레이드',
+      billing: '결제 및 사용량',
       accountSettings: '계정 설정',
       linkSocialAccounts: '소셜 계정 연결',
       changePassword: '비밀번호 변경',
@@ -210,6 +213,14 @@ export function TopNavigation({
               </div>
 
               <div className="py-2">
+                <DropdownMenuItem 
+                  className="px-4 py-2 cursor-pointer"
+                  onClick={() => navigate('/billing-settings')}
+                >
+                  <CreditCard size={16} className="mr-3 text-gray-600" />
+                  <span className="text-sm">{t.billing}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem className="px-4 py-2 cursor-pointer">
                   <Settings size={16} className="mr-3 text-gray-600" />
                   <span className="text-sm">{t.accountSettings}</span>

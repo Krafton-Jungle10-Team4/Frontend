@@ -149,10 +149,16 @@ export const API_ENDPOINTS = {
 
   // 비용 모니터링 (SnapAgent API)
   COST: {
+    // 봇별 사용량
     USAGE: (botId: string) => `/api/v1/cost/usage/${botId}`,
     USAGE_BREAKDOWN: (botId: string) =>
       `/api/v1/cost/usage/${botId}/breakdown`,
     DAILY_USAGE: (botId: string) => `/api/v1/cost/usage/${botId}/daily`,
+    // 유저 전체 사용량
+    USER_STATS: '/api/v1/cost/user/stats',
+    USER_BREAKDOWN: '/api/v1/cost/user/breakdown',
+    USER_MODEL_BREAKDOWN: '/api/v1/cost/user/model-breakdown',
+    USER_DAILY: '/api/v1/cost/user/daily',
     PRICING: '/api/v1/cost/pricing',
   },
 

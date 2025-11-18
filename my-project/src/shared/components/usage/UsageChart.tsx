@@ -18,9 +18,10 @@ import { DailyUsage } from '@/shared/data/mockUsageData';
 
 interface UsageChartProps {
   data: DailyUsage[];
+  title?: string;
 }
 
-export function UsageChart({ data }: UsageChartProps) {
+export function UsageChart({ data, title = 'Usage Over Time' }: UsageChartProps) {
   const chartData = data.map((item) => ({
     date: new Date(item.date).toLocaleDateString('en-US', {
       month: 'short',
@@ -34,7 +35,7 @@ export function UsageChart({ data }: UsageChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Usage Over Time</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>

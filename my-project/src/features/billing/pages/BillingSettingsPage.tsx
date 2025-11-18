@@ -2,6 +2,7 @@
 
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useBilling } from '../hooks/useBilling';
 import { useBillingStore } from '@/shared/stores/billingStore';
 import { useAuth, useAuthStore } from '@/features/auth';
@@ -11,7 +12,9 @@ import { Button } from '@/shared/components/button';
 import { Progress } from '@/shared/components/progress';
 import { LeftSidebar, TopNavigation, WorkspaceSidebar } from '@/widgets';
 import { mockPlans } from '../mock/billingMock';
-import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap } from 'lucide-react';
+import { costApi, type DailyCostSummary, type ModelUsageBreakdown } from '../api/costApi';
+import { UsageChart } from '@/shared/components/usage/UsageChart';
+import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap, TrendingUp, BarChart3, Cpu } from 'lucide-react';
 
 export function BillingSettingsPage() {
   const navigate = useNavigate();
@@ -28,6 +31,40 @@ export function BillingSettingsPage() {
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
+
+  // 일별 비용 및 모델별 사용량 데이터
+  const [dailyCosts, setDailyCosts] = useState<DailyCostSummary[]>([]);
+  const [modelBreakdown, setModelBreakdown] = useState<ModelUsageBreakdown[]>([]);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    if (!billingStatus) return;
+
+    const loadDetails = async () => {
+      setIsLoadingDetails(true);
+      try {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const [daily, models] = await Promise.all([
+          costApi.getUserDailyCosts(30),
+          costApi.getUserModelBreakdown({
+            startDate: monthStart,
+            endDate: now,
+          }),
+        ]);
+
+        setDailyCosts(daily);
+        setModelBreakdown(models);
+      } catch (err) {
+        console.error('Failed to load usage details', err);
+      } finally {
+        setIsLoadingDetails(false);
+      }
+    };
+
+    void loadDetails();
+  }, [billingStatus]);
 
   const handleCancelSubscription = () => {
     upgradePlan('free');
@@ -340,6 +377,169 @@ export function BillingSettingsPage() {
             </Card>
           </div>
 
+          {/* 일별 비용 차트 */}
+          {isLoadingDetails ? (
+            <Card className="rounded-2xl border border-gray-100 shadow-sm">
+              <CardContent className="flex h-[350px] items-center justify-center">
+                <p className="text-sm text-gray-500">
+                  {language === 'en' ? 'Loading chart data...' : '차트 데이터를 불러오는 중...'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : dailyCosts.length === 0 ? (
+            <Card className="rounded-2xl border border-gray-100 shadow-sm">
+              <CardContent className="flex h-[350px] items-center justify-center">
+                <p className="text-sm text-gray-500">
+                  {language === 'en'
+                    ? 'No usage data available for the selected period.'
+                    : '선택한 기간에 사용량 데이터가 없습니다.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <UsageChart
+              data={dailyCosts.map((item) => ({
+                date: item.date,
+                requests: item.requestCount,
+                tokens: item.totalTokens,
+                cost: item.totalCost,
+              }))}
+              title={language === 'en' ? 'Daily Usage Trend' : '일별 사용량 추이'}
+            />
+          )}
+
+          {/* 상세 통계 카드 */}
+          {billingStatus && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="rounded-2xl border border-gray-100 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    {language === 'en' ? 'Total Requests' : '총 요청 수'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {billingStatus.bot_usage?.reduce((sum, bot) => sum + bot.total_requests, 0).toLocaleString() ?? 0}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {language === 'en' ? 'This billing cycle' : '이번 결제 주기'}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-gray-100 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <Cpu className="h-4 w-4" />
+                    {language === 'en' ? 'Total Tokens' : '총 토큰 수'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {billingStatus.bot_usage?.reduce((sum, bot) => sum + bot.total_tokens, 0).toLocaleString() ?? 0}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {language === 'en' ? 'This billing cycle' : '이번 결제 주기'}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-gray-100 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    {language === 'en' ? 'Active Bots' : '활성 봇 수'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {sortedBotUsage.length}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {language === 'en' ? 'With usage this cycle' : '이번 주기 사용 있음'}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-gray-100 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    {language === 'en' ? 'Avg Cost/Bot' : '봇당 평균 비용'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-gray-900">
+                    ${sortedBotUsage.length > 0
+                      ? (usage.monthly_cost / sortedBotUsage.length).toFixed(2)
+                      : '0.00'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {language === 'en' ? 'This billing cycle' : '이번 결제 주기'}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* 모델별 사용량 분해 */}
+          <Card className="rounded-2xl border border-gray-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                {language === 'en' ? 'Model Usage Breakdown' : '모델별 사용량'}
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                {language === 'en'
+                  ? "See which AI models you're using and their associated costs."
+                  : '사용 중인 AI 모델과 각 모델의 비용을 확인하세요.'}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoadingDetails ? (
+                <div className="rounded-2xl bg-gray-50 p-6 text-center text-sm text-gray-500">
+                  {language === 'en' ? 'Loading model data...' : '모델 데이터를 불러오는 중...'}
+                </div>
+              ) : modelBreakdown.length === 0 ? (
+                <div className="rounded-2xl bg-gray-50 p-6 text-center text-sm text-gray-500">
+                  {language === 'en'
+                    ? 'No model usage data available.'
+                    : '모델 사용량 데이터가 없습니다.'}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {modelBreakdown.map((model, index) => (
+                    <div
+                      key={`${model.provider}-${model.modelName}-${index}`}
+                      className="flex items-center justify-between rounded-2xl border border-gray-100 p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-900">{model.modelName}</p>
+                          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                            {model.provider}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {language === 'en'
+                            ? `${model.requestCount.toLocaleString()} requests · ${model.totalInputTokens.toLocaleString()} input + ${model.totalOutputTokens.toLocaleString()} output tokens`
+                            : `${model.requestCount.toLocaleString()}회 요청 · 입력 ${model.totalInputTokens.toLocaleString()} + 출력 ${model.totalOutputTokens.toLocaleString()} 토큰`}
+                        </p>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-lg font-semibold text-gray-900">
+                          ${model.totalCost.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {language === 'en' ? 'Total cost' : '총 비용'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 봇별 사용량 */}
           <Card className="rounded-2xl border border-gray-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900">
@@ -363,7 +563,7 @@ export function BillingSettingsPage() {
                   {sortedBotUsage.map((bot) => (
                     <div
                       key={bot.bot_id}
-                      className="flex items-center justify-between rounded-2xl border border-gray-100 p-4"
+                      className="flex items-center justify-between rounded-2xl border border-gray-100 p-4 hover:bg-gray-50 transition-colors"
                     >
                       <div>
                         <p className="font-semibold text-gray-900">
@@ -371,8 +571,8 @@ export function BillingSettingsPage() {
                         </p>
                         <p className="text-xs text-gray-500">
                           {language === 'en'
-                            ? `${bot.total_requests} requests · ${bot.total_tokens} tokens`
-                            : `${bot.total_requests}회 요청 · ${bot.total_tokens} 토큰`}
+                            ? `${bot.total_requests} requests · ${bot.total_tokens.toLocaleString()} tokens`
+                            : `${bot.total_requests}회 요청 · ${bot.total_tokens.toLocaleString()} 토큰`}
                         </p>
                       </div>
                       <div className="text-right">
