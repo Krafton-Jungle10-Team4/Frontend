@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 interface WorkspaceState {
   // 현재 활성 탭
-  activeTab: 'explore' | 'studio' | 'knowledge' | 'tools';
+  activeTab: 'explore' | 'studio' | 'knowledge' | 'library';
 
   // 필터 상태
   exploreFilters: {

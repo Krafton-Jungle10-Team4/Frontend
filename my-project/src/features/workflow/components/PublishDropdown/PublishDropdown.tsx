@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from '@shared/components/tooltip';
 import { usePublishActions } from '../../hooks/usePublishActions';
+import { LibrarySaveDialog } from '../dialogs/LibrarySaveDialog';
 
 interface PublishDropdownProps {
   botId: string;
@@ -80,6 +81,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
 
   // 현재 봇의 deployment인지 확인
   const currentBotDeployment = deployment?.bot_id === botId ? deployment : null;
@@ -93,87 +95,102 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     }
   };
 
-  return (
-    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="default"
-          className="!bg-blue-600 !text-white hover:!bg-blue-700 flex items-center gap-1.5"
-        >
-          게시하기
-          <ChevronDown className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
+  // 업데이트 게시 버튼 클릭 시 LibrarySaveDialog 열기
+  const handlePublishClick = () => {
+    setIsOpen(false); // 드롭다운 닫기
+    setIsLibraryDialogOpen(true); // 다이얼로그 열기
+  };
 
-      <DropdownMenuContent align="end" className="w-64">
-        {/* 상단: 배포 상태 및 업데이트 버튼 */}
-        <div className="p-3 border-b">
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant={getStatusVariant(currentBotDeployment?.status || null)}>
-              {currentBotDeployment?.status
-                ? DEPLOYMENT_STATUS_LABELS[currentBotDeployment.status]
-                : '미배포'}
-            </Badge>
-            {currentBotDeployment?.version && (
-              <span className="text-xs text-muted-foreground">
-                v{currentBotDeployment.version}
-              </span>
+  return (
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="default"
+            className="!bg-blue-600 !text-white hover:!bg-blue-700 flex items-center gap-1.5"
+          >
+            게시하기
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-64">
+          {/* 상단: 배포 상태 및 업데이트 버튼 */}
+          <div className="p-3 border-b">
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant={getStatusVariant(currentBotDeployment?.status || null)}>
+                {currentBotDeployment?.status
+                  ? DEPLOYMENT_STATUS_LABELS[currentBotDeployment.status]
+                  : '미배포'}
+              </Badge>
+              {currentBotDeployment?.version && (
+                <span className="text-xs text-muted-foreground">
+                  v{currentBotDeployment.version}
+                </span>
+              )}
+            </div>
+
+            {currentBotDeployment?.updated_at && (
+              <p className="text-xs text-muted-foreground mb-2">
+                발행일 {formatRelativeTime(currentBotDeployment.updated_at)}
+              </p>
             )}
+
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={handlePublishClick}
+            >
+              업데이트 게시
+            </Button>
           </div>
 
-          {currentBotDeployment?.updated_at && (
-            <p className="text-xs text-muted-foreground mb-2">
-              발행일 {formatRelativeTime(currentBotDeployment.updated_at)}
-            </p>
+          <DropdownMenuSeparator />
+
+          {/* 메뉴 항목들 */}
+          {canRunApp ? (
+            <DropdownMenuItem onClick={runApp}>
+              <Play className="mr-2 h-4 w-4" />앱 실행
+            </DropdownMenuItem>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuItem
+                  onSelect={(event) => event.preventDefault()}
+                  className="cursor-not-allowed opacity-70"
+                >
+                  <Play className="mr-2 h-4 w-4" />앱 실행 (게시 필요)
+                </DropdownMenuItem>
+              </TooltipTrigger>
+              <TooltipContent>
+                봇을 게시하고 Widget Key를 발급받으면 실행할 수 있습니다.
+              </TooltipContent>
+            </Tooltip>
           )}
 
-          <Button
-            size="sm"
-            className="w-full"
-            onClick={publishUpdate}
-          >
-            업데이트 게시
-          </Button>
-        </div>
-
-        <DropdownMenuSeparator />
-
-        {/* 메뉴 항목들 */}
-        {canRunApp ? (
-          <DropdownMenuItem onClick={runApp}>
-            <Play className="mr-2 h-4 w-4" />앱 실행
+          <DropdownMenuItem onClick={embedWebsite}>
+            <Code className="mr-2 h-4 w-4" />
+            사이트에 삽입
           </DropdownMenuItem>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuItem
-                onSelect={(event) => event.preventDefault()}
-                className="cursor-not-allowed opacity-70"
-              >
-                <Play className="mr-2 h-4 w-4" />앱 실행 (게시 필요)
-              </DropdownMenuItem>
-            </TooltipTrigger>
-            <TooltipContent>
-              봇을 게시하고 Widget Key를 발급받으면 실행할 수 있습니다.
-            </TooltipContent>
-          </Tooltip>
-        )}
 
-        <DropdownMenuItem onClick={embedWebsite}>
-          <Code className="mr-2 h-4 w-4" />
-          사이트에 삽입
-        </DropdownMenuItem>
+          <DropdownMenuItem onClick={openExplore}>
+            <Compass className="mr-2 h-4 w-4" />
+            Explore에서 열기
+          </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={openExplore}>
-          <Compass className="mr-2 h-4 w-4" />
-          Explore에서 열기
-        </DropdownMenuItem>
+          <DropdownMenuItem onClick={apiReference}>
+            <FileCode className="mr-2 h-4 w-4" />
+            API 참조 접근
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        <DropdownMenuItem onClick={apiReference}>
-          <FileCode className="mr-2 h-4 w-4" />
-          API 참조 접근
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      {/* LibrarySaveDialog */}
+      <LibrarySaveDialog
+        open={isLibraryDialogOpen}
+        onOpenChange={setIsLibraryDialogOpen}
+        onPublish={publishUpdate}
+      />
+    </>
   );
 }
