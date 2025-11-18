@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -43,13 +43,17 @@ export const WorkflowSettingsDialog = () => {
   );
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      setEnvValue(formatJson(environmentVariables || {}));
-      setConvValue(formatJson(conversationVariables || {}));
-      setError(null);
-    }
-  }, [open, environmentVariables, conversationVariables]);
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setOpen(nextOpen);
+      if (nextOpen) {
+        setEnvValue(formatJson(environmentVariables || {}));
+        setConvValue(formatJson(conversationVariables || {}));
+        setError(null);
+      }
+    },
+    [environmentVariables, conversationVariables]
+  );
 
   const handleSave = () => {
     try {
@@ -64,7 +68,7 @@ export const WorkflowSettingsDialog = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">설정</Button>
       </DialogTrigger>

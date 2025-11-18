@@ -4,10 +4,9 @@ import { Button } from '@/shared/components/button';
 import { Card } from '@/shared/components/card';
 import { Input } from '@/shared/components/input';
 import { toast } from 'sonner';
-import { Play, Sparkles, Loader2, BookText, Plus, X } from 'lucide-react';
+import { Play, Sparkles, Loader2, Plus, X } from 'lucide-react';
 
 import {
-  TemplateSelector,
   PromptEditor,
   ModelSelector,
   AdvancedSettings,
@@ -219,7 +218,7 @@ export function PromptStudioPage() {
         seed: seed ? parseInt(seed, 10) : null,
       };
 
-      const testCreationPromises = validPersonas.map((persona, index) => {
+      const testCreationPromises = validPersonas.map((persona) => {
         const individualTestSetName = `${testSetName.trim()} - Persona ${
           personas.findIndex((p) => p.id === persona.id) + 1
         }`;

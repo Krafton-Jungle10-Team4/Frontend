@@ -2,7 +2,7 @@ import type {
   NodeProps,
   KnowledgeRetrievalNodeType,
 } from '@/shared/types/workflow.types';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useDocumentsArray } from '@/features/documents/stores/selectors';
 
 type RetrievalModeValue = 'semantic' | 'keyword' | 'hybrid';

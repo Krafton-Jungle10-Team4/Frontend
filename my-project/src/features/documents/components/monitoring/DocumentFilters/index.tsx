@@ -7,7 +7,6 @@ import { StatusFilter } from './StatusFilter';
 import { SearchInput } from './SearchInput';
 import { BotFilter } from './BotFilter';
 import { useBotStore, selectBots } from '@/features/bot/stores/botStore';
-import { DocumentStatus } from '../../../types/document.types';
 
 export const DocumentFilters: React.FC = () => {
   const filters = useFilters();
@@ -23,8 +22,7 @@ export const DocumentFilters: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]); // ✅ FIX: Remove setFilters to prevent infinite loop
+  }, [searchQuery, setFilters]);
 
   const hasActiveFilters =
     filters.status !== undefined ||

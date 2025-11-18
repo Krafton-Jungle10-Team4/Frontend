@@ -1,6 +1,3 @@
-import { apiClient } from '@shared/api';
-import { API_ENDPOINTS } from '@shared/constants';
-
 export const resultsApi = {
   getTestResults: async (testSetId: string) => {
     // const response = await apiClient.get(`${API_ENDPOINTS.TESTS.RESULTS}/${testSetId}`);
@@ -8,6 +5,7 @@ export const resultsApi = {
     
     // For now, return mock data
     const { mockTestResults } = await import('@features/prompt-engineering-studio/data/mockResults');
-    return mockTestResults;
+    const filtered = mockTestResults.filter((result) => result.testSetId === testSetId);
+    return filtered.length > 0 ? filtered : mockTestResults;
   },
 };

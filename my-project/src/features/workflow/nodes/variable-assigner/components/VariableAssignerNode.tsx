@@ -11,7 +11,6 @@ interface VariableAssignerNodeProps {
 
 export const VariableAssignerNode: FC<VariableAssignerNodeProps> = ({
   id,
-  data,
 }) => {
   const { nodeData, isGroupMode } = useVariableAssigner(id);
 

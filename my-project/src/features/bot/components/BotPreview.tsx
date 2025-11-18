@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/shared/components/button';
 import {
   RotateCw,
@@ -29,9 +29,11 @@ interface Message {
 export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
   // TODO: Get botId from props or context
   const [_botId, _setBotId] = useState<string | null>(null); // Backend should provide this
-  const [_sessionId, _setSessionId] = useState<string>(
-    () => `chat_${Date.now()}_${Math.random().toString(36)}`
-  );
+  const messageIdCounter = useRef(0);
+  const generateMessageId = useCallback(() => {
+    messageIdCounter.current += 1;
+    return `msg-${messageIdCounter.current}`;
+  }, []);
 
   const translations = {
     en: {
@@ -129,7 +131,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     // Frontend: Reset local state
     setMessages([
       {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: 'bot',
         content: t.initialMessage,
         timestamp: new Date(),
@@ -139,7 +141,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     setIsTyping(false);
 
     // Generate new session ID for fresh chat
-    _setSessionId(`chat_${Date.now()}_${Math.random().toString(36)}`);
+    messageIdCounter.current = 0;
   };
 
   const handleSendMessage = async () => {
@@ -170,7 +172,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
     const userMessageContent = inputValue;
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: 'user',
       content: userMessageContent,
       timestamp: new Date(),
@@ -204,7 +206,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       setIsTyping(false);
 
       const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         type: 'bot',
         content: t.botResponse, // Replace with: data.botResponse
         timestamp: new Date(),
@@ -216,7 +218,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
       // Show error message
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         type: 'bot',
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
@@ -231,7 +233,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     setInputValue('');
 
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: 'user',
       content: msg,
       timestamp: new Date(),
@@ -248,7 +250,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
 
       setIsTyping(false);
       const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         type: 'bot',
         content: t.botResponse,
         timestamp: new Date(),

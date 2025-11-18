@@ -4,7 +4,6 @@
  */
 import { Card } from '@/shared/components/card';
 import { Badge } from '@/shared/components/badge';
-import { ScrollArea } from '@/shared/components/scroll-area';
 import type { ModelConfig, TestQuestion } from '../../types';
 import { getModelColor } from '@shared/utils/styleUtils';
 

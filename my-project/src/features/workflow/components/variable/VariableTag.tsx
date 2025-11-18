@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { RiFileCopyLine, RiEyeLine, RiCheckLine } from '@remixicon/react';
-import { Badge } from '@shared/components/badge';
 import { Button } from '@shared/components/button';
 import {
   Tooltip,

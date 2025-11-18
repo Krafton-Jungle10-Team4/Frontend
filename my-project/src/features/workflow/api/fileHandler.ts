@@ -46,6 +46,7 @@ export async function readTemplateFromFile(
         const template = JSON.parse(text) as WorkflowTemplate;
         resolve(template);
       } catch (error) {
+        console.error('Invalid template JSON:', error);
         reject(new Error('유효하지 않은 JSON 파일입니다.'));
       }
     };

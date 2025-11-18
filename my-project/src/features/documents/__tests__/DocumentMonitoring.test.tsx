@@ -236,8 +236,6 @@ describe('DocumentMonitoring Integration Tests', () => {
   });
 
   it('should handle pagination correctly', async () => {
-    const user = userEvent.setup();
-
     // Setup multiple documents
     const documents = new Map<string, DocumentWithStatus>();
     for (let i = 0; i < 60; i++) {
@@ -274,8 +272,6 @@ describe('DocumentMonitoring Integration Tests', () => {
   });
 
   it('should filter documents by status', async () => {
-    const user = userEvent.setup();
-
     // Setup documents with different statuses
     const documents = new Map<string, DocumentWithStatus>([
       [

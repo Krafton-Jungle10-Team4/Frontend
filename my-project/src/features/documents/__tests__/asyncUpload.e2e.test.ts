@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { useAsyncDocumentStore } from '../stores/documentStore.async';
 import { documentsAsyncApi } from '../api/documentsApi.async';
 import { DocumentStatus } from '../types/document.types';

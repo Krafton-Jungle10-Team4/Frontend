@@ -8,7 +8,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
 import { useDocumentsByStatus } from '../../stores/selectors';
 import { DocumentStatus } from '../../types/document.types';
-import { DOCUMENT_STATUS_CONFIG } from '../../constants/documentConstants';
 
 export const DocumentStatusCard: React.FC = () => {
   const queuedDocs = useDocumentsByStatus(DocumentStatus.QUEUED);

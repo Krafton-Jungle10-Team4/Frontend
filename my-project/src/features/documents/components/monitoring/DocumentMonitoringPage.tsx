@@ -35,12 +35,10 @@ export const DocumentMonitoringPage: React.FC = () => {
   useEffect(() => {
     fetchDocuments();
 
-    // Cleanup
     return () => {
       stopAllPolling();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // ✅ FIX: Empty deps - only run on mount/unmount
+  }, [fetchDocuments, stopAllPolling]);
 
   // Handlers
   const handleRetry = async (documentId: string) => {

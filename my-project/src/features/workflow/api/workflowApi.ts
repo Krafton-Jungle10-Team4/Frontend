@@ -15,10 +15,14 @@ import type {
   WorkflowValidationResponse,
   WorkflowVersionSummary,
   WorkflowVersionDetail,
-  WorkflowRunSummary,
-  WorkflowRunDetail,
-  WorkflowNodeExecution,
 } from '../types/api.types';
+import type {
+  WorkflowNodeExecution,
+  WorkflowRunDetail,
+  WorkflowRunSummary,
+  WorkflowTokenStatistics,
+  WorkflowRunAnnotationPayload,
+} from '../types/log.types';
 import type { NodePortSchema, PortDefinition } from '@/shared/types/workflow';
 import { clonePortSchema } from '@/shared/constants/nodePortSchemas';
 
@@ -170,18 +174,24 @@ export const workflowApi = {
       end_date?: string;
       limit?: number;
       offset?: number;
+      search?: string;
     }
   ): Promise<{
     runs: WorkflowRunSummary[];
     total: number;
-    page: number;
-    page_size: number;
+    limit: number;
+    offset: number;
   }> => {
     const { data } = await apiClient.get(
       API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUNS(botId),
       { params }
     );
-    return data;
+    return {
+      runs: data.items,
+      total: data.total,
+      limit: data.limit,
+      offset: data.offset,
+    };
   },
 
   /**
@@ -220,6 +230,53 @@ export const workflowApi = {
   ): Promise<WorkflowNodeExecution> => {
     const { data } = await apiClient.get(
       API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_NODE_DETAIL(botId, runId, nodeId)
+    );
+    return data;
+  },
+
+  /**
+   * 토큰 통계 조회
+   */
+  getTokenStatistics: async (
+    botId: string,
+    options?: { runId?: string; startDate?: string; endDate?: string }
+  ): Promise<WorkflowTokenStatistics> => {
+    const params: Record<string, string> = {};
+    if (options?.runId) params.run_id = options.runId;
+    if (options?.startDate) params.start_date = options.startDate;
+    if (options?.endDate) params.end_date = options.endDate;
+
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_STATISTICS(botId),
+      { params }
+    );
+    return data;
+  },
+
+  /**
+   * 실행 어노테이션 조회
+   */
+  getAnnotation: async (
+    botId: string,
+    runId: string
+  ): Promise<WorkflowRunAnnotationPayload> => {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_ANNOTATION(botId, runId)
+    );
+    return data;
+  },
+
+  /**
+   * 실행 어노테이션 저장
+   */
+  saveAnnotation: async (
+    botId: string,
+    runId: string,
+    annotation: string
+  ): Promise<WorkflowRunAnnotationPayload> => {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.WORKFLOWS.WORKFLOW_RUN_ANNOTATION(botId, runId),
+      { annotation }
     );
     return data;
   },

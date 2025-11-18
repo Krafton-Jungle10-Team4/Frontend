@@ -10,12 +10,13 @@ import type { ImportedWorkflowNodeData } from '../../../types/import-node.types'
 import { useTemplateStore } from '../../../stores/templateStore';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 
-export const ImportedWorkflowPanel = memo(() => {
-  const { selectedNodeId, nodes } = useWorkflowStore();
-  const { loadTemplate } = useTemplateStore();
+interface ImportedWorkflowPanelProps {
+  data: ImportedWorkflowNodeData;
+}
 
-  // 선택된 노드 찾기
-  const node = nodes.find((n) => n.id === selectedNodeId);
+export const ImportedWorkflowPanel = memo(
+  ({ data }: ImportedWorkflowPanelProps) => {
+    const { loadTemplate } = useTemplateStore();
 
   // 노드가 없거나 타입이 맞지 않는 경우 처리
   if (!node || node.data.type !== 'imported-workflow') {

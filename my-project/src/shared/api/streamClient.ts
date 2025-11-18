@@ -148,11 +148,12 @@ export async function streamRequest({
               callbacks.onSources?.(event.data);
               break;
 
-            case 'error':
+            case 'error': {
               const error = new Error(event.message) as Error & { code: string };
               error.code = event.code;
               callbacks.onError?.(error);
               throw error; // 에러 발생 시 스트림 중단
+            }
 
             case 'node':
               callbacks.onNodeEvent?.(event as WorkflowNodeEvent);

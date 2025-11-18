@@ -242,6 +242,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             pollingState.retryCount = 0;
             pollingState.lastChecked = new Date();
           } catch (error) {
+            console.error('Polling status check failed:', error);
             // Increment retry count
             pollingState.retryCount++;
 

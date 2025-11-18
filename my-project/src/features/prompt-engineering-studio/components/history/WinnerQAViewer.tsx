@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/card';
 import { Button } from '@shared/components/button';
-import { Badge } from '@shared/components/badge';
 import { Award, Star, Zap, DollarSign, Bot } from 'lucide-react';
 import { getModelColor } from '@shared/utils/styleUtils';
 import type { ModelResult } from '@/features/prompt-engineering-studio/types/api';

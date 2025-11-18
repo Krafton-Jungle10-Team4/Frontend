@@ -3,8 +3,6 @@ import { Button } from '@/shared/components/button';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBotSetup } from '../BotSetupContext';
-import { useCreateBot } from '../../../hooks/useCreateBot';
-import { buildCreateBotDto } from '../../../utils/botSetupHelpers';
 import { botApi } from '../../../api/botApi';
 import { toast } from 'sonner';
 import type { Language } from '@/shared/types';
@@ -32,7 +30,6 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     setCreatedBotId,
   } = context;
 
-  const { createBot, isCreating } = useCreateBot();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const translations = {

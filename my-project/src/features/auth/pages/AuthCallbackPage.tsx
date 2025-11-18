@@ -1,7 +1,51 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '@/shared/constants/routes';
+
+type StarStyle = {
+  id: number;
+  left: string;
+  top: string;
+  animationDelay: string;
+  animationDuration: string;
+};
+
+type ShootingStarStyle = {
+  id: number;
+  left: string;
+  animationDuration: string;
+  animationDelay: string;
+};
+
+const generateStarStyles = (
+  count: number,
+  options: {
+    delayMax: number;
+    durationBase: number;
+    durationRange: number;
+    leftStart?: number;
+    leftRange?: number;
+  }
+): StarStyle[] => {
+  const { delayMax, durationBase, durationRange, leftStart = 0, leftRange = 100 } =
+    options;
+  return Array.from({ length: count }, (_, index) => ({
+    id: index,
+    left: `${leftStart + Math.random() * leftRange}%`,
+    top: `${Math.random() * 100}%`,
+    animationDelay: `${Math.random() * delayMax}s`,
+    animationDuration: `${durationBase + Math.random() * durationRange}s`,
+  }));
+};
+
+const generateShootingStars = (count: number): ShootingStarStyle[] =>
+  Array.from({ length: count }, (_, index) => ({
+    id: index,
+    left: `${20 + Math.random() * 60}%`,
+    animationDuration: `${5 + index * 2}s`,
+    animationDelay: `${index * 3}s`,
+  }));
 
 /**
  * OAuth Callback 페이지
@@ -16,6 +60,16 @@ import { ROUTES } from '@/shared/constants/routes';
 export const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const { handleAuthCallback, error } = useAuth();
+  const [smallStars] = useState(() =>
+    generateStarStyles(50, { delayMax: 3, durationBase: 2, durationRange: 3 })
+  );
+  const [mediumStars] = useState(() =>
+    generateStarStyles(30, { delayMax: 2, durationBase: 1.5, durationRange: 2 })
+  );
+  const [largeStars] = useState(() =>
+    generateStarStyles(20, { delayMax: 2, durationBase: 1, durationRange: 2 })
+  );
+  const [shootingStars] = useState(() => generateShootingStars(3));
 
   useEffect(() => {
     const processCallback = async () => {
@@ -39,15 +93,15 @@ export const AuthCallbackPage = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-gray-900 to-teal-900">
         {/* Stars Layer 1 - Small stars */}
         <div className="absolute inset-0 opacity-50">
-          {[...Array(50)].map((_, i) => (
+          {smallStars.map((star) => (
             <div
-              key={`star1-${i}`}
+              key={`star1-${star.id}`}
               className="absolute w-1 h-1 bg-teal-300 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
+                left: star.left,
+                top: star.top,
+                animationDelay: star.animationDelay,
+                animationDuration: star.animationDuration,
               }}
             />
           ))}
@@ -55,15 +109,15 @@ export const AuthCallbackPage = () => {
 
         {/* Stars Layer 2 - Medium stars */}
         <div className="absolute inset-0 opacity-70">
-          {[...Array(30)].map((_, i) => (
+          {mediumStars.map((star) => (
             <div
-              key={`star2-${i}`}
+              key={`star2-${star.id}`}
               className="absolute w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1.5 + Math.random() * 2}s`,
+                left: star.left,
+                top: star.top,
+                animationDelay: star.animationDelay,
+                animationDuration: star.animationDuration,
               }}
             />
           ))}
@@ -71,15 +125,15 @@ export const AuthCallbackPage = () => {
 
         {/* Stars Layer 3 - Large stars */}
         <div className="absolute inset-0 opacity-80">
-          {[...Array(20)].map((_, i) => (
+          {largeStars.map((star) => (
             <div
-              key={`star3-${i}`}
+              key={`star3-${star.id}`}
               className="absolute w-2 h-2 bg-teal-500 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1 + Math.random() * 2}s`,
+                left: star.left,
+                top: star.top,
+                animationDelay: star.animationDelay,
+                animationDuration: star.animationDuration,
               }}
             />
           ))}
@@ -87,16 +141,16 @@ export const AuthCallbackPage = () => {
 
         {/* Shooting stars */}
         <div className="absolute inset-0">
-          {[...Array(3)].map((_, i) => (
+          {shootingStars.map((star) => (
             <div
-              key={`shooting-${i}`}
+              key={`shooting-${star.id}`}
               className="absolute w-1 h-20 bg-gradient-to-b from-white to-transparent opacity-0"
               style={{
-                left: `${20 + Math.random() * 60}%`,
+                left: star.left,
                 top: `-100px`,
                 transform: 'rotate(135deg)',
-                animation: `shooting ${5 + i * 2}s linear infinite`,
-                animationDelay: `${i * 3}s`,
+                animation: `shooting ${star.animationDuration} linear infinite`,
+                animationDelay: star.animationDelay,
               }}
             />
           ))}

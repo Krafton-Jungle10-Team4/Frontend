@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, memo } from 'react';
+import { useMemo, memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { DollarSign, Activity, Zap } from 'lucide-react';
 import { StatCard } from '@/shared/components/usage/UsageStats';
 import { UsageChart } from '@/shared/components/usage/UsageChart';
@@ -14,30 +15,26 @@ import { useBotStore } from '@/features/bot/stores/botStore';
  */
 const MonitoringView = () => {
   const botId = useBotStore((state) => state.selectedBotId);
-  const [usageData, setUsageData] = useState<DailyUsage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!botId) return;
-
-    setLoading(true);
-    setError(null);
-    workflowApi
-      .listWorkflowRuns(botId, { limit: 100 })
-      .then((response) => {
-        const grouped = groupRunsByDay(response.runs);
-        setUsageData(grouped);
-      })
-      .catch((err) => {
-        console.error('Failed to load runs:', err);
-        setError('실행 이력을 불러오지 못했습니다.');
-        setUsageData([]);
-      })
-      .finally(() => setLoading(false));
-  }, [botId]);
+  const {
+    data: usageData = [],
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ['workflow-monitoring', botId],
+    queryFn: async () => {
+      if (!botId) {
+        return [] as DailyUsage[];
+      }
+      const response = await workflowApi.listWorkflowRuns(botId, { limit: 100 });
+      return groupRunsByDay(response.runs);
+    },
+    enabled: Boolean(botId),
+  });
 
   const summary = useMemo(() => calculateSummary(usageData), [usageData]);
+  const loading = Boolean(botId) && isPending;
+  const errorMessage =
+    error instanceof Error ? '실행 이력을 불러오지 못했습니다.' : null;
 
   return (
     <div className="h-full w-full overflow-auto bg-gray-50 p-6">
@@ -54,9 +51,9 @@ const MonitoringView = () => {
             워크플로우 사용 현황을 보려면 먼저 봇을 선택하세요.
           </div>
         )}
-        {error && (
+        {errorMessage && (
           <div className="text-sm text-red-500">
-            {error}
+            {errorMessage}
           </div>
         )}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">

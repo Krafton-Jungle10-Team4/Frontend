@@ -21,7 +21,6 @@ import { Label } from '@shared/components/label';
 import { Trash2 } from 'lucide-react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { useVariablePoolStore } from '../stores/variablePoolStore';
-import type { NodeVariableMappings, ValueSelector } from '@shared/types/workflow';
 
 type VariableType = 'string' | 'number' | 'boolean' | 'object' | 'array';
 
@@ -81,7 +80,7 @@ const parseValue = (raw: string, type: VariableType): unknown => {
     case 'boolean':
       return raw === 'true';
     case 'object':
-    case 'array':
+    case 'array': {
       if (!raw.trim()) {
         return type === 'array' ? [] : {};
       }
@@ -93,6 +92,7 @@ const parseValue = (raw: string, type: VariableType): unknown => {
         throw new Error('객체 형태의 JSON이 필요합니다');
       }
       return parsed;
+    }
     default:
       return raw;
   }

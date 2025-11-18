@@ -5,7 +5,6 @@
  */
 
 import { WriteMode } from '@/shared/types/workflow.types';
-import type { AssignerInputType, AssignerOperation } from '@/shared/types/workflow.types';
 
 /**
  * 작업 타입 레이블 맵

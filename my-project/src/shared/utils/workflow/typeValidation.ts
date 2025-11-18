@@ -1,6 +1,6 @@
 // src/shared/utils/workflow/typeValidation.ts
 
-import { PortType, PortValue } from '@shared/types/workflow/port.types';
+import { PortType } from '@shared/types/workflow/port.types';
 
 /**
  * 값의 런타임 타입 확인

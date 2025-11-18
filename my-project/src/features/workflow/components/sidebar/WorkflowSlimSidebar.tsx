@@ -5,13 +5,11 @@ export type SidebarView = 'flow' | 'monitoring' | 'logs' | 'knowledge';
 export interface WorkflowSlimSidebarProps {
   activeView: SidebarView;
   onViewChange: (view: SidebarView) => void;
-  onLogoClick?: () => void;
 }
 
 const WorkflowSlimSidebar = ({
   activeView,
   onViewChange,
-  onLogoClick,
 }: WorkflowSlimSidebarProps) => {
 
   const menuItems: { id: SidebarView; icon: React.ElementType }[] = [

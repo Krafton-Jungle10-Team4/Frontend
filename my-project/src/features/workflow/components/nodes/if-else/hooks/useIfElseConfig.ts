@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   IfElseCase,
   IfElseCondition,
@@ -9,35 +9,26 @@ import type {
 import { createDefaultIfElseCase } from '../utils/portSchemaGenerator';
 
 interface UseIfElseConfigProps {
-  nodeId: string;
   cases: IfElseCase[];
   onUpdate: (cases: IfElseCase[]) => void;
 }
 
-export function useIfElseConfig({ nodeId, cases: initialCases, onUpdate }: UseIfElseConfigProps) {
-  const initialNormalizedCases =
-    initialCases && initialCases.length > 0 ? initialCases : [createDefaultIfElseCase()];
-  const [cases, setCases] = useState<IfElseCase[]>(initialNormalizedCases);
-  const [currentNodeId, setCurrentNodeId] = useState(nodeId);
-
-  // 노드가 변경될 때만 상태 재설정 (상태 누수 방지)
-  // initialCases는 배열이므로 의존성 배열에 넣으면 매번 재렌더링됨
-  useEffect(() => {
-    if (currentNodeId !== nodeId) {
-      const nextCases =
-        initialCases && initialCases.length > 0 ? initialCases : [createDefaultIfElseCase()];
-      setCases(nextCases);
-      setCurrentNodeId(nodeId);
-      if (!initialCases || initialCases.length === 0) {
-        onUpdate(nextCases);
-      }
+export function useIfElseConfig({ cases: initialCases, onUpdate }: UseIfElseConfigProps) {
+  const cases = useMemo<IfElseCase[]>(() => {
+    if (initialCases && initialCases.length > 0) {
+      return initialCases;
     }
-  }, [nodeId, currentNodeId, initialCases, onUpdate]);
+    return [createDefaultIfElseCase()];
+  }, [initialCases]);
 
-  // 변경사항을 부모에 전파
+  useEffect(() => {
+    if (!initialCases || initialCases.length === 0) {
+      onUpdate(cases);
+    }
+  }, [cases, initialCases, onUpdate]);
+
   const notifyUpdate = useCallback(
     (newCases: IfElseCase[]) => {
-      setCases(newCases);
       onUpdate(newCases);
     },
     [onUpdate]

@@ -19,11 +19,9 @@ import type {
   VariableMapping,
 } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
-import * as assignerTransformers from '@/features/workflow/components/nodes/assigner/api/transformers';
 import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
 import {
   resolvePromptVariables,
-  extractVariableReferences,
 } from '@/features/workflow/utils/promptVariableResolver';
 
 /**

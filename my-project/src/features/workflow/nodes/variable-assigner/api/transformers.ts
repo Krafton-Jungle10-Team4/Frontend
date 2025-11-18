@@ -126,7 +126,6 @@ export function toBackendFormat(data: VariableAssignerNodeData) {
  * @returns 프론트엔드 노드 데이터
  */
 export function fromBackendFormat(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   backendData: any
 ): VariableAssignerNodeData {
   const { config } = backendData;
@@ -157,7 +156,6 @@ export function fromBackendFormat(
     variables: [],
     advanced_settings: {
       group_enabled: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       groups: config.groups.map((group: any) => ({
         groupId: group.groupId,
         group_name: group.group_name,

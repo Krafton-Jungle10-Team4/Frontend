@@ -12,7 +12,6 @@ import { useActivityStore } from '@features/activity';
 import { useAuthStore } from '@features/auth';
 import { useUIStore } from '@shared/stores/uiStore';
 import { buildMinimalWorkflow } from '../utils/workflowUtils';
-import type { Language } from '@shared/types';
 
 interface CreateBotInput {
   name: string;
@@ -103,7 +102,7 @@ export function useBotCreateDialog() {
         setIsCreating(false);
       }
     },
-    [language, addBot, addActivity, userName, navigate, closeDialog, t]
+    [addBot, addActivity, userName, navigate, closeDialog, t]
   );
 
   return {

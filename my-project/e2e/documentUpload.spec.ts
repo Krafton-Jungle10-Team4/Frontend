@@ -176,10 +176,6 @@ test.describe('Document Upload Flow', () => {
   });
 
   test('should refresh document list', async ({ page }) => {
-    // Get initial document count
-    const initialRows = page.locator('tbody tr');
-    const initialCount = await initialRows.count();
-
     // Click refresh button
     const refreshButton = page.locator('button:has-text("새로고침")');
     if ((await refreshButton.count()) > 0) {

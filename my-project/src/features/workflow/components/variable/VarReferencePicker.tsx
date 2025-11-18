@@ -15,9 +15,6 @@ interface VarReferencePickerProps {
   /** 현재 노드 ID */
   nodeId: string;
 
-  /** 대상 입력 포트 이름 */
-  portName: string;
-
   /** 포트 타입 (필터링용) */
   portType: PortType;
 
@@ -36,7 +33,6 @@ interface VarReferencePickerProps {
 
 export function VarReferencePicker({
   nodeId,
-  portName,
   portType,
   value,
   onChange,

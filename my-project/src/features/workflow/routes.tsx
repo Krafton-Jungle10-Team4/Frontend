@@ -9,6 +9,13 @@ export const workflowRoutes: RouteObject = {
   path: 'bot',
   children: [
     {
+      path: ':botId/workflow/logs',
+      lazy: () =>
+        import('./pages/WorkflowLogsPage').then((module) => ({
+          Component: module.WorkflowLogsPage,
+        })),
+    },
+    {
       path: ':botId/workflow',
       lazy: () =>
         import('./pages/WorkflowBuilderPage').then((module) => ({

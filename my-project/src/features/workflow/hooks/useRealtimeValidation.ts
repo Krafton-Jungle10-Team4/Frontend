@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { debounce } from 'lodash-es';
 
@@ -13,17 +13,20 @@ import { debounce } from 'lodash-es';
 export const useRealtimeValidation = (enabled: boolean = true) => {
   const { nodes, edges, validateWorkflow } = useWorkflowStore();
 
-  const debouncedValidate = useRef(
-    debounce(async () => {
+  const debouncedValidate = useMemo(() => {
+    return debounce(async () => {
       await validateWorkflow();
-    }, 500)
-  ).current;
+    }, 500);
+  }, [validateWorkflow]);
 
   useEffect(() => {
     if (!enabled) return;
 
     debouncedValidate();
 
+    return () => {
+      debouncedValidate.cancel();
+    };
     return () => {
       debouncedValidate.cancel();
     };

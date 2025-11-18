@@ -1,5 +1,5 @@
 import type { NodeProps, LLMNodeType } from '@/shared/types/workflow.types';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 /**
  * LLM 노드

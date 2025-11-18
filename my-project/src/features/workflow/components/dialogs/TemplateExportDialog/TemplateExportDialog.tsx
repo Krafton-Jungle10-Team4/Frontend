@@ -1,7 +1,7 @@
 /**
  * TemplateExportDialog - 템플릿 Export 다이얼로그
  */
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Loader2, Check, X } from 'lucide-react';
 import {
@@ -68,15 +68,17 @@ export const TemplateExportDialog = memo(() => {
     },
   });
 
-  // 다이얼로그 오픈 시 검증 실행
-  useEffect(() => {
-    if (isExportDialogOpen) {
-      setIsValidating(true);
-      validateExport().finally(() => {
-        setIsValidating(false);
-      });
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      handleClose();
+      return;
     }
-  }, [isExportDialogOpen, validateExport]);
+
+    setIsValidating(true);
+    validateExport().finally(() => {
+      setIsValidating(false);
+    });
+  };
 
   const onSubmit = async (data: ExportFormData) => {
     if (!botId || !draftVersionId) return;
@@ -94,7 +96,7 @@ export const TemplateExportDialog = memo(() => {
     try {
       await exportTemplate(config);
       reset();
-    } catch (error) {
+    } catch {
       // Error handled in store
     }
   };
@@ -105,7 +107,7 @@ export const TemplateExportDialog = memo(() => {
   };
 
   return (
-    <Dialog open={isExportDialogOpen} onOpenChange={handleClose}>
+    <Dialog open={isExportDialogOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>템플릿으로 내보내기</DialogTitle>

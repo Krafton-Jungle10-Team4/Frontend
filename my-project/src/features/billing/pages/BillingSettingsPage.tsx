@@ -14,7 +14,7 @@ import { LeftSidebar, TopNavigation, WorkspaceSidebar } from '@/widgets';
 import { mockPlans } from '../mock/billingMock';
 import { costApi, type DailyCostSummary, type ModelUsageBreakdown } from '../api/costApi';
 import { UsageChart } from '@/shared/components/usage/UsageChart';
-import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap, TrendingUp, BarChart3, Cpu } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap, BarChart3, Cpu } from 'lucide-react';
 
 export function BillingSettingsPage() {
   const navigate = useNavigate();

@@ -57,7 +57,6 @@ export const variableAssignerApi = {
    */
   async updateDraft(
     botId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     graph: any,
     variables: Partial<Omit<WorkflowDraftPayload, 'graph'>> = {}
   ) {
