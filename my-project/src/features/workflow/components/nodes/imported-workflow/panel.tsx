@@ -7,8 +7,6 @@ import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
 import { Separator } from '@/shared/components/separator';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
-import { useTemplateStore } from '../../../stores/templateStore';
-import { useWorkflowStore } from '../../../stores/workflowStore';
 
 interface ImportedWorkflowPanelProps {
   data: ImportedWorkflowNodeData;
@@ -16,24 +14,15 @@ interface ImportedWorkflowPanelProps {
 
 export const ImportedWorkflowPanel = memo(
   ({ data }: ImportedWorkflowPanelProps) => {
-    const { loadTemplate } = useTemplateStore();
-
-    const handleViewTemplate = () => {
-    if (data.template_id) {
-      loadTemplate(data.template_id);
-    }
-    // 템플릿 상세 모달 오픈 로직 추가 가능
-  };
-
   return (
     <div className="space-y-4 p-4">
       {/* Read-Only Banner */}
       <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
         <Lock className="w-5 h-5 text-muted-foreground" />
         <div className="flex-1">
-          <p className="text-sm font-medium">읽기 전용 템플릿</p>
+          <p className="text-sm font-medium">읽기 전용 라이브러리 에이전트</p>
           <p className="text-xs text-muted-foreground">
-            템플릿 노드는 편집할 수 없습니다.
+            라이브러리에서 가져온 에이전트는 이 자리에서 편집할 수 없습니다.
           </p>
         </div>
       </div>
