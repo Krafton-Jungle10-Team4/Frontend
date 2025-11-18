@@ -121,12 +121,12 @@ export const router = createBrowserRouter([
                     Component: module.KnowledgePage,
                   })),
               },
-              // Tools (도구)
+              // Library (라이브러리)
               {
-                path: 'tools',
+                path: 'library',
                 lazy: () =>
-                  import('@/features/workspace').then((module) => ({
-                    Component: module.ToolsPage,
+                  import('@/features/library').then((module) => ({
+                    Component: module.LibraryPage,
                   })),
               },
             ],

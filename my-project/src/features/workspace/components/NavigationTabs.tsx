@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import { Compass, LayoutGrid, BookOpen, Wrench } from 'lucide-react';
+import { Compass, LayoutGrid, BookOpen, Library } from 'lucide-react';
 import { cn } from '@/shared/components/utils';
 
 interface NavigationTabsProps {
-  activeTab: 'explore' | 'studio' | 'knowledge' | 'tools';
+  activeTab: 'explore' | 'studio' | 'knowledge' | 'library';
   onTabChange: (tab: NavigationTabsProps['activeTab']) => void;
   language: 'en' | 'ko';
 }
@@ -12,7 +12,7 @@ const tabs = [
   { id: 'explore', icon: Compass, label: { en: 'Explore', ko: '탐색' } },
   { id: 'studio', icon: LayoutGrid, label: { en: 'Studio', ko: '스튜디오' } },
   { id: 'knowledge', icon: BookOpen, label: { en: 'Knowledge', ko: '지식' } },
-  { id: 'tools', icon: Wrench, label: { en: 'Tools', ko: '도구' } },
+  { id: 'library', icon: Library, label: { en: 'Library', ko: '라이브러리' } },
 ] as const;
 
 export function NavigationTabs({

@@ -21,7 +21,7 @@ export function WorkspaceLayout() {
     if (path.includes('/explore')) return 'explore';
     if (path.includes('/studio')) return 'studio';
     if (path.includes('/knowledge')) return 'knowledge';
-    if (path.includes('/tools')) return 'tools';
+    if (path.includes('/library')) return 'library';
     return 'studio';
   }, [location.pathname]);
 
@@ -33,7 +33,7 @@ export function WorkspaceLayout() {
     }
   }, [activeTab, detectedTab, setActiveTab]);
 
-  const handleTabChange = (tab: 'explore' | 'studio' | 'knowledge' | 'tools') => {
+  const handleTabChange = (tab: 'explore' | 'studio' | 'knowledge' | 'library') => {
     setActiveTab(tab);
     navigate(`/workspace/${tab}`);
   };

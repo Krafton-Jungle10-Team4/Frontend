@@ -10,6 +10,7 @@ import type {
   WorkflowValidationMessage,
   WorkflowVersionSummary,
 } from '../types/api.types';
+import type { LibraryMetadata } from '../types/workflow.types';
 import type { NodePortSchema } from '@/shared/types/workflow';
 import { PortType } from '@/shared/types/workflow';
 import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePortSchemas';
@@ -1325,7 +1326,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
   },
 
-  publishWorkflow: async (botId: string) => {
+  publishWorkflow: async (botId: string, libraryMetadata?: LibraryMetadata) => {
     const { draftVersionId } = get();
     if (!draftVersionId) {
       console.warn('No draft version available to publish');
@@ -1335,7 +1336,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     await get().saveWorkflow(botId);
     const result = await workflowApi.publishWorkflowVersion(
       botId,
-      draftVersionId
+      draftVersionId,
+      libraryMetadata
     );
     return result;
   },
