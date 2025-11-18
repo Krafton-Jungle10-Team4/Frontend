@@ -468,7 +468,7 @@ const deserializeVariableMappings = (
 
   return Object.entries(mappings).reduce<NodeVariableMappings>(
     (acc, [key, mapping]) => {
-      if (!mapping) return acc;
+      if (!mapping || !mapping.source) return acc;
       acc[key] = {
         target_port: mapping.target_port,
         source: {
