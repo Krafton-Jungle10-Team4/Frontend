@@ -10,6 +10,7 @@ import { OutputVarList } from '../../variable/OutputVarList';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import { StatusIndicator } from './StatusIndicator';
+import { getNodeCustomName } from '@features/workflow/utils/nodeCustomNames';
 
 type BaseNodeProps = {
   children: ReactElement;
@@ -33,10 +34,22 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
 
+  const botId = useWorkflowStore((state) => state.botId);
   const hasValidationError = useWorkflowStore(
     (state) => state.validationErrorNodeIds.includes(id)
   );
   const nodeType = data.type as BlockEnum;
+
+  // 로컬 스토리지에서 커스텀 이름 가져오기
+  const displayTitle = useMemo(() => {
+    if (botId) {
+      const customName = getNodeCustomName(botId, id);
+      if (customName) {
+        return customName;
+      }
+    }
+    return data.title;
+  }, [botId, id, data.title]);
   const hasInputHandle = nodeType !== BlockEnum.Start && !suppressDefaultHandles;
   const hasOutputHandle = nodeType !== BlockEnum.End && !suppressDefaultHandles;
   const disableDefaultOutputHandle =
@@ -119,10 +132,10 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
           <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
             <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
             <div
-              title={data.title}
+              title={displayTitle}
               className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
             >
-              {data.title}
+              {displayTitle}
             </div>
 
             {/* 상태 아이콘 */}

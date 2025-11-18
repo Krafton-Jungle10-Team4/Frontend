@@ -4,7 +4,7 @@
  * Provider, Model, Prompt, Temperature, Max Tokens 설정
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field, OutputVars, VarItem, InputMappingSection } from '../_base/components';
@@ -26,6 +26,10 @@ import { TemplateSyntaxHint } from '../common/TemplateSyntaxHint';
 import { PromptValidationStatus } from './PromptValidationStatus';
 import { VariableSelector } from '../answer/VariableSelector';
 import { useRef } from 'react';
+import {
+  getNodeCustomName,
+  setNodeCustomName,
+} from '../../../utils/nodeCustomNames';
 
 /**
  * model 값에서 provider 추출
@@ -79,11 +83,20 @@ const extractModelNameFromModel = (model: unknown): string => {
 };
 
 export const LLMPanel = () => {
-  const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
+  const { selectedNodeId, nodes, updateNode, botId } = useWorkflowStore();
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [customName, setCustomName] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
+
+  // 로컬 스토리지에서 커스텀 이름 로드
+  useEffect(() => {
+    if (node && botId) {
+      const storedName = getNodeCustomName(botId, node.id);
+      setCustomName(storedName || '');
+    }
+  }, [node?.id, botId]);
 
   if (!node) return null;
 
@@ -92,6 +105,13 @@ export const LLMPanel = () => {
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
+  };
+
+  const handleCustomNameChange = (value: string) => {
+    setCustomName(value);
+    if (botId && selectedNodeId) {
+      setNodeCustomName(botId, selectedNodeId, value || null);
+    }
   };
 
   const handleInsertVariable = (variable: string) => {
@@ -123,6 +143,19 @@ export const LLMPanel = () => {
           title="입력 매핑"
           description="이 노드가 사용할 입력을 이전 노드의 출력과 연결하세요"
         />
+
+        <Group title="기본 설정" description="노드의 이름을 설정하세요">
+          <Field label="노드 이름">
+            <Input
+              value={customName}
+              onChange={(e) => handleCustomNameChange(e.target.value)}
+              placeholder="노드 이름을 입력하세요 (예: 질문 분석 LLM)"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              이 이름은 이 브라우저에서만 저장되며, 새로고침 후에도 유지됩니다.
+            </p>
+          </Field>
+        </Group>
 
         <Group title="모델 설정" description="사용할 LLM 제공자와 모델을 선택하세요">
           <Field label="Provider" required>

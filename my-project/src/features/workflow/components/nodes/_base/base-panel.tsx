@@ -9,17 +9,30 @@ import { useWorkflowStore } from '../../../stores/workflowStore';
 import { X } from 'lucide-react';
 import { Input } from '@shared/components/input';
 import BlockIcon from './block-icon';
+import { getNodeCustomName } from '../../../utils/nodeCustomNames';
+import { useMemo } from 'react';
 
 interface BasePanelProps {
   children: React.ReactNode;
 }
 
 export const BasePanel = ({ children }: BasePanelProps) => {
-  const { selectedNodeId, nodes, updateNode, selectNode } = useWorkflowStore();
+  const { selectedNodeId, nodes, updateNode, selectNode, botId } = useWorkflowStore();
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
   if (!node) return null;
+
+  // 로컬 스토리지에서 커스텀 이름 가져오기
+  const displayTitle = useMemo(() => {
+    if (botId && selectedNodeId) {
+      const customName = getNodeCustomName(botId, selectedNodeId);
+      if (customName) {
+        return customName;
+      }
+    }
+    return node.data.title || node.data.type;
+  }, [botId, selectedNodeId, node.data.title, node.data.type]);
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
@@ -36,7 +49,7 @@ export const BasePanel = ({ children }: BasePanelProps) => {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <BlockIcon type={node.data.type} size="sm" />
           <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {node.data.title || node.data.type}
+            {displayTitle}
           </h3>
         </div>
         <button
