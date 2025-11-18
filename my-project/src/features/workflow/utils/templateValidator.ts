@@ -141,8 +141,14 @@ export function validateBusinessRules(
   }
 
   // 5. 포트 스키마 확인
-  if (!template.input_schema || template.input_schema.length === 0) {
-    errors.push('입력 포트 스키마가 정의되지 않았습니다.');
+  // NOTE: input_schema와 output_schema는 배열이기만 하면 됨 (비어있을 수 있음)
+  // 템플릿에 따라 외부 입력/출력이 없을 수 있음
+  if (!template.input_schema || !Array.isArray(template.input_schema)) {
+    errors.push('input_schema가 배열이어야 합니다.');
+  }
+
+  if (!template.output_schema || !Array.isArray(template.output_schema)) {
+    errors.push('output_schema가 배열이어야 합니다.');
   }
 
   // 6. 메타데이터 검증
