@@ -1,6 +1,5 @@
 import { memo, useMemo, useCallback } from 'react';
 import type { ReactElement } from 'react';
-import { RiCheckboxCircleFill, RiErrorWarningFill, RiLoader2Line } from '@remixicon/react';
 import type { NodeProps } from '@/shared/types/workflow.types';
 import { NodeRunningStatus } from '@/shared/types/workflow.types';
 import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
@@ -10,12 +9,16 @@ import type { NodePortSchema } from '@shared/types/workflow';
 import { OutputVarList } from '../../variable/OutputVarList';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
 import { BlockEnum } from '@/shared/types/workflow.types';
+import { StatusIndicator } from './StatusIndicator';
 
 type BaseNodeProps = {
   children: ReactElement;
   data: NodeProps['data'];
   selected?: boolean;
   id: string;
+  customHeader?: ReactElement;
+  disableDefaultHeader?: boolean;
+  suppressDefaultHandles?: boolean;
 };
 
 /**
@@ -26,7 +29,7 @@ type BaseNodeProps = {
  * - BlockIcon, StatusIcon, NodeHandle 표시
  * - 포트 시스템 지원 (하위 호환)
  */
-const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
+const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHeader, suppressDefaultHandles }: BaseNodeProps) => {
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
   const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
 
@@ -34,8 +37,8 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
     (state) => state.validationErrorNodeIds.includes(id)
   );
   const nodeType = data.type as BlockEnum;
-  const hasInputHandle = nodeType !== BlockEnum.Start;
-  const hasOutputHandle = nodeType !== BlockEnum.End;
+  const hasInputHandle = nodeType !== BlockEnum.Start && !suppressDefaultHandles;
+  const hasOutputHandle = nodeType !== BlockEnum.End && !suppressDefaultHandles;
   const disableDefaultOutputHandle =
     nodeType === BlockEnum.IfElse || nodeType === BlockEnum.QuestionClassifier;
 
@@ -52,10 +55,6 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
   const defaultOutputHandleId = useMemo(() => {
     return pickPortName(ports?.outputs) || 'source';
   }, [pickPortName, ports?.outputs]);
-
-  const isLoading =
-    data._runningStatus === NodeRunningStatus.Running ||
-    data._singleRunningStatus === NodeRunningStatus.Running;
 
   const showSelectedBorder = selected;
 
@@ -114,29 +113,26 @@ const BaseNode = ({ id, data, children, selected }: BaseNodeProps) => {
         )}
       </>
 
-      {/* 노드 헤더 */}
-      <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
-        <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
-        <div
-          title={data.title}
-          className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
-        >
-          {data.title}
-        </div>
+      {/* 노드 헤더 - 커스텀 헤더 또는 기본 헤더 */}
+      {!disableDefaultHeader && (
+        customHeader || (
+          <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
+            <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
+            <div
+              title={data.title}
+              className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
+            >
+              {data.title}
+            </div>
 
-        {/* 상태 아이콘 */}
-        {isLoading && (
-          <RiLoader2Line className="h-3.5 w-3.5 animate-spin text-text-accent" />
-        )}
-        {!isLoading &&
-          data._runningStatus === NodeRunningStatus.Succeeded && (
-            <RiCheckboxCircleFill className="h-3.5 w-3.5 text-text-success" />
-          )}
-        {(data._runningStatus === NodeRunningStatus.Failed ||
-          data._runningStatus === NodeRunningStatus.Exception) && (
-          <RiErrorWarningFill className="h-3.5 w-3.5 text-text-destructive" />
-        )}
-      </div>
+            {/* 상태 아이콘 */}
+            <StatusIndicator
+              runningStatus={data._runningStatus}
+              singleRunningStatus={data._singleRunningStatus}
+            />
+          </div>
+        )
+      )}
 
       {/* 노드 내용 */}
       {children}

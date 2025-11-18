@@ -33,7 +33,7 @@ import { useRef } from 'react';
 const extractProviderFromModel = (model: unknown): string => {
   if (typeof model === 'object' && model !== null && 'provider' in model) {
     const value = (model as { provider?: string }).provider;
-    return (value || 'openai').toLowerCase();
+    return (value || 'bedrock').toLowerCase(); // 기본값을 bedrock으로 변경
   }
 
   if (typeof model === 'string') {
@@ -43,32 +43,39 @@ const extractProviderFromModel = (model: unknown): string => {
       if (provider === 'openai') return 'openai';
       if (provider === 'anthropic') return 'anthropic';
       if (provider === 'google') return 'google';
+      if (provider === 'bedrock') return 'bedrock';
     }
+    // Bedrock 모델 ID 패턴 인식
+    if (normalized.startsWith('anthropic.claude') || normalized.includes('amazon.titan')) return 'bedrock';
     if (normalized.startsWith('gpt')) return 'openai';
     if (normalized.startsWith('claude')) return 'anthropic';
     if (normalized.includes('gemini')) return 'google';
   }
 
-  return 'openai';
+  return 'bedrock'; // 기본값을 bedrock으로 변경
 };
 
 /**
- * model 값에서 실제 모델명 추출
+ * model 값에서 실제 모델 ID 추출 (LLMModelSelect의 value prop에 사용)
  */
 const extractModelNameFromModel = (model: unknown): string => {
-  if (typeof model === 'object' && model !== null && 'name' in model) {
-    return (model as { name: string }).name;
+  // 객체 형태인 경우 (레거시 호환성)
+  if (typeof model === 'object' && model !== null) {
+    if ('name' in model) {
+      return (model as { name: string }).name;
+    }
+    if ('id' in model) {
+      return (model as { id: string }).id;
+    }
   }
 
+  // 문자열인 경우 그대로 반환 (모델 ID)
   if (typeof model === 'string') {
-    if (model.includes('/')) {
-      const [, modelName] = model.split('/');
-      return modelName || model;
-    }
     return model;
   }
 
-  return 'gpt-4o-mini';
+  // 기본값: Bedrock Haiku 3 (ON_DEMAND 지원)
+  return 'anthropic.claude-3-haiku-20240307-v1:0';
 };
 
 export const LLMPanel = () => {
@@ -123,16 +130,15 @@ export const LLMPanel = () => {
               value={currentProvider}
               onValueChange={(provider) => {
                 handleUpdate('provider', provider);
-                handleUpdate('model', {
-                  provider,
-                  name: '',
-                });
+                // Provider 변경 시 모델 초기화 (빈 문자열로 설정하면 백엔드에서 기본값 사용)
+                handleUpdate('model', '');
               }}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="bedrock">Bedrock (AWS)</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
                 <SelectItem value="anthropic">Anthropic</SelectItem>
                 <SelectItem value="google">Google</SelectItem>
@@ -145,10 +151,8 @@ export const LLMPanel = () => {
               selectedProvider={currentProvider}
               value={extractModelNameFromModel(llmData.model)}
               onChange={(modelId) => {
-                handleUpdate('model', {
-                  provider: currentProvider,
-                  name: modelId,
-                });
+                // 백엔드는 model을 문자열로 받음 (전체 모델 ID 사용)
+                handleUpdate('model', modelId);
               }}
             />
           </Field>

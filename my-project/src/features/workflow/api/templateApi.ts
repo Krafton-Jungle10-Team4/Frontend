@@ -40,9 +40,41 @@ export const templateApi = {
    * 템플릿 상세 조회
    */
   get: async (templateId: string): Promise<WorkflowTemplate> => {
+    console.log('🔍 [templateApi.get] Fetching template:', templateId);
     const response = await apiClient.get<WorkflowTemplate>(
       API_ENDPOINTS.TEMPLATES.DETAIL(templateId)
     );
+
+    console.log('✅ [templateApi.get] Response received:', {
+      id: response.data.id,
+      name: response.data.name,
+      version: response.data.version,
+      hasGraph: !!response.data.graph,
+      graphStructure: response.data.graph ? {
+        hasNodes: !!response.data.graph.nodes,
+        hasEdges: !!response.data.graph.edges,
+        nodesCount: response.data.graph.nodes?.length || 0,
+        edgesCount: response.data.graph.edges?.length || 0,
+        nodeTypes: response.data.graph.nodes?.map((n: any) => n.data?.type).filter(Boolean) || []
+      } : null,
+      hasInputSchema: !!response.data.input_schema,
+      hasOutputSchema: !!response.data.output_schema,
+      inputSchemaCount: response.data.input_schema?.length || 0,
+      outputSchemaCount: response.data.output_schema?.length || 0
+    });
+
+    if (!response.data.graph) {
+      console.error('❌ [templateApi.get] CRITICAL: Template missing graph field!', response.data);
+    }
+
+    if (response.data.graph && (!response.data.graph.nodes || !response.data.graph.edges)) {
+      console.error('❌ [templateApi.get] CRITICAL: Template graph missing nodes or edges!', {
+        hasNodes: !!response.data.graph.nodes,
+        hasEdges: !!response.data.graph.edges,
+        graph: response.data.graph
+      });
+    }
+
     return response.data;
   },
 
@@ -115,9 +147,21 @@ export const templateApi = {
    * Import 검증
    */
   validateImport: async (templateId: string): Promise<ImportValidation> => {
+    console.log('🔍 [templateApi.validateImport] Validating template:', templateId);
     const response = await apiClient.post<ImportValidation>(
       API_ENDPOINTS.TEMPLATES.VALIDATE_IMPORT(templateId)
     );
+
+    console.log('✅ [templateApi.validateImport] Validation response:', {
+      is_valid: response.data.is_valid,
+      is_compatible: response.data.is_compatible,
+      missing_node_types: response.data.missing_node_types,
+      version_mismatch: response.data.version_mismatch,
+      can_upgrade: response.data.can_upgrade,
+      warnings: response.data.warnings,
+      errors: response.data.errors
+    });
+
     return response.data;
   },
 

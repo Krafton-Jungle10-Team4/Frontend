@@ -19,6 +19,8 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import { PortType } from '@/shared/types/workflow/port.types';
 import type { PortDefinition as WorkflowPortDefinition } from '@/shared/types/workflow/port.types';
 import { toast } from 'sonner';
+import { createImportedNodeFromTemplate } from '../utils/templateImporter';
+import { validateTemplate } from '../utils/templateValidator';
 
 /**
  * 템플릿 포트 정의를 워크플로우 포트 정의로 변환
@@ -268,7 +270,9 @@ export const useTemplateStore = create<TemplateState>()(
       importTemplate: async (templateId, position) => {
         set({ isLoading: true, error: null });
         try {
-          // 1. Import 검증 먼저 수행
+          console.log('🚀 [importTemplate] Starting template import:', { templateId, position });
+
+          // 1. Import 검증 먼저 수행 (백엔드 API 호출)
           const validation = await templateApi.validateImport(templateId);
 
           // 2. 검증 실패 시 중단
@@ -294,50 +298,66 @@ export const useTemplateStore = create<TemplateState>()(
             });
           }
 
-          // 4. 템플릿 조회
+          // 4. 템플릿 조회 (디버그 로깅 포함)
           const template = await templateApi.get(templateId);
 
-          // 5. ImportedWorkflowNode 생성
-          // ReactFlow는 'custom' 타입만 인식하고, data.type으로 실제 노드 타입 구분
-          const nodeId = `imported_${template.id}_${Date.now()}`;
-          const node: Node<{
-            template_id: string;
-            template_name: string;
-            template_version: string;
-            is_expanded: boolean;
-            read_only: boolean;
-            internal_graph: typeof template.graph;
-          }> = {
-            id: nodeId,
-            type: 'custom', // ReactFlow에서 인식하는 노드 타입
-            position,
-            data: {
-              type: BlockEnum.ImportedWorkflow, // 실제 노드 타입 (CustomNode가 사용)
-              title: template.name,
-              desc: template.description,
-              template_id: template.id,
-              template_name: template.name,
-              template_version: template.version,
-              is_expanded: false,
-              read_only: true,
-              internal_graph: template.graph,
-              ports: {
-                inputs: template.input_schema.map(convertPortDefinition),
-                outputs: template.output_schema.map(convertPortDefinition),
-              },
-              variable_mappings: {},
-            },
-          };
+          // 5. 프론트엔드 검증 (validateTemplate) - 구조, 노드 타입, 비즈니스 규칙
+          console.log('🔍 [importTemplate] Running frontend template validation');
+          const frontendValidation = validateTemplate(template);
 
-          // 6. workflowStore에 노드 추가
+          if (!frontendValidation.valid) {
+            const errorMessage = `템플릿 검증 실패: ${frontendValidation.errors.join(', ')}`;
+            console.error('❌ [importTemplate] Frontend validation failed:', {
+              errors: frontendValidation.errors,
+              template: {
+                id: template.id,
+                name: template.name,
+                hasGraph: !!template.graph,
+                hasNodes: !!template.graph?.nodes,
+                hasEdges: !!template.graph?.edges,
+                nodeTypes: template.graph?.nodes?.map((n: any) => n.data?.type) || []
+              }
+            });
+
+            set({ isLoading: false });
+            toast.error('템플릿 Import 불가', {
+              description: errorMessage,
+            });
+            throw new Error(errorMessage);
+          }
+
+          console.log('✅ [importTemplate] Frontend validation passed');
+
+          // 6. createImportedNodeFromTemplate 유틸리티 사용 (계획서 준수)
+          console.log('🔧 [importTemplate] Creating imported node from template');
+          const { node, childNodes, childEdges } = createImportedNodeFromTemplate(
+            template,
+            position,
+            false // 초기에는 collapsed 상태
+          );
+
+          console.log('✅ [importTemplate] Node created successfully:', {
+            nodeId: node.id,
+            childNodesCount: childNodes.length,
+            childEdgesCount: childEdges.length,
+            hasInternalGraph: !!(node.data as any)?.internal_graph,
+            internalGraphStructure: (node.data as any)?.internal_graph ? {
+              nodesCount: (node.data as any).internal_graph.nodes?.length || 0,
+              edgesCount: (node.data as any).internal_graph.edges?.length || 0
+            } : null
+          });
+
+          // 7. workflowStore에 노드 추가
           const workflowStore = useWorkflowStore.getState();
           workflowStore.addNode(node);
 
-          // 7. 사용 기록
+          console.log('✅ [importTemplate] Node added to workflow');
+
+          // 8. 사용 기록
           try {
             await templateApi.recordUsage(templateId, {
               workflow_id: workflowStore.botId || 'unknown',
-              node_id: nodeId,
+              node_id: node.id,
               event_type: 'imported',
             });
           } catch (usageError) {
@@ -350,10 +370,12 @@ export const useTemplateStore = create<TemplateState>()(
             description: template.name,
           });
 
-          return nodeId;
+          console.log('🎉 [importTemplate] Template import completed successfully');
+          return node.id;
         } catch (error: any) {
+          console.error('❌ [importTemplate] Import failed:', error);
           const errorMessage =
-            error.response?.data?.message || '템플릿 Import 실패';
+            error.response?.data?.message || error.message || '템플릿 Import 실패';
           set({ error: errorMessage, isLoading: false });
           toast.error(errorMessage);
           throw error;
