@@ -10,6 +10,7 @@ import type {
   QuestionClassifierNodeType,
   AssignerNodeType,
 } from '@/shared/types/workflow.types';
+import type { ImportedWorkflowNodeData } from '@/features/workflow/types/import-node.types';
 import type { BackendWorkflow, BackendNode } from '@/shared/types/workflowTransform.types';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import type {

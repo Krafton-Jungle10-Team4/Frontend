@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react';
 import type { ExpandedViewProps } from '../../../types/import-node.types';
 import { NodeComponentMap } from '../components';
 import BaseNode from '../_base/node';
+import CustomEdge from '../../edges/custom-edge';
 import { ReadOnlyOverlay } from './ReadOnlyOverlay';
 import type { CommonNodeType } from '@/shared/types/workflow.types';
 import type { NodeProps } from '@xyflow/react';
@@ -133,10 +134,14 @@ export const ExpandedView = memo(
       });
     }, []);
 
-    // ReactFlow에서 사용할 노드 타입 매핑
+    // ReactFlow에서 사용할 노드/엣지 타입 매핑
     const nodeTypes = useMemo(() => ({
       custom: CustomNode,
     }), [CustomNode]);
+
+    const edgeTypes = useMemo(() => ({
+      custom: CustomEdge,
+    }), []);
 
     // Safe access with default empty arrays
     const safeNodes = internalGraph.nodes || [];
@@ -296,6 +301,7 @@ export const ExpandedView = memo(
             nodes={readOnlyNodes}
             edges={readOnlyEdges}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             onNodeClick={handleNodeClick}
             nodesDraggable={false}
             nodesConnectable={false}
@@ -308,6 +314,7 @@ export const ExpandedView = memo(
             preventScrolling={true}
             fitView
             fitViewOptions={{ padding: 0.2 }}
+            defaultEdgeOptions={{ type: 'custom' }}
           >
             <Background />
             <Controls showInteractive={false} />
