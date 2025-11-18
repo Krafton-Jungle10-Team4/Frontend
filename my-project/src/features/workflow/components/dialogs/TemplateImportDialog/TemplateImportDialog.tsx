@@ -58,7 +58,7 @@ export const TemplateImportDialog = memo(() => {
 
   return (
     <Dialog open={isImportDialogOpen} onOpenChange={closeImportDialog}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>템플릿 라이브러리</DialogTitle>
           <DialogDescription>
