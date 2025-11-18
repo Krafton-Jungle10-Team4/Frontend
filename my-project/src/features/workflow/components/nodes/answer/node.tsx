@@ -28,7 +28,7 @@ const AnswerNode = ({ data }: NodeProps<AnswerNodeType>) => {
         'template-transform': 'Template',
         'if-else': 'If/Else',
         'question-classifier': 'Classifier',
-        start: 'Start',
+        start: 'Input',
         end: 'End',
       };
 
