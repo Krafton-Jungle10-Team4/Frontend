@@ -23,6 +23,9 @@ import { RiArrowDownSLine, RiArrowRightSLine } from '@remixicon/react';
 import type { LLMNodeType } from '@/shared/types/workflow.types';
 import { PortType } from '@shared/types/workflow';
 import { TemplateSyntaxHint } from '../common/TemplateSyntaxHint';
+import { PromptValidationStatus } from './PromptValidationStatus';
+import { VariableSelector } from '../answer/VariableSelector';
+import { useRef } from 'react';
 
 /**
  * model 값에서 provider 추출
@@ -71,6 +74,7 @@ const extractModelNameFromModel = (model: unknown): string => {
 export const LLMPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
@@ -81,6 +85,26 @@ export const LLMPanel = () => {
 
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
+  };
+
+  const handleInsertVariable = (variable: string) => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentPrompt = llmData.prompt || '';
+    const newPrompt =
+      currentPrompt.slice(0, start) + `{{${variable}}}` + currentPrompt.slice(end);
+
+    handleUpdate('prompt', newPrompt);
+
+    // 커서 위치 조정
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + variable.length + 4; // {{}} 포함
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
   };
 
   return (
@@ -133,13 +157,31 @@ export const LLMPanel = () => {
         <Group title="프롬프트 설정" description="모델에 전달할 프롬프트를 작성하세요">
           <Field label="프롬프트" required>
             <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  변수를 삽입하려면 아래 버튼을 클릭하세요
+                </span>
+                <VariableSelector
+                  nodeId={selectedNodeId!}
+                  onSelect={handleInsertVariable}
+                />
+              </div>
               <Textarea
+                ref={textareaRef}
                 value={llmData.prompt || ''}
                 onChange={(e) => handleUpdate('prompt', e.target.value)}
-                rows={6}
-                placeholder="프롬프트를 입력하세요..."
+                rows={10}
+                placeholder="프롬프트를 입력하세요...&#10;&#10;예: {{context}}를 사용하여 답변하세요&#10;또는 {{nodeId.portName}} 형식으로 직접 참조할 수 있습니다"
+                className="font-mono text-sm"
               />
               <TemplateSyntaxHint />
+              {/* 유효성 검사 상태 */}
+              <div className="mt-2">
+                <PromptValidationStatus
+                  nodeId={selectedNodeId!}
+                  prompt={llmData.prompt || ''}
+                />
+              </div>
             </div>
           </Field>
         </Group>

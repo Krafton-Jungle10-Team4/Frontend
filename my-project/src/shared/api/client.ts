@@ -49,6 +49,19 @@ apiClient.interceptors.request.use(
     console.log('📤 [Request]', config.method?.toUpperCase(), config.url);
     console.log('📤 [Request] withCredentials:', config.withCredentials);
     console.log('📤 [Request] Has token:', !!token);
+    
+    // validate-export 요청의 페이로드 로깅
+    if (config.url?.includes('validate-export') && config.data) {
+      console.log('📤 [validate-export Request Payload]', {
+        hasNodes: !!config.data.nodes,
+        nodesCount: config.data.nodes?.length,
+        hasEdges: !!config.data.edges,
+        edgesCount: config.data.edges?.length,
+        hasEnvironmentVars: !!config.data.environment_variables,
+        hasConversationVars: !!config.data.conversation_variables,
+        fullPayload: config.data,
+      });
+    }
 
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -150,6 +163,11 @@ apiClient.interceptors.response.use(
     if (!isExpected404) {
       console.error('❌ [Response Error]', error.response?.status, error.config?.url);
       console.error('❌ [Error Details]', error.response?.data);
+      
+      // validate-export 에러의 details를 더 자세히 로깅
+      if (originalRequest.url?.includes('validate-export') && error.response?.data?.details) {
+        console.error('❌ [validate-export Error Details]:', JSON.stringify(error.response.data.details, null, 2));
+      }
     }
 
     // 401 에러이고, 재시도하지 않았으며, 인증 관련 엔드포인트가 아닌 경우

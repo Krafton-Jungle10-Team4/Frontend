@@ -7,7 +7,8 @@ export const TemplateSyntaxHint = () => (
       템플릿 문법
     </div>
     <ul className="list-disc pl-5 space-y-0.5">
-      <li><code className="font-mono">{'{{node.port}}'}</code> 기본 치환</li>
+      <li><code className="font-mono">{'{{node.port}}'}</code> 직접 노드 참조</li>
+      <li><code className="font-mono">{'{{portName}}'}</code> 입력 포트 이름만 사용 (연결된 노드 자동 찾기)</li>
       <li><code className="font-mono">{'{{#node.array.0.title#}}'}</code> 형태로 중첩 속성과 배열 인덱스 접근</li>
       <li><code className="font-mono">{'{{conversation.summary}}'}</code>, <code className="font-mono">{'{{env.api_key}}'}</code> 등 특수 prefix 지원</li>
       <li>모든 변수는 Markdown으로 변환되며 파일/배열은 자동 서식 적용됩니다.</li>

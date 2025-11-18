@@ -179,9 +179,19 @@ export const useTemplateStore = create<TemplateState>()(
         try {
           // Get live nodes and edges from workflow store
           const workflowStore = useWorkflowStore.getState();
-          const { nodes, edges } = workflowStore;
+          const { nodes, edges, botId, draftVersionId } = workflowStore;
 
-          const validation = await templateApi.validateExport({ nodes, edges });
+          if (!botId || !draftVersionId) {
+            const errorMessage = '워크플로우를 먼저 저장해주세요.';
+            set({ error: errorMessage, isLoading: false });
+            toast.error(errorMessage);
+            return;
+          }
+
+          const validation = await templateApi.validateExport(
+            { nodes, edges },
+            { workflow_id: botId, version_id: draftVersionId }
+          );
           set({ exportValidation: validation, isLoading: false });
 
           if (!validation.is_valid) {

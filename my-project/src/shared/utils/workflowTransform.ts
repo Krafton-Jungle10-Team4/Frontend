@@ -21,6 +21,10 @@ import type {
 import { PortType } from '@/shared/types/workflow';
 import * as assignerTransformers from '@/features/workflow/components/nodes/assigner/api/transformers';
 import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
+import {
+  resolvePromptVariables,
+  extractVariableReferences,
+} from '@/features/workflow/utils/promptVariableResolver';
 
 /**
  * 프론트엔드 노드/엣지 → 백엔드 스키마 변환
@@ -52,12 +56,34 @@ export const transformToBackend = (
               : 'gpt-4o-mini'),
           prompt_template: (() => {
             const prompt = (node.data as any).prompt || '';
-            // Ensure {context} placeholder exists and is properly formatted
-            if (prompt.includes('{{context}}') || prompt.includes('{context}')) {
-              // Normalize to single braces for backend
-              return prompt.replace(/\{\{context\}\}/g, '{context}').replace(/\{context\}/g, '{{context}}');
-            }
-            return prompt;
+            if (!prompt) return prompt;
+
+            // 프롬프트 변수 해석: {{portName}} → {{nodeId.portName}}
+            const variableMappings = node.data.variable_mappings;
+            const resolvedVars = resolvePromptVariables(
+              prompt,
+              node.id,
+              nodes,
+              edges,
+              variableMappings
+            );
+
+            // 해석된 변수로 프롬프트 변환
+            let resolvedPrompt = prompt;
+            resolvedVars.forEach((resolvedVar) => {
+              if (resolvedVar.isValid && resolvedVar.resolved) {
+                // {{portName}} 또는 {{original}} → {{resolved}}
+                // 모든 인스턴스를 치환하기 위해 정규식 사용
+                const originalPattern = new RegExp(
+                  `\\{\\{\\s*${resolvedVar.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\}\\}`,
+                  'g'
+                );
+                const resolvedPattern = `{{${resolvedVar.resolved}}}`;
+                resolvedPrompt = resolvedPrompt.replace(originalPattern, resolvedPattern);
+              }
+            });
+
+            return resolvedPrompt;
           })(),
           temperature: (node.data as any).temperature || 0.7,
           max_tokens: (node.data as any).maxTokens || 500,

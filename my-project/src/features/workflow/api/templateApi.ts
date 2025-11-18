@@ -3,6 +3,8 @@
  */
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
+import { transformToBackend } from '@/shared/utils/workflowTransform';
+import type { Node, Edge } from '@/shared/types/workflow.types';
 import type {
   WorkflowTemplate,
   TemplateListResponse,
@@ -46,15 +48,53 @@ export const templateApi = {
 
   /**
    * Export 검증
-   * API 명세에 따라 { nodes, edges } 를 body로 전송
+   * 프론트엔드 노드/엣지를 백엔드 형식으로 변환하여 전송
+   * workflow_id와 version_id는 query parameter로 전달
    */
-  validateExport: async (payload: {
-    nodes: any[];
-    edges: any[];
-  }): Promise<ExportValidation> => {
+  validateExport: async (
+    payload: {
+      nodes: Node[];
+      edges: Edge[];
+    },
+    queryParams: {
+      workflow_id: string;
+      version_id: string;
+    }
+  ): Promise<ExportValidation> => {
+    console.log('🔍 [validateExport] Starting validation with:', {
+      nodesCount: payload.nodes.length,
+      edgesCount: payload.edges.length,
+      workflow_id: queryParams.workflow_id,
+      version_id: queryParams.version_id,
+    });
+    
+    // 백엔드 형식으로 변환
+    const transformedPayload = transformToBackend(payload.nodes, payload.edges);
+    
+    console.log('🔍 [validateExport] Transformed payload structure:', {
+      nodesCount: transformedPayload.nodes.length,
+      edgesCount: transformedPayload.edges.length,
+      hasEnvironmentVars: !!transformedPayload.environment_variables,
+      hasConversationVars: !!transformedPayload.conversation_variables,
+      sampleNode: transformedPayload.nodes[0] ? {
+        id: transformedPayload.nodes[0].id,
+        type: transformedPayload.nodes[0].type,
+        hasData: !!transformedPayload.nodes[0].data,
+        hasPorts: !!transformedPayload.nodes[0].ports,
+        hasVariableMappings: !!transformedPayload.nodes[0].variable_mappings,
+      } : null,
+    });
+    
+    // workflow_id와 version_id를 query parameter로 전달
     const response = await apiClient.post<ExportValidation>(
       API_ENDPOINTS.TEMPLATES.VALIDATE_EXPORT,
-      payload
+      transformedPayload,
+      {
+        params: {
+          workflow_id: queryParams.workflow_id,
+          version_id: queryParams.version_id,
+        },
+      }
     );
     return response.data;
   },
