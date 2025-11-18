@@ -33,193 +33,214 @@ export const transformToBackend = (
   edges: Edge[]
 ): BackendWorkflow => {
   return {
-    nodes: nodes.map((node) => ({
-      id: node.id,
-      type: node.data.type,
-      position: node.position,
-      data: {
-        title: node.data.title,
-        desc: node.data.desc || '',
+    nodes: nodes.map((node) => {
+      const serializedPorts = serializePorts(node.data.ports);
+
+      const backendNode: BackendNode = {
+        id: node.id,
         type: node.data.type,
+        position: node.position,
+        data: {
+          title: node.data.title,
+          desc: node.data.desc || '',
+          type: node.data.type,
 
-        // LLM 노드 변환
-        ...(node.data.type === BlockEnum.LLM && {
-          provider:
-            (node.data as any).provider ||
-            extractProviderSlug((node.data as any).model) ||
-            'openai',
-          model:
-            (node.data as any).model?.name ||
-            (typeof (node.data as any).model === 'string'
-              ? (node.data as any).model
-              : 'gpt-4o-mini'),
-          prompt_template: (() => {
-            const prompt = (node.data as any).prompt || '';
-            if (!prompt) return prompt;
+          // LLM 노드 변환
+          ...(node.data.type === BlockEnum.LLM && {
+            provider:
+              (node.data as any).provider ||
+              extractProviderSlug((node.data as any).model) ||
+              'openai',
+            model:
+              (node.data as any).model?.name ||
+              (typeof (node.data as any).model === 'string'
+                ? (node.data as any).model
+                : 'gpt-4o-mini'),
+            prompt_template: (() => {
+              const prompt = (node.data as any).prompt || '';
+              if (!prompt) return prompt;
 
-            // 프롬프트 변수 해석: {{portName}} → {{nodeId.portName}}
-            const variableMappings = node.data.variable_mappings;
-            const resolvedVars = resolvePromptVariables(
-              prompt,
-              node.id,
-              nodes,
-              edges,
-              variableMappings
-            );
+              // 프롬프트 변수 해석: {{portName}} → {{nodeId.portName}}
+              const variableMappings = node.data.variable_mappings;
+              const resolvedVars = resolvePromptVariables(
+                prompt,
+                node.id,
+                nodes,
+                edges,
+                variableMappings
+              );
 
-            // 해석된 변수로 프롬프트 변환
-            let resolvedPrompt = prompt;
-            resolvedVars.forEach((resolvedVar) => {
-              if (resolvedVar.isValid && resolvedVar.resolved) {
-                // {{portName}} 또는 {{original}} → {{resolved}}
-                // 모든 인스턴스를 치환하기 위해 정규식 사용
-                const originalPattern = new RegExp(
-                  `\\{\\{\\s*${resolvedVar.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\}\\}`,
-                  'g'
-                );
-                const resolvedPattern = `{{${resolvedVar.resolved}}}`;
-                resolvedPrompt = resolvedPrompt.replace(originalPattern, resolvedPattern);
+              // 해석된 변수로 프롬프트 변환
+              let resolvedPrompt = prompt;
+              resolvedVars.forEach((resolvedVar) => {
+                if (resolvedVar.isValid && resolvedVar.resolved) {
+                  // {{portName}} 또는 {{original}} → {{resolved}}
+                  const originalPattern = new RegExp(
+                    `\\{\\{\\s*${resolvedVar.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\}\\}`,
+                    'g'
+                  );
+                  const resolvedPattern = `{{${resolvedVar.resolved}}}`;
+                  resolvedPrompt = resolvedPrompt.replace(originalPattern, resolvedPattern);
+                }
+              });
+
+              return resolvedPrompt;
+            })(),
+            temperature: (node.data as any).temperature || 0.7,
+            max_tokens: (node.data as any).maxTokens || 500,
+          }),
+
+          // Knowledge Retrieval 노드 변환
+          ...(node.data.type === BlockEnum.KnowledgeRetrieval && {
+            dataset_id: (node.data as any).dataset || '',
+            mode: normalizeRetrievalModeValue((node.data as any).retrievalMode),
+            top_k: (node.data as any).topK || 5,
+            document_ids: (node.data as any).documentIds || [],
+          }),
+
+          // MCP 노드 변환
+          ...(node.data.type === BlockEnum.MCP && {
+            provider_id: (node.data as any).provider_id || '',
+            action: (node.data as any).action || '',
+            parameters: (node.data as any).parameters || {},
+          }),
+
+          // If-Else 노드 변환
+          ...(node.data.type === BlockEnum.IfElse && {
+            cases: (node.data as IfElseNodeType).cases || [],
+          }),
+
+          // Question Classifier 노드 변환
+          ...(node.data.type === BlockEnum.QuestionClassifier && {
+            query_variable_selector:
+              (node.data as QuestionClassifierNodeType).query_variable_selector || [],
+            model: (node.data as QuestionClassifierNodeType).model || undefined,
+            classes: (node.data as QuestionClassifierNodeType).classes || [],
+            instruction: (node.data as QuestionClassifierNodeType).instruction || '',
+            memory: (node.data as QuestionClassifierNodeType).memory,
+            vision: (node.data as QuestionClassifierNodeType).vision,
+          }),
+
+          // Tavily Search 노드 변환
+          ...(node.data.type === BlockEnum.TavilySearch && {
+            search_depth: (node.data as any).search_depth || 'basic',
+            topic: (node.data as any).topic || 'general',
+            max_results: (node.data as any).max_results || 5,
+            include_domains: (node.data as any).include_domains || [],
+            exclude_domains: (node.data as any).exclude_domains || [],
+            time_range: (node.data as any).time_range || null,
+            start_date: (node.data as any).start_date || null,
+            end_date: (node.data as any).end_date || null,
+            include_answer: (node.data as any).include_answer || false,
+            include_raw_content: (node.data as any).include_raw_content || false,
+          }),
+
+          // Assigner 노드 변환
+          ...(node.data.type === BlockEnum.Assigner && {
+            version: (node.data as AssignerNodeType).version || '2',
+            operations: ((node.data as AssignerNodeType).operations || []).map(op => ({
+              write_mode: op.write_mode,
+              input_type: op.input_type,
+              constant_value: op.constant_value,
+            })),
+          }),
+
+          // Answer 노드 변환
+          ...(node.data.type === BlockEnum.Answer && {
+            template: (node.data as any).template || '',
+            description: (node.data as any).description || '',
+          }),
+        },
+        ports: serializedPorts,
+        variable_mappings: (() => {
+          let mappings = node.data.variable_mappings as NodeVariableMappings | undefined;
+
+          // For LLM nodes, ensure 'context' is properly mapped if used in template
+          if (node.data.type === BlockEnum.LLM) {
+            const promptTemplate = (node.data as any).prompt || '';
+            const hasContextPlaceholder = promptTemplate.includes('{context}') ||
+                                         promptTemplate.includes('{{context}}');
+
+            if (hasContextPlaceholder) {
+              if (!mappings) {
+                mappings = {};
               }
-            });
+              // Ensure context mapping exists
+              if (!mappings.context) {
+                mappings.context = {
+                  target_port: 'context',
+                  source: {
+                    variable: '',  // Will be connected via edge or manually set
+                    value_type: 'string'
+                  }
+                };
+              }
+            }
+          }
 
-            return resolvedPrompt;
-          })(),
-          temperature: (node.data as any).temperature || 0.7,
-          max_tokens: (node.data as any).maxTokens || 500,
-        }),
-
-        // Knowledge Retrieval 노드 변환
-        ...(node.data.type === BlockEnum.KnowledgeRetrieval && {
-          dataset_id: (node.data as any).dataset || '',
-          mode: normalizeRetrievalModeValue((node.data as any).retrievalMode),
-          top_k: (node.data as any).topK || 5,
-          document_ids: (node.data as any).documentIds || [],
-        }),
-
-        // MCP 노드 변환
-        ...(node.data.type === BlockEnum.MCP && {
-          provider_id: (node.data as any).provider_id || '',
-          action: (node.data as any).action || '',
-          parameters: (node.data as any).parameters || {},
-        }),
-
-        // If-Else 노드 변환
-        ...(node.data.type === BlockEnum.IfElse && {
-          cases: (node.data as IfElseNodeType).cases || [],
-        }),
-
-        // Question Classifier 노드 변환
-        ...(node.data.type === BlockEnum.QuestionClassifier && {
-          query_variable_selector:
-            (node.data as QuestionClassifierNodeType).query_variable_selector || [],
-          model: (node.data as QuestionClassifierNodeType).model || undefined,
-          classes: (node.data as QuestionClassifierNodeType).classes || [],
-          instruction: (node.data as QuestionClassifierNodeType).instruction || '',
-          memory: (node.data as QuestionClassifierNodeType).memory,
-          vision: (node.data as QuestionClassifierNodeType).vision,
-        }),
-
-        // Tavily Search 노드 변환
-        ...(node.data.type === BlockEnum.TavilySearch && {
-          search_depth: (node.data as any).search_depth || 'basic',
-          topic: (node.data as any).topic || 'general',
-          max_results: (node.data as any).max_results || 5,
-          include_domains: (node.data as any).include_domains || [],
-          exclude_domains: (node.data as any).exclude_domains || [],
-          time_range: (node.data as any).time_range || null,
-          start_date: (node.data as any).start_date || null,
-          end_date: (node.data as any).end_date || null,
-          include_answer: (node.data as any).include_answer || false,
-          include_raw_content: (node.data as any).include_raw_content || false,
-        }),
-
-        // Assigner 노드 변환
-        ...(node.data.type === BlockEnum.Assigner && {
-          version: (node.data as AssignerNodeType).version || '2',
-          operations: ((node.data as AssignerNodeType).operations || []).map(op => ({
-            write_mode: op.write_mode,
-            input_type: op.input_type,
-            constant_value: op.constant_value,
-          })),
-        }),
-
-        // Answer 노드 변환
-        ...(node.data.type === BlockEnum.Answer && {
-          template: (node.data as any).template || '',
-          description: (node.data as any).description || '',
-        }),
-      },
-      ports: serializePorts(node.data.ports),
-      variable_mappings: (() => {
-        let mappings = node.data.variable_mappings as NodeVariableMappings | undefined;
-
-        // For LLM nodes, ensure 'context' is properly mapped if used in template
-        if (node.data.type === BlockEnum.LLM) {
-          const promptTemplate = (node.data as any).prompt || '';
-          const hasContextPlaceholder = promptTemplate.includes('{context}') ||
-                                       promptTemplate.includes('{{context}}');
-
-          if (hasContextPlaceholder) {
+          // For Assigner nodes, ensure all necessary mappings exist
+          if (node.data.type === BlockEnum.Assigner) {
+            const operations = (node.data as AssignerNodeType).operations || [];
             if (!mappings) {
               mappings = {};
             }
-            // Ensure context mapping exists
-            if (!mappings.context) {
-              mappings.context = {
-                target_port: 'context',
-                source: {
-                  variable: '',  // Will be connected via edge or manually set
-                  value_type: 'string'
-                }
-              };
-            }
-          }
-        }
 
-        // For Assigner nodes, ensure all necessary mappings exist
-        if (node.data.type === BlockEnum.Assigner) {
-          const operations = (node.data as AssignerNodeType).operations || [];
-          if (!mappings) {
-            mappings = {};
-          }
+            operations.forEach((operation, index) => {
+              // Check if operation needs a value input
+              const needsValue = operation.write_mode !== 'CLEAR' &&
+                               operation.write_mode !== 'REMOVE_FIRST' &&
+                               operation.write_mode !== 'REMOVE_LAST';
 
-          operations.forEach((operation, index) => {
-            // Check if operation needs a value input
-            const needsValue = operation.write_mode !== 'CLEAR' &&
-                             operation.write_mode !== 'REMOVE_FIRST' &&
-                             operation.write_mode !== 'REMOVE_LAST';
-
-            // Ensure target port mapping exists
-            const targetPortName = `operation_${index}_target`;
-            if (!mappings![targetPortName]) {
-              mappings![targetPortName] = {
-                target_port: targetPortName,
-                source: {
-                  variable: '',
-                  value_type: 'any'
-                }
-              };
-            }
-
-            // Ensure value port mapping exists if needed
-            if (needsValue && operation.input_type === 'VARIABLE') {
-              const valuePortName = `operation_${index}_value`;
-              if (!mappings![valuePortName]) {
-                mappings![valuePortName] = {
-                  target_port: valuePortName,
+              // Ensure target port mapping exists
+              const targetPortName = `operation_${index}_target`;
+              if (!mappings![targetPortName]) {
+                mappings![targetPortName] = {
+                  target_port: targetPortName,
                   source: {
                     variable: '',
                     value_type: 'any'
                   }
                 };
               }
-            }
-          });
-        }
 
-        return serializeVariableMappings(mappings, nodes, node.id);
-      })(),
-    })),
+              // Ensure value port mapping exists if needed
+              if (needsValue && operation.input_type === 'VARIABLE') {
+                const valuePortName = `operation_${index}_value`;
+                if (!mappings![valuePortName]) {
+                  mappings![valuePortName] = {
+                    target_port: valuePortName,
+                    source: {
+                      variable: '',
+                      value_type: 'any'
+                    }
+                  };
+                }
+              }
+            });
+          }
+
+          return serializeVariableMappings(mappings, nodes, node.id);
+        })(),
+      };
+
+      if (node.data.type === BlockEnum.ImportedWorkflow) {
+        const importedData = node.data as ImportedWorkflowNodeData;
+        backendNode.data = {
+          ...backendNode.data,
+          template_id: importedData.template_id,
+          template_name: importedData.template_name,
+          template_version: importedData.template_version,
+          is_expanded: importedData.is_expanded ?? false,
+          read_only: importedData.read_only ?? true,
+          internal_graph: importedData.internal_graph,
+          ports: serializedPorts,
+          input_schema: serializedPorts?.inputs || importedData.ports?.inputs || [],
+          output_schema: serializedPorts?.outputs || importedData.ports?.outputs || [],
+        };
+      }
+
+      return backendNode;
+    }),
     edges: edges.map((edge) => {
       const normalizedSourceHandle =
         normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ??
@@ -258,117 +279,131 @@ export const transformFromBackend = (
   workflow: BackendWorkflow
 ): { nodes: Node[]; edges: Edge[] } => {
   return {
-    nodes: workflow.nodes.map((node) => ({
-      id: node.id,
-      type: 'custom',
-      position: node.position,
-      data: {
-        type: node.type as BlockEnum,
-        title: node.data.title,
-        desc: node.data.desc,
-        ports: deserializePorts(node.ports),
-        variable_mappings: deserializeVariableMappings(node.variable_mappings),
+    nodes: workflow.nodes.map((node) => {
+      const portsSource =
+        node.ports || ((node.data as any).ports as BackendNode['ports'] | undefined);
+      const deserializedPorts = deserializePorts(portsSource);
 
-        // LLM 노드 변환
-        ...(node.type === 'llm' && {
-          provider:
-            (node.data as any).provider ||
-            extractProviderSlug(node.data.model || ''),
-          model:
-            typeof node.data.model === 'object' && node.data.model !== null
-              ? {
-                  provider:
-                    (node.data as any).provider ||
-                    (node.data.model as any).provider ||
-                    extractProviderSlug(
-                      (node.data.model as any).name || ''
-                    ),
-                  name:
-                    (node.data.model as any).name ||
-                    extractModelName(
-                      (node.data.model as any).id ||
-                        (node.data.model as any).name ||
-                        ''
-                    ),
-                }
-              : {
-                  provider:
-                    (node.data as any).provider ||
-                    extractProviderSlug(node.data.model || ''),
-                  name: extractModelName(node.data.model || 'gpt-4o-mini'),
-                },
-          prompt: node.data.prompt_template || '',
-          temperature: node.data.temperature || 0.7,
-          maxTokens: node.data.max_tokens || 500,
-        }),
+      return {
+        id: node.id,
+        type: 'custom',
+        position: node.position,
+        data: {
+          type: node.type as BlockEnum,
+          title: node.data.title,
+          desc: node.data.desc,
+          ports: deserializedPorts,
+          variable_mappings: deserializeVariableMappings(node.variable_mappings),
 
-        // Knowledge Retrieval 노드 변환
-        ...(node.type === 'knowledge-retrieval' && {
-          dataset: node.data.dataset_id || '',
-          retrievalMode: normalizeRetrievalModeValue(node.data.mode),
-          topK: node.data.top_k || 5,
-          documentIds: node.data.document_ids || [],
-        }),
+          ...(node.type === 'imported-workflow' && {
+            template_id: (node.data as any).template_id || '',
+            template_name: (node.data as any).template_name || '',
+            template_version: (node.data as any).template_version || '',
+            is_expanded: (node.data as any).is_expanded ?? false,
+            read_only: (node.data as any).read_only ?? true,
+            internal_graph: (node.data as any).internal_graph || null,
+          }),
 
-        // MCP 노드 변환
-        ...(node.type === 'mcp' && {
-          provider_id: node.data.provider_id || '',
-          action: node.data.action || '',
-          parameters: node.data.parameters || {},
-        }),
+          // LLM 노드 변환
+          ...(node.type === 'llm' && {
+            provider:
+              (node.data as any).provider ||
+              extractProviderSlug(node.data.model || ''),
+            model:
+              typeof node.data.model === 'object' && node.data.model !== null
+                ? {
+                    provider:
+                      (node.data as any).provider ||
+                      (node.data.model as any).provider ||
+                      extractProviderSlug(
+                        (node.data.model as any).name || ''
+                      ),
+                    name:
+                      (node.data.model as any).name ||
+                      extractModelName(
+                        (node.data.model as any).id ||
+                          (node.data.model as any).name ||
+                          ''
+                      ),
+                  }
+                : {
+                    provider:
+                      (node.data as any).provider ||
+                      extractProviderSlug(node.data.model || ''),
+                    name: extractModelName(node.data.model || 'gpt-4o-mini'),
+                  },
+            prompt: node.data.prompt_template || '',
+            temperature: node.data.temperature || 0.7,
+            maxTokens: node.data.max_tokens || 500,
+          }),
 
-        // If-Else 노드 변환
-        ...(node.type === 'if-else' && {
-          cases: (node.data as any).cases || [],
-        }),
+          // Knowledge Retrieval 노드 변환
+          ...(node.type === 'knowledge-retrieval' && {
+            dataset: node.data.dataset_id || '',
+            retrievalMode: normalizeRetrievalModeValue(node.data.mode),
+            topK: node.data.top_k || 5,
+            documentIds: node.data.document_ids || [],
+          }),
 
-        // Question Classifier 노드 변환
-        ...(node.type === 'question-classifier' && {
-          query_variable_selector: node.data.query_variable_selector || [],
-          model: node.data.model,
-          classes: node.data.classes || [],
-          instruction: node.data.instruction || '',
-          memory: node.data.memory,
-          vision: node.data.vision,
-        }),
+          // MCP 노드 변환
+          ...(node.type === 'mcp' && {
+            provider_id: node.data.provider_id || '',
+            action: node.data.action || '',
+            parameters: node.data.parameters || {},
+          }),
 
-        // Tavily Search 노드 역변환
-        ...(node.type === 'tavily-search' && {
-          search_depth: node.data.search_depth || 'basic',
-          topic: node.data.topic || 'general',
-          max_results: node.data.max_results || 5,
-          include_domains: node.data.include_domains || [],
-          exclude_domains: node.data.exclude_domains || [],
-          time_range: node.data.time_range || null,
-          start_date: node.data.start_date || null,
-          end_date: node.data.end_date || null,
-          include_answer: node.data.include_answer || false,
-          include_raw_content: node.data.include_raw_content || false,
-        }),
+          // If-Else 노드 변환
+          ...(node.type === 'if-else' && {
+            cases: (node.data as any).cases || [],
+          }),
 
-        // Assigner 노드 역변환
-        ...(node.type === 'assigner' && {
-          version: node.data.version || '2',
-          operations: (node.data.operations || []).map((op: any, index: number) => ({
-            id: `op_${index}_${Date.now()}`,
-            write_mode: op.write_mode,
-            input_type: op.input_type,
-            constant_value: op.constant_value,
-            // target_variable와 source_variable는 엣지 연결로부터 복원됨
-          })),
-          ui_state: {
-            expanded: true,
-            selected_operation: undefined,
-          },
-        }),
+          // Question Classifier 노드 변환
+          ...(node.type === 'question-classifier' && {
+            query_variable_selector: node.data.query_variable_selector || [],
+            model: node.data.model,
+            classes: node.data.classes || [],
+            instruction: node.data.instruction || '',
+            memory: node.data.memory,
+            vision: node.data.vision,
+          }),
 
-        // Answer 노드 역변환
-        ...(node.type === 'answer' && {
-          template: node.data.template || '',
-          description: node.data.description || '',
-        }),
-      },
-    })),
+          // Tavily Search 노드 역변환
+          ...(node.type === 'tavily-search' && {
+            search_depth: node.data.search_depth || 'basic',
+            topic: node.data.topic || 'general',
+            max_results: node.data.max_results || 5,
+            include_domains: node.data.include_domains || [],
+            exclude_domains: node.data.exclude_domains || [],
+            time_range: node.data.time_range || null,
+            start_date: node.data.start_date || null,
+            end_date: node.data.end_date || null,
+            include_answer: node.data.include_answer || false,
+            include_raw_content: node.data.include_raw_content || false,
+          }),
+
+          // Assigner 노드 역변환
+          ...(node.type === 'assigner' && {
+            version: node.data.version || '2',
+            operations: (node.data.operations || []).map((op: any, index: number) => ({
+              id: `op_${index}_${Date.now()}`,
+              write_mode: op.write_mode,
+              input_type: op.input_type,
+              constant_value: op.constant_value,
+            })),
+            ui_state: {
+              expanded: true,
+              selected_operation: undefined,
+            },
+          }),
+
+          // Answer 노드 역변환
+          ...(node.type === 'answer' && {
+            template: node.data.template || '',
+            description: node.data.description || '',
+          }),
+        },
+      };
+    }),
 
     edges: workflow.edges.map((edge) => ({
       id: edge.id,

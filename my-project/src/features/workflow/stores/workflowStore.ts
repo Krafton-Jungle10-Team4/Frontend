@@ -533,12 +533,7 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
   const legacyMappings = new Map<string, Record<string, any>>();
 
   edges.forEach((edge) => {
-    if (
-      !edge.source ||
-      !edge.target ||
-      !edge.sourceHandle ||
-      !edge.targetHandle
-    ) {
+    if (!edge.source || !edge.target) {
       return;
     }
 
@@ -552,7 +547,11 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
       TARGET_PORT_RENAME_MAP[(targetNode.data.type as BlockEnum) || BlockEnum.Start] || {};
     const normalizedTargetHandle =
       normalizeHandleId(edge.target, edge.targetHandle, nodes, 'inputs') ||
-      edge.targetHandle;
+      edge.targetHandle ||
+      null;
+    if (!normalizedTargetHandle) {
+      return;
+    }
     const normalizedTargetPort =
       (normalizedTargetHandle && renameMap[normalizedTargetHandle]) ||
       normalizedTargetHandle;
@@ -568,10 +567,12 @@ const buildLegacyMappingsFromEdges = (nodes: Node[], edges: Edge[]) => {
 
     const normalizedSourceHandle =
       normalizeHandleId(edge.source, edge.sourceHandle, nodes, 'outputs') ||
-      edge.sourceHandle;
-    const selectorBase = normalizedSourceHandle
-      ? `${edge.source}.${normalizedSourceHandle}`
-      : `${edge.source}.${edge.sourceHandle}`;
+      edge.sourceHandle ||
+      null;
+    if (!normalizedSourceHandle) {
+      return;
+    }
+    const selectorBase = `${edge.source}.${normalizedSourceHandle}`;
     const normalizedSelector = normalizeSelectorVariable(
       normalizeSelectorString(selectorBase),
       nodes
