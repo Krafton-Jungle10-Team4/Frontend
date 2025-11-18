@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Clock } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -15,6 +15,17 @@ import type {
   WorkflowLogFilters,
 } from '../../../types/log.types';
 import { Loader2 } from 'lucide-react';
+
+// 밀리초를 읽기 쉬운 형식으로 변환
+const formatElapsedTime = (milliseconds?: number | null) => {
+  if (!milliseconds) return '-';
+  const seconds = milliseconds / 1000;
+  if (seconds < 1) return `${milliseconds.toFixed(0)}ms`;
+  if (seconds < 60) return `${seconds.toFixed(2)}초`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}분 ${remainingSeconds.toFixed(0)}초`;
+};
 
 interface WorkflowLogDetailPanelProps {
   botId?: string | null;
@@ -93,30 +104,67 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {/* Run Summary */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">실행 요약</h3>
-                  <div className="rounded-lg border p-4 space-y-2">
-                    <div className="flex justify-between">
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">상태:</span>
-                      <span className="text-sm font-medium">{runDetail.status}</span>
+                      <span className="text-sm font-medium capitalize">
+                        {runDetail.status === 'succeeded' ? '성공' : 
+                         runDetail.status === 'failed' ? '실패' : 
+                         runDetail.status === 'running' ? '실행 중' : runDetail.status}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">시작 시간:</span>
                       <span className="text-sm font-medium">
-                        {new Date(runDetail.started_at).toLocaleString('ko-KR')}
+                        {new Date(runDetail.started_at).toLocaleString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
                       </span>
                     </div>
                     {runDetail.finished_at && (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">종료 시간:</span>
                         <span className="text-sm font-medium">
-                          {new Date(runDetail.finished_at).toLocaleString('ko-KR')}
+                          {new Date(runDetail.finished_at).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                          })}
                         </span>
                       </div>
                     )}
-                    {runDetail.total_tokens && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">총 토큰:</span>
+                    {runDetail.elapsed_time !== null && runDetail.elapsed_time !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          소요 시간:
+                        </span>
                         <span className="text-sm font-medium">
-                          {runDetail.total_tokens.toLocaleString()}
+                          {formatElapsedTime(runDetail.elapsed_time)}
+                        </span>
+                      </div>
+                    )}
+                    {runDetail.total_tokens !== null && runDetail.total_tokens !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">총 토큰 사용량:</span>
+                        <span className="text-sm font-medium">
+                          {runDetail.total_tokens.toLocaleString()} 토큰
+                        </span>
+                      </div>
+                    )}
+                    {runDetail.total_steps !== null && runDetail.total_steps !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">실행 단계:</span>
+                        <span className="text-sm font-medium">
+                          {runDetail.total_steps}개
                         </span>
                       </div>
                     )}
@@ -126,9 +174,9 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {/* Inputs */}
                 {runDetail.inputs && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">입력</h3>
-                    <div className="rounded-lg border p-4">
-                      <pre className="text-sm overflow-x-auto">
+                    <h3 className="text-lg font-semibold">입력 (Input)</h3>
+                    <div className="rounded-lg border bg-gray-50 p-4">
+                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words font-mono">
                         {JSON.stringify(runDetail.inputs, null, 2)}
                       </pre>
                     </div>
@@ -138,9 +186,9 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {/* Outputs */}
                 {runDetail.outputs && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">출력</h3>
-                    <div className="rounded-lg border p-4">
-                      <pre className="text-sm overflow-x-auto">
+                    <h3 className="text-lg font-semibold">출력 (Output)</h3>
+                    <div className="rounded-lg border bg-gray-50 p-4">
+                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words font-mono">
                         {JSON.stringify(runDetail.outputs, null, 2)}
                       </pre>
                     </div>
@@ -177,4 +225,5 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
 );
 
 WorkflowLogDetailPanel.displayName = 'WorkflowLogDetailPanel';
+
 
