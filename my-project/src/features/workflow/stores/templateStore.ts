@@ -185,7 +185,20 @@ export const useTemplateStore = create<TemplateState>()(
 
           if (!botId || !draftVersionId) {
             const errorMessage = '워크플로우를 먼저 저장해주세요.';
-            set({ error: errorMessage, isLoading: false });
+            const failedValidation: ExportValidation = {
+              is_valid: false,
+              errors: [errorMessage],
+              warnings: [],
+              node_count: nodes.length,
+              edge_count: edges.length,
+              detected_input_ports: [],
+              detected_output_ports: [],
+            };
+            set({
+              exportValidation: failedValidation,
+              error: errorMessage,
+              isLoading: false
+            });
             toast.error(errorMessage);
             return;
           }
@@ -204,7 +217,20 @@ export const useTemplateStore = create<TemplateState>()(
         } catch (error: any) {
           const errorMessage =
             error.response?.data?.message || 'Export 검증 실패';
-          set({ error: errorMessage, isLoading: false });
+          const failedValidation: ExportValidation = {
+            is_valid: false,
+            errors: [errorMessage],
+            warnings: [],
+            node_count: 0,
+            edge_count: 0,
+            detected_input_ports: [],
+            detected_output_ports: [],
+          };
+          set({
+            exportValidation: failedValidation,
+            error: errorMessage,
+            isLoading: false
+          });
           toast.error(errorMessage);
         }
       },

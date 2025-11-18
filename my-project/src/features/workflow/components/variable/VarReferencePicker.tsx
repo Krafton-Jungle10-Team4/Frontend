@@ -106,15 +106,24 @@ export function VarReferencePicker({
 
           <div className="flex items-center gap-1">
             {selectedVariable && (
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded p-1"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleClear();
+                  }
+                }}
+                className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded p-1 cursor-pointer"
               >
                 <RiCloseLine size={16} />
-              </button>
+              </div>
             )}
             <RiCodeBoxLine size={16} />
           </div>
