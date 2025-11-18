@@ -6,7 +6,7 @@ import { memo } from 'react';
  * 워크플로우의 시작점
  * - 워크플로우 메타데이터 설정
  */
-const StartNode = ({ data }: NodeProps<StartNodeType>) => {
+const StartNode = (_props: NodeProps<StartNodeType>) => {
   return <></>;
 };
 

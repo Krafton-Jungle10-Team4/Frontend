@@ -9,6 +9,7 @@ export { default as Workflow } from './components/WorkflowBuilder';
 
 // Store
 export { useWorkflowStore } from './stores/workflowStore';
+export { useWorkflowLogStore } from './stores/workflowLogStore';
 
 // Types
 export type {

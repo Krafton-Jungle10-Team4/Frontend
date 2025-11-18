@@ -22,6 +22,7 @@ import {
 } from '@shared/components/select';
 import { MultiSelect } from '@shared/components/multi-select';
 import type { KnowledgeRetrievalNodeType } from '@/shared/types/workflow.types';
+type WorkflowNode = ReturnType<typeof useWorkflowStore>['nodes'][number];
 
 // 검색 모드 타입 및 옵션
 type RetrievalModeValue = 'semantic' | 'keyword' | 'hybrid';
@@ -58,8 +59,6 @@ export const KnowledgeRetrievalPanel = () => {
   // 완료된 문서 목록 가져오기
   const completedDocuments = useCompletedDocuments(activeBotId);
 
-  const node = nodes.find((n) => n.id === selectedNodeId);
-
   // 문서 목록 로드
   useEffect(() => {
     if (activeBotId) {
@@ -69,42 +68,66 @@ export const KnowledgeRetrievalPanel = () => {
     }
   }, [activeBotId, fetchDocuments]);
 
-  if (!node) return null;
+  const node = nodes.find((n) => n.id === selectedNodeId);
 
+  if (!selectedNodeId || !node) {
+    return null;
+  }
+
+  return (
+    <KnowledgeRetrievalPanelContent
+      key={selectedNodeId}
+      nodeId={selectedNodeId}
+      node={node}
+      updateNode={updateNode}
+      completedDocuments={completedDocuments}
+      activeBotId={activeBotId}
+    />
+  );
+};
+
+interface KnowledgeRetrievalPanelContentProps {
+  nodeId: string;
+  node: WorkflowNode;
+  updateNode: ReturnType<typeof useWorkflowStore>['updateNode'];
+  completedDocuments: ReturnType<typeof useCompletedDocuments>;
+  activeBotId: string | null;
+}
+
+function KnowledgeRetrievalPanelContent({
+  nodeId,
+  node,
+  updateNode,
+  completedDocuments,
+  activeBotId,
+}: KnowledgeRetrievalPanelContentProps) {
   const krData = node.data as KnowledgeRetrievalNodeType;
 
-  // 유효한 문서 ID 집합 (성능 최적화)
   const validDocumentIds = useMemo(
     () => new Set(completedDocuments.map((doc) => doc.id)),
     [completedDocuments]
   );
 
-  // 정제된 문서 ID 목록 (유효하지 않은 ID 제거)
   const sanitizedDocumentIds = useMemo(() => {
     const ids = krData.documentIds ?? EMPTY_DOCUMENT_IDS;
     return ids.filter((id) => validDocumentIds.has(id));
   }, [krData.documentIds, validDocumentIds]);
 
-  // 정규화된 검색 모드
   const currentRetrievalMode = normalizeRetrievalMode(krData.retrievalMode);
 
-  // 정제된 문서 ID로 자동 업데이트 (유효하지 않은 ID 제거)
   useEffect(() => {
-    if (!selectedNodeId) return;
-
     const original = krData.documentIds ?? EMPTY_DOCUMENT_IDS;
 
-    // 배열이 다른 경우에만 업데이트
     if (
       original.length !== sanitizedDocumentIds.length ||
       original.some((id, idx) => id !== sanitizedDocumentIds[idx])
     ) {
-      updateNode(selectedNodeId, { documentIds: sanitizedDocumentIds });
+      updateNode(nodeId, { documentIds: sanitizedDocumentIds });
     }
-  }, [krData.documentIds, sanitizedDocumentIds, selectedNodeId, updateNode]);
+  }, [krData.documentIds, sanitizedDocumentIds, nodeId, updateNode]);
 
   const handleUpdate = (field: string, value: unknown) => {
-    updateNode(selectedNodeId!, { [field]: value });
+    updateNode(nodeId, { [field]: value });
   };
 
   return (

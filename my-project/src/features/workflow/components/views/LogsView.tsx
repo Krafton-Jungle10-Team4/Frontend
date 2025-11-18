@@ -1,221 +1,296 @@
-import { memo, useEffect, useState } from 'react';
-import { Card } from '@/shared/components/card';
-import { Textarea } from '@/shared/components/textarea';
-import { workflowApi } from '../../api/workflowApi';
+import {
+  Suspense,
+  lazy,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useBotStore } from '@/features/bot/stores/botStore';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Card } from '@/shared/components/card';
+import { Skeleton } from '@/shared/components/skeleton';
+import { Button } from '@/shared/components/button';
+import { Switch } from '@/shared/components/switch';
+import { WorkflowLogFilters } from '../logs/WorkflowLogFilters';
+import { WorkflowLogRow } from '../logs/WorkflowLogRow';
+import { useWorkflowLogs } from '../../hooks/useWorkflowLogs';
 import type {
+  WorkflowLogFilters as WorkflowLogFiltersType,
+  WorkflowRunStatus,
   WorkflowRunSummary,
-  WorkflowNodeExecution,
-} from '../../types/api.types';
+} from '../../types/log.types';
 
-/**
- * 로그 & 어노테이션 뷰
- */
+const parseDateParam = (value: string | null) => {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+const isWorkflowStatus = (
+  value: string | null
+): value is WorkflowRunStatus => {
+  return value === 'running' || value === 'succeeded' || value === 'failed';
+};
+
+const DEFAULT_FILTERS: WorkflowLogFiltersType = {
+  status: 'all',
+};
+
+const WorkflowLogDetailPanel = lazy(() =>
+  import('../logs/WorkflowLogDetailPanel').then((module) => ({
+    default: module.WorkflowLogDetailPanel,
+  }))
+);
+
 const LogsView = () => {
   const botId = useBotStore((state) => state.selectedBotId);
-  const [runs, setRuns] = useState<WorkflowRunSummary[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
-  const [nodeExecutions, setNodeExecutions] = useState<WorkflowNodeExecution[]>(
-    []
+  const [searchParams, setSearchParams] = useSearchParams();
+  const runParam = searchParams.get('run');
+  const isDetailOpen = Boolean(runParam);
+  const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const filters = useMemo<WorkflowLogFiltersType>(() => {
+    const statusParam = searchParams.get('status');
+    const parsedStatus = isWorkflowStatus(statusParam)
+      ? statusParam
+      : undefined;
+    return {
+      status: parsedStatus ?? 'all',
+      startDate: parseDateParam(searchParams.get('start')),
+      endDate: parseDateParam(searchParams.get('end')),
+      searchQuery: searchParams.get('q') ?? undefined,
+    };
+  }, [searchParams]);
+
+  const {
+    runs,
+    selectedRunId,
+    selectedRun,
+    isLoading,
+    isFetchingMore,
+    error,
+    hasMore,
+    loadMore,
+    selectRun,
+    refresh,
+  } = useWorkflowLogs({
+    botId,
+    filters,
+  });
+
+  const updateSearchParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const nextParams = new URLSearchParams(searchParams);
+      updater(nextParams);
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams]
   );
-  const [annotation, setAnnotation] = useState('');
-  const [loadingRuns, setLoadingRuns] = useState(false);
-  const [loadingNodes, setLoadingNodes] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!botId) {
-      setRuns([]);
-      setNodeExecutions([]);
-      setSelectedRunId(null);
-      return;
-    }
-
-    setLoadingRuns(true);
-    workflowApi
-      .listWorkflowRuns(botId, { limit: 20 })
-      .then((response) => {
-        const runsList = response?.runs || [];
-        setRuns(runsList);
-        if (runsList.length > 0) {
-          setSelectedRunId(runsList[0].id);
+  const handleFiltersChange = useCallback(
+    (nextFilters: WorkflowLogFiltersType) => {
+      updateSearchParams((params) => {
+        if (nextFilters.status && nextFilters.status !== 'all') {
+          params.set('status', nextFilters.status);
+        } else {
+          params.delete('status');
         }
-        setError(null);
-      })
-      .catch((err) => {
-        console.error('Failed to load workflow runs:', err);
-        setError('실행 이력을 불러올 수 없습니다.');
-        setRuns([]);
-      })
-      .finally(() => setLoadingRuns(false));
-  }, [botId]);
+
+        if (nextFilters.startDate) {
+          params.set('start', nextFilters.startDate.toISOString());
+        } else {
+          params.delete('start');
+        }
+
+        if (nextFilters.endDate) {
+          params.set('end', nextFilters.endDate.toISOString());
+        } else {
+          params.delete('end');
+        }
+
+        if (nextFilters.searchQuery) {
+          params.set('q', nextFilters.searchQuery);
+        } else {
+          params.delete('q');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const handleResetFilters = useCallback(() => {
+    handleFiltersChange(DEFAULT_FILTERS);
+  }, [handleFiltersChange]);
+
+  const handleRunSelect = useCallback(
+    (run: WorkflowRunSummary) => {
+      updateSearchParams((params) => {
+        params.set('run', run.id);
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const handlePanelOpenChange = (next: boolean) => {
+    if (!next) {
+      updateSearchParams((params) => {
+        params.delete('run');
+      });
+    }
+  };
 
   useEffect(() => {
-    if (!botId || !selectedRunId) {
-      setNodeExecutions([]);
-      return;
+    if (runParam) {
+      selectRun(runParam);
     }
+  }, [runParam, selectRun]);
 
-    setLoadingNodes(true);
-    workflowApi
-      .getWorkflowRunNodes(botId, selectedRunId)
-      .then((nodes) => {
-        setNodeExecutions(nodes);
-      })
-      .catch((err) => {
-        console.error('Failed to load node executions:', err);
-      })
-      .finally(() => setLoadingNodes(false));
-  }, [botId, selectedRunId]);
+  useEffect(() => {
+    if (!isRealtimeEnabled) return;
+    const intervalId = window.setInterval(() => {
+      refresh();
+    }, 15_000);
+    return () => window.clearInterval(intervalId);
+  }, [isRealtimeEnabled, refresh]);
+
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore) return;
+    const target = sentinelRef.current;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        loadMore();
+      }
+    });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
+  const renderSkeletons = () => (
+    <div className="space-y-4">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Skeleton key={index} className="h-32 w-full" />
+      ))}
+    </div>
+  );
+
+  if (!botId) {
+    return (
+      <div className="flex h-full items-center justify-center bg-gray-50">
+        <EmptyState
+          icon={Loader2}
+          title="봇을 선택해 주세요"
+          description="좌측 사이드바에서 로그를 확인할 봇을 먼저 선택해야 합니다."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full overflow-auto bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            실행 로그 & 어노테이션
+      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6">
+        <header>
+          <p className="text-sm font-medium text-primary">Workflow Logs</p>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">
+            실행 기록과 입력/출력을 한눈에
           </h1>
-          <p className="text-gray-600">
-            워크플로우 실행 기록을 살펴보고 문제를 빠르게 파악하세요.
+          <p className="text-sm text-muted-foreground">
+            상태, 기간, 키워드로 실행을 필터링하고 상세 패널에서 토큰 및 노드 타임라인을 확인하세요.
           </p>
-        </div>
+          <div className="mt-4 flex items-center gap-2">
+            <Switch
+              checked={isRealtimeEnabled}
+              onCheckedChange={setIsRealtimeEnabled}
+              id="realtime-toggle"
+            />
+            <label
+              htmlFor="realtime-toggle"
+              className="text-sm text-muted-foreground"
+            >
+              실시간 모드 {isRealtimeEnabled ? '켜짐 (15초 간격)' : '꺼짐'}
+            </label>
+          </div>
+        </header>
 
-        {!botId && (
-          <div className="text-sm text-gray-500">
-            봇을 선택하면 실행 로그를 확인할 수 있습니다.
+        <WorkflowLogFilters
+          filters={filters}
+          onChange={handleFiltersChange}
+          onReset={handleResetFilters}
+          isDisabled={isLoading && runs.length === 0}
+        />
+
+        {error && (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
           </div>
         )}
 
-        {error && <div className="text-sm text-red-500">{error}</div>}
+        <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-4">
+            {isLoading && runs.length === 0 ? (
+              renderSkeletons()
+            ) : runs.length === 0 ? (
+              <Card className="p-8 text-center text-muted-foreground">
+                조건에 맞는 실행 로그가 없습니다.
+              </Card>
+            ) : (
+              runs.map((run) => (
+                <WorkflowLogRow
+                  key={run.id}
+                  run={run}
+                  isActive={selectedRunId === run.id}
+                  onSelect={handleRunSelect}
+                />
+              ))
+            )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 실행 목록 */}
-          <div className="lg:col-span-2">
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  최근 실행
-                </h2>
-                {loadingRuns && (
-                  <span className="text-xs text-gray-500">불러오는 중...</span>
-                )}
+            <div ref={sentinelRef} />
+            {hasMore && !isFetchingMore && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={loadMore}
+                className="w-full"
+              >
+                더 불러오기
+              </Button>
+            )}
+            {isFetchingMore && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                다음 실행을 불러오는 중입니다...
               </div>
-
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {runs.map((run) => (
-                  <div
-                    key={run.id}
-                    onClick={() => setSelectedRunId(run.id)}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedRunId === run.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {run.id.slice(0, 8)}...
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(run.started_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <span
-                        className={`px-2 py-0.5 text-xs font-semibold rounded ${
-                          run.status === 'succeeded'
-                            ? 'bg-green-100 text-green-700'
-                            : run.status === 'failed'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {run.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="mt-2 text-xs text-gray-600 flex gap-4">
-                      <span>Tokens: {run.total_tokens ?? 0}</span>
-                      <span>Time: {run.elapsed_time ?? 0}ms</span>
-                    </div>
-                  </div>
-                ))}
-
-                {runs.length === 0 && !loadingRuns && (
-                  <div className="text-sm text-gray-500 text-center py-8">
-                    실행 기록이 없습니다.
-                  </div>
-                )}
-              </div>
-            </Card>
+            )}
           </div>
 
-          {/* 노드 로그 & 어노테이션 */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="space-y-4">
             <Card className="p-4">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                노드 실행 로그
-              </h2>
-              {loadingNodes ? (
-                <div className="text-sm text-gray-500">노드 로그 불러오는 중...</div>
-              ) : nodeExecutions.length > 0 ? (
-                <div className="space-y-3 max-h-[360px] overflow-y-auto">
-                  {nodeExecutions.map((exec) => (
-                    <div
-                      key={exec.id}
-                      className="border rounded-lg p-3 bg-white shadow-sm"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold text-gray-800">
-                          {exec.node_id}
-                        </span>
-                        <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                            exec.status === 'succeeded'
-                              ? 'bg-green-100 text-green-700'
-                              : exec.status === 'failed'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {exec.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mb-2">
-                        {exec.node_type} • {exec.elapsed_time ?? 0}ms •{' '}
-                        {exec.tokens_used ?? 0} tokens
-                      </p>
-                      {exec.error_message && (
-                        <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded p-2">
-                          {exec.error_message}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500">
-                  선택된 실행에 대한 노드 로그가 없습니다.
-                </div>
-              )}
-            </Card>
-
-            <Card className="p-4">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                어노테이션
-              </h2>
-              <Textarea
-                value={annotation}
-                onChange={(e) => setAnnotation(e.target.value)}
-                placeholder="이 실행에 대한 메모를 작성하세요..."
-                className="min-h-[150px] resize-none"
-              />
-              <p className="text-xs text-gray-400 mt-2">
-                주석은 로컬에만 저장됩니다.
+              <h3 className="text-sm font-semibold text-foreground">
+                실행 선택
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                왼쪽 실행을 클릭하면 상세 패널이 열리며, 입력/출력과 노드 타임라인을 확인할 수 있습니다.
               </p>
             </Card>
           </div>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <WorkflowLogDetailPanel
+          botId={botId}
+          runId={selectedRun?.id ?? null}
+          open={isDetailOpen}
+          onOpenChange={handlePanelOpenChange}
+          filters={filters}
+          isRealtime={isRealtimeEnabled}
+        />
+      </Suspense>
     </div>
   );
 };

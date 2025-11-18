@@ -33,7 +33,7 @@ const AssignerNode = ({ data }: NodeProps<AssignerNodeType>) => {
 
       {/* 작업 목록 요약 */}
       <div className="space-y-1.5">
-        {validOperations.slice(0, 3).map((op, index) => (
+        {validOperations.slice(0, 3).map((op) => (
           <div
             key={op.id}
             className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5"

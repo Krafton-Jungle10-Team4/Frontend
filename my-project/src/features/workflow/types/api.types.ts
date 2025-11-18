@@ -76,38 +76,3 @@ export interface WorkflowVersionDetail extends WorkflowVersionSummary {
   environment_variables: Record<string, unknown>;
   conversation_variables: Record<string, unknown>;
 }
-
-export interface WorkflowRunSummary {
-  id: string;
-  session_id: string;
-  status: 'running' | 'succeeded' | 'failed';
-  started_at: string;
-  finished_at?: string | null;
-  elapsed_time?: number | null;
-  total_tokens?: number | null;
-  total_steps?: number | null;
-}
-
-export interface WorkflowRunDetail extends WorkflowRunSummary {
-  workflow_version_id: string;
-  graph_snapshot: BackendWorkflow;
-  inputs: Record<string, unknown>;
-  outputs: Record<string, unknown>;
-  error_message?: string | null;
-}
-
-export interface WorkflowNodeExecution {
-  id: string;
-  node_id: string;
-  node_type: string;
-  status: 'running' | 'succeeded' | 'failed';
-  inputs: Record<string, unknown>;
-  outputs: Record<string, unknown>;
-  started_at: string;
-  finished_at?: string | null;
-  elapsed_time?: number | null;
-  tokens_used?: number | null;
-  is_truncated?: boolean;
-  truncated_fields?: Record<string, boolean>;
-  error_message?: string | null;
-}

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, X, AlertCircle } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { Button } from '@/shared/components/button';
 import { FILE_CONSTRAINTS } from '../../../constants/documentConstants';
 import { formatBytes } from '@/shared/utils/format';

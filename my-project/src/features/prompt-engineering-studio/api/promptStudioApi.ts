@@ -5,7 +5,6 @@
  * 실제 API 호출은 프로젝트 표준 apiClient를 사용하도록 수정되었습니다.
  * Mock 데이터 반환 로직은 개발 편의를 위해 유지됩니다.
  */
-import { apiClient } from '@/shared/api/client';
 import { mockTestSets } from '../data/mockTestSets';
 import type {
   TestSetListResponse,
@@ -17,16 +16,6 @@ import type {
   RefinePersonaRequest,
   RefinePersonaResponse,
 } from '../types/api';
-import type { TestSet } from '../types/testSet';
-
-// API 엔드포인트 (실제 프로젝트에서는 @/shared/constants/apiEndpoints.ts 와 같은 곳에서 관리될 수 있습니다)
-const ENDPOINTS = {
-  TEST_SETS: '/prompt-studio/test-sets',
-  TEST_SET_DETAIL: (testSetId: string) => `/prompt-studio/test-sets/${testSetId}`,
-  UPDATE_WINNER: (testSetId: string) =>
-    `/prompt-studio/test-sets/${testSetId}/winner`,
-  REFINE_PERSONA: '/prompt-studio/prompts/refine',
-};
 
 /**
  * 테스트 세트 목록 조회
@@ -86,9 +75,14 @@ export const createTestSet = async (
   // ============================================================
   return new Promise((resolve) => {
     setTimeout(() => {
-      const newTestSetId = `ts-${Date.now()}-${Math.random()
+      const normalizedName = request.testSetName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 12);
+      const newTestSetId = `ts-${normalizedName || 'test'}-${Date.now()
         .toString(36)
-        .substr(2, 9)}`;
+        .slice(-6)}`;
       resolve({
         testSetId: newTestSetId,
       });
@@ -125,9 +119,6 @@ export const getTestSetDetail = async (
     setTimeout(() => {
       const testSet = mockTestSets.find(ts => ts.id === testSetId);
       if (testSet) {
-        // The API expects a TestSetDetailResponse, so we need to adapt
-        // our TestSet type. For now, we'll cast it, assuming the structure
-        // is compatible enough for the mock scenario.
         resolve(testSet as unknown as TestSetDetailResponse);
       } else {
         reject(new Error('Test set not found'));
@@ -166,7 +157,7 @@ export const updateWinnerModel = async (
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        message: 'Winner model updated successfully.',
+        message: `Winner model '${request.winnerModel}' updated successfully for ${testSetId}.`,
       });
     }, 400);
   });

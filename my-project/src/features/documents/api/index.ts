@@ -13,7 +13,7 @@ import type {
  * Feature Flag 확인
  * @returns true if async upload is enabled
  */
-const useAsyncAPI = (): boolean => {
+const isAsyncUploadEnabled = (): boolean => {
   return import.meta.env.VITE_ENABLE_ASYNC_UPLOAD === 'true';
 };
 
@@ -35,7 +35,7 @@ export const documentsService = {
     botId: string,
     onUploadProgress?: (progressEvent: any) => void
   ): Promise<DocumentUploadResponse | AsyncDocumentUploadResponse> => {
-    if (useAsyncAPI()) {
+    if (isAsyncUploadEnabled()) {
       return documentsAsyncApi.uploadAsync(file, botId, onUploadProgress);
     }
     return documentsApi.uploadDocument(file, botId, onUploadProgress);

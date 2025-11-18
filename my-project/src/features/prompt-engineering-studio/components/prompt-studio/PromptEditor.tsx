@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Button } from '@/shared/components/button';
 import { Textarea } from '@/shared/components/textarea';
 import { FilePenLine, Sparkles, Loader2, FileText } from 'lucide-react';
@@ -26,8 +25,6 @@ export function PromptEditor({
   refineDisabled: boolean;
   onSelectTemplate: (id: string | null) => void;
 }) {
-  const selectedTemplateData = templates.find((t) => t.id === selectedTemplate);
-
   return (
     <div>
       {/* Compact Template Selector */}

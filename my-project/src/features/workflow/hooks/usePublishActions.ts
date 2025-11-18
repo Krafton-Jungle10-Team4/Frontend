@@ -66,13 +66,14 @@ export function usePublishActions(botId: string) {
           });
           toast.success('배포가 생성되었습니다');
         } catch (retryError) {
+          console.error('Failed to create deployment after 404:', retryError);
           toast.error('배포 생성에 실패했습니다');
         }
       } else {
         toast.error('배포 업데이트에 실패했습니다');
       }
     }
-  }, [botId, saveWorkflow, updateStatus, createOrUpdateDeployment, widgetConfig]);
+  }, [botId, saveWorkflow, publishWorkflow, updateStatus, createOrUpdateDeployment, widgetConfig]);
 
   /**
    * 앱 실행 가능 여부 판단

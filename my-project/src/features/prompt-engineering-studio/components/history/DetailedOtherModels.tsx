@@ -6,7 +6,6 @@ import {
   AccordionTrigger,
 } from '@shared/components/accordion';
 import { Button } from '@shared/components/button';
-import { Badge } from '@shared/components/badge';
 import { Star, Zap, DollarSign, ChevronRight } from 'lucide-react';
 import type { ModelResult } from '@/features/prompt-engineering-studio/types/api';
 

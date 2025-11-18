@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { BlockEnum } from '@/shared/types/workflow.types';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import {

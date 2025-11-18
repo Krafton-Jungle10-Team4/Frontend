@@ -2,7 +2,7 @@
  * Results Validation Page
  * 결과 & 검증 - 페르소나 선택 보드 적용
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@shared/components/button';
 import { Download, Copy, Loader2, Check, ClipboardCheck, ChevronRight } from 'lucide-react';
@@ -27,12 +27,15 @@ import {
     
     export function ResultsValidationPage() {
       const [searchParams] = useSearchParams();
-      const testSetIds = searchParams.get('ids')?.split(',') || [];
+      const testSetIds = useMemo(
+        () => searchParams.get('ids')?.split(',') || [],
+        [searchParams]
+      );
     
       const [currentTestSetId, setCurrentTestSetId] = useState<string | null>(
         testSetIds[0] || null
       );
-      const { testResults, winner, persona } = useTestResults(
+      const { testResults, winner } = useTestResults(
         currentTestSetId ?? undefined
       );
     
@@ -70,7 +73,7 @@ import {
           }
         };
         fetchPersonaSummaries();
-      }, [searchParams]);
+      }, [testSetIds]);
     
       useEffect(() => {
         if (testResults.length > 0) {

@@ -88,12 +88,16 @@ export function TestResultCards({
 
   useEffect(() => {
     if (!emblaApi) return;
-    updateVisibleSlides();
-    emblaApi.on('select', updateVisibleSlides);
-    emblaApi.on('reInit', updateVisibleSlides);
+    const handleUpdate = () => {
+      updateVisibleSlides();
+    };
+    emblaApi.on('select', handleUpdate);
+    emblaApi.on('reInit', handleUpdate);
+    emblaApi.on('init', handleUpdate);
     return () => {
-      emblaApi.off('select', updateVisibleSlides);
-      emblaApi.off('reInit', updateVisibleSlides);
+      emblaApi.off('select', handleUpdate);
+      emblaApi.off('reInit', handleUpdate);
+      emblaApi.off('init', handleUpdate);
     };
   }, [emblaApi, updateVisibleSlides]);
 

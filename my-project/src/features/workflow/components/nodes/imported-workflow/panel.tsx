@@ -10,12 +10,11 @@ import type { ImportedWorkflowNodeData } from '../../../types/import-node.types'
 import { useTemplateStore } from '../../../stores/templateStore';
 
 interface ImportedWorkflowPanelProps {
-  nodeId: string;
   data: ImportedWorkflowNodeData;
 }
 
 export const ImportedWorkflowPanel = memo(
-  ({ nodeId, data }: ImportedWorkflowPanelProps) => {
+  ({ data }: ImportedWorkflowPanelProps) => {
     const { loadTemplate } = useTemplateStore();
 
     const handleViewTemplate = () => {

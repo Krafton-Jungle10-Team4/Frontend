@@ -1,6 +1,6 @@
 // src/features/workflow/hooks/useRecentVariables.ts
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { VariableReference } from '@shared/types/workflow';
 
 const RECENT_VARIABLES_KEY = 'workflow_recent_variables';
@@ -11,20 +11,16 @@ const MAX_RECENT = 10;
  */
 export function useRecentVariables() {
   const [recentVariables, setRecentVariables] = useState<VariableReference[]>(
-    []
-  );
-
-  // LocalStorage에서 로드
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(RECENT_VARIABLES_KEY);
-      if (stored) {
-        setRecentVariables(JSON.parse(stored));
+    () => {
+      try {
+        const stored = localStorage.getItem(RECENT_VARIABLES_KEY);
+        return stored ? (JSON.parse(stored) as VariableReference[]) : [];
+      } catch (error) {
+        console.error('Failed to load recent variables:', error);
+        return [];
       }
-    } catch (error) {
-      console.error('Failed to load recent variables:', error);
     }
-  }, []);
+  );
 
   // LocalStorage에 저장
   const saveToStorage = useCallback((variables: VariableReference[]) => {

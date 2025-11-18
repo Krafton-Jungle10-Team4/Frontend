@@ -209,7 +209,7 @@ export function WidgetChatPage() {
     return () => {
       stopTypingAnimation();
     };
-  }, []);
+  }, [stopTypingAnimation]);
 
   /**
    * 세션 준비 완료 시 입력창에 자동 포커스

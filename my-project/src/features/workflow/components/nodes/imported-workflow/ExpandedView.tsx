@@ -12,7 +12,7 @@ import type { CommonNodeType } from '@/shared/types/workflow.types';
 import type { NodeProps } from '@xyflow/react';
 
 export const ExpandedView = memo(
-  ({ nodeId, internalGraph, templateId }: ExpandedViewProps) => {
+  ({ nodeId, internalGraph }: ExpandedViewProps) => {
     // CustomNode를 useMemo로 생성하여 순환 참조 방지
     const CustomNode = useMemo(() => {
       return memo((props: NodeProps) => {
@@ -57,7 +57,7 @@ export const ExpandedView = memo(
     }));
 
     const handleNodeClick = useCallback(
-      (event: React.MouseEvent, node: Node) => {
+      (event: React.MouseEvent, _node: Node) => {
         event.stopPropagation();
         toast.info('읽기 전용 템플릿', {
           description: '이 노드는 템플릿의 일부로 편집할 수 없습니다.',

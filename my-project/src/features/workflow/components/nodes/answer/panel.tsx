@@ -1,8 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field } from '../_base/components/layout';
-import { Label } from '@shared/components/label';
 import { Textarea } from '@shared/components/textarea';
 import type { AnswerNodeType } from '@/shared/types/workflow.types';
 import { VariableSelector } from './VariableSelector';
@@ -11,27 +10,39 @@ import { TemplateSyntaxHint } from '../common/TemplateSyntaxHint';
 
 export const AnswerPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  if (!selectedNodeId) return null;
 
   const node = nodes.find((n) => n.id === selectedNodeId);
+  if (!node) return null;
 
-  const [template, setTemplate] = useState(
-    (node?.data as AnswerNodeType)?.template || ''
+  const answerData = node.data as AnswerNodeType;
+
+  return (
+    <AnswerPanelContent
+      key={selectedNodeId}
+      nodeId={selectedNodeId}
+      answerData={answerData}
+      updateNode={updateNode}
+    />
   );
+};
+
+interface AnswerPanelContentProps {
+  nodeId: string;
+  answerData: AnswerNodeType;
+  updateNode: ReturnType<typeof useWorkflowStore>['updateNode'];
+}
+
+function AnswerPanelContent({
+  nodeId,
+  answerData,
+  updateNode,
+}: AnswerPanelContentProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [template, setTemplate] = useState(answerData.template || '');
   const [description, setDescription] = useState(
-    (node?.data as AnswerNodeType)?.description || ''
+    answerData.description || ''
   );
-
-  // Sync local state when selected node changes
-  useEffect(() => {
-    if (node?.data) {
-      const answerData = node.data as AnswerNodeType;
-      setTemplate(answerData.template || '');
-      setDescription(answerData.description || '');
-    }
-  }, [selectedNodeId, node?.data]);
-
-  if (!node || !selectedNodeId) return null;
 
   // 변수 삽입 핸들러
   const handleInsertVariable = useCallback(
@@ -50,7 +61,7 @@ export const AnswerPanel = () => {
       setTemplate(newTemplate);
 
       // 데이터 업데이트
-      updateNode(selectedNodeId, {
+      updateNode(nodeId, {
         template: newTemplate,
       });
 
@@ -61,29 +72,29 @@ export const AnswerPanel = () => {
         textarea.setSelectionRange(newPosition, newPosition);
       }, 0);
     },
-    [template, selectedNodeId, updateNode]
+    [template, nodeId, updateNode]
   );
 
   // 템플릿 변경 핸들러
   const handleTemplateChange = useCallback(
     (value: string) => {
       setTemplate(value);
-      updateNode(selectedNodeId, {
+      updateNode(nodeId, {
         template: value,
       });
     },
-    [selectedNodeId, updateNode]
+    [nodeId, updateNode]
   );
 
   // 설명 변경 핸들러
   const handleDescriptionChange = useCallback(
     (value: string) => {
       setDescription(value);
-      updateNode(selectedNodeId, {
+      updateNode(nodeId, {
         description: value,
       });
     },
-    [selectedNodeId, updateNode]
+    [nodeId, updateNode]
   );
 
   return (
@@ -100,10 +111,7 @@ export const AnswerPanel = () => {
                 <span className="text-sm text-gray-600">
                   변수를 삽입하려면 아래 버튼을 클릭하세요
                 </span>
-                <VariableSelector
-                  nodeId={selectedNodeId}
-                  onSelect={handleInsertVariable}
-                />
+                <VariableSelector nodeId={nodeId} onSelect={handleInsertVariable} />
               </div>
               <Textarea
                 ref={textareaRef}
@@ -129,10 +137,10 @@ export const AnswerPanel = () => {
 
           {/* 유효성 검사 상태 */}
           <div className="mt-4">
-            <ValidationStatus nodeId={selectedNodeId} template={template} />
+            <ValidationStatus nodeId={nodeId} template={template} />
           </div>
         </Group>
       </Box>
     </BasePanel>
   );
-};
+}

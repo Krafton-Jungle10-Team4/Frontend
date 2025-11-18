@@ -20,14 +20,35 @@ import { generateIfElsePortSchema } from './utils/portSchemaGenerator';
 export function IfElsePanel() {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
 
-  // 선택된 노드 찾기
-  const node = nodes.find((n) => n.id === selectedNodeId);
+  if (!selectedNodeId) return null;
 
+  const node = nodes.find((n) => n.id === selectedNodeId);
   if (!node) return null;
 
   const ifElseData = node.data as IfElseNodeType;
   const initialCases = ifElseData?.cases ?? [];
 
+  return (
+    <IfElsePanelContent
+      key={selectedNodeId}
+      nodeId={selectedNodeId}
+      initialCases={initialCases}
+      updateNode={updateNode}
+    />
+  );
+}
+
+interface IfElsePanelContentProps {
+  nodeId: string;
+  initialCases: IfElseNodeType['cases'];
+  updateNode: ReturnType<typeof useWorkflowStore>['updateNode'];
+}
+
+function IfElsePanelContent({
+  nodeId,
+  initialCases,
+  updateNode,
+}: IfElsePanelContentProps) {
   const {
     cases,
     addCase,
@@ -37,10 +58,9 @@ export function IfElsePanel() {
     removeCondition,
     toggleLogicalOperator,
   } = useIfElseConfig({
-    nodeId: selectedNodeId!,
     cases: initialCases,
     onUpdate: (newCases) => {
-      updateNode(selectedNodeId!, {
+      updateNode(nodeId, {
         cases: newCases,
         ports: generateIfElsePortSchema(newCases),
       } as any);
@@ -80,7 +100,7 @@ export function IfElsePanel() {
             </div>
           ) : (
             <CaseList
-              nodeId={selectedNodeId!}
+              nodeId={nodeId}
               cases={cases}
               onAddCondition={addCondition}
               onUpdateCondition={updateCondition}

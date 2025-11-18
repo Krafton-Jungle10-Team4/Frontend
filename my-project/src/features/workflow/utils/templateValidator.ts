@@ -2,7 +2,7 @@
  * 템플릿 검증 유틸리티
  */
 import Ajv, { type JSONSchemaType } from 'ajv';
-import type { WorkflowTemplate, PortDefinition } from '../types/template.types';
+import type { WorkflowTemplate } from '../types/template.types';
 import {
   TEMPLATE_LIMITS,
   SUPPORTED_NODE_TYPES,

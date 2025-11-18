@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Bot as BotIcon, MoreVertical, Trash2, Shield, Plus } from 'lucide-react';
 import {
   DropdownMenu,
@@ -29,7 +29,20 @@ interface BotCardProps {
   language: Language;
 }
 
-export function BotCard({
+const StatsGrid = ({ stats }: { stats: Array<{ label: string; value: string | number }> }) => (
+  <div className="grid grid-cols-3 gap-4">
+    {stats.map((stat) => (
+      <div key={stat.label}>
+        <p className="text-xs uppercase tracking-wide text-gray-400">
+          {stat.label}
+        </p>
+        <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+      </div>
+    ))}
+  </div>
+);
+
+function BotCard({
   bot,
   onDelete,
   onClick,
@@ -56,39 +69,26 @@ export function BotCard({
   };
 
   const t = translations[language];
-  const stats = [
-    { label: t.nodes, value: bot.nodeCount },
-    { label: t.edges, value: bot.edgeCount },
-    { label: t.cost, value: `$${bot.estimatedCost.toFixed(2)}` },
-  ];
-
-  const renderStatItems = () =>
-    stats.map((stat) => (
-      <div key={stat.label}>
-        <p className="text-[10px] uppercase tracking-wide text-gray-400">
-          {stat.label}
-        </p>
-        <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
-      </div>
-    ));
-
-  const StatsRow = () => (
-    <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm text-gray-600">
-      {renderStatItems()}
-    </div>
+  const stats = useMemo(
+    () => [
+      { label: t.nodes, value: bot.nodeCount },
+      { label: t.edges, value: bot.edgeCount },
+      { label: t.cost, value: `$${bot.estimatedCost.toFixed(2)}` },
+    ],
+    [t.nodes, t.edges, t.cost, bot.nodeCount, bot.edgeCount, bot.estimatedCost]
   );
 
-  const StatsGrid = () => (
-    <div className="grid grid-cols-3 gap-4">
-      {stats.map((stat) => (
+  const statItems = useMemo(
+    () =>
+      stats.map((stat) => (
         <div key={stat.label}>
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-[10px] uppercase tracking-wide text-gray-400">
             {stat.label}
           </p>
           <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
         </div>
-      ))}
-    </div>
+      )),
+    [stats]
   );
 
   const handleCardClick = () => {
@@ -149,7 +149,9 @@ export function BotCard({
               </div>
             </div>
           </div>
-          <StatsRow />
+          <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm text-gray-600">
+            {statItems}
+          </div>
           <DropdownMenu onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -175,7 +177,7 @@ export function BotCard({
           </DropdownMenu>
         </div>
         <div className="mt-4 w-full md:hidden">
-          <StatsGrid />
+          <StatsGrid stats={stats} />
         </div>
       </div>
     );
@@ -252,8 +254,10 @@ export function BotCard({
         )}
       </div>
       <div className="mt-2">
-        <StatsGrid />
+        <StatsGrid stats={stats} />
       </div>
     </div>
   );
 }
+
+export { BotCard };

@@ -1,5 +1,4 @@
 import type { NodeProps, EndNodeType } from '@/shared/types/workflow.types';
-import { memo } from 'react';
 
 /**
  * End 노드

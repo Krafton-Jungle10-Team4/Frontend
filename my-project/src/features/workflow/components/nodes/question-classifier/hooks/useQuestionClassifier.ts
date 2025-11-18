@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { Topic, ModelConfig, VisionConfig } from '@/shared/types/workflow.types';
 import { useWorkflowStore } from '@/features/workflow/stores/workflowStore';
 import {
@@ -24,12 +24,12 @@ export function useQuestionClassifier({
   visionConfig: initialVision,
   onUpdate,
 }: UseQuestionClassifierProps) {
-  const normalizedInitialClasses =
-    initialClasses && initialClasses.length > 0
-      ? initialClasses
-      : createDefaultQuestionClassifierClasses();
-  const [classes, setClasses] = useState<Topic[]>(normalizedInitialClasses);
-  const [currentNodeId, setCurrentNodeId] = useState(nodeId);
+  const classes = useMemo<Topic[]>(() => {
+    if (initialClasses && initialClasses.length > 0) {
+      return initialClasses;
+    }
+    return createDefaultQuestionClassifierClasses();
+  }, [initialClasses]);
   const { edges, updateNode } = useWorkflowStore();
 
   // 포트 스키마 업데이트 함수
@@ -41,30 +41,13 @@ export function useQuestionClassifier({
     [nodeId, updateNode]
   );
 
-  // 노드가 변경될 때만 상태 재설정 (상태 누수 방지)
-  useEffect(() => {
-    if (currentNodeId !== nodeId) {
-      const nextClasses =
-        initialClasses && initialClasses.length > 0
-          ? initialClasses
-          : createDefaultQuestionClassifierClasses();
-      setClasses(nextClasses);
-      setCurrentNodeId(nodeId);
-      if (!initialClasses || initialClasses.length === 0) {
-        onUpdate({ classes: nextClasses });
-        updatePorts(nextClasses, initialVision);
-      }
-    }
-  }, [nodeId, currentNodeId, initialClasses, onUpdate, updatePorts, initialVision]);
-
   useEffect(() => {
     if (!initialClasses || initialClasses.length === 0) {
       const defaults = createDefaultQuestionClassifierClasses();
-      setClasses(defaults);
       onUpdate({ classes: defaults });
       updatePorts(defaults, initialVision);
     }
-  }, [initialClasses, onUpdate, updatePorts, initialVision]);
+  }, [initialClasses, initialVision, onUpdate, updatePorts]);
 
   // 변경사항을 부모에 전파
   const notifyUpdate = useCallback(
@@ -96,7 +79,6 @@ export function useQuestionClassifier({
         });
       }
 
-      setClasses(newClasses);
       notifyUpdate({ classes: newClasses });
 
       // 포트 스키마 업데이트

@@ -51,5 +51,4 @@ export interface CollapsedViewProps {
 export interface ExpandedViewProps {
   nodeId: string;
   internalGraph: TemplateGraph;
-  templateId: string;
 }

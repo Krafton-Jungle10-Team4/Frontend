@@ -8,7 +8,6 @@ import {
   mockWinner,
   mockEvaluationInsights,
 } from '@features/prompt-engineering-studio/data/mockResults';
-import { mockModels } from '@features/prompt-engineering-studio/data/mockModels';
 import { sortTestsByOverallScore, getTopTests, findWinnerTest } from '@shared/utils';
 
 export function useTestResults(testSetId: string | undefined) {

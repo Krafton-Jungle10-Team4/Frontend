@@ -9,8 +9,6 @@ import {
   Bug,
   Palette,
   LogOut,
-  Zap,
-  Crown,
   Sparkles,
   ChevronDown,
   CreditCard,
@@ -36,46 +34,11 @@ interface TopNavigationProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onLogout?: () => Promise<void> | void;
-  serviceName?: string;
   activeTabLabel?: string;
   onLogoClick?: () => void;
   navigationTabs?: ReactNode;
   showSidebarToggle?: boolean;
 }
-
-const PlanDisplay = () => {
-  const { billingStatus } = useBilling();
-
-  if (!billingStatus) {
-    return null;
-  }
-
-  const { plan_id, name } = billingStatus.current_plan;
-
-  const planConfig = {
-    free: {
-      icon: null,
-      className: 'bg-gray-100 text-gray-800',
-    },
-    pro: {
-      icon: <Zap size={14} className="text-yellow-500" />,
-      className: 'bg-yellow-100 text-yellow-800',
-    },
-    enterprise: {
-      icon: <Crown size={14} className="text-purple-500" />,
-      className: 'bg-purple-100 text-purple-800',
-    },
-  };
-
-  const config = planConfig[plan_id];
-
-  return (
-    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm bg-white text-gray-800`}>
-      {config.icon}
-      <span>{name}</span>
-    </div>
-  );
-};
 
 export function TopNavigation({
   onToggleSidebar,
@@ -85,7 +48,6 @@ export function TopNavigation({
   language,
   onLanguageChange,
   onLogout,
-  serviceName = 'SnapAgent',
   activeTabLabel,
   onLogoClick,
   navigationTabs,

@@ -44,6 +44,7 @@ export function EmbedWebsiteDialog({ botId: _botId }: EmbedWebsiteDialogProps) {
         toast.success('코드가 복사되었습니다');
         closeDialog();
       } catch (error) {
+        console.error('코드 복사에 실패했습니다:', error);
         toast.error('코드 복사에 실패했습니다');
       }
     }

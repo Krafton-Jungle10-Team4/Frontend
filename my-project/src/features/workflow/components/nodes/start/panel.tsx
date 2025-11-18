@@ -16,14 +16,13 @@ import type { StartNodeType } from '@/shared/types/workflow.types';
 
 export const StartPanel = () => {
   const { selectedNodeId, nodes } = useWorkflowStore();
+  const updateNode = useWorkflowStore((state) => state.updateNode);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
   if (!node) return null;
 
   const startData = node.data as StartNodeType;
-  const updateNode = useWorkflowStore((state) => state.updateNode);
-
   const handleUpdate = (field: string, value: unknown) => {
     updateNode(selectedNodeId!, { [field]: value });
   };

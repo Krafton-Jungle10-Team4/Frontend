@@ -41,7 +41,7 @@ function operationFromBackend(
  */
 export function toBackendFormat(data: AssignerNodeType) {
   const operations = (data.operations || []).map(operationToBackend);
-  let variable_mappings = data.variable_mappings || {};
+  const variable_mappings = data.variable_mappings || {};
 
   // Ensure variable_mappings for all operation ports
   operations.forEach((operation, index) => {

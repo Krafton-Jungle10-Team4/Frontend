@@ -74,7 +74,6 @@ export const ImportedWorkflowNode = memo(
             <ExpandedView
               nodeId={id}
               internalGraph={data.internal_graph}
-              templateId={data.template_id}
             />
           ) : (
             <CollapsedView ports={data.ports} description={data.desc} />

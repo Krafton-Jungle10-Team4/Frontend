@@ -37,7 +37,7 @@ import {
   createDefaultQuestionClassifierClasses,
 } from '../components/nodes/question-classifier/utils/portSchemaGenerator';
 import { generateAssignerPortSchema } from '../components/nodes/assigner/utils/portSchemaGenerator';
-import type { AssignerNodeType, AssignerOperation } from '@/shared/types/workflow.types';
+import type { AssignerNodeType } from '@/shared/types/workflow.types';
 import { normalizeHandleId, normalizeSelectorVariable } from '@/shared/utils/workflowPorts';
 import { sanitizeEdgeForLogicalTargets } from '../utils/logicalNodeGuards';
 
@@ -65,9 +65,6 @@ const stringifyValue = (value: unknown): string => {
 
 const isVariableAssignerNode = (node: Node): boolean =>
   (node.data.type as BlockEnum) === BlockEnum.VariableAssigner;
-
-const isAssignerNode = (node: Node): boolean =>
-  (node.data.type as BlockEnum) === BlockEnum.Assigner;
 
 const ensureVariableAssignerData = (
   rawData: Record<string, any>
@@ -790,54 +787,6 @@ const calculateShortestPath = (
   return Infinity; // 연결되지 않음
 };
 
-/**
- * 특정 노드가 분기 노드의 직접 타겟인지 확인
- * @param nodeId 확인할 노드 ID
- * @param nodes 모든 노드
- * @param edges 모든 엣지
- * @returns 분기 노드의 직접 타겟이면 true
- */
-const isDirectTargetOfBranchNode = (
-  nodeId: string,
-  nodes: Node[],
-  edges: Edge[]
-): boolean => {
-  const branchNodeTypes = [BlockEnum.IfElse, BlockEnum.QuestionClassifier];
-
-  // 해당 노드로 들어오는 엣지 확인
-  const incomingEdges = edges.filter((edge) => edge.target === nodeId);
-
-  for (const edge of incomingEdges) {
-    const sourceNode = nodes.find((n) => n.id === edge.source);
-    if (!sourceNode) {
-      continue;
-    }
-
-    const sourceType = sourceNode.data.type as BlockEnum;
-    if (!branchNodeTypes.includes(sourceType)) {
-      continue;
-    }
-
-    // 분기 노드의 특수 포트(if, else, class_*_branch)로부터의 연결인지 확인
-    const sourceHandle = edge.sourceHandle || '';
-    if (
-      sourceType === BlockEnum.IfElse &&
-      (sourceHandle === 'if' || sourceHandle === 'else')
-    ) {
-      return true;
-    }
-    if (
-      sourceType === BlockEnum.QuestionClassifier &&
-      sourceHandle.startsWith('class_') &&
-      sourceHandle.endsWith('_branch')
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
 const synchronizeEdgesWithMappings = (nodes: Node[], edges: Edge[]) => {
   const uniqueEdges = new Map<string, Edge>();
 
@@ -1487,7 +1436,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         (type) => type.type === BlockEnum.Answer
       );
 
-      let nodeTypes = [...fetched];
+      const nodeTypes = [...fetched];
       if (!hasVariableAssigner) {
         nodeTypes.push(cloneVariableAssignerNodeType());
       }

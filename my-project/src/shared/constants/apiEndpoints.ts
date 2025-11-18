@@ -108,6 +108,10 @@ export const API_ENDPOINTS = {
       runId: string,
       nodeId: string
     ) => `/api/v1/bots/${botId}/workflow-executions/${runId}/nodes/${nodeId}`,
+    WORKFLOW_RUN_STATISTICS: (botId: string) =>
+      `/api/v1/bots/${botId}/workflow-executions/statistics`,
+    WORKFLOW_RUN_ANNOTATION: (botId: string, runId: string) =>
+      `/api/v1/bots/${botId}/workflow-executions/${runId}/annotation`,
 
     // Variable Assigner 노드 관련
     DEFAULT_NODE_CONFIG: (botId: string, nodeType: string) =>

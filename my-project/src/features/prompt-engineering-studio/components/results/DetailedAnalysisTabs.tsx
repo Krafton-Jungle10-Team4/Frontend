@@ -11,8 +11,6 @@ import {
   BarChart3,
   MessageSquare,
   Target,
-  CheckCircle2,
-  AlertTriangle,
   Sparkles,
 } from 'lucide-react';
 import {
