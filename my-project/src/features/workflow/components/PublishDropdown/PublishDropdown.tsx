@@ -3,7 +3,7 @@
  * Dify 스타일 게시하기 드롭다운 메뉴
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Play, Code, Compass, FileCode } from 'lucide-react';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
 import { usePublishActions } from '../../hooks/usePublishActions';
 import { LibrarySaveDialog } from '../dialogs/LibrarySaveDialog';
 import { DeployConfirmDialog } from '../dialogs/DeployConfirmDialog';
+import { botApi } from '@/features/bot/api/botApi';
 
 interface PublishDropdownProps {
   botId: string;
@@ -86,9 +87,25 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
   const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
+  const [botName, setBotName] = useState<string>('');
 
   // 현재 봇의 deployment인지 확인
   const currentBotDeployment = deployment?.bot_id === botId ? deployment : null;
+
+  // 봇 정보 조회
+  useEffect(() => {
+    const fetchBotInfo = async () => {
+      try {
+        const bot = await botApi.getBot(botId);
+        setBotName(bot.bot_name || '');
+      } catch (error) {
+        console.error('Failed to fetch bot info:', error);
+      }
+    };
+    if (botId) {
+      fetchBotInfo();
+    }
+  }, [botId]);
 
   // 드롭다운이 열릴 때만 배포 정보 로드
   const handleOpenChange = (open: boolean) => {
@@ -194,6 +211,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         open={isLibraryDialogOpen}
         onOpenChange={setIsLibraryDialogOpen}
         onPublish={publishUpdate}
+        defaultBotName={botName}
       />
 
       {/* DeployConfirmDialog */}

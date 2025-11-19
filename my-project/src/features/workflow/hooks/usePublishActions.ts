@@ -44,8 +44,8 @@ export function usePublishActions(botId: string) {
         return;
       }
 
-      toast.success('발행 성공', {
-        description: `${publishedVersion.version} 버전이 라이브러리에 발행되었습니다.`,
+      toast.success('게시 성공', {
+        description: `${publishedVersion.version} 버전이 라이브러리에 게시되었습니다.`,
       });
 
       // 3. 발행된 버전 ID 저장 및 배포 확인 모달 오픈
@@ -54,8 +54,8 @@ export function usePublishActions(botId: string) {
 
     } catch (error: any) {
       console.error('Publish error:', error);
-      toast.error('발행 실패', {
-        description: error.message || '발행 중 오류가 발생했습니다.',
+      toast.error('게시 실패', {
+        description: error.message || '게시 중 오류가 발생했습니다.',
       });
     }
   }, [botId, saveWorkflow, publishWorkflow]);

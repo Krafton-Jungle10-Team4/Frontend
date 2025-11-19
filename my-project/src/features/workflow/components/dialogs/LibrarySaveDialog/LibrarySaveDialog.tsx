@@ -1,7 +1,7 @@
 /**
  * LibrarySaveDialog - 워크플로우 발행 및 라이브러리 저장 다이얼로그
  */
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import {
@@ -32,6 +32,7 @@ interface LibrarySaveDialogProps {
   onOpenChange: (open: boolean) => void;
   onPublish: (libraryMetadata: LibraryMetadata) => Promise<void>;
   isPublishing?: boolean;
+  defaultBotName?: string;
 }
 
 interface FormData {
@@ -43,7 +44,7 @@ interface FormData {
 }
 
 export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
-  ({ open, onOpenChange, onPublish, isPublishing = false }) => {
+  ({ open, onOpenChange, onPublish, isPublishing = false, defaultBotName = '' }) => {
     const {
       register,
       handleSubmit,
@@ -53,7 +54,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
       reset,
     } = useForm<FormData>({
       defaultValues: {
-        library_name: '',
+        library_name: defaultBotName,
         library_description: '',
         library_category: '',
         library_tags: '',
@@ -63,6 +64,13 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
 
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
+
+    // defaultBotName이 변경되면 폼의 library_name 업데이트
+    useEffect(() => {
+      if (defaultBotName) {
+        setValue('library_name', defaultBotName);
+      }
+    }, [defaultBotName, setValue]);
 
     const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && tagInput.trim()) {
@@ -114,9 +122,9 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>워크플로우 발행</DialogTitle>
+            <DialogTitle>에이전트 버전 게시</DialogTitle>
             <DialogDescription>
-              워크플로우를 발행하고 라이브러리에 저장합니다.
+              에이전트 버전을 게시하고 라이브러리에 저장합니다.
             </DialogDescription>
           </DialogHeader>
 
@@ -152,18 +160,13 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                   {/* 설명 */}
                   <div className="space-y-2">
                     <Label htmlFor="library_description">
-                      설명 <span className="text-destructive">*</span>
+                      설명
                     </Label>
                     <Textarea
                       id="library_description"
-                      placeholder="에이전트의 기능과 사용 방법을 설명해주세요"
+                      placeholder="에이전트의 기능과 사용 방법을 설명해주세요 (선택사항)"
                       rows={3}
                       {...register('library_description', {
-                        required: '설명을 입력해주세요',
-                        minLength: {
-                          value: 10,
-                          message: '설명은 최소 10자 이상이어야 합니다',
-                        },
                         maxLength: {
                           value: 500,
                           message: '설명은 최대 500자까지 입력 가능합니다',
@@ -278,7 +281,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
               </Button>
               <Button type="submit" disabled={isPublishing}>
                 {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isPublishing ? '발행 중...' : '라이브러리에 게시'}
+                {isPublishing ? '게시 중...' : '라이브러리에 게시'}
               </Button>
             </DialogFooter>
           </form>
