@@ -7,8 +7,9 @@ import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.typ
 import { AgentDetailDialog } from './AgentDetailDialog';
 import { AgentImportDialog } from './AgentImportDialog';
 import { AgentImportAsNodeDialog } from './AgentImportAsNodeDialog';
-import { DeploymentDialog } from './DeploymentDialog';
+import { LibraryDeployDialog } from './LibraryDeployDialog';
 import { VersionTimelineDialog } from './VersionTimelineDialog';
+import { useLibraryStore } from '../stores/libraryStore';
 
 interface AgentCardProps {
   agent: LibraryAgentVersion;
@@ -20,6 +21,9 @@ export function AgentCard({ agent }: AgentCardProps) {
   const [showImportAsNodeDialog, setShowImportAsNodeDialog] = useState(false);
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [showVersionTimelineDialog, setShowVersionTimelineDialog] = useState(false);
+
+  // Phase 6.2: 배포 상태 동기화
+  const { fetchAgents } = useLibraryStore();
 
   const visibilityLabel = {
     private: '비공개',
@@ -69,6 +73,12 @@ export function AgentCard({ agent }: AgentCardProps) {
     if (diffDays < 30) return `${diffDays}일 전`;
     if (diffDays < 365) return `${Math.floor(diffDays / 30)}개월 전`;
     return `${Math.floor(diffDays / 365)}년 전`;
+  };
+
+  // Phase 6.2: 배포 성공 시 라이브러리 목록 갱신
+  const handleDeploySuccess = () => {
+    fetchAgents();
+    setShowDeployDialog(false);
   };
 
   return (
@@ -214,12 +224,11 @@ export function AgentCard({ agent }: AgentCardProps) {
         open={showImportAsNodeDialog}
         onOpenChange={setShowImportAsNodeDialog}
       />
-      <DeploymentDialog
+      <LibraryDeployDialog
         open={showDeployDialog}
-        onClose={() => setShowDeployDialog(false)}
-        versionId={agent.id}
-        agentName={agent.library_name}
-        botId={agent.bot_id}
+        onOpenChange={setShowDeployDialog}
+        agent={agent}
+        onDeploySuccess={handleDeploySuccess}
       />
       <VersionTimelineDialog
         open={showVersionTimelineDialog}

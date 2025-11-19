@@ -33,7 +33,7 @@ export const ImportedWorkflowPanel = memo(
       <div className="space-y-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground">
-            템플릿 이름
+            에이전트 이름
           </label>
           <p className="text-sm mt-1">{data.template_name || '알 수 없음'}</p>
         </div>
@@ -117,7 +117,7 @@ export const ImportedWorkflowPanel = memo(
           onClick={handleViewTemplate}
         >
           <ExternalLink className="w-4 h-4 mr-2" />
-          템플릿 상세 보기
+          에이전트 상세 보기
         </Button>
       )}
     </div>

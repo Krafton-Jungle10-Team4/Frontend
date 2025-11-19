@@ -1,5 +1,5 @@
 /**
- * ImportedWorkflowNode - 템플릿을 표현하는 노드
+ * ImportedWorkflowNode - 에이전트를 표현하는 노드
  */
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { Handle, Position, type NodeProps, useUpdateNodeInternals } from '@xyflow/react';

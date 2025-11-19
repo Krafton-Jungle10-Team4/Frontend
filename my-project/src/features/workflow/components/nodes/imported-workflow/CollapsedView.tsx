@@ -1,5 +1,5 @@
 /**
- * CollapsedView - 축소된 상태의 템플릿 노드
+ * CollapsedView - 축소된 상태의 에이전트 노드
  */
 import { memo } from 'react';
 import { FileText } from 'lucide-react';
