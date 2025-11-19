@@ -16,7 +16,6 @@ import { Button } from '@/shared/components/button';
 import { Input } from '@/shared/components/input';
 import { Textarea } from '@/shared/components/textarea';
 import { Label } from '@/shared/components/label';
-import { Checkbox } from '@/shared/components/checkbox';
 import {
   Select,
   SelectContent,
@@ -31,12 +30,11 @@ import type { LibraryMetadata } from '../../../types/workflow.types';
 interface LibrarySaveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPublish: (libraryMetadata?: LibraryMetadata) => Promise<void>;
+  onPublish: (libraryMetadata: LibraryMetadata) => Promise<void>;
   isPublishing?: boolean;
 }
 
 interface FormData {
-  saveToLibrary: boolean;
   library_name: string;
   library_description: string;
   library_category: string;
@@ -55,19 +53,16 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
       reset,
     } = useForm<FormData>({
       defaultValues: {
-        saveToLibrary: false,
         library_name: '',
         library_description: '',
         library_category: '',
         library_tags: '',
-        library_visibility: 'private',
+        library_visibility: 'team',
       },
     });
 
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
-
-    const saveToLibrary = watch('saveToLibrary');
 
     const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && tagInput.trim()) {
@@ -89,18 +84,14 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
 
     const onSubmit = async (data: FormData) => {
       try {
-        if (data.saveToLibrary) {
-          const libraryMetadata: LibraryMetadata = {
-            library_name: data.library_name,
-            library_description: data.library_description,
-            library_category: data.library_category,
-            library_tags: tags,
-            library_visibility: data.library_visibility,
-          };
-          await onPublish(libraryMetadata);
-        } else {
-          await onPublish();
-        }
+        const libraryMetadata: LibraryMetadata = {
+          library_name: data.library_name,
+          library_description: data.library_description,
+          library_category: data.library_category,
+          library_tags: tags,
+          library_visibility: data.library_visibility,
+        };
+        await onPublish(libraryMetadata);
 
         // 성공 시 폼 리셋
         reset();
@@ -125,32 +116,12 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
           <DialogHeader>
             <DialogTitle>워크플로우 발행</DialogTitle>
             <DialogDescription>
-              워크플로우를 발행하고, 선택적으로 라이브러리에 저장할 수 있습니다.
+              워크플로우를 발행하고 라이브러리에 저장합니다.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1">
             <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-              {/* 라이브러리에 저장 체크박스 */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="saveToLibrary"
-                  checked={saveToLibrary}
-                  onCheckedChange={(checked) =>
-                    setValue('saveToLibrary', checked as boolean)
-                  }
-                />
-                <Label
-                  htmlFor="saveToLibrary"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  라이브러리에 저장
-                </Label>
-              </div>
-
-              {/* 조건부 메타데이터 필드 */}
-              {saveToLibrary && (
-                <div className="space-y-4 border-t pt-4">
                   {/* 라이브러리 이름 */}
                   <div className="space-y-2">
                     <Label htmlFor="library_name">
@@ -160,7 +131,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       id="library_name"
                       placeholder="예: 고객 문의 응답 에이전트"
                       {...register('library_name', {
-                        required: saveToLibrary ? '이름을 입력해주세요' : false,
+                        required: '이름을 입력해주세요',
                         minLength: {
                           value: 2,
                           message: '이름은 최소 2자 이상이어야 합니다',
@@ -188,7 +159,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       placeholder="에이전트의 기능과 사용 방법을 설명해주세요"
                       rows={3}
                       {...register('library_description', {
-                        required: saveToLibrary ? '설명을 입력해주세요' : false,
+                        required: '설명을 입력해주세요',
                         minLength: {
                           value: 10,
                           message: '설명은 최소 10자 이상이어야 합니다',
@@ -294,8 +265,6 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       </p>
                     )}
                   </div>
-                </div>
-              )}
             </div>
 
             <DialogFooter className="mt-4">
@@ -309,7 +278,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
               </Button>
               <Button type="submit" disabled={isPublishing}>
                 {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isPublishing ? '발행 중...' : '발행하기'}
+                {isPublishing ? '발행 중...' : '라이브러리에 게시'}
               </Button>
             </DialogFooter>
           </form>

@@ -23,6 +23,7 @@ import {
 } from '@shared/components/tooltip';
 import { usePublishActions } from '../../hooks/usePublishActions';
 import { LibrarySaveDialog } from '../dialogs/LibrarySaveDialog';
+import { DeployConfirmDialog } from '../dialogs/DeployConfirmDialog';
 
 interface PublishDropdownProps {
   botId: string;
@@ -77,6 +78,9 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     openExplore,
     apiReference,
     canRunApp,
+    isDeployDialogOpen,
+    setIsDeployDialogOpen,
+    publishedVersionId,
   } = usePublishActions(botId);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -141,7 +145,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
               className="w-full"
               onClick={handlePublishClick}
             >
-              업데이트 게시
+              라이브러리에 게시
             </Button>
           </div>
 
@@ -191,6 +195,20 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         onOpenChange={setIsLibraryDialogOpen}
         onPublish={publishUpdate}
       />
+
+      {/* DeployConfirmDialog */}
+      {publishedVersionId && (
+        <DeployConfirmDialog
+          open={isDeployDialogOpen}
+          onOpenChange={setIsDeployDialogOpen}
+          botId={botId}
+          versionId={publishedVersionId}
+          onDeploySuccess={() => {
+            // 배포 성공 시 배포 정보 refetch
+            fetchDeployment(botId);
+          }}
+        />
+      )}
     </>
   );
 }

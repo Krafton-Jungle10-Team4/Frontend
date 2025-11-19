@@ -3,11 +3,12 @@
  * 게시하기 관련 모든 액션 로직을 제공하는 훅
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useDeploymentStore } from '@/features/deployment/stores/deploymentStore';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { botApi } from '@/features/bot/api/botApi';
+import type { LibraryMetadata } from '../types/workflow.types';
 
 export function usePublishActions(botId: string) {
   const {
@@ -21,64 +22,43 @@ export function usePublishActions(botId: string) {
 
   const { saveWorkflow, publishWorkflow } = useWorkflowStore();
 
+  // 배포 확인 모달 상태
+  const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
+  const [publishedVersionId, setPublishedVersionId] = useState<string | null>(null);
+
   /**
    * 업데이트 게시
-   * - 워크플로우 저장
-   * - 배포가 없으면 자동 생성, 있으면 상태만 변경
+   * - 워크플로우 저장 및 발행
+   * - 배포 확인 모달 표시
    */
-  const publishUpdate = useCallback(async () => {
-    let workflowVersionId: string | null = null;
-
+  const publishUpdate = useCallback(async (libraryMetadata: LibraryMetadata) => {
     try {
-      // 1. 워크플로우 저장 및 발행
+      // 1. 워크플로우 저장
       await saveWorkflow(botId);
-      const publishResult = await publishWorkflow(botId);
-      if (!publishResult) {
+
+      // 2. 워크플로우 발행 (라이브러리 메타데이터 필수)
+      const publishedVersion = await publishWorkflow(botId, libraryMetadata);
+
+      if (!publishedVersion) {
         toast.error('발행할 Draft가 없습니다');
         return;
       }
-      workflowVersionId = publishResult.id;
 
-      // 2. Deployment 존재 여부 확인 (현재 봇의 deployment인지 확인)
-      const currentDeployment = useDeploymentStore.getState().deployment;
-      const isCurrentBotDeployment = currentDeployment?.bot_id === botId;
+      toast.success('발행 성공', {
+        description: `${publishedVersion.version} 버전이 라이브러리에 발행되었습니다.`,
+      });
 
-      if (!currentDeployment || !isCurrentBotDeployment) {
-        // Deployment가 없거나 다른 봇의 것이면 기본 설정으로 생성
-        await createOrUpdateDeployment(botId, {
-          status: 'published',
-          allowed_domains: [],
-          widget_config: widgetConfig,
-          workflow_version_id: publishResult.id,
-        });
-        toast.success('배포가 생성되었습니다');
-      } else {
-        // Deployment가 있으면 상태만 업데이트
-        await updateStatus(botId, 'published');
-        toast.success('배포가 업데이트되었습니다');
-      }
+      // 3. 발행된 버전 ID 저장 및 배포 확인 모달 오픈
+      setPublishedVersionId(publishedVersion.id);
+      setIsDeployDialogOpen(true);
+
     } catch (error: any) {
-      console.error('Failed to publish update:', error);
-
-      // 404 에러 처리 - 배포가 없으면 자동으로 생성 시도
-      if (error.response?.status === 404 && workflowVersionId) {
-        try {
-          await createOrUpdateDeployment(botId, {
-            status: 'published',
-            allowed_domains: [],
-            widget_config: widgetConfig,
-            workflow_version_id: workflowVersionId,
-          });
-          toast.success('배포가 생성되었습니다');
-        } catch (retryError) {
-          console.error('Failed to create deployment after 404:', retryError);
-          toast.error('배포 생성에 실패했습니다');
-        }
-      } else {
-        toast.error('배포 업데이트에 실패했습니다');
-      }
+      console.error('Publish error:', error);
+      toast.error('발행 실패', {
+        description: error.message || '발행 중 오류가 발생했습니다.',
+      });
     }
-  }, [botId, saveWorkflow, publishWorkflow, updateStatus, createOrUpdateDeployment, widgetConfig]);
+  }, [botId, saveWorkflow, publishWorkflow]);
 
   /**
    * 앱 실행 가능 여부 판단
@@ -141,5 +121,9 @@ export function usePublishActions(botId: string) {
     openExplore,
     apiReference,
     canRunApp,
+    // 배포 확인 모달 상태
+    isDeployDialogOpen,
+    setIsDeployDialogOpen,
+    publishedVersionId,
   };
 }
