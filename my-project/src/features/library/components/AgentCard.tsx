@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
-import { Download, Rocket, Eye } from 'lucide-react';
+import { Download, Rocket, Eye, Plus, History } from 'lucide-react';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { AgentDetailDialog } from './AgentDetailDialog';
 import { AgentImportDialog } from './AgentImportDialog';
+import { AgentImportAsNodeDialog } from './AgentImportAsNodeDialog';
 import { DeploymentDialog } from './DeploymentDialog';
+import { VersionTimelineDialog } from './VersionTimelineDialog';
 
 interface AgentCardProps {
   agent: LibraryAgentVersion;
@@ -15,7 +17,9 @@ interface AgentCardProps {
 export function AgentCard({ agent }: AgentCardProps) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showImportAsNodeDialog, setShowImportAsNodeDialog] = useState(false);
   const [showDeployDialog, setShowDeployDialog] = useState(false);
+  const [showVersionTimelineDialog, setShowVersionTimelineDialog] = useState(false);
 
   const visibilityLabel = {
     private: '비공개',
@@ -30,6 +34,41 @@ export function AgentCard({ agent }: AgentCardProps) {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  // 배포 상태 배지 렌더링 함수
+  const getDeploymentBadge = () => {
+    if (!agent.deployment_status) {
+      return <Badge variant="outline">배포 안 됨</Badge>;
+    }
+
+    switch (agent.deployment_status) {
+      case 'published':
+        return <Badge className="bg-green-500 text-white">배포됨</Badge>;
+      case 'suspended':
+        return <Badge className="bg-yellow-500 text-white">일시중지</Badge>;
+      case 'draft':
+        return <Badge variant="secondary">Draft</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  // 상대 시간 표시 함수 (date-fns 대체)
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    if (diffDays < 30) return `${diffDays}일 전`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}개월 전`;
+    return `${Math.floor(diffDays / 365)}년 전`;
   };
 
   return (
@@ -68,6 +107,23 @@ export function AgentCard({ agent }: AgentCardProps) {
             )}
           </div>
 
+          {/* Deployment Status Badge & Widget Key */}
+          <div className="flex items-center gap-2 mt-4">
+            {getDeploymentBadge()}
+            {agent.widget_key && (
+              <span className="text-xs text-muted-foreground">
+                🔑 {agent.widget_key.slice(0, 8)}...
+              </span>
+            )}
+          </div>
+
+          {/* Deployed Date */}
+          {agent.deployed_at && (
+            <p className="text-xs text-muted-foreground mt-2">
+              배포: {formatRelativeTime(agent.deployed_at)}
+            </p>
+          )}
+
           {/* Stats */}
           <div className="flex gap-4 mt-4 text-xs text-muted-foreground">
             {agent.node_count !== undefined && (
@@ -79,32 +135,67 @@ export function AgentCard({ agent }: AgentCardProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => setShowDetailDialog(true)}
-          >
-            <Eye className="w-4 h-4 mr-1" />
-            상세보기
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => setShowImportDialog(true)}
-          >
-            <Download className="w-4 h-4 mr-1" />
-            가져오기
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDeployDialog(true)}
-          >
-            <Rocket className="w-4 h-4" />
-          </Button>
+        <CardFooter className="flex flex-col gap-2">
+          <div className="flex gap-2 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowDetailDialog(true)}
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              상세보기
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowImportDialog(true)}
+            >
+              <Download className="w-4 h-4 mr-1" />
+              에이전트 가져오기
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowImportAsNodeDialog(true)}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              노드로 가져오기
+            </Button>
+          </div>
+          <div className="flex gap-2 w-full">
+            {!agent.deployment_status ? (
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={() => setShowDeployDialog(true)}
+              >
+                <Rocket className="w-4 h-4 mr-1" />
+                배포
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="flex-1"
+                onClick={() => setShowDeployDialog(true)}
+              >
+                <Rocket className="w-4 h-4 mr-1" />
+                배포 관리
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowVersionTimelineDialog(true)}
+            >
+              <History className="w-4 h-4 mr-1" />
+              버전 보기
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 
@@ -119,11 +210,21 @@ export function AgentCard({ agent }: AgentCardProps) {
         onClose={() => setShowImportDialog(false)}
         agent={agent}
       />
+      <AgentImportAsNodeDialog
+        open={showImportAsNodeDialog}
+        onOpenChange={setShowImportAsNodeDialog}
+      />
       <DeploymentDialog
         open={showDeployDialog}
         onClose={() => setShowDeployDialog(false)}
         versionId={agent.id}
         agentName={agent.library_name}
+        botId={agent.bot_id}
+      />
+      <VersionTimelineDialog
+        open={showVersionTimelineDialog}
+        onOpenChange={setShowVersionTimelineDialog}
+        agent={agent}
       />
     </>
   );

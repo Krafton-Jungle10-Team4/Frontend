@@ -35,6 +35,10 @@ export function createImportedNodeFromTemplate(
       template_id: template.id,
       template_name: template.name,
       template_version: template.version,
+      // 실행용 필수 필드: 백엔드 ImportedWorkflowNode가 source_version_id를 사용
+      config: {
+        source_version_id: template.metadata.source_version_id,
+      },
       is_expanded: isExpanded,
       read_only: true,
       internal_graph: template.graph,

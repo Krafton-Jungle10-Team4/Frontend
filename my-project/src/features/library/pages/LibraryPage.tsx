@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLibraryStore } from '../stores/libraryStore';
 import { LibraryFilters } from '../components/LibraryFilters';
 import { AgentCard } from '../components/AgentCard';
@@ -10,6 +10,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/shared/components/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/select';
 import { Loader2 } from 'lucide-react';
 
 export function LibraryPage() {
@@ -23,6 +30,9 @@ export function LibraryPage() {
     setFilters,
   } = useLibraryStore();
 
+  // 배포 필터 상태
+  const [deploymentFilter, setDeploymentFilter] = useState<string>('all');
+
   useEffect(() => {
     fetchAgents();
   }, [fetchAgents]);
@@ -31,6 +41,15 @@ export function LibraryPage() {
     setFilters({ page });
     fetchAgents({ page });
   };
+
+  // 배포 상태별 필터링
+  const filteredAgents = useMemo(() => {
+    if (deploymentFilter === 'all') return agents;
+    if (deploymentFilter === 'deployed') {
+      return agents.filter((a) => a.deployment_status === 'published');
+    }
+    return agents.filter((a) => !a.deployment_status);
+  }, [agents, deploymentFilter]);
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -45,6 +64,20 @@ export function LibraryPage() {
       {/* Filters */}
       <LibraryFilters />
 
+      {/* Deployment Filter */}
+      <div className="mb-6">
+        <Select value={deploymentFilter} onValueChange={setDeploymentFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="배포 상태" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">전체</SelectItem>
+            <SelectItem value="deployed">배포됨</SelectItem>
+            <SelectItem value="not_deployed">배포 안 됨</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
@@ -54,10 +87,12 @@ export function LibraryPage() {
       )}
 
       {/* Empty State */}
-      {!isLoading && agents.length === 0 && (
+      {!isLoading && filteredAgents.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            라이브러리에 등록된 에이전트가 없습니다.
+            {deploymentFilter === 'all'
+              ? '라이브러리에 등록된 에이전트가 없습니다.'
+              : '해당 배포 상태의 에이전트가 없습니다.'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             워크플로우를 발행할 때 라이브러리 메타데이터를 입력하면 자동으로 등록됩니다.
@@ -66,10 +101,10 @@ export function LibraryPage() {
       )}
 
       {/* Agent Cards Grid */}
-      {!isLoading && agents.length > 0 && (
+      {!isLoading && filteredAgents.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {agents.map((agent) => (
+            {filteredAgents.map((agent) => (
               <AgentCard key={agent.id} agent={agent} />
             ))}
           </div>

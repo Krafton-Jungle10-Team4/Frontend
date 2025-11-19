@@ -17,7 +17,7 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { AlignHorizontalJustifyCenter, Eye, EyeOff } from 'lucide-react';
+import { AlignHorizontalJustifyCenter, Eye, EyeOff, Download } from 'lucide-react';
 
 import { Button } from '@shared/components/button';
 import type {
@@ -61,6 +61,7 @@ import {
 } from '../nodes/question-classifier/utils/portSchemaGenerator';
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 import { ConversationVariablePanel } from '../ConversationVariablePanel';
+import { AgentImportAsNodeDialog } from '@/features/library/components/AgentImportAsNodeDialog';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
 const REACT_FLOW_NODE_TYPES = {
@@ -119,6 +120,7 @@ const WorkflowInner = () => {
   const [panelWidth, setPanelWidth] = useState(480); // 초기 너비 480px
   const [isResizing, setIsResizing] = useState(false);
   const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
+  const [isAgentImportDialogOpen, setIsAgentImportDialogOpen] = useState(false);
   const { screenToFlowPosition, fitView } = useReactFlow();
   const prevBotIdRef = useRef<string | undefined>();
   const initialFitViewDoneRef = useRef(false);
@@ -668,6 +670,15 @@ const WorkflowInner = () => {
             대화 변수
           </Button>
 
+          <Button
+            variant="outline"
+            onClick={() => setIsAgentImportDialogOpen(true)}
+            title="라이브러리에서 에이전트 가져오기"
+          >
+            <Download className="w-4 h-4" />
+            에이전트 가져오기
+          </Button>
+
           <WorkflowSettingsDialog />
 
           <SaveButton />
@@ -728,6 +739,15 @@ const WorkflowInner = () => {
         open={isConversationPanelOpen}
         onOpenChange={setConversationPanelOpen}
       />
+
+      <AgentImportAsNodeDialog
+        open={isAgentImportDialogOpen}
+        onOpenChange={setIsAgentImportDialogOpen}
+        onImportSuccess={() => {
+          // 성공 시 처리 (노드가 이미 추가됨)
+        }}
+      />
+
       {botId && (
         <>
           <EmbedWebsiteDialog botId={botId} />

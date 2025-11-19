@@ -26,6 +26,7 @@ interface DeploymentDialogProps {
   onClose: () => void;
   versionId: string;
   agentName: string;
+  botId?: string;
 }
 
 interface Deployment {
@@ -36,7 +37,7 @@ interface Deployment {
   bot_id: string;
 }
 
-export function DeploymentDialog({ open, onClose, versionId, botId, agentName }: DeploymentDialogProps) {
+export function DeploymentDialog({ open, onClose, versionId, agentName, botId }: DeploymentDialogProps) {
   const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);

@@ -12,6 +12,11 @@ export interface ImportedWorkflowNodeData {
   title: string;
   desc?: string;
 
+  // 실행용 필수 필드 (백엔드 ImportedWorkflowNode가 참조)
+  config: {
+    source_version_id: string; // 라이브러리/템플릿 버전 UUID
+  };
+
   // 템플릿 정보
   template_id: string;
   template_name: string;

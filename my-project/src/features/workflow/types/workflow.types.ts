@@ -3,6 +3,7 @@
  */
 
 import type { BackendWorkflow } from '@/shared/types/workflowTransform.types';
+import type { PortDefinition } from '@/shared/types/workflow/port.types';
 
 // ========== 라이브러리 관련 타입 (신규) ==========
 
@@ -42,8 +43,8 @@ export interface LibraryAgentDetail extends LibraryAgentVersion {
   environment_variables?: Record<string, any>;
   conversation_variables?: Record<string, any>;
   features?: Record<string, any>;
-  input_schema?: Record<string, any>;
-  output_schema?: Record<string, any>;
+  input_schema?: PortDefinition[];
+  output_schema?: PortDefinition[];
   port_definitions?: Record<string, any>;
   created_at: string;
 }
@@ -95,8 +96,8 @@ export interface WorkflowVersion {
   library_published_at?: string;
 
   // 통계 및 스키마 정보 (신규)
-  input_schema?: Record<string, any>;
-  output_schema?: Record<string, any>;
+  input_schema?: PortDefinition[];
+  output_schema?: PortDefinition[];
   node_count?: number;
   edge_count?: number;
   port_definitions?: Record<string, any>;
