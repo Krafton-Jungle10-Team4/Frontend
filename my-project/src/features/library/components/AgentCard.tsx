@@ -7,7 +7,7 @@ import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.typ
 import { AgentDetailDialog } from './AgentDetailDialog';
 import { AgentImportDialog } from './AgentImportDialog';
 import { AgentImportAsNodeDialog } from './AgentImportAsNodeDialog';
-import { LibraryDeployDialog } from './LibraryDeployDialog';
+import { DeploymentOptionsDialog } from './DeploymentOptionsDialog';
 import { VersionTimelineDialog } from './VersionTimelineDialog';
 import { useLibraryStore } from '../stores/libraryStore';
 
@@ -73,12 +73,6 @@ export function AgentCard({ agent }: AgentCardProps) {
     if (diffDays < 30) return `${diffDays}일 전`;
     if (diffDays < 365) return `${Math.floor(diffDays / 30)}개월 전`;
     return `${Math.floor(diffDays / 365)}년 전`;
-  };
-
-  // Phase 6.2: 배포 성공 시 라이브러리 목록 갱신
-  const handleDeploySuccess = () => {
-    fetchAgents();
-    setShowDeployDialog(false);
   };
 
   return (
@@ -176,26 +170,16 @@ export function AgentCard({ agent }: AgentCardProps) {
             </Button>
           </div>
           <div className="flex gap-2 w-full">
-            {!agent.deployment_status ? (
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={() => setShowDeployDialog(true)}
-              >
-                <Rocket className="w-4 h-4 mr-1" />
-                배포
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="flex-1"
-                onClick={() => setShowDeployDialog(true)}
-              >
-                <Rocket className="w-4 h-4 mr-1" />
-                배포 관리
-              </Button>
-            )}
+            <Button
+              size="sm"
+              className="flex-1"
+              variant={agent.deployment_status ? "secondary" : "default"}
+              onClick={() => setShowDeployDialog(true)}
+            >
+              <Rocket className="w-4 h-4 mr-1" />
+              {agent.deployment_status ? "배포 관리" : "배포"}
+            </Button>
+
             <Button
               variant="ghost"
               size="sm"
@@ -224,11 +208,10 @@ export function AgentCard({ agent }: AgentCardProps) {
         open={showImportAsNodeDialog}
         onOpenChange={setShowImportAsNodeDialog}
       />
-      <LibraryDeployDialog
+      <DeploymentOptionsDialog
         open={showDeployDialog}
         onOpenChange={setShowDeployDialog}
         agent={agent}
-        onDeploySuccess={handleDeploySuccess}
       />
       <VersionTimelineDialog
         open={showVersionTimelineDialog}

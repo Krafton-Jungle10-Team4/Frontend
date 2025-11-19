@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useDeploymentStore } from '@/features/deployment/stores/deploymentStore';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { botApi } from '@/features/bot/api/botApi';
+import { deploymentApi } from '@/features/deployment/api/deploymentApi';
 import type { LibraryMetadata } from '../types/workflow.types';
 
 export function usePublishActions(botId: string) {
@@ -18,6 +19,7 @@ export function usePublishActions(botId: string) {
     updateStatus,
     createOrUpdateDeployment,
     widgetConfig,
+    fetchDeployment,
   } = useDeploymentStore();
 
   const { saveWorkflow, publishWorkflow } = useWorkflowStore();
@@ -69,26 +71,95 @@ export function usePublishActions(botId: string) {
     Boolean(deployment?.widget_key);
 
   /**
+   * 배포 확인 및 생성
+   * widget_key가 없으면 자동으로 배포 생성
+   */
+  const ensureDeployment = useCallback(async (): Promise<string | null> => {
+    try {
+      // 이미 widget_key가 있으면 바로 반환
+      if (deployment?.bot_id === botId && deployment?.widget_key) {
+        return deployment.widget_key;
+      }
+
+      // 배포 정보 새로 조회
+      await fetchDeployment(botId);
+
+      // 조회 후에도 widget_key가 없으면 배포 생성
+      const refreshedDeployment = useDeploymentStore.getState().deployment;
+      if (refreshedDeployment?.bot_id === botId && refreshedDeployment?.widget_key) {
+        return refreshedDeployment.widget_key;
+      }
+
+      // 발행된 버전 조회
+      const versions = await botApi.getWorkflowVersions(botId);
+      const publishedVersion = versions.find(v => v.status === 'published');
+
+      if (!publishedVersion) {
+        toast.error('발행된 버전이 없습니다', {
+          description: '먼저 워크플로우를 게시해주세요.',
+        });
+        return null;
+      }
+
+      // 기본 Widget 설정으로 배포 생성
+      const defaultWidgetConfig = {
+        theme: 'light' as const,
+        position: 'bottom-right' as const,
+        auto_open: false,
+        primary_color: '#0066FF',
+      };
+
+      toast.info('배포 중...', {
+        description: 'Widget Key를 생성하고 있습니다.',
+      });
+
+      const newDeployment = await deploymentApi.createOrUpdate(botId, {
+        workflow_version_id: publishedVersion.id,
+        status: 'published',
+        widget_config: defaultWidgetConfig,
+      });
+
+      // 배포 정보 다시 로드
+      await fetchDeployment(botId);
+
+      toast.success('배포 완료', {
+        description: 'Widget Key가 생성되었습니다.',
+      });
+
+      return newDeployment.widget_key;
+    } catch (error) {
+      console.error('Deployment error:', error);
+      toast.error('배포 실패', {
+        description: '배포 중 오류가 발생했습니다.',
+      });
+      return null;
+    }
+  }, [botId, deployment, fetchDeployment]);
+
+  /**
    * 앱 실행
    * 독립 실행형 챗봇 페이지를 새 탭에서 열기
    */
   const runApp = useCallback(async () => {
-    if (!canRunApp || !deployment?.widget_key) {
-      toast.error('앱을 실행하려면 봇을 게시하고 Widget Key를 발급받아야 합니다.');
-      return;
-    }
-
     try {
-      await botApi.enableWorkflowV2(botId);
-    } catch (error) {
-      console.error('Failed to enable workflow V2 mode:', error);
-      toast.error('워크플로우 V2 모드를 활성화하지 못했습니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
+      // widget_key 확인 및 배포 생성
+      const widgetKey = await ensureDeployment();
 
-    const appUrl = `${window.location.origin}/app/${deployment.widget_key}`;
-    window.open(appUrl, '_blank', 'noopener');
-  }, [botId, canRunApp, deployment]);
+      if (!widgetKey) {
+        return; // 배포 실패 시 종료
+      }
+
+      // Workflow V2 모드 활성화
+      await botApi.enableWorkflowV2(botId);
+
+      // Widget Key로 앱 URL 생성
+      const appUrl = `${window.location.origin}/app/${widgetKey}`;
+      window.open(appUrl, '_blank', 'noopener');
+    } catch (error) {
+      console.error('Failed to run app:', error);
+      toast.error('앱 실행 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }, [botId, ensureDeployment]);
 
   /**
    * 사이트에 삽입

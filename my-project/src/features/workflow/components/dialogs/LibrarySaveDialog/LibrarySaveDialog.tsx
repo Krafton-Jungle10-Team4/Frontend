@@ -40,7 +40,6 @@ interface FormData {
   library_description: string;
   library_category: string;
   library_tags: string;
-  library_visibility: 'private' | 'team' | 'public';
 }
 
 export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
@@ -58,7 +57,6 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
         library_description: '',
         library_category: '',
         library_tags: '',
-        library_visibility: 'team',
       },
     });
 
@@ -97,7 +95,6 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
           library_description: data.library_description,
           library_category: data.library_category,
           library_tags: tags,
-          library_visibility: data.library_visibility,
         };
         await onPublish(libraryMetadata);
 
@@ -234,39 +231,6 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                     <p className="text-xs text-muted-foreground">
                       Enter 키로 태그 추가, 클릭하여 제거
                     </p>
-                  </div>
-
-                  {/* 공개 범위 */}
-                  <div className="space-y-2">
-                    <Label htmlFor="library_visibility">
-                      공개 범위 <span className="text-destructive">*</span>
-                    </Label>
-                    <Select
-                      value={watch('library_visibility')}
-                      onValueChange={(value: 'private' | 'team' | 'public') =>
-                        setValue('library_visibility', value)
-                      }
-                    >
-                      <SelectTrigger id="library_visibility">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="private">
-                          비공개 - 나만 사용
-                        </SelectItem>
-                        <SelectItem value="team">
-                          팀 공유 - 팀원에게 공개
-                        </SelectItem>
-                        <SelectItem value="public">
-                          공개 - 모든 사용자에게 공개
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.library_visibility && (
-                      <p className="text-sm text-destructive">
-                        {errors.library_visibility.message}
-                      </p>
-                    )}
                   </div>
             </div>
 

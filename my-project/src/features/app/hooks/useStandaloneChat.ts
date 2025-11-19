@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useState, useCallback, useMemo, useSyncExternalStore, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { widgetApi } from '@/features/widget/api/widgetApi';
 import type {
@@ -44,21 +44,40 @@ const buildContext = (): PageContext => {
 };
 
 function useSessionManager(widgetKey?: string) {
+  const snapshotRef = useRef<CachedSession | null>(null);
+  const rawRef = useRef<string | null>(null);
+
   const getSnapshot = useCallback((): CachedSession | null => {
     if (!widgetKey) return null;
 
     const raw = localStorage.getItem(SESSION_KEY(widgetKey));
-    if (!raw) return null;
+
+    // 동일한 raw라면 이전 스냅샷을 그대로 사용해 리렌더 루프 방지
+    if (raw === rawRef.current) {
+      return snapshotRef.current;
+    }
+
+    if (!raw) {
+      snapshotRef.current = null;
+      rawRef.current = null;
+      return null;
+    }
 
     try {
       const parsed = JSON.parse(raw) as CachedSession;
       if (new Date(parsed.expiresAt).getTime() > Date.now()) {
+        snapshotRef.current = parsed;
+        rawRef.current = raw;
         return parsed;
       }
       localStorage.removeItem(SESSION_KEY(widgetKey));
+      snapshotRef.current = null;
+      rawRef.current = null;
       return null;
     } catch {
       localStorage.removeItem(SESSION_KEY(widgetKey));
+      snapshotRef.current = null;
+      rawRef.current = null;
       return null;
     }
   }, [widgetKey]);
@@ -90,6 +109,8 @@ function useSessionManager(widgetKey?: string) {
     (payload: CachedSession) => {
       if (!widgetKey) return;
       localStorage.setItem(SESSION_KEY(widgetKey), JSON.stringify(payload));
+      rawRef.current = JSON.stringify(payload);
+      snapshotRef.current = payload;
       // 커스텀 이벤트로 변경 알림
       window.dispatchEvent(new CustomEvent(`session-change-${widgetKey}`));
     },
@@ -99,6 +120,8 @@ function useSessionManager(widgetKey?: string) {
   const clearSession = useCallback(() => {
     if (!widgetKey) return;
     localStorage.removeItem(SESSION_KEY(widgetKey));
+    rawRef.current = null;
+    snapshotRef.current = null;
     // 커스텀 이벤트로 변경 알림
     window.dispatchEvent(new CustomEvent(`session-change-${widgetKey}`));
   }, [widgetKey]);
@@ -121,6 +144,9 @@ export function useStandaloneChat(widgetKey: string | undefined) {
     Record<string, string | null>
   >({});
   const { session, saveSession, clearSession } = useSessionManager(widgetKey);
+
+  // Welcome 메시지 중복 설정 방지를 위한 ref
+  const welcomeMessageSetRef = useRef<Set<string>>(new Set());
 
   const messages = messagesMap[normalizedKey] ?? [];
   const setMessagesForKey = useCallback(
@@ -165,23 +191,17 @@ export function useStandaloneChat(widgetKey: string | undefined) {
 
     const configData = await widgetApi.getConfig(widgetKey);
 
-    if (configData.config.welcome_message) {
-      setMessagesForKey((prev) =>
-        prev.length > 0
-          ? prev
-          : [
-              {
-                id: `welcome-${widgetKey}`,
-                role: 'assistant',
-                content: configData.config.welcome_message,
-                timestamp: new Date().toISOString(),
-              },
-            ]
-      );
-    }
-
-    if (session) {
-      return { config: configData, session };
+    // localStorage에서 직접 읽어서 확인 (session props 대신 사용)
+    const raw = localStorage.getItem(SESSION_KEY(widgetKey));
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as CachedSession;
+        if (new Date(parsed.expiresAt).getTime() > Date.now()) {
+          return { config: configData, session: parsed };
+        }
+      } catch {
+        // 파싱 실패 시 무시하고 새 세션 생성
+      }
     }
 
     const sessionResponse = await widgetApi.createSession({
@@ -210,7 +230,7 @@ export function useStandaloneChat(widgetKey: string | undefined) {
       config: configData,
       session: payload,
     };
-  }, [widgetKey, session, saveSession, setMessagesForKey]);
+  }, [widgetKey, saveSession]);
 
   const {
     data: initializationResult,
@@ -236,6 +256,35 @@ export function useStandaloneChat(widgetKey: string | undefined) {
       : initializationError instanceof Error
         ? initializationError.message
         : null;
+
+  // Welcome 메시지 설정 (초기화 완료 후)
+  useEffect(() => {
+    if (!config?.config.welcome_message || !widgetKey) return;
+
+    // 이미 해당 위젯에 대해 welcome 메시지를 설정했으면 스킵
+    if (welcomeMessageSetRef.current.has(widgetKey)) return;
+
+    setMessagesMap((prev) => {
+      const existing = prev[normalizedKey];
+      // 이미 메시지가 있으면 추가하지 않음
+      if (existing && existing.length > 0) return prev;
+
+      // welcome 메시지 설정 완료 표시
+      welcomeMessageSetRef.current.add(widgetKey);
+
+      return {
+        ...prev,
+        [normalizedKey]: [
+          {
+            id: `welcome-${widgetKey}`,
+            role: 'assistant',
+            content: config.config.welcome_message,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
+    });
+  }, [config?.config.welcome_message, widgetKey, normalizedKey]);
 
   const sendMessage = useCallback(
     async (content: string) => {

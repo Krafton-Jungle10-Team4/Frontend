@@ -96,8 +96,8 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
   useEffect(() => {
     const fetchBotInfo = async () => {
       try {
-        const bot = await botApi.getBot(botId);
-        setBotName(bot.bot_name || '');
+        const bot = await botApi.getById(botId);
+        setBotName(bot.name || '');
       } catch (error) {
         console.error('Failed to fetch bot info:', error);
       }

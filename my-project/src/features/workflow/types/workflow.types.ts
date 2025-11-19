@@ -8,11 +8,10 @@ import type { PortDefinition } from '@/shared/types/workflow/port.types';
 // ========== 라이브러리 관련 타입 (신규) ==========
 
 export interface LibraryMetadata {
-  library_name: string;
+  library_name?: string;  // Optional: 미제공 시 백엔드에서 봇 이름 사용
   library_description?: string;
   library_category?: string;
   library_tags?: string[];
-  library_visibility: 'private' | 'team' | 'public';
 }
 
 export interface PublishWorkflowRequest {
