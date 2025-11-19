@@ -7,11 +7,11 @@ import type { BackendWorkflow } from '@/shared/types/workflowTransform.types';
 // ========== 라이브러리 관련 타입 (신규) ==========
 
 export interface LibraryMetadata {
-  name: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
-  visibility: 'private' | 'team' | 'public';
+  library_name: string;
+  library_description?: string;
+  library_category?: string;
+  library_tags?: string[];
+  library_visibility: 'private' | 'team' | 'public';
 }
 
 export interface PublishWorkflowRequest {
