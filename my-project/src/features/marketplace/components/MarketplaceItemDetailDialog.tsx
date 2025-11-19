@@ -173,12 +173,12 @@ export function MarketplaceItemDetailDialog({
               )}
 
               {/* 게시자 정보 */}
-              {item.publisher && (
+              {item.publisher && item.publisher.username && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold">게시자</h3>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <User className="w-4 h-4" />
-                    <span>팀 ID: {item.publisher.team_id}</span>
+                    <span>{item.publisher.username}</span>
                   </div>
                 </div>
               )}
