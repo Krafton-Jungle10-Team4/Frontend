@@ -54,7 +54,7 @@ export function LibraryPage() {
   }, [agents, deploymentFilter]);
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 max-h-screen overflow-y-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">라이브러리</h1>
@@ -105,7 +105,7 @@ export function LibraryPage() {
       {/* Agent Cards Grid */}
       {!isLoading && filteredAgents.length > 0 && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
             {filteredAgents.map((agent) => (
               <AgentCard key={agent.id} agent={agent} />
             ))}

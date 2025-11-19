@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
-import { Download, Rocket, Eye, Plus, History } from 'lucide-react';
+import { Download, Rocket, Eye, Plus, History, Globe } from 'lucide-react';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { AgentDetailDialog } from './AgentDetailDialog';
 import { AgentImportDialog } from './AgentImportDialog';
 import { AgentImportAsNodeDialog } from './AgentImportAsNodeDialog';
 import { DeploymentOptionsDialog } from './DeploymentOptionsDialog';
 import { VersionTimelineDialog } from './VersionTimelineDialog';
+import { MarketplacePublishDialog } from './MarketplacePublishDialog';
 import { useLibraryStore } from '../stores/libraryStore';
 
 interface AgentCardProps {
@@ -21,6 +22,7 @@ export function AgentCard({ agent }: AgentCardProps) {
   const [showImportAsNodeDialog, setShowImportAsNodeDialog] = useState(false);
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [showVersionTimelineDialog, setShowVersionTimelineDialog] = useState(false);
+  const [showMarketplacePublishDialog, setShowMarketplacePublishDialog] = useState(false);
 
   // Phase 6.2: 배포 상태 동기화
   const { fetchAgents } = useLibraryStore();
@@ -151,22 +153,13 @@ export function AgentCard({ agent }: AgentCardProps) {
               상세보기
             </Button>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              className="flex-1"
-              onClick={() => setShowImportDialog(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              onClick={() => setShowMarketplacePublishDialog(true)}
             >
-              <Download className="w-4 h-4 mr-1" />
-              에이전트 가져오기
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-              onClick={() => setShowImportAsNodeDialog(true)}
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              노드로 가져오기
+              <Globe className="w-4 h-4 mr-1" />
+              마켓플레이스에 게시
             </Button>
           </div>
           <div className="flex gap-2 w-full">
@@ -216,6 +209,11 @@ export function AgentCard({ agent }: AgentCardProps) {
       <VersionTimelineDialog
         open={showVersionTimelineDialog}
         onOpenChange={setShowVersionTimelineDialog}
+        agent={agent}
+      />
+      <MarketplacePublishDialog
+        open={showMarketplacePublishDialog}
+        onOpenChange={setShowMarketplacePublishDialog}
         agent={agent}
       />
     </>
