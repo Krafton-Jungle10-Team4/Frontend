@@ -9,11 +9,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/shared/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { useToast } from '@/shared/hooks/use-toast';
+} from '@/shared/components/dialog';
+import { Button } from '@/shared/components/button';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/shared/components/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/select';
+import { toast } from 'sonner';
 import { deploymentApi } from '@/features/deployment/api/deploymentApi';
 import { botApi } from '@/features/bot/api/botApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
@@ -39,7 +39,6 @@ export function LibraryDeployDialog({
   const [bots, setBots] = useState<any[]>([]);
   const [hasExistingDeployment, setHasExistingDeployment] = useState(false);
   const [existingDeployment, setExistingDeployment] = useState<any>(null);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,8 +102,7 @@ export function LibraryDeployDialog({
         widget_config: defaultWidgetConfig,
       });
 
-      toast({
-        title: "배포 성공",
+      toast.success('배포 성공', {
         description: `${agent.library_name} ${agent.version}이(가) 성공적으로 배포되었습니다.`,
       });
 
@@ -112,10 +110,8 @@ export function LibraryDeployDialog({
       onOpenChange(false);
     } catch (error) {
       console.error('Deployment error:', error);
-      toast({
-        title: "배포 실패",
-        description: "배포 중 오류가 발생했습니다.",
-        variant: "destructive",
+      toast.error('배포 실패', {
+        description: '배포 중 오류가 발생했습니다.',
       });
     } finally {
       setIsDeploying(false);

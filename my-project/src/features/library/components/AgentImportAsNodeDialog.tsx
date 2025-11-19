@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -34,22 +34,36 @@ export function AgentImportAsNodeDialog({
   const [isLoading, setIsLoading] = useState(false);
   const addNode = useWorkflowStore((state) => state.addNode);
 
-  // 검색 (디바운스 적용 권장)
-  const handleSearch = async () => {
+  // 다이얼로그 열릴 때 자동으로 모든 에이전트 로드
+  useEffect(() => {
+    if (open) {
+      loadAgents();
+    }
+  }, [open]);
+
+  // 에이전트 로드 함수
+  const loadAgents = async (search?: string) => {
     try {
       setIsLoading(true);
       const response = await getLibraryAgents({
-        search: searchQuery,
+        search: search || undefined,
+        page: 1,
+        page_size: 100, // 충분히 많은 결과 로드
       });
       setAgents(response.agents);
     } catch (error) {
-      console.error('Search failed:', error);
-      toast.error('검색 실패', {
-        description: '에이전트 검색 중 오류가 발생했습니다.',
+      console.error('Failed to load agents:', error);
+      toast.error('로드 실패', {
+        description: '에이전트 목록을 불러오는 중 오류가 발생했습니다.',
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 검색
+  const handleSearch = () => {
+    loadAgents(searchQuery);
   };
 
   // 노드로 가져오기
@@ -94,7 +108,7 @@ export function AgentImportAsNodeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>에이전트 노드 가져오기</DialogTitle>
           <DialogDescription>
@@ -116,8 +130,8 @@ export function AgentImportAsNodeDialog({
             </Button>
           </div>
 
-          {/* 검색 결과 */}
-          <div className="max-h-[400px] overflow-y-auto space-y-2">
+          {/* 에이전트 목록 */}
+          <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
             {agents.map((agent) => (
               <div
                 key={agent.id}
@@ -145,9 +159,15 @@ export function AgentImportAsNodeDialog({
               </div>
             ))}
 
+            {isLoading && (
+              <div className="text-center py-8 text-muted-foreground">
+                로딩 중...
+              </div>
+            )}
+
             {agents.length === 0 && !isLoading && (
               <div className="text-center py-8 text-muted-foreground">
-                검색 결과가 없습니다.
+                에이전트가 없습니다.
               </div>
             )}
           </div>
