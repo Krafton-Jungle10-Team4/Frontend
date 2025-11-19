@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from '@/shared/components/select';
 import { Loader2 } from 'lucide-react';
+import { EmbedWebsiteDialog } from '@/features/deployment/components/EmbedWebsiteDialog';
+import { ApiReferenceDialog } from '@/features/deployment/components/ApiReferenceDialog';
 
 export function LibraryPage() {
   const {
@@ -146,6 +148,12 @@ export function LibraryPage() {
           </div>
         </>
       )}
+
+      {/* 임베드 다이얼로그 */}
+      <EmbedWebsiteDialog />
+
+      {/* API 참조 다이얼로그 */}
+      <ApiReferenceDialog />
     </div>
   );
 }
