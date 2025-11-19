@@ -47,6 +47,22 @@ export const ImportedWorkflowNode = memo(
     const updateNodeInternals = useUpdateNodeInternals();
     const isExpanded = data.is_expanded ?? false;
 
+    // 디버그 로그: 노드 데이터 확인
+    console.log('[ImportedWorkflowNode] Rendering node:', {
+      id,
+      title: data.title,
+      hasTitle: !!data.title,
+      hasPorts: !!data.ports,
+      hasInputs: !!data.ports?.inputs,
+      hasOutputs: !!data.ports?.outputs,
+      inputsLength: data.ports?.inputs?.length,
+      outputsLength: data.ports?.outputs?.length,
+      inputs: data.ports?.inputs,
+      outputs: data.ports?.outputs,
+      desc: data.desc,
+      isExpanded,
+    });
+
     // 중복 포트 제거 헬퍼 함수
     const uniquePorts = useCallback((ports: any[], type: 'input' | 'output') => {
       console.log(`[ImportedWorkflowNode] Before uniquePorts (${type}):`, ports);

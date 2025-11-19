@@ -1,7 +1,7 @@
 /**
  * ImportedWorkflowNode Config Panel (읽기 전용)
  */
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Lock, ExternalLink } from 'lucide-react';
 import { Button } from '@/shared/components/button';
 import { Badge } from '@/shared/components/badge';
@@ -14,6 +14,13 @@ interface ImportedWorkflowPanelProps {
 
 export const ImportedWorkflowPanel = memo(
   ({ data }: ImportedWorkflowPanelProps) => {
+  const handleViewTemplate = useCallback(() => {
+    if (!data.template_id) return;
+    // 라이브러리 페이지에서 해당 버전을 쉽게 찾을 수 있도록 쿼리 전달
+    const url = `/workspace/library?version_id=${data.template_id}`;
+    window.open(url, '_blank');
+  }, [data.template_id]);
+
   return (
     <div className="space-y-4 p-4">
       {/* Read-Only Banner */}

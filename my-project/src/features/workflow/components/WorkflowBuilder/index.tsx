@@ -62,10 +62,12 @@ import {
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 import { ConversationVariablePanel } from '../ConversationVariablePanel';
 import { AgentImportAsNodeDialog } from '@/features/library/components/AgentImportAsNodeDialog';
+import { ImportedWorkflowNode } from '../nodes/imported-workflow/node';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
 const REACT_FLOW_NODE_TYPES = {
   custom: CustomNode,
+  'imported-workflow': ImportedWorkflowNode,
 };
 
 // React Flow 엣지 타입 매핑
