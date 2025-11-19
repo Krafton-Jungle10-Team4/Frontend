@@ -88,6 +88,7 @@ export interface DeploymentCreateRequest {
   status?: DeploymentStatus; // 선택, 기본값: "published"
   allowed_domains?: string[] | null; // 호스트명만 입력 (예: "example.com", "*.example.com")
   widget_config: WidgetConfig; // 필수
+  workflow_version_id: string; // 필수: 배포할 워크플로우 버전 UUID
 }
 
 /**

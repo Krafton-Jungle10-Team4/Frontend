@@ -27,6 +27,8 @@ export function usePublishActions(botId: string) {
    * - 배포가 없으면 자동 생성, 있으면 상태만 변경
    */
   const publishUpdate = useCallback(async () => {
+    let workflowVersionId: string | null = null;
+
     try {
       // 1. 워크플로우 저장 및 발행
       await saveWorkflow(botId);
@@ -35,6 +37,7 @@ export function usePublishActions(botId: string) {
         toast.error('발행할 Draft가 없습니다');
         return;
       }
+      workflowVersionId = publishResult.id;
 
       // 2. Deployment 존재 여부 확인 (현재 봇의 deployment인지 확인)
       const currentDeployment = useDeploymentStore.getState().deployment;
@@ -46,6 +49,7 @@ export function usePublishActions(botId: string) {
           status: 'published',
           allowed_domains: [],
           widget_config: widgetConfig,
+          workflow_version_id: publishResult.id,
         });
         toast.success('배포가 생성되었습니다');
       } else {
@@ -57,12 +61,13 @@ export function usePublishActions(botId: string) {
       console.error('Failed to publish update:', error);
 
       // 404 에러 처리 - 배포가 없으면 자동으로 생성 시도
-      if (error.response?.status === 404) {
+      if (error.response?.status === 404 && workflowVersionId) {
         try {
           await createOrUpdateDeployment(botId, {
             status: 'published',
             allowed_domains: [],
             widget_config: widgetConfig,
+            workflow_version_id: workflowVersionId,
           });
           toast.success('배포가 생성되었습니다');
         } catch (retryError) {

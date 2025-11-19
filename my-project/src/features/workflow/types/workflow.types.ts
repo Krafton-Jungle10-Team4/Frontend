@@ -30,6 +30,11 @@ export interface LibraryAgentVersion {
   library_published_at: string;
   node_count?: number;
   edge_count?: number;
+
+  // 🆕 배포 관련 필드 추가
+  deployment_status?: 'draft' | 'published' | 'suspended';
+  widget_key?: string;
+  deployed_at?: string;
 }
 
 export interface LibraryAgentDetail extends LibraryAgentVersion {
