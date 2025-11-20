@@ -19,12 +19,12 @@ import {
   selectDeployment,
   selectIsLoading,
   selectError,
-} from '../stores/deploymentStore';
-import { EmbedWebsiteDialog } from '../components/EmbedWebsiteDialog';
-import { ApiReferenceDialog } from '../components/ApiReferenceDialog';
-import { APIDeploymentPanel } from '../components/APIDeploymentPanel';
+} from '../stores/deploymentStore.ts';
+import { EmbedWebsiteDialog } from '../components/EmbedWebsiteDialog.tsx';
+import { ApiReferenceDialog } from '../components/ApiReferenceDialog.tsx';
+import { APIDeploymentPanel } from '../components/APIDeploymentPanel.tsx';
 import { IntegrationsPanel } from '@/features/integrations';
-import { DEPLOYMENT_STATUS_LABELS } from '../types/deployment';
+import { DEPLOYMENT_STATUS_LABELS } from '../types/deployment.ts';
 
 export function DeploymentPage() {
   const { botId } = useParams<{ botId: string }>();

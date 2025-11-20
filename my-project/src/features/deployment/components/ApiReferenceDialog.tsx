@@ -24,7 +24,7 @@ import {
   useDeploymentStore,
   selectWidgetKey,
   selectIsApiDialogOpen,
-} from '../stores/deploymentStore';
+} from '../stores/deploymentStore.ts';
 
 interface ApiReferenceDialogProps {
   botId?: string; // 현재는 사용하지 않지만 향후 확장 가능

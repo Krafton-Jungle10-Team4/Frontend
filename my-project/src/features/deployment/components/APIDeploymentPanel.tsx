@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/card';
 import { Button } from '@shared/components/button';
 import { Plus, ExternalLink } from 'lucide-react';
-import { useApiKeyStore } from '../stores/apiKeyStore';
+import { useApiKeyStore } from '../stores/apiKeyStore.ts';
 import { APIKeyList } from './APIKeyList';
 import { CreateAPIKeyDialog } from './CreateAPIKeyDialog';
 import { APIKeyCreatedDialog } from './APIKeyCreatedDialog';

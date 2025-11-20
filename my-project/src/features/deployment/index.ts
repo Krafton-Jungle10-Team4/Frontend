@@ -4,10 +4,10 @@
  */
 
 // ============= API =============
-export { deploymentApi } from './api/deploymentApi';
+export { deploymentApi } from './api/deploymentApi.ts';
 
 // ============= Store =============
-export { useDeploymentStore } from './stores/deploymentStore';
+export { useDeploymentStore } from './stores/deploymentStore.ts';
 export {
   selectDeployment,
   selectIsLoading,
@@ -18,7 +18,7 @@ export {
   selectEmbedScript,
   selectWidgetKey,
   selectDeploymentStatus,
-} from './stores/deploymentStore';
+} from './stores/deploymentStore.ts';
 
 // ============= Types =============
 export type {
@@ -30,18 +30,18 @@ export type {
   DeploymentStatusUpdateResponse,
   DeploymentDeleteResponse,
   DeploymentState,
-} from './types/deployment';
+} from './types/deployment.ts';
 export {
   isDeployment,
   isDeploymentStatus,
   DEPLOYMENT_STATUS_LABELS,
   DEPLOYMENT_STATUS_COLORS,
-} from './types/deployment';
+} from './types/deployment.ts';
 
 // ============= Components =============
-export { EmbedCodeDisplay } from './components/EmbedCodeDisplay';
-export { EmbedWebsiteDialog } from './components/EmbedWebsiteDialog';
-export { ApiReferenceDialog } from './components/ApiReferenceDialog';
+export { EmbedCodeDisplay } from './components/EmbedCodeDisplay.tsx';
+export { EmbedWebsiteDialog } from './components/EmbedWebsiteDialog.tsx';
+export { ApiReferenceDialog } from './components/ApiReferenceDialog.tsx';
 
 // ============= Pages =============
-export { DeploymentPage } from './pages/DeploymentPage';
+export { DeploymentPage } from './pages/DeploymentPage.tsx';

@@ -16,7 +16,7 @@ import {
   useDeploymentStore,
   selectIsEmbedDialogOpen,
   selectEmbedScript,
-} from '../stores/deploymentStore';
+} from '../stores/deploymentStore.ts';
 
 interface EmbedWebsiteDialogProps {
   botId?: string; // 현재는 사용하지 않지만 향후 확장 가능

@@ -11,7 +11,7 @@ import type {
   DeploymentStatusUpdateRequest,
   DeploymentStatusUpdateResponse,
   DeploymentDeleteResponse,
-} from '../types/deployment';
+} from '../types/deployment.ts';
 
 /**
  * Deployment API 함수들

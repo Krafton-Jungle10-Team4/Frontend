@@ -5,13 +5,13 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { deploymentApi } from '../api/deploymentApi';
+import { deploymentApi } from '../api/deploymentApi.ts';
 import type {
   Deployment,
   DeploymentCreateRequest,
   DeploymentStatus,
   WidgetConfig,
-} from '../types/deployment';
+} from '../types/deployment.ts';
 
 interface DeploymentStore {
   // State - 배포 정보
