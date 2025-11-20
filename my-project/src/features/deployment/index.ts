@@ -42,6 +42,8 @@ export {
 export { EmbedCodeDisplay } from './components/EmbedCodeDisplay.tsx';
 export { EmbedWebsiteDialog } from './components/EmbedWebsiteDialog.tsx';
 export { ApiReferenceDialog } from './components/ApiReferenceDialog.tsx';
+export { DeploymentManager } from './components/DeploymentManager.tsx';
+export { EnvVarsEditor } from './components/EnvVarsEditor.tsx';
 
 // ============= Pages =============
 export { DeploymentPage } from './pages/DeploymentPage.tsx';
