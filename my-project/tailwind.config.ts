@@ -8,6 +8,9 @@ const config = {
       colors: {
         studio: {
           header: 'var(--studio-header-bg)',
+          page: {
+            bg: 'var(--studio-page-bg)',
+          },
           sidebar: {
             bg: 'var(--studio-sidebar-bg)',
             border: 'var(--studio-sidebar-border)',
@@ -34,6 +37,17 @@ const config = {
             selectedBg: 'var(--studio-tag-selected-bg)',
             selectedText: 'var(--studio-tag-selected-text)',
           },
+          text: {
+            primary: 'var(--studio-text-primary)',
+            secondary: 'var(--studio-text-secondary)',
+            muted: 'var(--studio-text-muted)',
+          },
+          divider: 'var(--studio-divider)',
+          hover: 'var(--studio-hover)',
+          search: {
+            bg: 'var(--studio-search-bg)',
+            border: 'var(--studio-search-border)',
+          },
         },
       },
       borderRadius: {
@@ -47,6 +61,7 @@ const config = {
           'linear-gradient(135deg, var(--studio-button-gradient-from), var(--studio-button-gradient-to))',
         'studio-button-dark':
           'linear-gradient(135deg, var(--studio-button-dark-from), var(--studio-button-dark-to))',
+        'brand-gradient': 'linear-gradient(90deg, #000000, #3735c3)',
       },
       boxShadow: {
         'studio-card': 'var(--studio-card-hover-shadow)',

@@ -3,11 +3,12 @@
   --studio-header-gradient-from: #0A0E27;
   --studio-header-gradient-to: #1A1F4E;
 
-  --studio-sidebar-bg: #FFFFFF;
-  --studio-sidebar-border: #E5E7EB;
+  --studio-page-bg: #f4f6fb;
+  --studio-sidebar-bg: #f6f7ff;
+  --studio-sidebar-border: #dfe2ff;
 
-  --studio-card-bg: #FFFFFF;
-  --studio-card-border: #E5E7EB;
+  --studio-card-bg: #ffffff;
+  --studio-card-border: #dfe2ff;
   --studio-card-hover-shadow: 0 10px 25px rgba(0,0,0,0.08);
 
   --studio-primary: #5E3AEE;
@@ -29,4 +30,24 @@
   --studio-tag-selected-text: #FFFFFF;
 
   --studio-card-accent: #3B82F6;
+  --studio-text-primary: #101630;
+  --studio-text-secondary: #4c5184;
+  --studio-text-muted: #9094b6;
+  --studio-divider: #e0e3ff;
+  --studio-hover: rgba(83, 66, 194, 0.12);
+  --studio-search-bg: #edf0ff;
+  --studio-search-border: #d5daf5;
+}
+
+/* Tailwind 유틸리티 클래스 명시적 정의 */
+.bg-studio-header-gradient {
+  background-image: linear-gradient(90deg, var(--studio-header-gradient-from), var(--studio-header-gradient-to));
+}
+
+.bg-studio-button {
+  background-image: linear-gradient(135deg, var(--studio-button-gradient-from), var(--studio-button-gradient-to));
+}
+
+.bg-studio-button-dark {
+  background-image: linear-gradient(135deg, var(--studio-button-dark-from), var(--studio-button-dark-to));
 }

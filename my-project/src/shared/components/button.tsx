@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         'studio-primary': 'bg-studio-button text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]',
         'studio-dark': 'bg-studio-button-dark text-white shadow-lg hover:shadow-xl border border-white/10',
-        'studio-outline': 'border border-studio-primary text-studio-primary hover:bg-studio-primary hover:text-white',
+        'studio-outline': 'border border-studio-primary text-studio-primary hover:bg-studio-primary/10',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
