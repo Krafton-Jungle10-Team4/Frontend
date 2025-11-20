@@ -5,9 +5,9 @@
 
 import { create } from 'zustand';
 
-export type WorkspaceTab = 'explore' | 'studio' | 'knowledge' | 'tools';
+export type WorkspaceTab = 'marketplace' | 'studio' | 'knowledge' | 'tools';
 
-interface ExploreFilters {
+interface MarketplaceFilters {
   category: string;
   searchQuery: string;
 }
@@ -29,19 +29,19 @@ interface WorkspaceState {
   activeTab: WorkspaceTab;
 
   // 필터 상태
-  exploreFilters: ExploreFilters;
+  marketplaceFilters: MarketplaceFilters;
   studioFilters: StudioFilters;
   knowledgeFilters: KnowledgeFilters;
 
   // 액션
   setActiveTab: (tab: WorkspaceTab) => void;
-  setExploreFilters: (filters: Partial<ExploreFilters>) => void;
+  setMarketplaceFilters: (filters: Partial<MarketplaceFilters>) => void;
   setStudioFilters: (filters: Partial<StudioFilters>) => void;
   setKnowledgeFilters: (filters: Partial<KnowledgeFilters>) => void;
   resetFilters: () => void;
 }
 
-const initialExploreFilters: ExploreFilters = {
+const initialMarketplaceFilters: MarketplaceFilters = {
   category: 'all',
   searchQuery: '',
 };
@@ -61,16 +61,16 @@ const initialKnowledgeFilters: KnowledgeFilters = {
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   // 초기 상태
   activeTab: 'studio',
-  exploreFilters: initialExploreFilters,
+  marketplaceFilters: initialMarketplaceFilters,
   studioFilters: initialStudioFilters,
   knowledgeFilters: initialKnowledgeFilters,
 
   // 액션
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  setExploreFilters: (filters) =>
+  setMarketplaceFilters: (filters) =>
     set((state) => ({
-      exploreFilters: { ...state.exploreFilters, ...filters },
+      marketplaceFilters: { ...state.marketplaceFilters, ...filters },
     })),
 
   setStudioFilters: (filters) =>
@@ -85,7 +85,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
 
   resetFilters: () =>
     set({
-      exploreFilters: initialExploreFilters,
+      marketplaceFilters: initialMarketplaceFilters,
       studioFilters: initialStudioFilters,
       knowledgeFilters: initialKnowledgeFilters,
     }),

@@ -106,12 +106,12 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <Navigate to="/workspace/studio" replace />,
               },
-              // Explore (마켓플레이스)
+              // Marketplace (마켓플레이스)
               {
-                path: 'explore',
+                path: 'marketplace',
                 lazy: () =>
                   import('@/features/workspace').then((module) => ({
-                    Component: module.ExplorePage,
+                    Component: module.MarketplacePage,
                   })),
               },
               // Studio (봇 관리)

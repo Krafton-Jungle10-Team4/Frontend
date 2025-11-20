@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Languages,
   Settings,
@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
 import { cn } from '@/shared/components/utils';
-import { Menu } from 'lucide-react';
 
 type Language = 'en' | 'ko';
 
@@ -54,11 +53,9 @@ export function TopNavigation({
   showSidebarToggle = true,
 }: TopNavigationProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { isFreePlan } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
   const brandAccent = '#1CC8A0';
-  const isStudioPage = location.pathname.includes('/workspace/studio');
 
   const translations = {
     en: {
@@ -88,52 +85,44 @@ export function TopNavigation({
   const t = translations[language];
 
   return (
-    <div
-      className={cn(
-        'border-b transition-all',
-        isStudioPage
-          ? ['bg-studio-header-gradient', 'border-transparent', 'h-[72px]']
-          : ['bg-background', 'border-border', 'h-16'],
-      )}
-    >
+    <div className="border-b transition-all h-[72px] bg-white border-border">
       <div className="container flex h-full items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onToggleSidebar}
-            className={cn(
-              'p-2 rounded-md transition-colors',
-              isStudioPage ? 'text-white hover:bg-white/10' : 'hover:bg-accent',
-            )}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+        <div className="flex items-center gap-4 ml-4">
           <button
             onClick={onLogoClick ?? onHomeClick}
-            className="flex items-center gap-2 cursor-pointer"
+            className="cursor-pointer"
           >
-            <img
-              src="/logo.svg"
-              alt="SnapAgent"
-              className={cn('h-8', isStudioPage && 'brightness-0 invert')}
-            />
-            <span className={cn('font-bold text-xl', isStudioPage ? 'text-white' : 'text-foreground')}>
+            <span
+              className="font-bold text-2xl bg-clip-text text-transparent"
+              style={{ backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)' }}
+            >
               SnapAgent
             </span>
           </button>
-        </div>
-        {navigationTabs && (
-          isStudioPage ? <div className="flex items-center gap-1">{navigationTabs}</div> : navigationTabs
-        )}
 
-        <div className={cn('flex items-center gap-4', isStudioPage && 'text-white')}>
+          {isFreePlan && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/billing-settings')}
+              className="text-[10px] font-medium px-2 py-0 h-5 rounded-full border text-white border-transparent hover:shadow-md transition-all duration-200 hover:scale-105"
+              style={{ backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)' }}
+            >
+              Free
+            </Button>
+          )}
+        </div>
+
+        <div className="flex-1 flex justify-center">
+          {navigationTabs}
+        </div>
+
+        <div className="flex items-center gap-4">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onLanguageChange(language === 'en' ? 'ko' : 'en')}
-            className={cn(
-              'text-sm gap-1 sm:gap-2 rounded-full border-none shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95',
-              isStudioPage ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white hover:bg-gray-50'
-            )}
+            className="text-sm gap-1 sm:gap-2 rounded-full border-none shadow-sm bg-white hover:bg-gray-50 transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95"
           >
             <Languages size={16} className="transition-colors duration-200" />
             <span className="hidden sm:inline">
@@ -143,19 +132,13 @@ export function TopNavigation({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={cn(
-                'focus:outline-none flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1',
-                isStudioPage ? 'hover:bg-white/10' : 'hover:bg-white hover:shadow-md'
-              )}>
+              <button className="focus:outline-none flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1 hover:bg-white hover:shadow-md">
                 <Avatar className="w-9 h-9 cursor-pointer transition-all duration-200">
                   <AvatarFallback className="bg-teal-500 text-white">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
-                <span className={cn(
-                  'text-sm inline-flex items-center gap-1 transition-colors duration-200',
-                  isStudioPage ? 'text-white' : 'text-gray-700'
-                )}>
+                <span className="text-sm text-gray-700 inline-flex items-center gap-1 transition-colors duration-200">
                   {userName}
                   <ChevronDown size={12} className="transition-transform duration-200 group-hover:translate-y-0.5" />
                 </span>

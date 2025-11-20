@@ -9,7 +9,7 @@ export { LeftActionPanel } from './components/LeftActionPanel';
 export { TopActions, type ViewMode } from './components/TopActions';
 
 // Pages
-export { ExplorePage } from './pages/ExplorePage';
+export { MarketplacePage } from './pages/MarketplacePage';
 export { StudioPage } from './pages/StudioPage';
 export { KnowledgePage } from './pages/KnowledgePage';
 export { ToolsPage } from './pages/ToolsPage';

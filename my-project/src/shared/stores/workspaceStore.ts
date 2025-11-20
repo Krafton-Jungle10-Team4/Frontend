@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 interface WorkspaceState {
   // 현재 활성 탭
-  activeTab: 'explore' | 'studio' | 'knowledge' | 'library';
+  activeTab: 'marketplace' | 'studio' | 'knowledge' | 'library';
 
   // 필터 상태
-  exploreFilters: {
+  marketplaceFilters: {
     category: string;
     searchQuery: string;
   };
@@ -23,8 +23,8 @@ interface WorkspaceState {
 
   // 액션
   setActiveTab: (tab: WorkspaceState['activeTab']) => void;
-  setExploreFilters: (
-    filters: Partial<WorkspaceState['exploreFilters']>
+  setMarketplaceFilters: (
+    filters: Partial<WorkspaceState['marketplaceFilters']>
   ) => void;
   setStudioFilters: (
     filters: Partial<WorkspaceState['studioFilters']>
@@ -37,7 +37,7 @@ interface WorkspaceState {
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   activeTab: 'studio',
 
-  exploreFilters: {
+  marketplaceFilters: {
     category: 'all',
     searchQuery: '',
   },
@@ -55,9 +55,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
 
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  setExploreFilters: (filters) =>
+  setMarketplaceFilters: (filters) =>
     set((state) => ({
-      exploreFilters: { ...state.exploreFilters, ...filters },
+      marketplaceFilters: { ...state.marketplaceFilters, ...filters },
     })),
 
   setStudioFilters: (filters) =>

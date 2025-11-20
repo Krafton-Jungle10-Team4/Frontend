@@ -18,7 +18,7 @@ export function WorkspaceLayout() {
   // Determine active tab from location
   const detectedTab = useMemo(() => {
     const path = location.pathname;
-    if (path.includes('/explore')) return 'explore';
+    if (path.includes('/marketplace')) return 'marketplace';
     if (path.includes('/studio')) return 'studio';
     if (path.includes('/knowledge')) return 'knowledge';
     if (path.includes('/library')) return 'library';
@@ -33,7 +33,7 @@ export function WorkspaceLayout() {
     }
   }, [activeTab, detectedTab, setActiveTab]);
 
-  const handleTabChange = (tab: 'explore' | 'studio' | 'knowledge' | 'library') => {
+  const handleTabChange = (tab: 'marketplace' | 'studio' | 'knowledge' | 'library') => {
     setActiveTab(tab);
     navigate(`/workspace/${tab}`);
   };
