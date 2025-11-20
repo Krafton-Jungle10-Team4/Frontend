@@ -7,6 +7,11 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://api.snapagent.shop';
 export const API_TIMEOUT = 30000; // 30초
 
+// 공개 API Base URL (X-API-Key 인증)
+export const PUBLIC_API_BASE_URL =
+  import.meta.env.VITE_PUBLIC_API_URL ||
+  `${API_BASE_URL}/api/v1/public`;
+
 export const API_ENDPOINTS = {
   // 인증 (SnapAgent API)
   AUTH: {
@@ -70,6 +75,13 @@ export const API_ENDPOINTS = {
     DEPLOYMENT_STATUS: (botId: string) =>
       `/api/v1/bots/${botId}/deployment/status`,
     TAGS: '/api/v1/bots/tags',
+    // API 키 관리 (JWT 인증)
+    API_KEYS: (botId: string) => `/api/v1/bots/${botId}/api-keys`,
+    API_KEY_DETAIL: (botId: string, keyId: string) =>
+      `/api/v1/bots/${botId}/api-keys/${keyId}`,
+    API_KEY_USAGE: (botId: string, keyId: string) =>
+      `/api/v1/bots/${botId}/api-keys/${keyId}/usage`,
+    API_SCHEMA: (botId: string) => `/api/v1/bots/${botId}/api-schema`,
   },
 
   // 워크플로우 관리 (SnapAgent API)

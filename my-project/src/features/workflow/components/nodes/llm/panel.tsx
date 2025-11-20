@@ -250,10 +250,20 @@ export const LLMPanel = () => {
                 min="0"
                 max="2"
                 step="0.1"
-                value={llmData.temperature || 0.7}
-                onChange={(e) =>
-                  handleUpdate('temperature', parseFloat(e.target.value))
-                }
+                value={llmData.temperature ?? 0.7}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // 빈 문자열이면 기본값으로 설정
+                  if (value === '' || value === null) {
+                    handleUpdate('temperature', 0.7);
+                    return;
+                  }
+                  const parsed = parseFloat(value);
+                  // NaN 체크 및 유효 범위 검증
+                  if (!isNaN(parsed) && parsed >= 0 && parsed <= 2) {
+                    handleUpdate('temperature', parsed);
+                  }
+                }}
               />
             </Field>
 
@@ -265,10 +275,20 @@ export const LLMPanel = () => {
                 type="number"
                 min="1"
                 max="8192"
-                value={llmData.maxTokens || 4000}
-                onChange={(e) =>
-                  handleUpdate('maxTokens', parseInt(e.target.value, 10))
-                }
+                value={llmData.maxTokens ?? 4000}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // 빈 문자열이면 기본값으로 설정
+                  if (value === '' || value === null) {
+                    handleUpdate('maxTokens', 4000);
+                    return;
+                  }
+                  const parsed = parseInt(value, 10);
+                  // NaN 체크 및 유효 범위 검증
+                  if (!isNaN(parsed) && parsed >= 1 && parsed <= 8192) {
+                    handleUpdate('maxTokens', parsed);
+                  }
+                }}
               />
             </Field>
           </CollapsibleContent>
