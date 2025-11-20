@@ -155,7 +155,7 @@ export function AgentCard({ agent }: AgentCardProps) {
             <Button
               variant="default"
               size="sm"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              className="flex-1 bg-brand-gradient hover:opacity-90"
               onClick={() => setShowMarketplacePublishDialog(true)}
             >
               <Globe className="w-4 h-4 mr-1" />

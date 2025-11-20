@@ -64,7 +64,6 @@ export function useBotCreateDialog() {
       }
 
       setIsCreating(true);
-      const toastId = toast.loading(t.creating);
 
       try {
         // Bot 생성 API 호출
@@ -85,20 +84,17 @@ export function useBotCreateDialog() {
           message: `${userName} ${t.activityCreated}: ${newBot.name}`,
         });
 
-        toast.success(t.success);
+        // 다이얼로그 닫기
+        closeDialog();
 
         // 워크플로우 페이지로 이동
         navigate(`/bot/${newBot.id}/workflow`, {
-          state: { botName: newBot.name },
+          state: { botName: newBot.name, showSuccessToast: true },
         });
-
-        // 다이얼로그 닫기
-        closeDialog();
       } catch (error) {
         console.error('Failed to create bot:', error);
         toast.error(t.error);
       } finally {
-        toast.dismiss(toastId);
         setIsCreating(false);
       }
     },

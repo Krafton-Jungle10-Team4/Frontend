@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Bot as BotIcon, MoreVertical, Trash2, Rocket } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2, Rocket, Settings } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +27,7 @@ interface BotCardProps {
   onDelete: (botId: string, botName: string) => void;
   onClick?: (botId: string) => void;
   onDeploy?: (botId: string) => void;
+  onNavigateDeployment?: (botId: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
 }
@@ -53,6 +54,7 @@ function BotCard({
   onDelete,
   onClick,
   onDeploy,
+  onNavigateDeployment,
   viewMode = 'grid',
   language,
 }: BotCardProps) {
@@ -65,6 +67,7 @@ function BotCard({
       edges: 'Edges',
       version: 'Version',
       deploy: 'Deploy',
+      deploymentManage: 'Deployment Management',
       delete: 'Delete',
     },
     ko: {
@@ -73,6 +76,7 @@ function BotCard({
       edges: '엣지 수',
       version: '버전',
       deploy: '배포',
+      deploymentManage: '배포 관리',
       delete: '삭제',
     },
   };
@@ -160,6 +164,17 @@ function BotCard({
                 {t.deploy}
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="gap-2"
+                onSelect={(event) => {
+                  event.stopPropagation();
+                  setSuppressNextClick(true);
+                  onNavigateDeployment?.(bot.id);
+                }}
+              >
+                <Settings size={16} />
+                {t.deploymentManage}
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="gap-2 text-red-600"
                 onSelect={(event) => {
                   event.stopPropagation();
@@ -219,6 +234,17 @@ function BotCard({
             >
               <Rocket size={16} />
               {t.deploy}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2"
+              onSelect={(event) => {
+                event.stopPropagation();
+                setSuppressNextClick(true);
+                onNavigateDeployment?.(bot.id);
+              }}
+            >
+              <Settings size={16} />
+              {t.deploymentManage}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 text-red-600"

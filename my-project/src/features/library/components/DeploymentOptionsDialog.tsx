@@ -24,7 +24,7 @@ export function DeploymentOptionsDialog({
   onOpenChange,
   agent,
 }: DeploymentOptionsDialogProps) {
-  const { runApp, embedWebsite, openExplore, apiReference } = usePublishActions(agent.bot_id);
+  const { runApp, embedWebsite, openMarketplace, apiReference } = usePublishActions(agent.bot_id);
   const [isDeploying, setIsDeploying] = useState(false);
 
   /**
@@ -76,10 +76,10 @@ export function DeploymentOptionsDialog({
     }
   };
 
-  const handleOpenExplore = async () => {
+  const handleOpenMarketplace = async () => {
     const deployed = await ensureDeployment();
     if (deployed) {
-      openExplore();
+      openMarketplace();
       onOpenChange(false);
     }
   };
@@ -144,7 +144,7 @@ export function DeploymentOptionsDialog({
           <Button
             variant="outline"
             className="w-full justify-start h-auto py-4"
-            onClick={handleOpenExplore}
+            onClick={handleOpenMarketplace}
             disabled={isDeploying}
           >
             {isDeploying ? (
@@ -153,9 +153,9 @@ export function DeploymentOptionsDialog({
               <Compass className="mr-3 h-5 w-5" />
             )}
             <div className="flex flex-col items-start">
-              <span className="font-medium">Explore에서 열기</span>
+              <span className="font-medium">Marketplace에서 열기</span>
               <span className="text-xs text-muted-foreground">
-                Explore 페이지에서 에이전트 탐색 (준비 중)
+                Marketplace 페이지에서 에이전트 탐색 (준비 중)
               </span>
             </div>
           </Button>
