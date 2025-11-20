@@ -762,5 +762,19 @@ const vars = {
   'dify-logo-dify-logo-blue': 'var(--color-dify-logo-dify-logo-blue)',
   'dify-logo-dify-logo-black': 'var(--color-dify-logo-dify-logo-black)',
 
+  'studio-header-bg': 'var(--studio-header-bg)',
+  'studio-header-gradient-from': 'var(--studio-header-gradient-from)',
+  'studio-header-gradient-to': 'var(--studio-header-gradient-to)',
+  'studio-sidebar-bg': 'var(--studio-sidebar-bg)',
+  'studio-sidebar-border': 'var(--studio-sidebar-border)',
+  'studio-card-border': 'var(--studio-card-border)',
+  'studio-card-bg': 'var(--studio-card-bg)',
+  'studio-primary': 'var(--studio-primary)',
+  'studio-primary-hover': 'var(--studio-primary-hover)',
+  'studio-button-gradient-from': 'var(--studio-button-gradient-from)',
+  'studio-button-gradient-to': 'var(--studio-button-gradient-to)',
+  'studio-button-dark-from': 'var(--studio-button-dark-from)',
+  'studio-button-dark-to': 'var(--studio-button-dark-to)',
+
 }
 export default vars

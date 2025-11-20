@@ -1,0 +1,32 @@
+:root {
+  --studio-header-bg: #0A0E27;
+  --studio-header-gradient-from: #0A0E27;
+  --studio-header-gradient-to: #1A1F4E;
+
+  --studio-sidebar-bg: #FFFFFF;
+  --studio-sidebar-border: #E5E7EB;
+
+  --studio-card-bg: #FFFFFF;
+  --studio-card-border: #E5E7EB;
+  --studio-card-hover-shadow: 0 10px 25px rgba(0,0,0,0.08);
+
+  --studio-primary: #5E3AEE;
+  --studio-primary-hover: #4B2ED9;
+
+  --studio-button-gradient-from: #5E3AEE;
+  --studio-button-gradient-to: #7C5EFA;
+  --studio-button-dark-from: #0A0E27;
+  --studio-button-dark-to: #1A1F4E;
+
+  --studio-status-running: #10B981;
+  --studio-status-stopped: #6B7280;
+  --studio-status-pending: #F59E0B;
+  --studio-status-error: #EF4444;
+
+  --studio-tag-bg: #F3F4F6;
+  --studio-tag-text: #374151;
+  --studio-tag-selected-bg: #5E3AEE;
+  --studio-tag-selected-text: #FFFFFF;
+
+  --studio-card-accent: #3B82F6;
+}
