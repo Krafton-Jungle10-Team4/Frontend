@@ -84,6 +84,10 @@ export const API_ENDPOINTS = {
     API_SCHEMA: (botId: string) => `/api/v1/bots/${botId}/api-schema`,
   },
 
+  STUDIO: {
+    WORKFLOWS: '/api/v1/studio/workflows',
+  },
+
   // 워크플로우 관리 (SnapAgent API)
   WORKFLOWS: {
     // 노드 타입 관련

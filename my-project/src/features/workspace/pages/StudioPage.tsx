@@ -1,126 +1,59 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useBots } from '@/features/bot/hooks/useBots';
 import { FilterSidebar } from '@/features/studio/components/FilterSidebar';
-import { botApi } from '@/features/bot/api/botApi';
-import { workflowApi } from '@/features/workflow/api/workflowApi';
-import { WorkflowGrid, type StudioWorkflowCard } from '@/features/studio/components/WorkflowGrid';
+import { WorkflowGrid } from '@/features/studio/components/WorkflowGrid';
 import { SortDropdown } from '@/features/studio/components/SortDropdown';
+import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
+import {
+  selectFilteredAndSortedWorkflows,
+  selectAvailableTags,
+  selectWorkflowStats,
+} from '@/features/studio/stores/selectors';
 
 export function StudioPage() {
   const navigate = useNavigate();
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
-
-  const { bots, loading, error } = useBots({
-    searchQuery,
-    tags: selectedTags.length > 0 ? selectedTags : undefined,
-    autoFetch: true,
-  });
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const tags = await botApi.getTags();
-        setAvailableTags(tags);
-      } catch (err) {
-        console.error('Failed to fetch tags:', err);
-        const allTags = new Set<string>();
-        bots.forEach((bot) => {
-          bot.tags?.forEach((tag) => allTags.add(tag));
-        });
-        setAvailableTags(Array.from(allTags));
-      }
-    };
-
-    fetchTags();
-  }, [bots]);
-
-  const [botVersions, setBotVersions] = useState<Record<string, string>>({});
+  const workflows = useWorkflowStore((state) => state.workflows);
+  const loading = useWorkflowStore((state) => state.loading);
+  const error = useWorkflowStore((state) => state.error);
+  const filters = useWorkflowStore((state) => state.filters);
+  const sortBy = useWorkflowStore((state) => state.sortBy);
+  const setFilters = useWorkflowStore((state) => state.setFilters);
+  const setSortBy = useWorkflowStore((state) => state.setSortBy);
+  const fetchWorkflows = useWorkflowStore((state) => state.fetchWorkflows);
+  const availableTags = useWorkflowStore((state) => state.availableTags);
+  const stats = useWorkflowStore((state) => state.stats);
 
   useEffect(() => {
-    const fetchLatestVersions = async () => {
-      const versionMap: Record<string, string> = {};
+    void fetchWorkflows();
+  }, [fetchWorkflows]);
 
-      await Promise.all(
-        bots.map(async (bot) => {
-          try {
-            const versions = await workflowApi.listWorkflowVersions(bot.id, { status: 'published' });
-            if (versions.length > 0) {
-              versionMap[bot.id] = versions[0].version;
-            }
-          } catch (error) {
-            console.error(`Failed to fetch versions for bot ${bot.id}:`, error);
-          }
-        })
-      );
+  const filteredAndSortedWorkflows = useMemo(
+    () => selectFilteredAndSortedWorkflows(workflows, filters, sortBy),
+    [workflows, filters, sortBy]
+  );
 
-      setBotVersions(versionMap);
-    };
-
-    if (bots.length > 0) {
-      fetchLatestVersions();
+  const sidebarTags = useMemo(() => {
+    if (availableTags.length > 0) {
+      return availableTags;
     }
-  }, [bots]);
+    return selectAvailableTags(workflows);
+  }, [availableTags, workflows]);
 
   const workflowStats = useMemo(() => {
-    return {
-      total: bots.length,
-      running: bots.filter((bot) => bot.status === 'active').length,
-      stopped: bots.filter((bot) => bot.status !== 'active').length,
-    };
-  }, [bots]);
-
-  const workflowCards: StudioWorkflowCard[] = useMemo(() => {
-    return bots.map((bot) => ({
-      id: bot.id,
-      name: bot.name,
-      description: bot.description,
-      tags: bot.tags ?? [],
-      status: bot.status === 'active' ? 'running' : bot.status === 'inactive' ? 'stopped' : 'draft',
-      latestVersion: botVersions[bot.id],
-      updatedAt: bot.updatedAt,
-      deploymentState: undefined,
-      marketplaceState: undefined,
-    }));
-  }, [bots, botVersions]);
-
-  const filteredAndSortedWorkflows = useMemo(() => {
-    let filtered = workflowCards;
-
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (bot) =>
-          bot.name.toLowerCase().includes(searchLower) ||
-          bot.tags.some((tag) => tag.toLowerCase().includes(searchLower))
-      );
-    }
-
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((bot) =>
-        selectedTags.some((tag) => bot.tags.includes(tag))
-      );
-    }
-
-    filtered.sort((a, b) => {
-      if (sortBy === 'recent') {
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      } else {
-        return a.name.localeCompare(b.name);
-      }
-    });
-
-    return filtered;
-  }, [workflowCards, searchQuery, selectedTags, sortBy]);
+    const hasApiStats =
+      stats.total !== 0 ||
+      stats.running !== 0 ||
+      stats.stopped !== 0 ||
+      stats.error !== 0 ||
+      stats.pending !== 0;
+    return hasApiStats ? stats : selectWorkflowStats(workflows);
+  }, [stats, workflows]);
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+    const nextTags = filters.tags.includes(tag)
+      ? filters.tags.filter((t) => t !== tag)
+      : [...filters.tags, tag];
+    setFilters({ tags: nextTags });
   };
 
   const handleWorkflowClick = (workflowId: string) => {
@@ -130,11 +63,11 @@ export function StudioPage() {
   return (
     <div className="flex h-[calc(100vh-72px)]">
       <FilterSidebar
-        tags={availableTags}
-        selectedTags={selectedTags}
+        tags={sidebarTags}
+        selectedTags={filters.tags}
         onTagToggle={handleTagToggle}
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        searchValue={filters.search}
+        onSearchChange={(value) => setFilters({ search: value })}
         workflowStats={workflowStats}
       />
 
@@ -156,12 +89,13 @@ export function StudioPage() {
             </div>
           ) : error ? (
             <div className="flex h-64 items-center justify-center">
-              <p className="text-sm text-destructive">
-                오류가 발생했습니다: {error.message}
-              </p>
+              <p className="text-sm text-destructive">오류가 발생했습니다: {error.message}</p>
             </div>
           ) : (
-            <WorkflowGrid workflows={filteredAndSortedWorkflows} onWorkflowClick={handleWorkflowClick} />
+            <WorkflowGrid
+              workflows={filteredAndSortedWorkflows}
+              onWorkflowClick={handleWorkflowClick}
+            />
           )}
         </div>
       </main>

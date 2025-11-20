@@ -1,31 +1,36 @@
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict, isValid } from 'date-fns';
 import { cn } from '@/shared/components/utils';
 import { Tag } from '@/shared/components/tag';
-
-export type StudioWorkflowStatus = 'running' | 'stopped' | 'draft' | 'pending';
-
-export interface StudioWorkflowCard {
-  id: string;
-  name: string;
-  description?: string;
-  tags: string[];
-  status: StudioWorkflowStatus;
-  latestVersion?: string;
-  updatedAt: string | Date;
-  marketplaceState?: string;
-  deploymentState?: string;
-}
+import type {
+  Workflow,
+  WorkflowStatus,
+  DeploymentState,
+} from '@/shared/types/workflow';
 
 interface WorkflowGridProps {
-  workflows: StudioWorkflowCard[];
+  workflows: Workflow[];
   onWorkflowClick?: (id: string) => void;
 }
 
-const statusClasses: Record<StudioWorkflowStatus, string> = {
+const statusClasses: Record<WorkflowStatus, string> = {
   running: 'text-studio-status-running bg-studio-status-running/10',
   stopped: 'text-studio-status-stopped bg-studio-status-stopped/10',
-  draft: 'text-studio-status-stopped bg-studio-status-stopped/10',
+  error: 'text-red-600 bg-red-100',
   pending: 'text-amber-600 bg-amber-100',
+};
+
+const statusLabel: Record<WorkflowStatus, string> = {
+  running: '실행 중',
+  stopped: '중지됨',
+  error: '오류',
+  pending: '대기',
+};
+
+const deploymentLabels: Record<DeploymentState, string> = {
+  deployed: '배포 완료',
+  deploying: '배포 중',
+  error: '배포 오류',
+  stopped: '미배포',
 };
 
 export function WorkflowGrid({ workflows, onWorkflowClick }: WorkflowGridProps) {
@@ -41,9 +46,15 @@ export function WorkflowGrid({ workflows, onWorkflowClick }: WorkflowGridProps) 
   return (
     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {workflows.map((workflow) => {
-        const formattedUpdatedAt = formatDistanceToNowStrict(new Date(workflow.updatedAt), {
+        const updatedAtDate = workflow.updatedAt instanceof Date
+          ? workflow.updatedAt
+          : new Date(workflow.updatedAt ?? Date.now());
+        const safeDate = isValid(updatedAtDate) ? updatedAtDate : new Date();
+        const formattedUpdatedAt = formatDistanceToNowStrict(safeDate, {
           addSuffix: true,
         });
+        const workflowStatus = workflow.status ?? 'stopped';
+        const deploymentState = workflow.deploymentState ?? 'stopped';
 
         return (
           <div
@@ -64,14 +75,8 @@ export function WorkflowGrid({ workflows, onWorkflowClick }: WorkflowGridProps) 
                 <p className="text-xs uppercase tracking-wide text-studio-tag-text">최근 업데이트</p>
                 <p className="text-sm font-semibold text-foreground">{formattedUpdatedAt}</p>
               </div>
-              <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', statusClasses[workflow.status])}>
-                {workflow.status === 'running'
-                  ? '실행 중'
-                  : workflow.status === 'pending'
-                  ? '대기'
-                  : workflow.status === 'draft'
-                  ? '초안'
-                  : '중지됨'}
+              <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', statusClasses[workflowStatus])}>
+                {statusLabel[workflowStatus]}
               </span>
             </div>
 
@@ -92,13 +97,11 @@ export function WorkflowGrid({ workflows, onWorkflowClick }: WorkflowGridProps) 
             <div className="mt-auto grid grid-cols-2 gap-3 rounded-studio bg-studio-tag-bg/40 p-3">
               <div>
                 <p className="text-xs text-studio-tag-text">최근 버전</p>
-                <p className="text-sm font-semibold text-foreground">{workflow.latestVersion ?? 'v1.0'}</p>
+                <p className="text-sm font-semibold text-foreground">{workflow.latestVersion || 'v1.0'}</p>
               </div>
               <div>
                 <p className="text-xs text-studio-tag-text">배포 상태</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {workflow.deploymentState ? workflow.deploymentState : '미배포'}
-                </p>
+                <p className="text-sm font-semibold text-foreground">{deploymentLabels[deploymentState]}</p>
               </div>
             </div>
           </div>

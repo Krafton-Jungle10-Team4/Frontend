@@ -1,17 +1,15 @@
 import { Search } from 'lucide-react';
 import { cn } from '@/shared/components/utils';
 
+import type { WorkflowStats } from '@/shared/types/workflow';
+
 interface FilterSidebarProps {
   tags: string[];
   selectedTags: string[];
   onTagToggle: (tag: string) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  workflowStats: {
-    total: number;
-    running: number;
-    stopped: number;
-  };
+  workflowStats: WorkflowStats;
 }
 
 const StudioSearchBar: React.FC<{ value: string; onChange: (value: string) => void }> = ({
@@ -74,18 +72,26 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
       <div className="space-y-3">
         <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">총 워크플로우</h3>
-        <div className="bg-gray-50 rounded-studio p-4">
+        <div className="rounded-studio bg-gray-50 p-4">
           <div className="text-3xl font-bold text-gray-900">{workflowStats.total}</div>
           <div className="text-xs text-gray-500 mt-1">전체 워크플로우</div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-green-50 border border-green-200 rounded-studio p-3">
-            <div className="text-xs text-green-600 mb-1 font-medium">실행 중</div>
+          <div className="rounded-studio border border-green-200 bg-green-50 p-3">
+            <div className="text-xs font-medium text-green-600 mb-1">실행 중</div>
             <div className="text-2xl font-bold text-green-700">{workflowStats.running}</div>
           </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-studio p-3">
-            <div className="text-xs text-gray-600 mb-1 font-medium">중지됨</div>
+          <div className="rounded-studio border border-gray-200 bg-gray-50 p-3">
+            <div className="text-xs font-medium text-gray-600 mb-1">중지됨</div>
             <div className="text-2xl font-bold text-gray-700">{workflowStats.stopped}</div>
+          </div>
+          <div className="rounded-studio border border-amber-200 bg-amber-50 p-3">
+            <div className="text-xs font-medium text-amber-600 mb-1">대기</div>
+            <div className="text-xl font-bold text-amber-700">{workflowStats.pending}</div>
+          </div>
+          <div className="rounded-studio border border-red-200 bg-red-50 p-3">
+            <div className="text-xs font-medium text-red-600 mb-1">오류</div>
+            <div className="text-xl font-bold text-red-700">{workflowStats.error}</div>
           </div>
         </div>
       </div>
