@@ -45,7 +45,11 @@ export function VersionHistoryModal({
     setLoading(true);
     try {
       const response = await workflowApi.getVersionHistory(workflowId);
-      setVersions(response.data);
+      const formatted = response.data.map((version) => ({
+        ...version,
+        createdAt: new Date(version.createdAt),
+      }));
+      setVersions(formatted);
     } catch (error) {
       console.error('Failed to fetch version history:', error);
     } finally {
@@ -54,16 +58,22 @@ export function VersionHistoryModal({
   };
 
   const handleOpenVersion = (version: WorkflowVersion) => {
-    navigate(`/studio/workflow/${workflowId}/version/${version.id}`);
+    if (!workflowId) return;
+    navigate(`/bot/${workflowId}/workflow`, {
+      state: { versionId: version.id },
+    });
     onClose();
   };
 
   const handleSetupABTest = () => {
-    navigate(`/studio/workflow/${workflowId}/ab-test`);
+    if (!workflowId) return;
+    navigate(`/bot/${workflowId}/workflow`, {
+      state: { openABTestSetup: true },
+    });
     onClose();
   };
 
-  const formatDate = (date: Date): string => {
+  const formatDate = (date: Date | string): string => {
     return new Date(date).toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',

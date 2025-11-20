@@ -19,7 +19,7 @@ export function MyBotsSidebar() {
           <Rocket className="w-4 h-4 text-white" />
         </div>
         <span className="text-sm font-semibold text-gray-900">
-          {language === 'ko' ? '탐색' : 'Explore'}
+          {language === 'ko' ? '마켓플레이스' : 'Marketplace'}
         </span>
       </div>
 

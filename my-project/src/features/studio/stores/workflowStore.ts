@@ -72,13 +72,16 @@ const mapWorkflowStatus = (status?: string | null): WorkflowStatus => {
 
 const mapDeploymentState = (state?: string | null): DeploymentState => {
   switch (state) {
+    case 'deployed':
+    case 'published':
+      return 'deployed';
     case 'deploying':
+    case 'draft':
       return 'deploying';
     case 'error':
+    case 'disabled':
+    case 'suspended':
       return 'error';
-    case 'published':
-    case 'deployed':
-      return 'deployed';
     default:
       return 'stopped';
   }
@@ -86,10 +89,10 @@ const mapDeploymentState = (state?: string | null): DeploymentState => {
 
 const mapMarketplaceState = (state?: string | null): MarketplaceState => {
   switch (state) {
-    case 'pending':
-      return 'pending';
     case 'published':
       return 'published';
+    case 'pending':
+      return 'pending';
     default:
       return 'unpublished';
   }
@@ -111,6 +114,7 @@ const normalizeWorkflow = (item: any): Workflow => ({
   status: mapWorkflowStatus(item.status),
   tags: item.tags ?? [],
   latestVersion: item.latestVersion ?? 'v0.0',
+  latestVersionId: item.latestVersionId ?? undefined,
   versions: [],
   previousVersionCount: item.previousVersionCount ?? 0,
   deploymentState: mapDeploymentState(item.deploymentState),
@@ -150,7 +154,33 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   fetchWorkflows: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.get(API_ENDPOINTS.STUDIO.WORKFLOWS);
+      const { filters, sortBy } = get();
+
+      const params = new URLSearchParams();
+      params.append('page', '1');
+      params.append('limit', '100');
+
+      if (filters.search) {
+        params.append('search', filters.search);
+      }
+
+      if (filters.status && filters.status !== 'all') {
+        params.append('status', filters.status);
+      }
+
+      if (filters.tags && filters.tags.length > 0) {
+        filters.tags.forEach(tag => params.append('tags', tag));
+      }
+
+      const sortMapping: Record<SortOption, string> = {
+        recent: 'updatedAt:desc',
+        oldest: 'updatedAt:asc',
+        'name-asc': 'name:asc',
+        'name-desc': 'name:desc',
+      };
+      params.append('sort', sortMapping[sortBy] || 'updatedAt:desc');
+
+      const response = await apiClient.get(`${API_ENDPOINTS.STUDIO.WORKFLOWS}?${params.toString()}`);
       const payload = response.data ?? {};
       const workflows = (payload.data ?? []).map(normalizeWorkflow);
       const statsFromApi = payload.stats as Partial<WorkflowStats> | undefined;
@@ -217,10 +247,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set((state) => ({
       filters: { ...state.filters, ...filters },
     }));
+    get().fetchWorkflows();
   },
 
   setSortBy: (sortBy: SortOption) => {
     set({ sortBy });
+    get().fetchWorkflows();
   },
 
   deployWorkflow: async (id: string, config: DeployConfig) => {
