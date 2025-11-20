@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useDeploymentStore } from '@/features/deployment/stores/deploymentStore';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { botApi } from '@/features/bot/api/botApi';
+import { workflowApi } from '../api/workflowApi';
 import { deploymentApi } from '@/features/deployment/api/deploymentApi';
 import type { LibraryMetadata } from '../types/workflow.types';
 
@@ -91,8 +92,8 @@ export function usePublishActions(botId: string) {
       }
 
       // 발행된 버전 조회
-      const versions = await botApi.getWorkflowVersions(botId);
-      const publishedVersion = versions.find(v => v.status === 'published');
+      const versions = await workflowApi.listWorkflowVersions(botId, { status: 'published' });
+      const publishedVersion = versions[0];
 
       if (!publishedVersion) {
         toast.error('발행된 버전이 없습니다', {
@@ -170,11 +171,11 @@ export function usePublishActions(botId: string) {
   }, [openEmbedDialog]);
 
   /**
-   * Explore에서 열기
-   * 향후 구현: Explore 페이지로 이동
+   * Marketplace에서 열기
+   * 향후 구현: Marketplace 페이지로 이동
    */
-  const openExplore = useCallback(() => {
-    toast.info('Explore 기능은 준비 중입니다');
+  const openMarketplace = useCallback(() => {
+    toast.info('Marketplace 기능은 준비 중입니다');
   }, []);
 
   /**
@@ -189,9 +190,10 @@ export function usePublishActions(botId: string) {
     publishUpdate,
     runApp,
     embedWebsite,
-    openExplore,
+    openMarketplace,
     apiReference,
     canRunApp,
+    ensureDeployment,
     // 배포 확인 모달 상태
     isDeployDialogOpen,
     setIsDeployDialogOpen,

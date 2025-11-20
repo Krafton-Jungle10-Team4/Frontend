@@ -15,6 +15,7 @@ export interface Workflow {
   status: WorkflowStatus;
   tags: string[];
   latestVersion: string;
+  latestVersionId?: string;
   versions: WorkflowVersion[];
   previousVersionCount: number;
   deploymentState: DeploymentState;
@@ -67,7 +68,7 @@ export interface WorkflowStats {
   pending: number;
 }
 
-export type SortOption = 'recent' | 'name' | 'status';
+export type SortOption = 'recent' | 'oldest' | 'name-asc' | 'name-desc';
 
 export interface CreateWorkflowDto {
   name: string;
@@ -160,3 +161,24 @@ export interface ABTestConfig {
   metrics: string[];
   duration: number;
 }
+
+export {
+  PortType,
+  type PortDefinition,
+  type NodePortSchema,
+  type PortValue,
+  type PortValues,
+} from './workflow/port.types';
+
+export {
+  type ValueSelector,
+  type VariableMapping,
+  type NodeVariableMappings,
+  type VariableReference,
+  type VariablePoolState,
+} from './workflow/variable.types';
+
+export {
+  type WorkflowNodeV2,
+  type WorkflowEdgeV2,
+} from './workflow/node.types';

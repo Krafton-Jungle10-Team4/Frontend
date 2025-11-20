@@ -1,5 +1,6 @@
 import { useState, memo, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
@@ -79,6 +80,15 @@ export const WorkflowBuilderPage = () => {
     (state) => state.fetchDocuments
   );
 
+  // Auth store - 사용자 정보
+  const user = useAuthStore((state) => state.user);
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || '';
+
+  // UI store - 언어 설정
+  const language = useUIStore((state) => state.language);
+  const setLanguage = useUIStore((state) => state.setLanguage);
+
   // Keep bot store in sync with the workflow route param so other features (documents, knowledge nodes)
   // know which bot is currently being configured.
   useEffect(() => {
@@ -98,14 +108,19 @@ export const WorkflowBuilderPage = () => {
     });
   }, [botId, fetchDocuments]);
 
-  // Auth store - 사용자 정보
-  const user = useAuthStore((state) => state.user);
-  const userName = user?.name || 'User';
-  const userEmail = user?.email || '';
+  // 챗봇 생성 후 성공 토스트 표시
+  useEffect(() => {
+    const state = location.state as { botName?: string; showSuccessToast?: boolean } | null;
+    if (state?.showSuccessToast) {
+      const message = language === 'ko'
+        ? '챗봇이 성공적으로 생성되었습니다'
+        : 'Bot created successfully';
+      toast.success(message);
 
-  // UI store - 언어 설정
-  const language = useUIStore((state) => state.language);
-  const setLanguage = useUIStore((state) => state.setLanguage);
+      // state 정리하여 새로고침 시 토스트가 다시 표시되지 않도록
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, language]);
 
   // Workspace store - 탭 상태
   const workspaceActiveTab = useWorkspaceStore((state) => state.activeTab);
@@ -126,7 +141,7 @@ export const WorkflowBuilderPage = () => {
     }
   };
 
-  const handleWorkspaceTabChange = (tab: 'explore' | 'studio' | 'knowledge' | 'tools') => {
+  const handleWorkspaceTabChange = (tab: 'marketplace' | 'studio' | 'knowledge' | 'tools') => {
     setWorkspaceActiveTab(tab);
     navigate(`/workspace/${tab}`);
   };
