@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FilterSidebar } from '@/features/studio/components/FilterSidebar';
 import { WorkflowGrid } from '@/features/studio/components/WorkflowGrid';
 import { SortDropdown } from '@/features/studio/components/SortDropdown';
@@ -11,7 +10,6 @@ import {
 } from '@/features/studio/stores/selectors';
 
 export function StudioPage() {
-  const navigate = useNavigate();
   const workflows = useWorkflowStore((state) => state.workflows);
   const loading = useWorkflowStore((state) => state.loading);
   const error = useWorkflowStore((state) => state.error);
@@ -27,7 +25,7 @@ export function StudioPage() {
     void fetchWorkflows();
   }, [fetchWorkflows]);
 
-  const filteredAndSortedWorkflows = useMemo(
+  const filteredWorkflows = useMemo(
     () => selectFilteredAndSortedWorkflows(workflows, filters, sortBy),
     [workflows, filters, sortBy]
   );
@@ -54,10 +52,6 @@ export function StudioPage() {
       ? filters.tags.filter((t) => t !== tag)
       : [...filters.tags, tag];
     setFilters({ tags: nextTags });
-  };
-
-  const handleWorkflowClick = (workflowId: string) => {
-    navigate(`/bot/${workflowId}/workflow`);
   };
 
   return (
@@ -93,8 +87,8 @@ export function StudioPage() {
             </div>
           ) : (
             <WorkflowGrid
-              workflows={filteredAndSortedWorkflows}
-              onWorkflowClick={handleWorkflowClick}
+              workflows={filteredWorkflows}
+              sortBy={sortBy}
             />
           )}
         </div>
