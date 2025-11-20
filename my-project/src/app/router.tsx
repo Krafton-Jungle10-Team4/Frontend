@@ -50,6 +50,15 @@ export const router = createBrowserRouter([
           })),
       },
 
+      // Slack OAuth Callback - Public (no layout)
+      {
+        path: 'slack/callback',
+        lazy: () =>
+          import('@/features/integrations').then((module) => ({
+            Component: module.SlackCallbackPage,
+          })),
+      },
+
       // Bot Setup routes - Public (인증 불필요)
       {
         path: 'setup',
@@ -165,14 +174,6 @@ export const router = createBrowserRouter([
             lazy: () =>
               import('@/features/billing').then((module) => ({
                 Component: module.PricingPage,
-              })),
-          },
-          // Demo App - API 테스트 도구
-          {
-            path: 'demo-app',
-            lazy: () =>
-              import('@/features/demo-app').then((module) => ({
-                Component: module.DemoAppPage,
               })),
           },
         ],

@@ -15,6 +15,7 @@ import { VariableAssignerNode } from '@features/workflow/nodes/variable-assigner
 import AssignerNode from './assigner/node';
 import TavilySearchNode from './tavily-search/node';
 import { ImportedWorkflowNode } from './imported-workflow';
+import { SlackNode } from './slack';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
@@ -30,6 +31,7 @@ import { VariableAssignerPanel } from '@features/workflow/nodes/variable-assigne
 import { AssignerPanel } from './assigner/panel';
 import { TavilySearchPanel } from './tavily-search/panel';
 import { ImportedWorkflowPanel } from './imported-workflow';
+import { SlackPanel } from './slack';
 
 /**
  * 노드 타입 → 캔버스 컴포넌트 매핑
@@ -49,6 +51,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.Assigner]: AssignerNode, // New
   [BlockEnum.TavilySearch]: TavilySearchNode,
   [BlockEnum.ImportedWorkflow]: ImportedWorkflowNode,
+  [BlockEnum.Slack]: SlackNode,
   [BlockEnum.Http]: (() => null) as any,
   [BlockEnum.Code]: (() => null) as any,
   [BlockEnum.KnowledgeBase]: (() => null) as any,
@@ -71,4 +74,5 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.Assigner]: AssignerPanel, // New
   [BlockEnum.TavilySearch]: TavilySearchPanel,
   [BlockEnum.ImportedWorkflow]: ImportedWorkflowPanel,
+  [BlockEnum.Slack]: SlackPanel,
 };

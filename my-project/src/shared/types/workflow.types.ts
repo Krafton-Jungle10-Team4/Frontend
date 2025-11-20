@@ -26,6 +26,7 @@ export enum BlockEnum {
   QuestionClassifier = 'question-classifier',
   TavilySearch = 'tavily-search',
   ImportedWorkflow = 'imported-workflow',
+  Slack = 'slack', // Slack integration node
 }
 
 /**
@@ -440,4 +441,14 @@ export type TavilySearchNodeType = CommonNodeType<{
   // 콘텐츠 옵션
   include_answer?: boolean;
   include_raw_content?: boolean;
+}>;
+
+/**
+ * Slack 노드 타입
+ */
+export type SlackNodeType = CommonNodeType<{
+  type: BlockEnum.Slack;
+  channel?: string;
+  use_blocks?: boolean;
+  integration_id?: number;
 }>;

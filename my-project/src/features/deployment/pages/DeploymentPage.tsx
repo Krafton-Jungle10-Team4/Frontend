@@ -81,11 +81,34 @@ export function DeploymentPage() {
   if (!deployment) {
     return (
       <div className="container mx-auto p-8">
-        <div className="rounded-lg border p-6 bg-muted/30 text-center">
-          <p className="text-lg font-semibold mb-2">아직 배포가 없습니다.</p>
-          <p className="text-sm text-muted-foreground">
-            워크플로우에서 "업데이트 게시"를 실행하면 배포 정보가 생성됩니다.
-          </p>
+        <div className="rounded-lg border p-6 bg-muted/30 space-y-4">
+          <div className="text-center">
+            <p className="text-lg font-semibold mb-2">아직 배포가 없습니다.</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Slack 연동을 하려면 먼저 워크플로우를 게시해야 합니다.
+            </p>
+          </div>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-blue-900 mb-2">
+              📝 다음 단계를 따라주세요:
+            </p>
+            <ol className="list-decimal list-inside space-y-1.5 text-sm text-blue-800">
+              <li>워크플로우 빌더로 돌아가기</li>
+              <li>워크플로우 작성 및 저장</li>
+              <li>우측 상단 "라이브러리에 게시" 버튼 클릭</li>
+              <li>게시 완료 후 이 페이지에서 Slack 연동</li>
+            </ol>
+          </div>
+          
+          <div className="flex justify-center">
+            <Button
+              onClick={() => window.location.href = `/workspace/bot/${botId}/workflow`}
+              variant="default"
+            >
+              워크플로우로 돌아가기
+            </Button>
+          </div>
         </div>
       </div>
     );

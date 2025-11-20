@@ -1254,6 +1254,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         environmentVariables,
         conversationVariables,
       } = get();
+      
+      // DEBUG: Slack 노드 데이터 확인
+      const slackNode = nodes.find(n => n.data?.type === 'slack');
+      if (slackNode) {
+        console.log('[workflowStore] Slack node before normalize:', {
+          id: slackNode.id,
+          dataKeys: Object.keys(slackNode.data || {}),
+          data: slackNode.data
+        });
+      }
 
       const structuralErrors = validateBasicWorkflowStructure(nodes, edges);
       if (structuralErrors.length > 0) {
@@ -1278,6 +1288,17 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       }
 
       const normalizedGraph = normalizeWorkflowGraph(nodes, edges);
+      
+      // DEBUG: Slack 노드 데이터 확인 (normalize 후)
+      const normalizedSlackNode = normalizedGraph.nodes.find(n => n.data?.type === 'slack');
+      if (normalizedSlackNode) {
+        console.log('[workflowStore] Slack node after normalize:', {
+          id: normalizedSlackNode.id,
+          dataKeys: Object.keys(normalizedSlackNode.data || {}),
+          data: normalizedSlackNode.data
+        });
+      }
+      
       syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
 
       set({

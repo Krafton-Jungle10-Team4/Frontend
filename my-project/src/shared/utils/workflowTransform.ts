@@ -86,8 +86,8 @@ export const transformToBackend = (
 
               return resolvedPrompt;
             })(),
-            temperature: (node.data as any).temperature || 0.7,
-            max_tokens: (node.data as any).maxTokens || 500,
+            temperature: (node.data as any).temperature ?? 0.7,
+            max_tokens: (node.data as any).maxTokens ?? 4000,
           }),
 
           // Knowledge Retrieval 노드 변환
@@ -149,6 +149,13 @@ export const transformToBackend = (
           ...(node.data.type === BlockEnum.Answer && {
             template: (node.data as any).template || '',
             description: (node.data as any).description || '',
+          }),
+
+          // Slack 노드 변환
+          ...(node.data.type === BlockEnum.Slack && {
+            channel: (node.data as any).channel || '',
+            use_blocks: (node.data as any).use_blocks || false,
+            integration_id: (node.data as any).integration_id || undefined,
           }),
         },
         ports: serializedPorts,
@@ -400,6 +407,13 @@ export const transformFromBackend = (
           ...(node.type === 'answer' && {
             template: node.data.template || '',
             description: node.data.description || '',
+          }),
+
+          // Slack 노드 역변환
+          ...(node.type === 'slack' && {
+            channel: node.data.channel || '',
+            use_blocks: node.data.use_blocks || false,
+            integration_id: node.data.integration_id || undefined,
           }),
         },
       };
