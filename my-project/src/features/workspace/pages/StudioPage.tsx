@@ -199,6 +199,10 @@ export function StudioPage() {
     }
   };
 
+  const handleBotDeploy = (botId: string) => {
+    navigate(`/workspace/deployment/${botId}`);
+  };
+
   return (
     <>
       <BotCreateDialog
@@ -266,6 +270,7 @@ export function StudioPage() {
                 onDelete={handleBotDelete}
                 onCreateBot={handleCreateBlank}
                 onBotClick={handleBotClick}
+                onDeploy={handleBotDeploy}
               />
             )}
           </div>

@@ -129,6 +129,14 @@ export const router = createBrowserRouter([
                     Component: module.LibraryPage,
                   })),
               },
+              // Deployment (배포 관리)
+              {
+                path: 'deployment/:botId',
+                lazy: () =>
+                  import('@/features/deployment').then((module) => ({
+                    Component: module.DeploymentPage,
+                  })),
+              },
             ],
           },
           // Home - Bot 목록 페이지 (기존 유지, 추후 deprecated)
@@ -159,12 +167,12 @@ export const router = createBrowserRouter([
                 Component: module.PricingPage,
               })),
           },
-          // Deployment routes - 배포 관리
+          // Demo App - API 테스트 도구
           {
-            path: 'deployment/:botId',
+            path: 'demo-app',
             lazy: () =>
-              import('@/features/deployment').then((module) => ({
-                Component: module.DeploymentPage,
+              import('@/features/demo-app').then((module) => ({
+                Component: module.DemoAppPage,
               })),
           },
         ],

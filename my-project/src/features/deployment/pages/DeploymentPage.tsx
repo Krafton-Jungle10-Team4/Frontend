@@ -9,6 +9,12 @@ import {
   TooltipTrigger,
 } from '@shared/components/tooltip';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@shared/components/tabs';
+import {
   useDeploymentStore,
   selectDeployment,
   selectIsLoading,
@@ -16,6 +22,8 @@ import {
 } from '../stores/deploymentStore';
 import { EmbedWebsiteDialog } from '../components/EmbedWebsiteDialog';
 import { ApiReferenceDialog } from '../components/ApiReferenceDialog';
+import { APIDeploymentPanel } from '../components/APIDeploymentPanel';
+import { IntegrationsPanel } from '@/features/integrations';
 import { DEPLOYMENT_STATUS_LABELS } from '../types/deployment';
 
 export function DeploymentPage() {
@@ -84,8 +92,9 @@ export function DeploymentPage() {
   }
 
   return (
-    <div className="container mx-auto p-8 space-y-8">
-      <div className="flex items-start justify-between gap-6">
+    <div className="h-full overflow-y-auto">
+      <div className="container mx-auto p-8 space-y-8">
+        <div className="flex items-start justify-between gap-6">
         <div>
           <p className="text-sm text-muted-foreground mb-1">봇 ID {deployment.bot_id}</p>
           <h1 className="text-3xl font-bold">배포 관리</h1>
@@ -126,26 +135,56 @@ export function DeploymentPage() {
         </div>
       </div>
 
-      <section className="rounded-lg border p-6 space-y-3">
-        <h2 className="text-xl font-semibold">배포 정보</h2>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <dt className="text-muted-foreground">Widget Key</dt>
-            <dd className="font-mono">{deployment.widget_key}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">허용 도메인</dt>
-            <dd>
-              {deployment.allowed_domains?.length
-                ? deployment.allowed_domains.join(', ')
-                : '모든 도메인 허용'}
-            </dd>
-          </div>
-        </dl>
-      </section>
+      {/* 탭 추가 */}
+      <Tabs defaultValue="widget" className="w-full">
+        <TabsList>
+          <TabsTrigger value="widget">Widget</TabsTrigger>
+          <TabsTrigger value="app">앱 실행</TabsTrigger>
+          <TabsTrigger value="api">API 배포</TabsTrigger>
+          <TabsTrigger value="integrations">연동</TabsTrigger>
+        </TabsList>
 
-      <EmbedWebsiteDialog />
-      <ApiReferenceDialog />
+        <TabsContent value="widget">
+          <section className="rounded-lg border p-6 space-y-3">
+            <h2 className="text-xl font-semibold">배포 정보</h2>
+            <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <dt className="text-muted-foreground">Widget Key</dt>
+                <dd className="font-mono">{deployment.widget_key}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">허용 도메인</dt>
+                <dd>
+                  {deployment.allowed_domains?.length
+                    ? deployment.allowed_domains.join(', ')
+                    : '모든 도메인 허용'}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="app">
+          <section className="rounded-lg border p-6 space-y-3">
+            <h2 className="text-xl font-semibold">앱 실행 정보</h2>
+            <p className="text-muted-foreground">
+              앱 실행 기능은 위젯 배포 후 사용할 수 있습니다.
+            </p>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="api">
+          <APIDeploymentPanel botId={deployment.bot_id} />
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          <IntegrationsPanel botId={deployment.bot_id} />
+        </TabsContent>
+      </Tabs>
+
+        <EmbedWebsiteDialog />
+        <ApiReferenceDialog />
+      </div>
     </div>
   );
 }

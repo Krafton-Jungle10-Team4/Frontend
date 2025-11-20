@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Bot as BotIcon, MoreVertical, Trash2 } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2, Rocket } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ interface BotCardProps {
   bot: BotCardData;
   onDelete: (botId: string, botName: string) => void;
   onClick?: (botId: string) => void;
+  onDeploy?: (botId: string) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
 }
@@ -51,6 +52,7 @@ function BotCard({
   bot,
   onDelete,
   onClick,
+  onDeploy,
   viewMode = 'grid',
   language,
 }: BotCardProps) {
@@ -62,6 +64,7 @@ function BotCard({
       nodes: 'Nodes',
       edges: 'Edges',
       version: 'Version',
+      deploy: 'Deploy',
       delete: 'Delete',
     },
     ko: {
@@ -69,6 +72,7 @@ function BotCard({
       nodes: '노드 수',
       edges: '엣지 수',
       version: '버전',
+      deploy: '배포',
       delete: '삭제',
     },
   };
@@ -145,6 +149,17 @@ function BotCard({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
+                className="gap-2"
+                onSelect={(event) => {
+                  event.stopPropagation();
+                  setSuppressNextClick(true);
+                  onDeploy?.(bot.id);
+                }}
+              >
+                <Rocket size={16} />
+                {t.deploy}
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="gap-2 text-red-600"
                 onSelect={(event) => {
                   event.stopPropagation();
@@ -194,6 +209,17 @@ function BotCard({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="gap-2"
+              onSelect={(event) => {
+                event.stopPropagation();
+                setSuppressNextClick(true);
+                onDeploy?.(bot.id);
+              }}
+            >
+              <Rocket size={16} />
+              {t.deploy}
+            </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 text-red-600"
               onSelect={(event) => {
