@@ -22,14 +22,22 @@ export interface LibraryAgentVersion {
   id: string;  // UUID 문자열
   bot_id: string;
   version: string;
-  library_name: string;
+  status: 'draft' | 'published' | 'archived';
+  created_at: string;
+  updated_at: string;
+  published_at?: string;
+  library_name?: string;
   library_description?: string;
   library_category?: string;
   library_tags?: string[];
-  library_visibility: 'private' | 'team' | 'public';
-  library_published_at: string;
+  library_visibility?: 'private' | 'team' | 'public';
+  is_in_library: boolean;
+  library_published_at?: string;
+  input_schema?: any;
+  output_schema?: any;
   node_count?: number;
   edge_count?: number;
+  port_definitions?: any;
 
   // 🆕 배포 관련 필드 추가
   deployment_status?: 'draft' | 'published' | 'suspended';

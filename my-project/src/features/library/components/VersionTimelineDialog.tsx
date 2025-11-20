@@ -32,25 +32,17 @@ export function VersionTimelineDialog({
       try {
         setIsLoading(true);
 
-        // 같은 봇의 모든 버전 조회 (library_name으로 필터링)
-        const { data } = await apiClient.get<{
-          agents: LibraryAgentVersion[];
-          total: number;
-          page: number;
-          page_size: number;
-          total_pages: number;
-        }>('/library/agents', {
-          params: {
-            search: agent.library_name,
-          },
-        });
-
-        // 같은 봇 ID 필터링
-        const sameAgentVersions = data.agents.filter(
-          (a) => a.bot_id === agent.bot_id
+        // 봇의 모든 워크플로우 버전 조회
+        const { data } = await apiClient.get<LibraryAgentVersion[]>(
+          `/bots/${agent.bot_id}/workflows/versions`,
+          {
+            params: {
+              status: 'published', // 발행된 버전만 조회
+            },
+          }
         );
 
-        setVersions(sameAgentVersions);
+        setVersions(data);
       } catch (error) {
         console.error('Failed to fetch versions:', error);
       } finally {
@@ -86,8 +78,11 @@ export function VersionTimelineDialog({
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold">{version.version}</h3>
-                      {version.deployment_status === 'published' && (
-                        <Badge className="bg-green-500 text-white">배포됨</Badge>
+                      {version.status === 'published' && (
+                        <Badge className="bg-green-500 text-white">발행됨</Badge>
+                      )}
+                      {version.status === 'draft' && (
+                        <Badge variant="outline">초안</Badge>
                       )}
                       {version.id === agent.id && (
                         <Badge variant="outline">현재</Badge>
@@ -95,14 +90,16 @@ export function VersionTimelineDialog({
                     </div>
 
                     <p className="text-sm text-muted-foreground mt-1">
-                      {version.library_description}
+                      {version.library_description || version.library_name || '설명 없음'}
                     </p>
 
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>{version.node_count} 노드</span>
-                      <span>{version.edge_count} 엣지</span>
+                      {version.node_count && <span>{version.node_count} 노드</span>}
+                      {version.edge_count && <span>{version.edge_count} 엣지</span>}
                       <span>
-                        {new Date(version.library_published_at).toLocaleDateString('ko-KR')}
+                        {version.library_published_at
+                          ? new Date(version.library_published_at).toLocaleDateString('ko-KR')
+                          : new Date(version.created_at).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
                   </div>

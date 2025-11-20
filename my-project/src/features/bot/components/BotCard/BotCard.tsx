@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Bot as BotIcon, MoreVertical, Trash2, Shield, Plus } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
 } from '@/shared/components/dropdown-menu';
 import { formatTimeAgo } from '@/shared/utils/format';
 import type { Language } from '@/shared/types';
-import { TagBadge } from '@/shared/components/TagBadge';
+import { VersionBadge } from '@/features/workflow/components/VersionBadge';
 
 export interface BotCardData {
   id: string;
@@ -19,6 +19,7 @@ export interface BotCardData {
   edgeCount: number;
   estimatedCost: number;
   tags?: string[];
+  latestVersion?: string;
 }
 
 interface BotCardProps {
@@ -29,14 +30,18 @@ interface BotCardProps {
   language: Language;
 }
 
-const StatsGrid = ({ stats }: { stats: Array<{ label: string; value: string | number }> }) => (
+const StatsGrid = ({ stats, bot }: { stats: Array<{ label: string; value: string | number; isVersion?: boolean }>; bot: BotCardData }) => (
   <div className="grid grid-cols-3 gap-4">
     {stats.map((stat) => (
       <div key={stat.label}>
         <p className="text-xs uppercase tracking-wide text-gray-400">
           {stat.label}
         </p>
-        <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+        {stat.isVersion ? (
+          <VersionBadge version={stat.value as string} className="mt-1" />
+        ) : (
+          <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+        )}
       </div>
     ))}
   </div>
@@ -56,14 +61,14 @@ function BotCard({
       created: 'Created',
       nodes: 'Nodes',
       edges: 'Edges',
-      cost: 'Monthly Cost',
+      version: 'Version',
       delete: 'Delete',
     },
     ko: {
       created: '생성:',
       nodes: '노드 수',
       edges: '엣지 수',
-      cost: '월 비용',
+      version: '버전',
       delete: '삭제',
     },
   };
@@ -73,9 +78,9 @@ function BotCard({
     () => [
       { label: t.nodes, value: bot.nodeCount },
       { label: t.edges, value: bot.edgeCount },
-      { label: t.cost, value: `$${bot.estimatedCost.toFixed(2)}` },
+      { label: t.version, value: bot.latestVersion || 'v1.0', isVersion: true },
     ],
-    [t.nodes, t.edges, t.cost, bot.nodeCount, bot.edgeCount, bot.estimatedCost]
+    [t.nodes, t.edges, t.version, bot.nodeCount, bot.edgeCount, bot.latestVersion]
   );
 
   const statItems = useMemo(
@@ -85,7 +90,11 @@ function BotCard({
           <p className="text-[10px] uppercase tracking-wide text-gray-400">
             {stat.label}
           </p>
-          <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+          {stat.isVersion ? (
+            <VersionBadge version={stat.value as string} className="mt-1" />
+          ) : (
+            <p className="text-sm font-semibold text-gray-900">{stat.value}</p>
+          )}
         </div>
       )),
     [stats]
@@ -120,33 +129,6 @@ function BotCard({
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
-              <div className="mt-1">
-                {bot.tags && bot.tags.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 items-center">
-                    {bot.tags.map((tag) => (
-                      <TagBadge key={tag} tag={tag} />
-                    ))}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 border-2 border-dashed border-gray-300 rounded-lg text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all duration-200"
-                  >
-                    <Shield size={14} className="text-gray-400" />
-                    태그 추가
-                  </button>
-                )}
-              </div>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm text-gray-600">
@@ -177,7 +159,7 @@ function BotCard({
           </DropdownMenu>
         </div>
         <div className="mt-4 w-full md:hidden">
-          <StatsGrid stats={stats} />
+          <StatsGrid stats={stats} bot={bot} />
         </div>
       </div>
     );
@@ -227,34 +209,7 @@ function BotCard({
         </DropdownMenu>
       </div>
       <div className="mt-3">
-        {bot.tags && bot.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2 items-center">
-            {bot.tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} />
-            ))}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="inline-flex items-center gap-1.5 px-2 py-1 border-2 border-dashed border-gray-300 rounded-md text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all duration-200"
-          >
-            <Shield size={12} className="text-gray-400" />
-            태그 추가
-          </button>
-        )}
-      </div>
-      <div className="mt-2">
-        <StatsGrid stats={stats} />
+        <StatsGrid stats={stats} bot={bot} />
       </div>
     </div>
   );

@@ -134,9 +134,12 @@ export const workflowApi = {
     botId: string,
     params?: { status?: string }
   ): Promise<WorkflowVersionSummary[]> => {
+    const queryParams = params?.status
+      ? { version_status: params.status }
+      : undefined;
     const { data } = await apiClient.get(
       API_ENDPOINTS.WORKFLOWS.BOT_WORKFLOW_VERSIONS(botId),
-      { params }
+      { params: queryParams }
     );
     return data;
   },

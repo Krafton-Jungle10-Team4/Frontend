@@ -26,6 +26,9 @@ import {
 import { Badge } from '@/shared/components/badge';
 import { TEMPLATE_CATEGORIES } from '../../../constants/templateDefaults';
 import type { LibraryMetadata } from '../../../types/workflow.types';
+import { workflowApi } from '../../../api/workflowApi';
+import type { WorkflowVersionSummary } from '../../../types/api.types';
+import { VersionBadge } from '../../VersionBadge';
 
 interface LibrarySaveDialogProps {
   open: boolean;
@@ -33,6 +36,7 @@ interface LibrarySaveDialogProps {
   onPublish: (libraryMetadata: LibraryMetadata) => Promise<void>;
   isPublishing?: boolean;
   defaultBotName?: string;
+  botId: string;
 }
 
 interface FormData {
@@ -43,7 +47,7 @@ interface FormData {
 }
 
 export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
-  ({ open, onOpenChange, onPublish, isPublishing = false, defaultBotName = '' }) => {
+  ({ open, onOpenChange, onPublish, isPublishing = false, defaultBotName = '', botId }) => {
     const {
       register,
       handleSubmit,
@@ -62,6 +66,40 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
 
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
+    const [publishedVersions, setPublishedVersions] = useState<WorkflowVersionSummary[]>([]);
+    const [nextVersion, setNextVersion] = useState<string>('');
+
+    // 게시된 버전 목록 조회
+    useEffect(() => {
+      if (open && botId) {
+        const fetchVersions = async () => {
+          try {
+            const versions = await workflowApi.listWorkflowVersions(botId, { status: 'published' });
+            setPublishedVersions(versions);
+
+            // 다음 버전 계산
+            if (versions.length === 0) {
+              setNextVersion('v1.0');
+            } else {
+              const latestVersion = versions[0].version;
+              const versionMatch = latestVersion.match(/v(\d+)\.(\d+)/);
+              if (versionMatch) {
+                const major = parseInt(versionMatch[1], 10);
+                const minor = parseInt(versionMatch[2], 10);
+                setNextVersion(`v${major}.${minor + 1}`);
+              } else {
+                setNextVersion('v1.0');
+              }
+            }
+          } catch (error) {
+            console.error('Failed to fetch versions:', error);
+            setPublishedVersions([]);
+            setNextVersion('v1.0');
+          }
+        };
+        fetchVersions();
+      }
+    }, [open, botId]);
 
     // defaultBotName이 변경되면 폼의 library_name 업데이트
     useEffect(() => {
@@ -119,7 +157,10 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>에이전트 버전 게시</DialogTitle>
+            <div className="flex items-center gap-2">
+              <DialogTitle>에이전트 버전 게시</DialogTitle>
+              {nextVersion && <VersionBadge version={nextVersion} />}
+            </div>
             <DialogDescription>
               에이전트 버전을 게시하고 라이브러리에 저장합니다.
             </DialogDescription>
@@ -232,6 +273,18 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       Enter 키로 태그 추가, 클릭하여 제거
                     </p>
                   </div>
+
+                  {/* 게시된 버전 목록 */}
+                  {publishedVersions.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>게시된 버전</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {publishedVersions.map((version) => (
+                          <VersionBadge key={version.id} version={version.version} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
             </div>
 
             <DialogFooter className="mt-4">

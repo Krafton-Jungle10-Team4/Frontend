@@ -17,6 +17,7 @@ import { TopActions, type ViewMode } from '../components/TopActions';
 import { BotList } from '@/features/bot/components/BotList';
 import { BotCreateDialog } from '@/features/bot/components/BotCreateDialog';
 import { botApi } from '@/features/bot/api/botApi';
+import { workflowApi } from '@/features/workflow/api/workflowApi';
 import type { BotCardData } from '@/features/bot/components/BotCard';
 import type { Language } from '@/shared/types';
 import {
@@ -84,6 +85,34 @@ export function StudioPage() {
     fetchTags();
   }, [bots]);
 
+  // 각 봇의 최신 게시 버전 조회
+  const [botVersions, setBotVersions] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchLatestVersions = async () => {
+      const versionMap: Record<string, string> = {};
+
+      await Promise.all(
+        bots.map(async (bot) => {
+          try {
+            const versions = await workflowApi.listWorkflowVersions(bot.id, { status: 'published' });
+            if (versions.length > 0) {
+              versionMap[bot.id] = versions[0].version;
+            }
+          } catch (error) {
+            console.error(`Failed to fetch versions for bot ${bot.id}:`, error);
+          }
+        })
+      );
+
+      setBotVersions(versionMap);
+    };
+
+    if (bots.length > 0) {
+      fetchLatestVersions();
+    }
+  }, [bots]);
+
   // BotCardData 변환
   const botCards: BotCardData[] = bots.map((bot) => ({
     id: bot.id,
@@ -94,6 +123,7 @@ export function StudioPage() {
     edgeCount: 0, // workflow에서 계산 필요
     estimatedCost: 0, // 추후 계산 로직 추가
     tags: bot.tags,
+    latestVersion: botVersions[bot.id],
   }));
 
   // 필터링된 봇 목록 (completed 필터 적용)

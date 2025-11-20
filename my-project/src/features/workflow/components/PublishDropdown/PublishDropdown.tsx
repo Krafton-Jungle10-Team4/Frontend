@@ -62,6 +62,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         onOpenChange={setIsLibraryDialogOpen}
         onPublish={publishUpdate}
         defaultBotName={botName}
+        botId={botId}
       />
 
       {/* DeployConfirmDialog */}
