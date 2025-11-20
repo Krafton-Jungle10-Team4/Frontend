@@ -1,0 +1,17 @@
+interface SortDropdownProps {
+  value: 'recent' | 'name';
+  onChange: (value: 'recent' | 'name') => void;
+}
+
+export function SortDropdown({ value, onChange }: SortDropdownProps) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value as SortDropdownProps['value'])}
+      className="rounded-studio border border-studio-card-border bg-white px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus:border-studio-primary focus:outline-none focus:ring-2 focus:ring-studio-primary/20"
+    >
+      <option value="recent">최근 수정순</option>
+      <option value="name">이름순</option>
+    </select>
+  );
+}
