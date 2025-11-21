@@ -1,17 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/shared/components/badge';
-import { Download, Eye, MoreVertical, Tag as TagIcon } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/dropdown-menu';
+import { Download, Eye, Tag as TagIcon } from 'lucide-react';
 import type { MarketplaceItem } from '../api/marketplaceApi';
 import { MarketplaceItemDetailDialog } from './MarketplaceItemDetailDialog';
-import { importMarketplaceWorkflow } from '../api/marketplaceApi';
-import { toast } from 'sonner';
 
 interface MarketplaceItemCardProps {
   item: MarketplaceItem;
@@ -19,28 +10,7 @@ interface MarketplaceItemCardProps {
 }
 
 export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
-  const navigate = useNavigate();
   const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-
-  const handleImport = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isImporting) return;
-
-    const toastId = toast.loading('워크플로우를 가져오는 중...');
-
-    try {
-      setIsImporting(true);
-      await importMarketplaceWorkflow(item.id);
-      toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
-      navigate('/workspace/studio');
-    } catch (error) {
-      console.error('워크플로우 가져오기 실패:', error);
-      toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -71,46 +41,10 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
         />
 
         <div className="px-5 py-3 flex flex-col flex-1">
-          {/* 제목 + 드롭다운 */}
-          <div className="flex items-start justify-between mb-1">
-            <h3 className="font-bold text-lg text-gray-800 line-clamp-1">
-              {item.display_name}
-            </h3>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity rounded hover:bg-gray-100"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4 text-gray-500" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDetailDialog(true);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  상세보기
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleImport(e);
-                  }}
-                  disabled={isImporting}
-                  className="cursor-pointer"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {isImporting ? '가져오는 중...' : '가져오기'}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* 제목 */}
+          <h3 className="font-bold text-lg text-gray-800 line-clamp-1 mb-1">
+            {item.display_name}
+          </h3>
 
           {/* 날짜 + publisher */}
           <div className="text-xs text-muted-foreground mb-1">
