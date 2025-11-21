@@ -68,7 +68,7 @@ export function WorkflowCard({
   return (
     <div
       className={cn(
-        'relative bg-white rounded-studio overflow-hidden',
+        'relative bg-white rounded-lg overflow-hidden',
         'shadow-md hover:shadow-studio-card hover:scale-[1.02] transition-all duration-200',
         'cursor-pointer group h-full flex flex-col',
         isDeployed ? '' : 'border-t-4 border-t-gray-300 border border-studio-card-border'
@@ -186,7 +186,7 @@ export function WorkflowCard({
         <div className="flex gap-2 mt-auto">
           {isDeployed ? (
             <Button
-              variant="studio-dark"
+              variant="default"
               size="sm"
               rounded="sharp"
               onClick={(e: React.MouseEvent) => {
@@ -194,9 +194,6 @@ export function WorkflowCard({
                 onNavigateDeployment?.();
               }}
               className="flex-1 hover:opacity-90 hover:scale-105 transition-all duration-200"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-              }}
             >
               배포 관리
             </Button>
@@ -216,7 +213,7 @@ export function WorkflowCard({
           )}
 
           <Button
-            variant="studio-outline"
+            variant="outline"
             size="sm"
             rounded="sharp"
             onClick={(e: React.MouseEvent) => {

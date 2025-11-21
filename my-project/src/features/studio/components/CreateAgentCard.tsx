@@ -14,7 +14,7 @@ export function CreateAgentCard({
   return (
     <div
       className={cn(
-        'relative bg-white rounded-studio overflow-hidden',
+        'relative bg-white rounded-lg overflow-hidden',
         'border border-gray-300',
         'hover:shadow-studio-card hover:scale-[1.02] transition-all duration-200',
         'group h-full flex flex-col'
