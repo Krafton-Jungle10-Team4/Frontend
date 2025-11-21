@@ -41,16 +41,16 @@ const translations = {
     nameRequired: 'Bot name is required',
   },
   ko: {
-    title: '새 봇 만들기',
-    description: '봇의 이름과 설명을 입력하세요',
-    nameLabel: '봇 이름',
+    title: '새 에이전트 만들기',
+    description: '에이전트의 이름과 설명을 입력하세요',
+    nameLabel: '에이전트 이름',
     namePlaceholder: '예: 고객 지원 도우미',
     descriptionLabel: '설명 (선택사항)',
     descriptionPlaceholder: '이 봇의 목적은 무엇인가요?',
     cancel: '취소',
     create: '생성하기',
     creating: '생성 중...',
-    nameRequired: '봇 이름은 필수입니다',
+    nameRequired: '에이전트 이름은 필수입니다',
   },
 };
 

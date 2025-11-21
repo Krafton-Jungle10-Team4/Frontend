@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Bot as BotIcon, MoreVertical, Trash2, Rocket, Settings } from 'lucide-react';
+import { Bot as BotIcon, MoreVertical, Trash2, Rocket, Settings, History, Plus, Tag as TagIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
+import { Badge } from '@/shared/components/badge';
 import { formatTimeAgo } from '@/shared/utils/format';
 import type { Language } from '@/shared/types';
 import { VersionBadge } from '@/features/workflow/components/VersionBadge';
@@ -20,6 +21,8 @@ export interface BotCardData {
   estimatedCost: number;
   tags?: string[];
   latestVersion?: string;
+  isDeployed?: boolean;
+  previousVersionCount?: number;
 }
 
 interface BotCardProps {
@@ -28,6 +31,8 @@ interface BotCardProps {
   onClick?: (botId: string) => void;
   onDeploy?: (botId: string) => void;
   onNavigateDeployment?: (botId: string) => void;
+  onVersionHistory?: (botId: string) => void;
+  onEditTags?: (botId: string, currentTags: string[]) => void;
   viewMode?: 'grid' | 'list';
   language: Language;
 }
@@ -55,6 +60,8 @@ function BotCard({
   onClick,
   onDeploy,
   onNavigateDeployment,
+  onVersionHistory,
+  onEditTags,
   viewMode = 'grid',
   language,
 }: BotCardProps) {
@@ -69,6 +76,8 @@ function BotCard({
       deploy: 'Deploy',
       deploymentManage: 'Deployment Management',
       delete: 'Delete',
+      versionHistory: 'Version History',
+      addTag: 'Add Tag',
     },
     ko: {
       created: '생성:',
@@ -78,6 +87,8 @@ function BotCard({
       deploy: '배포',
       deploymentManage: '배포 관리',
       delete: '삭제',
+      versionHistory: '버전 히스토리',
+      addTag: '태그 추가',
     },
   };
 
@@ -122,9 +133,12 @@ function BotCard({
   if (viewMode === 'list') {
     return (
       <div
-        className="border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+        className={`relative border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+          bot.isDeployed ? 'border-t-4 border-t-transparent bg-gradient-to-r from-teal-400 to-teal-500 bg-clip-border' : 'border-t-4 border-t-gray-300'
+        }`}
         onClick={handleCardClick}
       >
+        <div className="bg-white rounded-lg -m-[1px] p-4 sm:p-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -137,6 +151,38 @@ function BotCard({
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {t.created} {formatTimeAgo(bot.createdAt, language)}
               </p>
+              {/* 태그 영역 */}
+              {onEditTags && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {bot.tags && bot.tags.length > 0 ? (
+                    bot.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="text-xs cursor-pointer hover:bg-gray-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditTags(bot.id, bot.tags || []);
+                        }}
+                      >
+                        <TagIcon className="h-3 w-3 mr-1" />
+                        {tag}
+                      </Badge>
+                    ))
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditTags(bot.id, []);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Plus className="h-3 w-3" />
+                      {t.addTag}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm text-gray-600">
@@ -191,15 +237,19 @@ function BotCard({
         <div className="mt-4 w-full md:hidden">
           <StatsGrid stats={stats} bot={bot} />
         </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+      className={`relative border border-gray-300 rounded-lg p-4 sm:p-6 hover:shadow-md hover:border-gray-400 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+        bot.isDeployed ? 'border-t-4 border-t-transparent bg-gradient-to-r from-teal-400 to-teal-500 bg-clip-border' : 'border-t-4 border-t-gray-300'
+      }`}
       onClick={handleCardClick}
     >
+      <div className="bg-white rounded-lg -m-[1px] p-4 sm:p-6">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -212,6 +262,38 @@ function BotCard({
             <p className="text-xs sm:text-sm text-gray-500 truncate">
               {t.created} {formatTimeAgo(bot.createdAt, language)}
             </p>
+            {/* 태그 영역 */}
+            {onEditTags && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {bot.tags && bot.tags.length > 0 ? (
+                  bot.tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="text-xs cursor-pointer hover:bg-gray-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditTags(bot.id, bot.tags || []);
+                      }}
+                    >
+                      <TagIcon className="h-3 w-3 mr-1" />
+                      {tag}
+                    </Badge>
+                  ))
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditTags(bot.id, []);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                    {t.addTag}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <DropdownMenu onOpenChange={setIsMenuOpen}>
@@ -262,6 +344,21 @@ function BotCard({
       </div>
       <div className="mt-3">
         <StatsGrid stats={stats} bot={bot} />
+      </div>
+      {onVersionHistory && (
+        <div className="mt-4 flex items-center justify-end">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onVersionHistory(bot.id);
+            }}
+            className="flex items-center gap-1 text-xs text-teal-500 hover:text-teal-600 transition-colors"
+          >
+            <History className="h-3 w-3" />
+            <span>{t.versionHistory}</span>
+          </button>
+        </div>
+      )}
       </div>
     </div>
   );

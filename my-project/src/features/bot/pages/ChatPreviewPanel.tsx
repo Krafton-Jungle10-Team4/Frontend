@@ -48,7 +48,7 @@ export function ChatPreviewPanel({
       initialMessage: `안녕하세요! 👋 AI 에이전트 웹 플랫폼 지원팀입니다. 무엇을 도와드릴까요?`,
       botResponse:
         '죄송합니다. 현재 미리보기 모드로 요청을 처리할 수 없습니다. 전체 기능을 사용하려면 챗봇을 지식 베이스에 연결해주세요.',
-      today: '오늘',
+      today: '💬 자유로운 대화를 시도해보세요',
       delivered: '전송됨',
       placeholder: '메시지를 입력하세요...',
       quickMessages: [
@@ -75,14 +75,7 @@ export function ChatPreviewPanel({
     skipped: 'text-gray-400',
   } as const;
 
-  const initialMessage: Message = {
-    id: '1',
-    type: 'bot',
-    content: t.initialMessage,
-    timestamp: new Date(),
-  };
-
-  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [_sessionId, setSessionId] = useState<string>('');
@@ -158,14 +151,7 @@ export function ChatPreviewPanel({
 
   const handleResetChat = () => {
     stopTypingAnimation();
-    setMessages([
-      {
-        id: Date.now().toString(),
-        type: 'bot',
-        content: t.initialMessage,
-        timestamp: new Date(),
-      },
-    ]);
+    setMessages([]);
     setInputValue('');
     stopTypingAnimation();
     setIsTyping(false);
@@ -687,21 +673,6 @@ export function ChatPreviewPanel({
 
           <div ref={messagesEndRef} />
         </div>
-
-        {/* Quick Replies */}
-        {messages.length === 1 && !isTyping && (
-          <div className="mt-4 space-y-2">
-            {t.quickMessages.map((msg, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleQuickMessage(msg)}
-                className="w-full text-left px-4 py-2.5 bg-transparent border border-teal-400 text-teal-400 rounded-2xl text-sm hover:bg-teal-400 hover:text-white transition-colors"
-              >
-                {msg}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Input */}

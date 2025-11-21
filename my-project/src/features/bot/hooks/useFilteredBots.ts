@@ -15,10 +15,12 @@ export interface BotCardData {
   nodeCount: number;
   edgeCount: number;
   estimatedCost: number;
+  tags?: string[];
 }
 
 interface UseFilteredBotsOptions {
   searchQuery?: string;
+  selectedTags?: string[];
 }
 
 /**
@@ -46,16 +48,17 @@ function convertToBotCardData(bot: Bot): BotCardData {
     nodeCount: derivedNodeCount,
     edgeCount: derivedEdgeCount,
     estimatedCost,
+    tags: bot.tags || [],
   };
 }
 
 /**
  * Bot 목록을 필터링하는 커스텀 훅
- * @param options - 필터링 옵션 (searchQuery)
+ * @param options - 필터링 옵션 (searchQuery, selectedTags)
  * @returns 필터링된 Bot 목록 (BotCardData 형태)
  */
 export function useFilteredBots(options: UseFilteredBotsOptions = {}) {
-  const { searchQuery = '' } = options;
+  const { searchQuery = '', selectedTags = [] } = options;
   const bots = useBotStore((state) => state.bots);
 
   const filteredBots = useMemo(() => {
@@ -63,12 +66,27 @@ export function useFilteredBots(options: UseFilteredBotsOptions = {}) {
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = bots.filter((bot) => bot.name.toLowerCase().includes(query));
+      filtered = filtered.filter((bot) => bot.name.toLowerCase().includes(query));
+    }
+
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((bot) => {
+        const botTags = bot.tags || [];
+        return selectedTags.every((tag) => botTags.includes(tag));
+      });
     }
 
     // Bot 타입을 BotCardData 타입으로 변환
     return filtered.map(convertToBotCardData);
-  }, [bots, searchQuery]);
+  }, [bots, searchQuery, selectedTags]);
+
+  const allTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    bots.forEach((bot) => {
+      (bot.tags || []).forEach((tag) => tagsSet.add(tag));
+    });
+    return Array.from(tagsSet).sort();
+  }, [bots]);
 
   return {
     bots: filteredBots,
@@ -76,5 +94,6 @@ export function useFilteredBots(options: UseFilteredBotsOptions = {}) {
     filteredCount: filteredBots.length,
     hasResults: filteredBots.length > 0,
     isEmpty: bots.length === 0,
+    allTags,
   };
 }

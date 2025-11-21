@@ -4,6 +4,7 @@
  * 상태 관리와 비즈니스 로직을 담당하고, Presentational 컴포넌트에 props를 전달
  */
 
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LeftSidebar,
@@ -15,6 +16,8 @@ import {
 import { SearchFilters } from '../components/SearchFilters';
 import { BotList } from '../components/BotList';
 import { BotCreateDialog } from '../components/BotCreateDialog';
+import { BotTagsDialog } from '../components/BotTagsDialog';
+import { BotFilterSidebar } from '../components/BotFilterSidebar';
 import { useAuth, useAuthStore } from '@/features/auth';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { useUIStore } from '@/shared/stores/uiStore';
@@ -23,6 +26,8 @@ import { useFilteredBots } from '../hooks/useFilteredBots';
 import { useBotActions } from '../hooks/useBotActions';
 import { useBotCreateDialog } from '../hooks/useBotCreateDialog';
 import { useBots } from '../hooks/useBots';
+import { botApi } from '../api/botApi';
+import { useBotStore } from '../stores/botStore';
 import type { Plan } from '@/features/billing/mock/billingMock';
 
 const PLAN_BOT_LIMITS: Record<Plan['plan_id'], number> = {
@@ -41,6 +46,13 @@ export function HomePage() {
   const userEmail = user?.email || '';
 
   const { logout } = useAuth();
+
+  // 태그 편집 다이얼로그 상태
+  const [isTagsDialogOpen, setIsTagsDialogOpen] = useState(false);
+  const [editingBotId, setEditingBotId] = useState<string>('');
+  const [editingBotTags, setEditingBotTags] = useState<string[]>([]);
+  const [selectedFilterTags, setSelectedFilterTags] = useState<string[]>([]);
+  const updateBot = useBotStore((state) => state.updateBot);
 
   // UI store
   const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
@@ -65,7 +77,8 @@ export function HomePage() {
     totalCount,
     isEmpty,
     hasResults,
-  } = useFilteredBots({ searchQuery });
+    allTags,
+  } = useFilteredBots({ searchQuery, selectedTags: selectedFilterTags });
   const { handleDeleteBot } = useBotActions();
   const {
     isOpen: isCreateDialogOpen,
@@ -84,6 +97,11 @@ export function HomePage() {
     });
   };
 
+  // 배포 관리 페이지로 이동
+  const handleNavigateDeployment = (botId: string) => {
+    navigate(`/workspace/deployment/${botId}`);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -92,6 +110,28 @@ export function HomePage() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleEditTags = (botId: string, currentTags: string[]) => {
+    setEditingBotId(botId);
+    setEditingBotTags(currentTags);
+    setIsTagsDialogOpen(true);
+  };
+
+  const handleSaveTags = async (botId: string, tags: string[]) => {
+    try {
+      const updatedBot = await botApi.update(botId, { tags });
+      updateBot(updatedBot);
+    } catch (error) {
+      console.error('Failed to update tags:', error);
+      throw error;
+    }
+  };
+
+  const handleTagFilterToggle = (tag: string) => {
+    setSelectedFilterTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   const translations = {
@@ -155,6 +195,14 @@ export function HomePage() {
 
         {/* Content Area */}
         <div className="flex-1 flex overflow-hidden">
+          {/* Tag Filter Sidebar */}
+          <BotFilterSidebar
+            allTags={allTags}
+            selectedTags={selectedFilterTags}
+            onTagToggle={handleTagFilterToggle}
+            language={language}
+          />
+
           {/* Bots List */}
           <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             {botsLoading && isEmpty ? (
@@ -176,6 +224,8 @@ export function HomePage() {
                 onDelete={handleDeleteBot}
                 onCreateBot={openCreateDialog}
                 onBotClick={handleBotClick}
+                onNavigateDeployment={handleNavigateDeployment}
+                onEditTags={handleEditTags}
               />
             )}
             {botsError && (
@@ -207,6 +257,16 @@ export function HomePage() {
         language={language}
         onSubmit={createBot}
         isCreating={isCreatingBot}
+      />
+
+      {/* Bot Tags Dialog */}
+      <BotTagsDialog
+        open={isTagsDialogOpen}
+        onOpenChange={setIsTagsDialogOpen}
+        botId={editingBotId}
+        currentTags={editingBotTags}
+        onSave={handleSaveTags}
+        language={language}
       />
     </div>
   );

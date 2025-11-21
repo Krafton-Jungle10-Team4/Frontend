@@ -19,6 +19,7 @@ interface BotListProps {
   onBotClick?: (botId: string) => void;
   onDeploy?: (botId: string) => void;
   onNavigateDeployment?: (botId: string) => void;
+  onEditTags?: (botId: string, currentTags: string[]) => void;
 }
 
 /**
@@ -39,6 +40,7 @@ export function BotList({
   onBotClick,
   onDeploy,
   onNavigateDeployment,
+  onEditTags,
 }: BotListProps) {
   const translations = {
     en: {
@@ -86,6 +88,7 @@ export function BotList({
           onClick={onBotClick}
           onDeploy={onDeploy}
           onNavigateDeployment={onNavigateDeployment}
+          onEditTags={onEditTags}
           viewMode={viewMode}
           language={language}
         />
