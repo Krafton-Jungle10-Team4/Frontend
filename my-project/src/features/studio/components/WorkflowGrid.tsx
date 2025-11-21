@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { WorkflowCard } from './WorkflowCard';
 import { CreateAgentCard } from './CreateAgentCard';
-import { VersionHistoryModal } from './VersionHistoryModal';
+import { VersionHistoryModal } from '@/features/deployment/components/VersionHistoryModal';
 import { StudioDeploymentOptionsDialog } from './StudioDeploymentOptionsDialog';
 import { EditWorkflowDialog } from './EditWorkflowDialog';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
@@ -16,6 +16,7 @@ interface WorkflowGridProps {
   onCreateFromTemplate: () => void;
   onOpenWorkflow: (workflowId: string) => void;
   onNavigateDeployment?: (workflowId: string) => void;
+  onEditTags?: (workflowId: string, currentTags: string[]) => void;
 }
 
 export function WorkflowGrid({
@@ -25,11 +26,13 @@ export function WorkflowGrid({
   onCreateFromTemplate,
   onOpenWorkflow,
   onNavigateDeployment,
+  onEditTags,
 }: WorkflowGridProps) {
   const { fetchWorkflows, publishToMarketplace, updateWorkflow, deleteWorkflow } = useWorkflowStore();
   const [versionHistoryModal, setVersionHistoryModal] = useState<{
     open: boolean;
-    workflowId?: string;
+    botId?: string;
+    botName?: string;
   }>({
     open: false,
   });
@@ -68,8 +71,12 @@ export function WorkflowGrid({
     [workflows, sortBy]
   );
 
-  const handleVersionHistory = (workflowId: string) => {
-    setVersionHistoryModal({ open: true, workflowId });
+  const handleVersionHistory = (workflow: Workflow) => {
+    setVersionHistoryModal({
+      open: true,
+      botId: workflow.id,
+      botName: workflow.name
+    });
   };
 
   const [deploymentDialog, setDeploymentDialog] = useState<{
@@ -132,18 +139,20 @@ export function WorkflowGrid({
               onEdit={() => onOpenWorkflow(workflow.id)}
               onDeploy={() => openDeploymentOptions(workflow)}
               onPublish={() => handlePublish(workflow)}
-              onVersionHistory={() => handleVersionHistory(workflow.id)}
+              onVersionHistory={() => handleVersionHistory(workflow)}
               onUpdate={() => handleUpdate(workflow)}
               onDelete={() => handleDelete(workflow)}
               onNavigateDeployment={() => onNavigateDeployment?.(workflow.id)}
+              onEditTags={onEditTags}
             />
           ))}
       </div>
 
         <VersionHistoryModal
           open={versionHistoryModal.open}
-          workflowId={versionHistoryModal.workflowId}
-          onClose={() => setVersionHistoryModal({ open: false })}
+          onOpenChange={(open) => setVersionHistoryModal({ open })}
+          botId={versionHistoryModal.botId || ''}
+          botName={versionHistoryModal.botName}
         />
         <StudioDeploymentOptionsDialog
           open={deploymentDialog.open}

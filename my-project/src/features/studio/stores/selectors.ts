@@ -61,10 +61,14 @@ export const selectSortedWorkflows = (
       return sorted.sort(
         (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
       );
-    case 'name':
+    case 'oldest':
+      return sorted.sort(
+        (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
+      );
+    case 'name-asc':
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
-    case 'status':
-      return sorted.sort((a, b) => a.status.localeCompare(b.status));
+    case 'name-desc':
+      return sorted.sort((a, b) => b.name.localeCompare(a.name));
     default:
       return sorted;
   }
@@ -98,6 +102,7 @@ export const selectWorkflowStats = (workflows: Workflow[]) => {
     stopped: workflows.filter((w) => w.status === 'stopped').length,
     error: workflows.filter((w) => w.status === 'error').length,
     pending: workflows.filter((w) => w.status === 'pending').length,
+    deployed: workflows.filter((w) => w.deploymentState === 'deployed').length,
   };
 };
 

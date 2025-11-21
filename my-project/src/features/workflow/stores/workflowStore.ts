@@ -357,7 +357,7 @@ interface WorkflowState {
   deleteEdge: (id: string) => void;
 
   // 워크플로우 CRUD
-  loadWorkflow: (botId: string) => Promise<void>;
+  loadWorkflow: (botId: string, versionId?: string) => Promise<void>;
   saveWorkflow: (botId: string) => Promise<WorkflowVersionSummary | null>;
   publishWorkflow: (botId: string) => Promise<WorkflowVersionSummary | null>;
 
@@ -1180,7 +1180,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }),
 
   // 워크플로우 불러오기
-  loadWorkflow: async (botId: string) => {
+  loadWorkflow: async (botId: string, versionId?: string) => {
     set({ isLoading: true, botId });
     try {
       const state = get();
@@ -1188,15 +1188,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         await get().loadNodeTypes();
       }
 
-      const versions = await workflowApi.listWorkflowVersions(botId, {
-        status: 'draft',
-      });
-
-      if (versions.length > 0) {
-        const draft = versions[0];
+      // versionId가 제공되면 해당 버전을 로드
+      if (versionId) {
         const detail = await workflowApi.getWorkflowVersionDetail(
           botId,
-          draft.id
+          versionId
         );
         const graph = transformFromBackend(detail.graph);
 
@@ -1206,7 +1202,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         set({
           nodes: normalizedGraph.nodes,
           edges: normalizedGraph.edges,
-          draftVersionId: detail.id,
+          draftVersionId: detail.status === 'draft' ? detail.id : null,
           environmentVariables: detail.environment_variables || {},
           conversationVariables: detail.conversation_variables || {},
           lastSavedAt: detail.updated_at,
@@ -1215,26 +1211,55 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
           validationErrorNodeIds: [],
         });
       } else {
-        const clonedNodes = DEFAULT_WORKFLOW.nodes.map((node) => ({
-          ...node,
-          data: { ...node.data },
-        }));
-        const clonedEdges = DEFAULT_WORKFLOW.edges.map((edge) => ({ ...edge }));
-
-        const normalizedGraph = normalizeWorkflowGraph(clonedNodes, clonedEdges);
-
-        syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
-        set({
-          nodes: normalizedGraph.nodes,
-          edges: normalizedGraph.edges,
-          draftVersionId: null,
-          environmentVariables: {},
-          conversationVariables: {},
-          lastSavedAt: null,
-          validationErrors: [],
-          validationWarnings: [],
-          validationErrorNodeIds: [],
+        // versionId가 없으면 draft를 로드
+        const versions = await workflowApi.listWorkflowVersions(botId, {
+          status: 'draft',
         });
+
+        if (versions.length > 0) {
+          const draft = versions[0];
+          const detail = await workflowApi.getWorkflowVersionDetail(
+            botId,
+            draft.id
+          );
+          const graph = transformFromBackend(detail.graph);
+
+          const normalizedGraph = normalizeWorkflowGraph(graph.nodes, graph.edges);
+
+          syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
+          set({
+            nodes: normalizedGraph.nodes,
+            edges: normalizedGraph.edges,
+            draftVersionId: detail.id,
+            environmentVariables: detail.environment_variables || {},
+            conversationVariables: detail.conversation_variables || {},
+            lastSavedAt: detail.updated_at,
+            validationErrors: [],
+            validationWarnings: [],
+            validationErrorNodeIds: [],
+          });
+        } else {
+          const clonedNodes = DEFAULT_WORKFLOW.nodes.map((node) => ({
+            ...node,
+            data: { ...node.data },
+          }));
+          const clonedEdges = DEFAULT_WORKFLOW.edges.map((edge) => ({ ...edge }));
+
+          const normalizedGraph = normalizeWorkflowGraph(clonedNodes, clonedEdges);
+
+          syncVariableAssignerNodesFromWorkflow(normalizedGraph.nodes);
+          set({
+            nodes: normalizedGraph.nodes,
+            edges: normalizedGraph.edges,
+            draftVersionId: null,
+            environmentVariables: {},
+            conversationVariables: {},
+            lastSavedAt: null,
+            validationErrors: [],
+            validationWarnings: [],
+            validationErrorNodeIds: [],
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to load workflow:', error);
