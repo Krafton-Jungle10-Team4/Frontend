@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -7,9 +8,11 @@ import {
   DialogTitle,
 } from '@/shared/components/dialog';
 import { Badge } from '@/shared/components/badge';
-import { Download, Eye, Star, Calendar, User } from 'lucide-react';
+import { Button } from '@/shared/components/button';
+import { Download, Eye, Star, Calendar, User, ExternalLink } from 'lucide-react';
 import { getMarketplaceItem, type MarketplaceItem } from '../api/marketplaceApi';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MarketplaceItemDetailDialogProps {
   open: boolean;
@@ -22,8 +25,35 @@ export function MarketplaceItemDetailDialog({
   onClose,
   itemId,
 }: MarketplaceItemDetailDialogProps) {
+  const navigate = useNavigate();
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleViewAgent = () => {
+    if (item?.workflow_version?.bot_id) {
+      navigate(`/bot/${item.workflow_version.bot_id}/workflow?mode=readonly&source=marketplace&marketplaceItemId=${item.id}`);
+      onClose();
+    }
+  };
+
+  const handleImport = async () => {
+    if (!item) return;
+
+    const toastId = toast.loading('워크플로우를 가져오는 중...');
+
+    try {
+      const { importMarketplaceWorkflow } = await import('../api/marketplaceApi');
+      const result = await importMarketplaceWorkflow(item.id);
+
+      toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
+
+      onClose();
+      navigate('/workspace/studio');
+    } catch (error) {
+      console.error('워크플로우 가져오기 실패:', error);
+      toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
+    }
+  };
 
   useEffect(() => {
     if (open && itemId) {
@@ -61,18 +91,33 @@ export function MarketplaceItemDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto rounded-none">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
           </div>
         ) : item ? (
           <>
             <DialogHeader>
               <DialogTitle className="text-2xl">{item.display_name}</DialogTitle>
-              <DialogDescription>
-                {item.description || '설명이 없습니다.'}
-              </DialogDescription>
+              <div className="flex items-center justify-between gap-4 mt-2">
+                <DialogDescription className="flex-1">
+                  {item.description || '설명이 없습니다.'}
+                </DialogDescription>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleViewAgent();
+                  }}
+                  className="flex items-center gap-1 whitespace-nowrap shrink-0"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  에이전트 보기
+                </Button>
+              </div>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
@@ -103,26 +148,26 @@ export function MarketplaceItemDetailDialog({
 
               {/* 통계 */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <Download className="w-4 h-4 text-teal-600" />
+                    <Download className="w-4 h-4 text-gray-700" />
                     <span className="text-sm font-semibold">다운로드</span>
                   </div>
-                  <p className="text-2xl font-bold text-teal-600">{formatNumber(item.download_count)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(item.download_count)}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
-                    <Eye className="w-4 h-4 text-blue-600" />
+                    <Eye className="w-4 h-4 text-gray-700" />
                     <span className="text-sm font-semibold">조회수</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{formatNumber(item.view_count)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(item.view_count)}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
                     <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     <span className="text-sm font-semibold">평점</span>
                   </div>
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-gray-900">
                     {item.rating_average.toFixed(1)}
                     <span className="text-sm text-muted-foreground ml-1">({item.rating_count})</span>
                   </p>
@@ -133,7 +178,7 @@ export function MarketplaceItemDetailDialog({
               {item.workflow_version && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold">워크플로우 정보</h3>
-                  <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+                  <div className="p-4 bg-gray-50 rounded-none border border-gray-200 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">버전:</span>
                       <span className="font-mono">{item.workflow_version.version}</span>
@@ -154,7 +199,7 @@ export function MarketplaceItemDetailDialog({
               {item.readme && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold">상세 설명</h3>
-                  <div className="p-4 bg-gray-50 rounded-lg prose prose-sm max-w-none">
+                  <div className="p-4 bg-gray-50 rounded-none border border-gray-200 prose prose-sm max-w-none">
                     <pre className="whitespace-pre-wrap text-sm">{item.readme}</pre>
                   </div>
                 </div>

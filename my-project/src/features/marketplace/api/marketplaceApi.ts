@@ -136,3 +136,19 @@ export const deleteMarketplaceItem = async (
 ): Promise<void> => {
   await apiClient.delete(`/api/v1/marketplace/${itemId}`);
 };
+
+/**
+ * 마켓플레이스 워크플로우 가져오기
+ */
+export interface ImportWorkflowResponse {
+  message: string;
+  bot_id: string;
+  bot_name: string;
+}
+
+export const importMarketplaceWorkflow = async (
+  itemId: string
+): Promise<ImportWorkflowResponse> => {
+  const response = await apiClient.post(`/api/v1/marketplace/${itemId}/import`);
+  return response.data;
+};
