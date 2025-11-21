@@ -57,12 +57,12 @@ export function EditWorkflowDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-xs">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>워크플로우 수정</DialogTitle>
+            <DialogTitle>서비스 수정</DialogTitle>
             <DialogDescription>
-              워크플로우의 이름과 설명을 수정할 수 있습니다.
+              서비스의 이름과 설명을 수정할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
 
@@ -75,19 +75,19 @@ export function EditWorkflowDialog({
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="워크플로우 이름을 입력하세요"
+                placeholder="서비스 이름을 입력하세요"
                 required
                 maxLength={100}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">설명</Label>
+              <Label htmlFor="description">설명 (선택사항)</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="워크플로우에 대한 설명을 입력하세요 (선택사항)"
+                placeholder="서비스에 대한 설명을 입력하세요"
                 rows={4}
                 maxLength={500}
               />
@@ -106,7 +106,11 @@ export function EditWorkflowDialog({
             >
               취소
             </Button>
-            <Button type="submit" disabled={isSubmitting || !name.trim()}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !name.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300"
+            >
               {isSubmitting ? '저장 중...' : '저장'}
             </Button>
           </DialogFooter>
