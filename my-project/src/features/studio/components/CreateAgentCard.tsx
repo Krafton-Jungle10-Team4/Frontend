@@ -17,7 +17,7 @@ export function CreateAgentCard({
         'relative bg-white rounded-lg overflow-hidden',
         'border border-gray-300',
         'hover:shadow-studio-card hover:scale-[1.02] transition-all duration-200',
-        'group h-full flex flex-col'
+        'group h-[160px] flex flex-col'
       )}
     >
 

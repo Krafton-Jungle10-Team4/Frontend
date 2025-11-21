@@ -70,7 +70,7 @@ export function WorkflowCard({
       className={cn(
         'relative bg-white rounded-lg overflow-hidden',
         'shadow-md hover:shadow-studio-card hover:scale-[1.02] transition-all duration-200',
-        'cursor-pointer group h-full flex flex-col',
+        'cursor-pointer group h-[160px] flex flex-col',
         isDeployed ? '' : 'border-t-4 border-t-gray-300 border border-studio-card-border'
       )}
       onClick={handleCardClick}

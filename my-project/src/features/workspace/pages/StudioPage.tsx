@@ -152,7 +152,7 @@ export function StudioPage() {
       <div className="flex flex-col h-[calc(100vh-56px)]">
         {/* 메인 콘텐츠 */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
-          <div className="px-6 pt-6 pb-6">
+          <div className="px-10 pt-8 pb-6">
             {/* 상단 검색/필터 영역 */}
             <div className="mb-6">
               <SearchAndFilters
