@@ -19,9 +19,9 @@ export const ImportedWorkflowPanel = memo(
       <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
         <Lock className="w-5 h-5 text-muted-foreground" />
         <div className="flex-1">
-          <p className="text-sm font-medium">읽기 전용 라이브러리 에이전트</p>
+          <p className="text-sm font-medium">읽기 전용 라이브러리 서비스</p>
           <p className="text-xs text-muted-foreground">
-            라이브러리에서 가져온 에이전트는 이 자리에서 편집할 수 없습니다.
+            라이브러리에서 가져온 서비스는 이 자리에서 편집할 수 없습니다.
           </p>
         </div>
       </div>
@@ -32,7 +32,7 @@ export const ImportedWorkflowPanel = memo(
       <div className="space-y-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground">
-            에이전트 이름
+            서비스 이름
           </label>
           <p className="text-sm mt-1">{data.template_name || '알 수 없음'}</p>
         </div>

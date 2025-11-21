@@ -81,7 +81,7 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
         workflow_version_id: versionId,
         widget_config: {},
       });
-      toast.success('에이전트가 성공적으로 배포되었습니다.');
+      toast.success('서비스가 성공적으로 배포되었습니다.');
       await fetchDeployment();
     } catch (error: any) {
       console.error('Failed to deploy:', error);
@@ -94,7 +94,7 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
   const handleDeactivate = async () => {
     try {
       if (!selectedBotId) {
-        toast.error('봇을 선택하세요.');
+        toast.error('서비스를 선택하세요.');
         return;
       }
       await apiClient.delete(`/bots/${selectedBotId}/deployment`);
@@ -196,8 +196,8 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
             <div className="bg-muted p-3 rounded-lg text-sm">
               <p className="font-medium mb-1">배포 안내</p>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>이 에이전트 버전을 원하는 봇에 배포할 수 있습니다.</li>
-                <li>배포하면 해당 봇의 기존 활성 배포가 비활성화됩니다.</li>
+                <li>이 서비스 버전을 원하는 서비스에 배포할 수 있습니다.</li>
+                <li>배포하면 해당 서비스의 기존 활성 배포가 비활성화됩니다.</li>
                 <li>배포된 버전은 챗봇 API에서 실행됩니다.</li>
               </ul>
             </div>

@@ -77,7 +77,7 @@ export function LibraryFilters() {
       {/* Search Bar */}
       <div className="flex gap-2">
         <Input
-          placeholder="에이전트 이름 또는 설명으로 검색..."
+          placeholder="서비스 이름 또는 설명으로 검색..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}

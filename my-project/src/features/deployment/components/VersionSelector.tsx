@@ -225,7 +225,7 @@ export function VersionSelector({
     return (
       <div className="rounded-lg border p-6 bg-muted/30">
         <p className="text-sm text-muted-foreground text-center">
-          게시된 워크플로우 버전이 없습니다.
+          게시된 서비스 버전이 없습니다.
           <br />
           워크플로우 빌더에서 "라이브러리에 게시" 버튼을 클릭하여 버전을 생성하세요.
         </p>

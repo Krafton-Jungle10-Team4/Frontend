@@ -35,7 +35,7 @@ export function MarketplacePage() {
         });
         setRecommendedItems(response.items);
       } catch (error) {
-        console.error('추천 에이전트 로드 실패:', error);
+        console.error('추천 서비스 로드 실패:', error);
       } finally {
         setIsLoadingRecommended(false);
       }
@@ -76,7 +76,7 @@ export function MarketplacePage() {
               <h1 className="text-2xl font-bold mb-2">
                 {language === 'ko' ? (
                   <>
-                    <span className="text-gray-900">마켓플레이스</span>에서 에이전트 탐색
+                    <span className="text-gray-900">마켓플레이스</span>에서 서비스 탐색
                   </>
                 ) : (
                   <>
@@ -87,7 +87,7 @@ export function MarketplacePage() {
               <div className="flex items-center justify-between gap-4">
                 <p className="text-muted-foreground">
                   {language === 'ko'
-                    ? '커뮤니티에서 공유된 에이전트를 검색하고 가져와서 사용하세요.'
+                    ? '커뮤니티에서 공유된 서비스를 검색하고 가져와서 사용하세요.'
                     : 'Search and import agents shared by the community.'}
                 </p>
                 {/* 검색바 */}
@@ -97,7 +97,7 @@ export function MarketplacePage() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="에이전트 검색..."
+                    placeholder="서비스 검색..."
                     className={cn(
                       'w-full pl-10 pr-4 py-2',
                       'bg-white border border-gray-300',
@@ -119,7 +119,7 @@ export function MarketplacePage() {
               <div className="flex items-center gap-2 mb-4">
                 <Trophy className="w-5 h-5 text-yellow-500" />
                 <h2 className="text-lg font-bold text-gray-900">
-                  {language === 'ko' ? '추천 에이전트' : 'Recommended Agents'}
+                  {language === 'ko' ? '추천 서비스' : 'Recommended Agents'}
                 </h2>
               </div>
               {isLoadingRecommended ? (
@@ -144,7 +144,7 @@ export function MarketplacePage() {
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-blue-500" />
                 <h2 className="text-lg font-bold text-gray-900">
-                  {language === 'ko' ? '최신 에이전트' : 'Latest Agents'}
+                  {language === 'ko' ? '최신 서비스' : 'Latest Agents'}
                 </h2>
               </div>
               {isLoading ? (

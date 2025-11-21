@@ -93,12 +93,12 @@ export const ExpandedView = memo(
           <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-muted/30">
             <AlertCircle className="w-12 h-12 text-destructive mb-4" />
             <h3 className="font-semibold text-lg mb-2">
-              에이전트 데이터 검증 실패
+              서비스 데이터 검증 실패
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              에이전트의 내부 워크플로우 정보가 누락되었습니다.
+              서비스의 내부 워크플로우 정보가 누락되었습니다.
               <br />
-              이 에이전트는 유효하지 않으며 사용할 수 없습니다.
+              이 서비스는 유효하지 않으며 사용할 수 없습니다.
             </p>
             <div className="text-xs bg-muted p-3 rounded-md max-w-md">
               <p className="font-mono">Template ID: {templateId}</p>
@@ -144,9 +144,9 @@ export const ExpandedView = memo(
               지원하지 않는 노드 타입 포함
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              이 에이전트는 현재 지원하지 않는 노드 타입을 포함하고 있습니다.
+              이 서비스는 현재 지원하지 않는 노드 타입을 포함하고 있습니다.
               <br />
-              에이전트를 업데이트하거나 다른 에이전트를 사용하세요.
+              서비스를 업데이트하거나 다른 서비스를 사용하세요.
             </p>
             <div className="text-xs bg-muted p-3 rounded-md max-w-md space-y-2">
               <p className="font-mono">Template ID: {templateId}</p>
@@ -258,12 +258,12 @@ export const ExpandedView = memo(
           <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-muted/30">
             <AlertCircle className="w-12 h-12 text-destructive mb-4" />
             <h3 className="font-semibold text-lg mb-2">
-              에이전트 데이터 오류
+              서비스 데이터 오류
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              에이전트의 일부 노드가 잘못된 형식입니다.
+              서비스의 일부 노드가 잘못된 형식입니다.
               <br />
-              에이전트를 다시 생성하거나 업데이트해주세요.
+              서비스를 다시 생성하거나 업데이트해주세요.
             </p>
             <div className="text-xs bg-muted p-3 rounded-md max-w-md space-y-2">
               <p className="font-mono">Template ID: {templateId}</p>
@@ -350,8 +350,8 @@ export const ExpandedView = memo(
     const handleNodeClick = useCallback(
       (event: React.MouseEvent, _node: Node) => {
         event.stopPropagation();
-        toast.info('읽기 전용 에이전트', {
-          description: '이 노드는 에이전트의 일부로 편집할 수 없습니다.',
+        toast.info('읽기 전용 서비스', {
+          description: '이 노드는 서비스의 일부로 편집할 수 없습니다.',
         });
       },
       []

@@ -59,7 +59,7 @@ export function LibraryPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">라이브러리</h1>
         <p className="text-muted-foreground">
-          팀에서 게시된 모든 에이전트 버전을 확인하고 가져올 수 있습니다.
+          팀에서 게시된 모든 서비스 버전을 확인하고 가져올 수 있습니다.
         </p>
       </div>
 
@@ -93,8 +93,8 @@ export function LibraryPage() {
         <div className="text-center py-12">
           <p className="text-muted-foreground">
             {deploymentFilter === 'all'
-              ? '라이브러리에 등록된 에이전트가 없습니다.'
-              : '해당 배포 상태의 에이전트가 없습니다.'}
+              ? '라이브러리에 등록된 서비스가 없습니다.'
+              : '해당 배포 상태의 서비스가 없습니다.'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             워크플로우를 발행할 때 라이브러리 메타데이터를 입력하면 자동으로 등록됩니다.
@@ -144,7 +144,7 @@ export function LibraryPage() {
 
           {/* Results Info */}
           <div className="text-center text-sm text-muted-foreground mt-4">
-            총 {totalCount}개의 에이전트
+            총 {totalCount}개의 서비스
           </div>
         </>
       )}

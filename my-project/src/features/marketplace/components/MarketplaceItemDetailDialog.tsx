@@ -115,7 +115,7 @@ export function MarketplaceItemDetailDialog({
                   className="flex items-center gap-1 whitespace-nowrap shrink-0"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  에이전트 보기
+                  서비스 보기
                 </Button>
               </div>
             </DialogHeader>

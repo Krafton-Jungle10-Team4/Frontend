@@ -83,7 +83,7 @@ export function VersionHistoryModal({
             {botName} - 버전 히스토리
           </DialogTitle>
           <DialogDescription>
-            이 에이전트의 버전별 기록을 확인합니다.
+            이 서비스의 버전별 기록을 확인합니다.
           </DialogDescription>
         </DialogHeader>
 
@@ -97,7 +97,7 @@ export function VersionHistoryModal({
         ) : versions.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              발행된 워크플로우 버전이 없습니다.
+              발행된 서비스 버전이 없습니다.
             </p>
           </div>
         ) : (

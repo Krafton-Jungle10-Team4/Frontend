@@ -104,7 +104,7 @@ export function DeploymentPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">배포 관리</h1>
           <p className="text-muted-foreground">
-            게시된 워크플로우 버전을 선택하여 배포할 수 있습니다.
+            게시된 서비스 버전을 선택하여 배포할 수 있습니다.
           </p>
         </div>
 
@@ -228,7 +228,7 @@ export function DeploymentPage() {
           <DialogHeader>
             <DialogTitle className="text-xl">배포 방식 선택</DialogTitle>
             <DialogDescription className="text-sm">
-              봇을 배포할 방식을 선택하세요
+              서비스를 배포할 방식을 선택하세요
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 gap-3 py-2">
