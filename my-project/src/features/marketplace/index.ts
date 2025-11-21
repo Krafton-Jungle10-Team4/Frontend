@@ -1,9 +1,11 @@
 /**
  * Marketplace Feature Module
- * Phase 6: Èt¤ 0¥ Public API
+ * Phase 6: ï¿½tï¿½ 0ï¿½ Public API
  */
 
 export { MarketplacePublisher } from './components/MarketplacePublisher';
+export { MarketplaceSearchBar } from './components/MarketplaceSearchBar';
+export { MarketplaceGrid } from './components/MarketplaceGrid';
 export { TagInput } from './components/TagInput';
 export {
   publishToMarketplace,

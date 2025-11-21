@@ -1,50 +1,23 @@
 import { useState, useEffect } from 'react';
-import { MarketplaceItemCard } from '@/features/marketplace/components/MarketplaceItemCard';
+import { MarketplaceSearchBar } from '@/features/marketplace/components/MarketplaceSearchBar';
+import { MarketplaceGrid } from '@/features/marketplace/components/MarketplaceGrid';
 import { getMarketplaceItems, type MarketplaceItem } from '@/features/marketplace/api/marketplaceApi';
 import { useUIStore } from '@shared/stores/uiStore';
-import { Loader2, Search, Trophy, Sparkles } from 'lucide-react';
-import { cn } from '@/shared/components/utils';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/shared/components/pagination';
+
+type SortOption = 'latest' | 'popular' | 'views';
 
 export function MarketplacePage() {
   const language = useUIStore(state => state.language);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [items, setItems] = useState<MarketplaceItem[]>([]);
-  const [recommendedItems, setRecommendedItems] = useState<MarketplaceItem[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingRecommended, setIsLoadingRecommended] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // 추천 에이전트 불러오기 (다운로드 수 많은 상위 3개)
-  useEffect(() => {
-    const fetchRecommendedItems = async () => {
-      try {
-        setIsLoadingRecommended(true);
-        const response = await getMarketplaceItems({
-          page: 1,
-          page_size: 3,
-          sort_by: 'popular',
-        });
-        setRecommendedItems(response.items);
-      } catch (error) {
-        console.error('추천 서비스 로드 실패:', error);
-      } finally {
-        setIsLoadingRecommended(false);
-      }
-    };
-
-    fetchRecommendedItems();
-  }, []);
-
-  // 최신 에이전트 불러오기
+  // 마켓플레이스 아이템 불러오기
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -53,10 +26,18 @@ export function MarketplacePage() {
           page: currentPage,
           page_size: 20,
           search: searchQuery || undefined,
-          sort_by: 'latest',
+          tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
+          sort_by: sortBy,
         });
         setItems(response.items);
         setTotalPages(response.total_pages);
+
+        // 태그 추출
+        const tagSet = new Set<string>();
+        response.items.forEach(item => {
+          item.tags?.forEach(tag => tagSet.add(tag));
+        });
+        setAllTags(Array.from(tagSet));
       } catch (error) {
         console.error('마켓플레이스 아이템 로드 실패:', error);
       } finally {
@@ -64,150 +45,44 @@ export function MarketplacePage() {
       }
     };
 
-    fetchItems();
-  }, [searchQuery, currentPage]);
+    void fetchItems();
+  }, [searchQuery, selectedTags, sortBy, currentPage]);
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="flex h-full overflow-hidden bg-muted/30">
-      <div className="flex-1 flex flex-col overflow-hidden p-6">
-        <div className="flex flex-col flex-1 overflow-hidden rounded-none bg-background border border-gray-200/60 shadow-sm">
-          <div className="p-6 pb-4">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold mb-2">
-                {language === 'ko' ? (
-                  <>
-                    <span className="text-gray-900">마켓플레이스</span>에서 서비스 탐색
-                  </>
-                ) : (
-                  <>
-                    Browse Agents in <span className="text-gray-900">Marketplace</span>
-                  </>
-                )}
-              </h1>
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-muted-foreground">
-                  {language === 'ko'
-                    ? '커뮤니티에서 공유된 서비스를 검색하고 가져와서 사용하세요.'
-                    : 'Search and import agents shared by the community.'}
-                </p>
-                {/* 검색바 */}
-                <div className="relative w-1/3">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="서비스 검색..."
-                    className={cn(
-                      'w-full pl-10 pr-4 py-2',
-                      'bg-white border border-gray-300',
-                      'text-sm text-gray-900',
-                      'placeholder:text-gray-500',
-                      'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
-                      'focus:border-blue-500',
-                      'transition-all'
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
+    <div className="flex flex-col h-[calc(100vh-56px)]">
+      <main className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="px-10 pt-8 pb-6">
+          {/* 검색/필터 영역 */}
+          <div className="mb-6">
+            <MarketplaceSearchBar
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              tags={allTags}
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0">
-            {/* 추천 에이전트 섹션 */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                <h2 className="text-lg font-bold text-gray-900">
-                  {language === 'ko' ? '추천 서비스' : 'Recommended Agents'}
-                </h2>
-              </div>
-              {isLoadingRecommended ? (
-                <div className="flex items-center justify-center h-32">
-                  <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {recommendedItems.map((item, index) => (
-                    <MarketplaceItemCard
-                      key={item.id}
-                      item={item}
-                      rank={index + 1}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 최신 에이전트 섹션 */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-blue-500" />
-                <h2 className="text-lg font-bold text-gray-900">
-                  {language === 'ko' ? '최신 서비스' : 'Latest Agents'}
-                </h2>
-              </div>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {items.map(item => (
-                      <MarketplaceItemCard
-                        key={item.id}
-                        item={item}
-                      />
-                    ))}
-                  </div>
-
-                  {items.length === 0 && (
-                    <div className="flex items-center justify-center h-64">
-                      <p className="text-muted-foreground">
-                        {language === 'ko' ? '마켓플레이스 아이템을 찾을 수 없습니다.' : 'No marketplace items found.'}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="mt-6">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious
-                              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(page)}
-                                isActive={page === currentPage}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext
-                              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+          {/* 그리드 영역 */}
+          <MarketplaceGrid
+            items={items}
+            loading={isLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            language={language}
+          />
         </div>
-      </div>
+      </main>
     </div>
   );
 }
