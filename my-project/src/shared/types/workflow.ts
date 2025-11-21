@@ -66,6 +66,7 @@ export interface WorkflowStats {
   stopped: number;
   error: number;
   pending: number;
+  deployed: number;
 }
 
 export type SortOption = 'recent' | 'oldest' | 'name-asc' | 'name-desc';

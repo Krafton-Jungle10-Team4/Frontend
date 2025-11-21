@@ -104,6 +104,7 @@ const mapStatsFromWorkflows = (workflows: Workflow[]): WorkflowStats => ({
   stopped: workflows.filter((w) => w.status === 'stopped').length,
   error: workflows.filter((w) => w.status === 'error').length,
   pending: workflows.filter((w) => w.status === 'pending').length,
+  deployed: workflows.filter((w) => w.deploymentState === 'deployed').length,
 });
 
 const normalizeWorkflow = (item: any): Workflow => ({
@@ -149,6 +150,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     stopped: 0,
     error: 0,
     pending: 0,
+    deployed: 0,
   },
 
   fetchWorkflows: async () => {
@@ -220,8 +222,38 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   updateWorkflow: async (id: string, data: UpdateWorkflowDto) => {
     try {
-      await apiClient.patch(API_ENDPOINTS.BOTS.UPDATE(id), data);
-      await get().fetchWorkflows();
+      const response = await apiClient.patch(API_ENDPOINTS.BOTS.UPDATE(id), data);
+      const updatedData = response.data?.data ?? response.data;
+      const updatedWorkflow = normalizeWorkflow(updatedData);
+
+      set((state) => {
+        // 워크플로우 업데이트
+        const workflows = state.workflows.map((workflow) =>
+          workflow.id === id ? updatedWorkflow : workflow
+        );
+
+        // 현재 sortBy에 따라 정렬
+        const sorted = [...workflows];
+        switch (state.sortBy) {
+          case 'recent':
+            sorted.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+            break;
+          case 'oldest':
+            sorted.sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
+            break;
+          case 'name-asc':
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case 'name-desc':
+            sorted.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+        }
+
+        return {
+          workflows: sorted,
+          availableTags: Array.from(new Set(sorted.flatMap((w) => w.tags))).sort(),
+        };
+      });
     } catch (error) {
       throw error;
     }

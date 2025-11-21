@@ -43,6 +43,6 @@ export type {
 } from './types/template.types';
 
 // Routes (Router에서만 사용)
-export { workflowRoutes } from './routes';
+export { workflowRoutes, templatePreviewRoutes } from './routes';
 
 // Note: Pages are lazy-loaded through routes, not exported directly to avoid bundle issues

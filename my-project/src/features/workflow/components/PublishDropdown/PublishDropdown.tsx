@@ -7,21 +7,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@shared/components/button';
 import { usePublishActions } from '../../hooks/usePublishActions';
 import { LibrarySaveDialog } from '../dialogs/LibrarySaveDialog';
-import { DeployConfirmDialog } from '../dialogs/DeployConfirmDialog';
 import { botApi } from '@/features/bot/api/botApi';
+import { GitCommit } from 'lucide-react';
 
 interface PublishDropdownProps {
   botId: string;
 }
 
 export function PublishDropdown({ botId }: PublishDropdownProps) {
-  const {
-    publishUpdate,
-    fetchDeployment,
-    isDeployDialogOpen,
-    setIsDeployDialogOpen,
-    publishedVersionId,
-  } = usePublishActions(botId);
+  const { publishUpdate } = usePublishActions(botId);
 
   const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
   const [botName, setBotName] = useState<string>('');
@@ -50,10 +44,14 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     <>
       <Button
         variant="default"
-        className="!bg-blue-600 !text-white hover:!bg-blue-700"
+        className="!text-white"
+        style={{
+          backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+        }}
         onClick={handlePublishClick}
       >
-        라이브러리에 게시
+        <GitCommit className="w-4 h-4" />
+        버전 커밋
       </Button>
 
       {/* LibrarySaveDialog */}
@@ -64,20 +62,6 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         defaultBotName={botName}
         botId={botId}
       />
-
-      {/* DeployConfirmDialog */}
-      {publishedVersionId && (
-        <DeployConfirmDialog
-          open={isDeployDialogOpen}
-          onOpenChange={setIsDeployDialogOpen}
-          botId={botId}
-          versionId={publishedVersionId}
-          onDeploySuccess={() => {
-            // 배포 성공 시 배포 정보 refetch
-            fetchDeployment(botId);
-          }}
-        />
-      )}
     </>
   );
 }

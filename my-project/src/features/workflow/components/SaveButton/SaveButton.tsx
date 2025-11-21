@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/button';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/shared/api/errorHandler';
+import { Save, Check } from 'lucide-react';
 
 export const SaveButton = () => {
   const { botId } = useParams<{ botId: string }>();
@@ -12,7 +13,8 @@ export const SaveButton = () => {
     validateBotWorkflow,
     isSaving,
     hasUnsavedChanges,
-    lastSaveError
+    lastSaveError,
+    lastSavedAt
   } = useWorkflowStore();
   const [isValidating, setIsValidating] = useState(false);
 
@@ -42,17 +44,30 @@ export const SaveButton = () => {
     }
   };
 
+  const isSaved = lastSavedAt && !hasUnsavedChanges;
+
   return (
     <div className="relative">
       <Button
         variant="outline"
         onClick={handleSave}
         disabled={isSaving || isValidating}
-        className={hasUnsavedChanges ? 'border-orange-500' : ''}
+        className={`transition-colors ${
+          isSaved
+            ? 'border-green-500 hover:border-green-600 text-green-600'
+            : hasUnsavedChanges
+            ? 'border-orange-500'
+            : ''
+        }`}
       >
-        {isSaving ? '저장 중...' : isValidating ? '검증 중...' : '저장'}
+        <span className={isSaved ? 'text-green-600' : ''}>
+          {isSaving ? '저장 중...' : isValidating ? '검증 중...' : '임시 저장'}
+        </span>
         {hasUnsavedChanges && !isSaving && !isValidating && (
           <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-orange-500" />
+        )}
+        {isSaved && (
+          <Check className="ml-2 w-4 h-4 text-green-600" />
         )}
       </Button>
       {lastSaveError && (

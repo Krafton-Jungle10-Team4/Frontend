@@ -5,9 +5,7 @@ import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
   type SidebarView,
 } from '../components/sidebar/WorkflowSlimSidebar';
-import MonitoringView from '../components/views/MonitoringView';
 import LogsView from '../components/views/LogsView';
-import { LegacyDocumentsView } from '@/features/documents/pages/DocumentsPage';
 import { ChatPreviewPanel } from '@/features/bot/pages/ChatPreviewPanel';
 import { useApp } from '@/features/bot/contexts/AppContext';
 import { useWorkflowStore } from '../stores/workflowStore';
@@ -19,21 +17,34 @@ import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore
 import { NavigationTabs } from '@/features/workspace/components/NavigationTabs';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
 
-// Memoized wrapper to prevent unnecessary re-renders
-const KnowledgeView = memo(({ botId }: { botId?: string }) => {
-  return <LegacyDocumentsView botId={botId} />;
-});
-KnowledgeView.displayName = 'KnowledgeView';
-
 const WorkflowWithChat = () => {
   const { language } = useApp();
   const { botId } = useParams<{ botId: string }>();
   const location = useLocation();
   const { isChatVisible } = useWorkflowStore();
+  const getBotById = useBotStore((state) => state.getBotById);
+  const [botName, setBotName] = useState<string>('Bot Workflow');
 
-  // Get bot data from URL params and navigation state
-  const state = location.state as { botName?: string } | null;
-  const botName = state?.botName || 'AI Support Agent';
+  // Bot 정보를 API에서 가져오기
+  useEffect(() => {
+    const fetchBotInfo = async () => {
+      if (!botId) return;
+
+      try {
+        const { botApi } = await import('@/features/bot/api/botApi');
+        const botData = await botApi.getById(botId);
+        setBotName(botData.name);
+      } catch (error) {
+        console.error('Failed to fetch bot info:', error);
+        // 실패 시 스토어나 state에서 가져오기
+        const state = location.state as { botName?: string } | null;
+        const storeBot = getBotById(botId);
+        setBotName(storeBot?.name || state?.botName || 'Bot Workflow');
+      }
+    };
+
+    fetchBotInfo();
+  }, [botId, getBotById, location.state]);
 
   // Bot ID 확인
   console.log('[Workflow] Current Bot ID:', botId);
@@ -150,10 +161,6 @@ export const WorkflowBuilderPage = () => {
     switch (activeView) {
       case 'flow':
         return <WorkflowWithChat />;
-      case 'knowledge':
-        return <KnowledgeView botId={botId} />;
-      case 'monitoring':
-        return <MonitoringView />;
       case 'logs':
         return <LogsView />;
       default:
