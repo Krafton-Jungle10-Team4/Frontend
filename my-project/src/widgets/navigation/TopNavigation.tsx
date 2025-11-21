@@ -86,7 +86,7 @@ export function TopNavigation({
 
   return (
     <div className="border-b transition-all h-14 bg-gray-100 border-border">
-      <div className="w-full flex h-full items-center justify-between px-4">
+      <div className="relative w-full flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
             onClick={onLogoClick ?? onHomeClick}
@@ -117,7 +117,7 @@ export function TopNavigation({
           )}
         </div>
 
-        <div className="flex-1 flex justify-center">{navigationTabs}</div>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">{navigationTabs}</div>
 
         <div className="flex items-center gap-4">
           <DropdownMenu>
