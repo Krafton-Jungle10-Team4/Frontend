@@ -130,15 +130,17 @@ fetch('https://api.snapagent.shop/api/v1/widget/chat', {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>API 참조</DialogTitle>
-          <DialogDescription>
-            챗봇 위젯 API 사용 방법 및 엔드포인트 정보
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[90vw] max-w-[90vw] sm:w-[80vw] sm:max-w-[80vw] lg:w-[70vw] lg:max-w-[70vw] xl:w-[60vw] xl:max-w-[60vw] max-h-[90vh] flex flex-col p-0">
+        <div className="px-6 pt-6 pb-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle>API 참조</DialogTitle>
+            <DialogDescription>
+              챗봇 위젯 API 사용 방법 및 엔드포인트 정보
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {/* Widget Key 섹션 */}
           <Card>
             <CardHeader>

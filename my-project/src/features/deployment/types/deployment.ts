@@ -65,6 +65,7 @@ export type DeploymentStatus = 'draft' | 'published' | 'suspended';
 export interface Deployment {
   deployment_id: string; // UUID
   bot_id: string;
+  bot_name?: string; // 봇 이름
   widget_key: string; // 64자 위젯 인증 키
   status: DeploymentStatus;
   embed_script: string; // 웹사이트에 삽입할 HTML 스크립트

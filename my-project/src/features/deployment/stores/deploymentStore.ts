@@ -101,8 +101,13 @@ export const useDeploymentStore = create<DeploymentStore>()(
             widgetConfig: deployment?.widget_config || initialWidgetConfig,
           });
         } catch (error: any) {
-          // 404 에러는 배포가 없는 정상 상태로 처리
-          if (error.response?.status === 404) {
+          // 404 에러 또는 "Deployment not found" 메시지는 배포가 없는 정상 상태로 처리
+          const isDeploymentNotFound =
+            error.response?.status === 404 ||
+            error.message?.includes('Deployment not found') ||
+            error.message?.includes('not found');
+
+          if (isDeploymentNotFound) {
             set({
               deployment: null,
               isLoading: false,
