@@ -158,43 +158,16 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <DialogTitle>에이전트 버전 게시</DialogTitle>
+              <DialogTitle>{defaultBotName} 버전 커밋</DialogTitle>
               {nextVersion && <VersionBadge version={nextVersion} />}
             </div>
             <DialogDescription>
-              에이전트 버전을 게시하고 라이브러리에 저장합니다.
+              에이전트 버전을 커밋하고 스튜디오에 저장합니다.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1">
             <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                  {/* 라이브러리 이름 */}
-                  <div className="space-y-2">
-                    <Label htmlFor="library_name">
-                      이름 <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="library_name"
-                      placeholder="예: 고객 문의 응답 에이전트"
-                      {...register('library_name', {
-                        required: '이름을 입력해주세요',
-                        minLength: {
-                          value: 2,
-                          message: '이름은 최소 2자 이상이어야 합니다',
-                        },
-                        maxLength: {
-                          value: 100,
-                          message: '이름은 최대 100자까지 입력 가능합니다',
-                        },
-                      })}
-                    />
-                    {errors.library_name && (
-                      <p className="text-sm text-destructive">
-                        {errors.library_name.message}
-                      </p>
-                    )}
-                  </div>
-
                   {/* 설명 */}
                   <div className="space-y-2">
                     <Label htmlFor="library_description">
@@ -202,7 +175,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                     </Label>
                     <Textarea
                       id="library_description"
-                      placeholder="에이전트의 기능과 사용 방법을 설명해주세요 (선택사항)"
+                      placeholder="현재 버전의 변경점에 대해 설명해주세요 (선택사항)"
                       rows={3}
                       {...register('library_description', {
                         maxLength: {
@@ -214,33 +187,6 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                     {errors.library_description && (
                       <p className="text-sm text-destructive">
                         {errors.library_description.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 카테고리 */}
-                  <div className="space-y-2">
-                    <Label htmlFor="library_category">
-                      카테고리 <span className="text-destructive">*</span>
-                    </Label>
-                    <Select
-                      value={watch('library_category')}
-                      onValueChange={(value) => setValue('library_category', value)}
-                    >
-                      <SelectTrigger id="library_category">
-                        <SelectValue placeholder="카테고리 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TEMPLATE_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.library_category && (
-                      <p className="text-sm text-destructive">
-                        {errors.library_category.message}
                       </p>
                     )}
                   </div>
@@ -296,9 +242,16 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
               >
                 취소
               </Button>
-              <Button type="submit" disabled={isPublishing}>
+              <Button
+                type="submit"
+                disabled={isPublishing}
+                className="!text-white"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+                }}
+              >
                 {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isPublishing ? '게시 중...' : '라이브러리에 게시'}
+                {isPublishing ? '커밋 중...' : '버전 커밋'}
               </Button>
             </DialogFooter>
           </form>
