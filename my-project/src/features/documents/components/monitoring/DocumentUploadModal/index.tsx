@@ -66,7 +66,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-[90vw] sm:w-[65vw] sm:!max-w-4xl">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>문서 업로드</DialogTitle>
           <DialogDescription>
@@ -86,7 +86,11 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           <Button variant="outline" onClick={handleClose} disabled={uploading}>
             취소
           </Button>
-          <Button onClick={handleUpload} disabled={files.length === 0 || uploading}>
+          <Button
+            onClick={handleUpload}
+            disabled={files.length === 0 || uploading}
+            className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300"
+          >
             {uploading ? '업로드 중...' : `업로드 (${files.length}개)`}
           </Button>
         </DialogFooter>
