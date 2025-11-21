@@ -1,8 +1,10 @@
-import { memo } from 'react';
-import { CheckCircle2, XCircle, Loader2, Clock, ChevronRight } from 'lucide-react';
+import { memo, useState, useEffect } from 'react';
+import { CheckCircle2, XCircle, Loader2, Clock, ChevronDown } from 'lucide-react';
 import { Card } from '@/shared/components/card';
 import { Badge } from '@/shared/components/badge';
-import type { WorkflowRunSummary } from '../../../types/log.types';
+import { Skeleton } from '@/shared/components/skeleton';
+import { workflowApi } from '../../api/workflowApi';
+import type { WorkflowRunSummary, WorkflowRunDetail } from '../../../types/log.types';
 const formatDateTime = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -17,6 +19,7 @@ interface WorkflowLogRowProps {
   run: WorkflowRunSummary;
   isActive?: boolean;
   onSelect: (run: WorkflowRunSummary) => void;
+  botId?: string | null;
 }
 
 const getStatusIcon = (status: WorkflowRunSummary['status']) => {
@@ -54,19 +57,42 @@ const formatElapsedTime = (seconds?: number | null) => {
 };
 
 export const WorkflowLogRow = memo<WorkflowLogRowProps>(
-  ({ run, isActive = false, onSelect }) => {
+  ({ run, isActive = false, onSelect, botId }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [runDetail, setRunDetail] = useState<WorkflowRunDetail | null>(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
     const handleClick = () => {
+      setIsExpanded(!isExpanded);
       onSelect(run);
     };
 
+    useEffect(() => {
+      if (isExpanded && !runDetail && botId) {
+        setIsLoadingDetail(true);
+        workflowApi.getWorkflowRun(botId, run.id)
+          .then(detail => {
+            setRunDetail(detail);
+          })
+          .catch(err => {
+            console.error('Failed to load workflow run detail:', err);
+          })
+          .finally(() => {
+            setIsLoadingDetail(false);
+          });
+      }
+    }, [isExpanded, runDetail, botId, run.id]);
+
     return (
       <Card
-        className={`cursor-pointer transition-all hover:shadow-md ${
+        className={`transition-all hover:shadow-md ${
           isActive ? 'ring-2 ring-primary bg-primary/5' : ''
         }`}
-        onClick={handleClick}
       >
-        <div className="p-4 space-y-3">
+        <div
+          className="p-4 space-y-3 cursor-pointer"
+          onClick={handleClick}
+        >
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -88,9 +114,9 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 </span>
               )}
             </div>
-            <ChevronRight
+            <ChevronDown
               className={`h-4 w-4 text-muted-foreground transition-transform ${
-                isActive ? 'rotate-90' : ''
+                isExpanded ? '' : '-rotate-90'
               }`}
             />
           </div>
@@ -161,6 +187,111 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
             </div>
           )}
         </div>
+
+        {/* Expanded Detail Section */}
+        {isExpanded && (
+          <div className="border-t bg-gray-50 p-4 space-y-4">
+            {isLoadingDetail ? (
+              <div className="space-y-3">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            ) : runDetail ? (
+              <>
+                {/* Run Summary */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-foreground">실행 요약</h4>
+                  <div className="rounded-lg border bg-white p-3 space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">상태:</span>
+                      <span className="font-medium">
+                        {runDetail.status === 'succeeded' ? '성공' :
+                         runDetail.status === 'failed' ? '실패' :
+                         runDetail.status === 'running' ? '실행 중' : runDetail.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">시작 시간:</span>
+                      <span className="font-medium">
+                        {new Date(runDetail.started_at).toLocaleString('ko-KR')}
+                      </span>
+                    </div>
+                    {runDetail.finished_at && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground">종료 시간:</span>
+                        <span className="font-medium">
+                          {new Date(runDetail.finished_at).toLocaleString('ko-KR')}
+                        </span>
+                      </div>
+                    )}
+                    {runDetail.elapsed_time !== null && runDetail.elapsed_time !== undefined && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          소요 시간:
+                        </span>
+                        <span className="font-medium">
+                          {formatElapsedTime(runDetail.elapsed_time)}
+                        </span>
+                      </div>
+                    )}
+                    {runDetail.total_tokens !== null && runDetail.total_tokens !== undefined && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground">총 토큰 사용량:</span>
+                        <span className="font-medium">{runDetail.total_tokens.toLocaleString()} 토큰</span>
+                      </div>
+                    )}
+                    {runDetail.total_steps !== null && runDetail.total_steps !== undefined && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground">실행 단계:</span>
+                        <span className="font-medium">{runDetail.total_steps}개</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Inputs */}
+                {runDetail.inputs && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">입력 (Input)</h4>
+                    <div className="rounded-lg border bg-white p-3">
+                      <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-64 overflow-y-auto">
+                        {JSON.stringify(runDetail.inputs, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                {/* Outputs */}
+                {runDetail.outputs && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">출력 (Output)</h4>
+                    <div className="rounded-lg border bg-white p-3">
+                      <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-64 overflow-y-auto">
+                        {JSON.stringify(runDetail.outputs, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {runDetail.error_message && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-red-600">에러 메시지</h4>
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                      <p className="text-xs text-red-700">{runDetail.error_message}</p>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center text-sm text-muted-foreground py-4">
+                상세 정보를 불러올 수 없습니다.
+              </div>
+            )}
+          </div>
+        )}
       </Card>
     );
   }

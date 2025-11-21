@@ -1,6 +1,4 @@
 import {
-  Suspense,
-  lazy,
   memo,
   useCallback,
   useEffect,
@@ -41,17 +39,9 @@ const DEFAULT_FILTERS: WorkflowLogFiltersType = {
   status: 'all',
 };
 
-const WorkflowLogDetailPanel = lazy(() =>
-  import('../logs/WorkflowLogDetailPanel').then((module) => ({
-    default: module.WorkflowLogDetailPanel,
-  }))
-);
-
 const LogsView = () => {
   const botId = useBotStore((state) => state.selectedBotId);
   const [searchParams, setSearchParams] = useSearchParams();
-  const runParam = searchParams.get('run');
-  const isDetailOpen = Boolean(runParam);
   const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -130,26 +120,10 @@ const LogsView = () => {
 
   const handleRunSelect = useCallback(
     (run: WorkflowRunSummary) => {
-      updateSearchParams((params) => {
-        params.set('run', run.id);
-      });
+      selectRun(run.id);
     },
-    [updateSearchParams]
+    [selectRun]
   );
-
-  const handlePanelOpenChange = (next: boolean) => {
-    if (!next) {
-      updateSearchParams((params) => {
-        params.delete('run');
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (runParam) {
-      selectRun(runParam);
-    }
-  }, [runParam, selectRun]);
 
   useEffect(() => {
     if (!isRealtimeEnabled) return;
@@ -193,11 +167,10 @@ const LogsView = () => {
 
   return (
     <div className="h-full w-full overflow-auto bg-gray-50 p-6">
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex h-full max-w-[60%] flex-col gap-6">
         <header>
-          <p className="text-sm font-medium text-primary">Workflow Logs</p>
           <h1 className="mt-1 text-2xl font-bold text-foreground">
-            실행 기록과 입력/출력을 한눈에
+          Workflow Logs
           </h1>
           <p className="text-sm text-muted-foreground">
             상태, 기간, 키워드로 실행을 필터링하고 상세 패널에서 토큰 및 노드 타임라인을 확인하세요.
@@ -230,8 +203,7 @@ const LogsView = () => {
           </div>
         )}
 
-        <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-4">
+        <div className="flex-1 space-y-4">
             {isLoading && runs.length === 0 ? (
               renderSkeletons()
             ) : runs.length === 0 ? (
@@ -245,6 +217,7 @@ const LogsView = () => {
                   run={run}
                   isActive={selectedRunId === run.id}
                   onSelect={handleRunSelect}
+                  botId={botId}
                 />
               ))
             )}
@@ -266,31 +239,8 @@ const LogsView = () => {
                 다음 실행을 불러오는 중입니다...
               </div>
             )}
-          </div>
-
-          <div className="space-y-4">
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold text-foreground">
-                실행 선택
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                왼쪽 실행을 클릭하면 상세 패널이 열리며, 입력/출력과 노드 타임라인을 확인할 수 있습니다.
-              </p>
-            </Card>
-          </div>
         </div>
       </div>
-
-      <Suspense fallback={null}>
-        <WorkflowLogDetailPanel
-          botId={botId}
-          runId={selectedRun?.id ?? null}
-          open={isDetailOpen}
-          onOpenChange={handlePanelOpenChange}
-          filters={filters}
-          isRealtime={isRealtimeEnabled}
-        />
-      </Suspense>
     </div>
   );
 };
