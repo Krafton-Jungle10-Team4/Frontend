@@ -1,4 +1,5 @@
 import { RiBookLine, RiDeleteBinLine, RiMoreFill } from '@remixicon/react';
+import { Tag as TagIcon } from 'lucide-react';
 import { Knowledge } from '@/data/mockKnowledge';
 import { Card } from '@shared/components/card';
 import { Badge } from '@shared/components/badge';
@@ -89,11 +90,19 @@ export function KnowledgeCard({
         )}
 
         <div className="flex flex-wrap gap-1 mb-2 mt-auto">
-          {knowledge.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-              {tag}
+          {knowledge.tags && knowledge.tags.length > 0 ? (
+            knowledge.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
+                <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                {tag}
+              </Badge>
+            ))
+          ) : (
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
+              <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+              태그 없음
             </Badge>
-          ))}
+          )}
         </div>
 
         <div className="text-[10px] text-muted-foreground">
