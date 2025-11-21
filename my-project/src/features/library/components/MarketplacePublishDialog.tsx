@@ -63,7 +63,7 @@ export function MarketplacePublishDialog({
 
       setIsSuccess(true);
       toast.success('마켓플레이스 게시 완료', {
-        description: '이제 모든 사용자가 이 에이전트를 검색하고 가져올 수 있습니다.',
+        description: '이제 모든 사용자가 이 서비스를 검색하고 가져올 수 있습니다.',
       });
 
       setTimeout(() => {

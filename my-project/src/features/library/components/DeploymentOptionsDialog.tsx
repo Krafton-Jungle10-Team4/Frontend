@@ -155,7 +155,7 @@ export function DeploymentOptionsDialog({
             <div className="flex flex-col items-start">
               <span className="font-medium">Marketplace에서 열기</span>
               <span className="text-xs text-muted-foreground">
-                Marketplace 페이지에서 에이전트 탐색 (준비 중)
+                Marketplace 페이지에서 서비스 탐색 (준비 중)
               </span>
             </div>
           </Button>
@@ -174,7 +174,7 @@ export function DeploymentOptionsDialog({
             <div className="flex flex-col items-start">
               <span className="font-medium">API 참조 접근</span>
               <span className="text-xs text-muted-foreground">
-                REST API로 에이전트에 접근하는 방법 확인
+                REST API로 서비스에 접근하는 방법 확인
               </span>
             </div>
           </Button>

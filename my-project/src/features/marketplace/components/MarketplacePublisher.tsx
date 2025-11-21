@@ -43,7 +43,7 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
 
   const handlePublish = async () => {
     if (!publishConfig.workflow_version_id) {
-      toast.error('워크플로우 버전 ID를 입력해주세요');
+      toast.error('서비스 버전 ID를 입력해주세요');
       return;
     }
 
@@ -66,17 +66,17 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
   return (
     <div className="space-y-6">
       <div>
-        <Label>워크플로우 버전 ID *</Label>
+        <Label>서비스 버전 ID *</Label>
         <Input
           value={publishConfig.workflow_version_id}
           onChange={(e) => setPublishConfig({
             ...publishConfig,
             workflow_version_id: e.target.value
           })}
-          placeholder="게시할 워크플로우 버전 ID"
+          placeholder="게시할 서비스 버전 ID"
         />
         <p className="text-xs text-muted-foreground mt-1">
-          워크플로우 버전 히스토리에서 확인 가능합니다
+          서비스 버전 히스토리에서 확인 가능합니다
         </p>
       </div>
 
@@ -88,7 +88,7 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
             ...publishConfig,
             display_name: e.target.value
           })}
-          placeholder="워크플로우 이름"
+          placeholder="서비스 이름"
           maxLength={100}
         />
       </div>
@@ -102,7 +102,7 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
             description: e.target.value
           })}
           rows={4}
-          placeholder="이 워크플로우가 무엇을 하는지 설명해주세요"
+          placeholder="이 서비스가 무엇을 하는지 설명해주세요"
           maxLength={500}
         />
         <p className="text-xs text-muted-foreground mt-1">

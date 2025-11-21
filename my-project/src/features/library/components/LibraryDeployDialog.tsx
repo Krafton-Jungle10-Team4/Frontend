@@ -122,7 +122,7 @@ export function LibraryDeployDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>에이전트 배포</DialogTitle>
+          <DialogTitle>서비스 배포</DialogTitle>
           <DialogDescription>
             {agent.library_name} {agent.version}을(를) 배포합니다.
           </DialogDescription>
@@ -135,11 +135,11 @@ export function LibraryDeployDialog({
               name="target_bot_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>대상 봇</FormLabel>
+                  <FormLabel>대상 서비스</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="봇을 선택하세요" />
+                        <SelectValue placeholder="서비스를 선택하세요" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -151,7 +151,7 @@ export function LibraryDeployDialog({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    이 에이전트를 배포할 봇을 선택하세요.
+                    이 서비스를 배포할 서비스를 선택하세요.
                   </FormDescription>
                 </FormItem>
               )}

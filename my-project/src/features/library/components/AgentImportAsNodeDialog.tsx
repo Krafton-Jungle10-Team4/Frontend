@@ -54,7 +54,7 @@ export function AgentImportAsNodeDialog({
     } catch (error) {
       console.error('Failed to load agents:', error);
       toast.error('로드 실패', {
-        description: '에이전트 목록을 불러오는 중 오류가 발생했습니다.',
+        description: '서비스 목록을 불러오는 중 오류가 발생했습니다.',
       });
     } finally {
       setIsLoading(false);
@@ -69,8 +69,8 @@ export function AgentImportAsNodeDialog({
   // 노드로 가져오기
   const handleImportAsNode = async () => {
     if (!selectedAgent) {
-      toast.error('에이전트 미선택', {
-        description: '가져올 에이전트를 선택해주세요.',
+      toast.error('서비스 미선택', {
+        description: '가져올 서비스를 선택해주세요.',
       });
       return;
     }
@@ -110,9 +110,9 @@ export function AgentImportAsNodeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>에이전트 노드 가져오기</DialogTitle>
+          <DialogTitle>서비스 노드 가져오기</DialogTitle>
           <DialogDescription>
-            라이브러리 에이전트를 현재 워크플로우에 노드로 추가합니다.
+            라이브러리 서비스를 현재 워크플로우에 노드로 추가합니다.
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +120,7 @@ export function AgentImportAsNodeDialog({
           {/* 검색 */}
           <div className="flex gap-2">
             <Input
-              placeholder="에이전트 이름 검색..."
+              placeholder="서비스 이름 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -130,7 +130,7 @@ export function AgentImportAsNodeDialog({
             </Button>
           </div>
 
-          {/* 에이전트 목록 */}
+          {/* 서비스 목록 */}
           <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
             {agents.map((agent) => (
               <div
@@ -167,7 +167,7 @@ export function AgentImportAsNodeDialog({
 
             {agents.length === 0 && !isLoading && (
               <div className="text-center py-8 text-muted-foreground">
-                에이전트가 없습니다.
+                서비스가 없습니다.
               </div>
             )}
           </div>

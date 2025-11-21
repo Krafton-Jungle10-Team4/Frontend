@@ -24,7 +24,7 @@ const StudioSearchBar: React.FC<{ value: string; onChange: (value: string) => vo
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="에이전트 검색..."
+        placeholder="서비스 검색..."
         className={cn(
           'w-full pl-10 pr-4 py-2',
           'bg-studio-search-bg border border-studio-search-border',
@@ -54,14 +54,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       <div className="space-y-3">
         <div className="border border-gray-200 flex items-stretch overflow-hidden">
           <div className="flex-1 bg-white p-3 flex flex-col items-center">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">총 에이전트</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">총 서비스</h3>
             <div className="text-3xl font-bold text-gray-900">{workflowStats.total}</div>
           </div>
 
           <div className="w-px bg-gray-300" />
 
           <div className="flex-1 bg-green-100 p-3 flex flex-col items-center">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">배포된 에이전트</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">배포된 서비스</h3>
             <div className="text-3xl font-bold text-gray-900">{workflowStats.deployed}</div>
           </div>
         </div>

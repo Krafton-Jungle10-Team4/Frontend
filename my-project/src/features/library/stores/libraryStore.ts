@@ -70,10 +70,10 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
     } catch (error: any) {
       console.error('Failed to fetch library agents:', error);
       set({
-        error: error.response?.data?.detail || '라이브러리 에이전트 조회 실패',
+        error: error.response?.data?.detail || '라이브러리 서비스 조회 실패',
         isLoading: false,
       });
-      toast.error('라이브러리 에이전트를 불러올 수 없습니다.');
+      toast.error('라이브러리 서비스를 불러올 수 없습니다.');
     }
   },
 
@@ -87,10 +87,10 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
     } catch (error: any) {
       console.error('Failed to fetch agent detail:', error);
       set({
-        error: error.response?.data?.detail || '에이전트 상세 조회 실패',
+        error: error.response?.data?.detail || '서비스 상세 조회 실패',
         isLoading: false,
       });
-      toast.error('에이전트 상세 정보를 불러올 수 없습니다.');
+      toast.error('서비스 상세 정보를 불러올 수 없습니다.');
     }
   },
 
@@ -101,15 +101,15 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
     try {
       await importLibraryAgent(targetBotId, sourceVersionId);
       set({ isLoading: false });
-      toast.success('에이전트를 성공적으로 가져왔습니다.');
+      toast.success('서비스를 성공적으로 가져왔습니다.');
       return true;
     } catch (error: any) {
       console.error('Failed to import agent:', error);
       set({
-        error: error.response?.data?.detail || '에이전트 가져오기 실패',
+        error: error.response?.data?.detail || '서비스 가져오기 실패',
         isLoading: false,
       });
-      toast.error('에이전트를 가져올 수 없습니다.');
+      toast.error('서비스를 가져올 수 없습니다.');
       return false;
     }
   },

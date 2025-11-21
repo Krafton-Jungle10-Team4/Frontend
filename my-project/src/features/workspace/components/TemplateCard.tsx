@@ -35,7 +35,7 @@ export function TemplateCard({ template, onClick, language }: TemplateCardProps)
           <Badge variant="secondary" className="text-xs flex-shrink-0">
             {template.type === 'workflow' && (language === 'ko' ? '워크플로우' : 'Workflow')}
             {template.type === 'chatbot' && (language === 'ko' ? '챗봇' : 'Chatbot')}
-            {template.type === 'agent' && (language === 'ko' ? '에이전트' : 'Agent')}
+            {template.type === 'agent' && (language === 'ko' ? '서비스' : 'Agent')}
           </Badge>
         </div>
       </div>

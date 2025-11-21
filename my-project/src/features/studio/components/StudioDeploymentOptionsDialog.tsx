@@ -175,7 +175,7 @@ export function StudioDeploymentOptionsDialog({
             <div className="flex flex-col items-start">
               <span className="font-medium">API 참조 접근</span>
               <span className="text-xs text-muted-foreground">
-                REST API로 에이전트 호출 방법 확인
+                REST API로 서비스 호출 방법 확인
               </span>
             </div>
           </Button>

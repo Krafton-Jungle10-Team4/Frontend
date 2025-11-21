@@ -15,26 +15,26 @@ export function createImportedWorkflowNode(
   // 필수 필드 검증: 배열 타입을 요구, 빈 배열은 허용
   if (!Array.isArray(agent.input_schema)) {
     throw new Error(
-      `라이브러리 에이전트 ${agent.id}에 input_schema가 없습니다. ` +
+      `라이브러리 서비스 ${agent.id}에 input_schema가 없습니다. ` +
       'API 응답을 확인하세요.'
     );
   }
   if (agent.input_schema.length === 0) {
-    console.warn(`라이브러리 에이전트 ${agent.id}의 input_schema가 비어 있습니다.`);
+    console.warn(`라이브러리 서비스 ${agent.id}의 input_schema가 비어 있습니다.`);
   }
 
   if (!Array.isArray(agent.output_schema)) {
     throw new Error(
-      `라이브러리 에이전트 ${agent.id}에 output_schema가 없습니다. ` +
+      `라이브러리 서비스 ${agent.id}에 output_schema가 없습니다. ` +
       'API 응답을 확인하세요.'
     );
   }
   if (agent.output_schema.length === 0) {
-    console.warn(`라이브러리 에이전트 ${agent.id}의 output_schema가 비어 있습니다.`);
+    console.warn(`라이브러리 서비스 ${agent.id}의 output_schema가 비어 있습니다.`);
   }
   if (!agent.graph) {
     throw new Error(
-      `라이브러리 에이전트 ${agent.id}에 graph가 없습니다. ` +
+      `라이브러리 서비스 ${agent.id}에 graph가 없습니다. ` +
       'API 응답을 확인하세요.'
     );
   }

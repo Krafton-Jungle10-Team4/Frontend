@@ -104,7 +104,7 @@ export const mockTemplates: Template[] = [
 
 export const templateCategories = [
   { id: 'all', label: { en: 'All', ko: '모든 카테고리' } },
-  { id: 'agent', label: { en: 'Agent', ko: '에이전트' } },
+  { id: 'agent', label: { en: 'Agent', ko: '서비스' } },
   { id: 'workflow', label: { en: 'Workflow', ko: '워크플로우' } },
   { id: 'chatbot', label: { en: 'Chatbot', ko: '챗봇' } },
   { id: 'automation', label: { en: 'Automation', ko: '인사' } },

@@ -162,7 +162,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
               {nextVersion && <VersionBadge version={nextVersion} />}
             </div>
             <DialogDescription>
-              에이전트 버전을 커밋하고 스튜디오에 저장합니다.
+              서비스 버전을 커밋하고 스튜디오에 저장합니다.
             </DialogDescription>
           </DialogHeader>
 

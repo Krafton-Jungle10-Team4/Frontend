@@ -86,9 +86,9 @@ export function AgentImportDialog({ open, onClose, agent }: AgentImportDialogPro
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>에이전트 가져오기</DialogTitle>
+          <DialogTitle>서비스 가져오기</DialogTitle>
           <DialogDescription>
-            {agent.library_name}을(를) 어떤 봇으로 가져오시겠습니까?
+            {agent.library_name}을(를) 어떤 서비스로 가져오시겠습니까?
           </DialogDescription>
         </DialogHeader>
 
@@ -96,21 +96,21 @@ export function AgentImportDialog({ open, onClose, agent }: AgentImportDialogPro
           {isFetchingBots ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin" />
-              <span className="ml-2">봇 목록 로딩 중...</span>
+              <span className="ml-2">서비스 목록 로딩 중...</span>
             </div>
           ) : bots.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              생성된 봇이 없습니다. 먼저 봇을 생성해주세요.
+              생성된 서비스가 없습니다. 먼저 서비스를 생성해주세요.
             </div>
           ) : (
             <>
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  대상 봇 선택
+                  대상 서비스 선택
                 </label>
                 <Select value={selectedBotId} onValueChange={setSelectedBotId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="봇을 선택하세요" />
+                    <SelectValue placeholder="서비스를 선택하세요" />
                   </SelectTrigger>
                   <SelectContent>
                     {bots.map((bot) => (
@@ -130,7 +130,7 @@ export function AgentImportDialog({ open, onClose, agent }: AgentImportDialogPro
               <div className="bg-muted p-3 rounded-lg text-sm">
                 <p className="font-medium mb-1">주의사항</p>
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  <li>선택한 봇의 draft 워크플로우가 덮어씌워집니다.</li>
+                  <li>선택한 서비스의 draft 워크플로우가 덮어씌워집니다.</li>
                   <li>기존 draft의 변경사항은 저장되지 않습니다.</li>
                   <li>가져온 후 필요에 따라 수정하고 발행하세요.</li>
                 </ul>

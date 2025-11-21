@@ -45,7 +45,7 @@ export function AgentDetailDialog({ open, onClose, versionId }: AgentDetailDialo
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{agent?.library_name || '에이전트 상세'}</DialogTitle>
+          <DialogTitle>{agent?.library_name || '서비스 상세'}</DialogTitle>
           <DialogDescription>
             {agent?.version} • {agent && formatDate(agent.library_published_at)}
           </DialogDescription>

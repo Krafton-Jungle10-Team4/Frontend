@@ -37,10 +37,10 @@ export function LeftActionPanel({
         <div className="mb-2">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-            <h2 className="text-lg font-semibold">에이전트 만들기</h2>
+            <h2 className="text-lg font-semibold">서비스 만들기</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            새로운 에이전트를 만들어보세요
+            새로운 서비스를 만들어보세요
           </p>
         </div>
 
