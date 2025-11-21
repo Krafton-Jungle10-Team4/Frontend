@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FilterSidebar } from '@/features/studio/components/FilterSidebar';
+import { SearchAndFilters } from '@/features/studio/components/SearchAndFilters';
 import { WorkflowGrid } from '@/features/studio/components/WorkflowGrid';
-import { SortDropdown } from '@/features/studio/components/SortDropdown';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 import {
   selectFilteredAndSortedWorkflows,
@@ -150,36 +149,31 @@ export function StudioPage() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-56px)]">
-        <FilterSidebar
-          tags={sidebarTags}
-          selectedTags={filters.tags}
-          onTagToggle={handleTagToggle}
-          searchValue={filters.search}
-          onSearchChange={(value) => setFilters({ search: value })}
-          workflowStats={workflowStats}
-        />
+      <div className="flex flex-col h-[calc(100vh-56px)]">
+        {/* 상단 검색/필터 영역 */}
+        <div className="px-6 pb-5 pt-7 bg-white border-b border-gray-200">
+          <SearchAndFilters
+            searchValue={filters.search}
+            onSearchChange={(value) => setFilters({ search: value })}
+            tags={sidebarTags}
+            selectedTags={filters.tags}
+            onTagToggle={handleTagToggle}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            stats={workflowStats}
+          />
+        </div>
 
+        {/* 메인 콘텐츠 */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
-          <div className="px-6 pt-4 pb-6 bg-gray-100">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold text-studio-text-primary">전체 에이전트</h1>
-              <SortDropdown value={sortBy} onChange={setSortBy} />
-            </div>
-          </div>
-
-          <div className="px-6 bg-gray-100">
-            <div className="border-t border-gray-300" />
-          </div>
-
-          <div className="px-6 pt-8 pb-6 bg-gray-100">
+          <div className="px-6 pt-6 pb-6">
             {loading ? (
               <div className="flex h-64 items-center justify-center">
-                <p className="text-sm text-studio-text-secondary">로딩 중...</p>
+                <p className="text-sm text-gray-500">로딩 중...</p>
               </div>
             ) : error ? (
               <div className="flex h-64 items-center justify-center">
-                <p className="text-sm text-destructive">오류가 발생했습니다: {error.message}</p>
+                <p className="text-sm text-red-600">오류가 발생했습니다: {error.message}</p>
               </div>
             ) : (
               <WorkflowGrid
