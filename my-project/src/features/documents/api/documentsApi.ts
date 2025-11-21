@@ -115,13 +115,11 @@ export const documentsApi = {
    * 인증: JWT Bearer Token (관리 작업은 JWT 인증 필수)
    * 
    * @param documentId 문서 ID
-   * @param botId 봇 ID (필수)
+   * @param botId 봇 ID (선택)
    */
-  deleteDocument: async (documentId: string, botId: string): Promise<void> => {
+  deleteDocument: async (documentId: string, botId?: string): Promise<void> => {
     await apiClient.delete(API_ENDPOINTS.DOCUMENTS.BY_ID(documentId), {
-      params: {
-        bot_id: botId,
-      },
+      params: botId ? { bot_id: botId } : undefined,
     });
   },
 

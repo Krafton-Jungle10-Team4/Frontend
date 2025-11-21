@@ -110,8 +110,26 @@ export function KnowledgePage() {
     console.log('Knowledge clicked:', knowledgeId);
   };
 
-  const handleDeleteKnowledge = (knowledgeId: string) => {
-    console.log('Delete knowledge:', knowledgeId);
+  const handleDeleteKnowledge = async (documentId: string) => {
+    if (!confirm(language === 'ko' ? '정말 삭제하시겠습니까?' : 'Are you sure you want to delete?')) {
+      return;
+    }
+
+    try {
+      await documentsApi.deleteDocument(documentId);
+      
+      // 목록에서 제거
+      setKnowledgeList((prev) => prev.filter((k) => k.id !== documentId));
+      
+      console.log('Document deleted:', documentId);
+    } catch (err) {
+      console.error('Failed to delete document:', err);
+      alert(
+        language === 'ko'
+          ? '문서 삭제에 실패했습니다.'
+          : 'Failed to delete document.'
+      );
+    }
   };
 
   return (

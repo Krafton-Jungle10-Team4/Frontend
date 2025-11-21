@@ -93,5 +93,12 @@ export const knowledgeApi = {
     );
     return data;
   },
+
+  /**
+   * 지식 삭제
+   */
+  async deleteKnowledge(knowledgeId: string): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.KNOWLEDGE.DETAIL(knowledgeId));
+  },
 };
 
