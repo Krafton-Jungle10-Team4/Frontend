@@ -86,8 +86,8 @@ export function TopNavigation({
 
   return (
     <div className="border-b transition-all h-[72px] bg-white border-border">
-      <div className="container flex h-full items-center justify-between">
-        <div className="flex items-center gap-4 ml-4">
+      <div className="w-full flex h-full items-center justify-between px-4">
+        <div className="flex items-center gap-4">
           <button
             onClick={onLogoClick ?? onHomeClick}
             className="cursor-pointer"
@@ -132,12 +132,7 @@ export function TopNavigation({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus:outline-none flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1 hover:bg-white hover:shadow-md">
-                <Avatar className="w-9 h-9 cursor-pointer transition-all duration-200">
-                  <AvatarFallback className="bg-teal-500 text-white">
-                    {userInitial}
-                  </AvatarFallback>
-                </Avatar>
+              <button className="focus:outline-none flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1 hover:bg-white hover:shadow-md">
                 <span className="text-sm text-gray-700 inline-flex items-center gap-1 transition-colors duration-200">
                   {userName}
                   <ChevronDown size={12} className="transition-transform duration-200 group-hover:translate-y-0.5" />

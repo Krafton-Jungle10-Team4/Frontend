@@ -1,5 +1,6 @@
 import { cn } from '@/shared/components/utils';
 import { useEffect, useRef, useState } from 'react';
+import { Store, Workflow, BookOpen } from 'lucide-react';
 
 interface NavigationTabsProps {
   activeTab: 'marketplace' | 'studio' | 'knowledge' | 'library';
@@ -8,9 +9,9 @@ interface NavigationTabsProps {
 }
 
 const tabs = [
-  { id: 'marketplace', label: { en: 'Marketplace', ko: '마켓플레이스' } },
-  { id: 'studio', label: { en: 'Studio', ko: '스튜디오' } },
-  { id: 'knowledge', label: { en: 'Knowledge', ko: '지식' } },
+  { id: 'marketplace', label: { en: 'Marketplace', ko: '마켓플레이스' }, icon: Store },
+  { id: 'studio', label: { en: 'Studio', ko: '스튜디오' }, icon: Workflow },
+  { id: 'knowledge', label: { en: 'Knowledge', ko: '지식' }, icon: BookOpen },
 ] as const;
 
 export function NavigationTabs({ activeTab, onTabChange, language }: NavigationTabsProps) {
@@ -22,27 +23,33 @@ export function NavigationTabs({ activeTab, onTabChange, language }: NavigationT
     const activeButton = tabRefs.current[activeIndex];
 
     if (activeButton) {
-      setIndicatorStyle({
-        left: activeButton.offsetLeft,
-        width: activeButton.offsetWidth,
-      });
+      const container = activeButton.parentElement;
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        setIndicatorStyle({
+          left: buttonRect.left - containerRect.left,
+          width: activeButton.offsetWidth,
+        });
+      }
     }
   }, [activeTab]);
 
   return (
     <nav className="relative flex items-center gap-0">
-      <div className="relative inline-flex items-center gap-0 bg-muted/50 rounded-lg p-1">
+      <div className="relative inline-flex items-center gap-8 bg-muted/50 rounded-lg p-1">
         <div
-          className="absolute h-[calc(100%-8px)] rounded-md transition-all duration-300 ease-out"
+          className="absolute h-[calc(100%-8px)] transition-all duration-300 ease-out"
           style={{
             left: `${indicatorStyle.left}px`,
             width: `${indicatorStyle.width}px`,
-            transform: 'translateY(0)',
+            top: '4px',
             backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
           }}
         />
         {tabs.map((tab, index) => {
           const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
 
           return (
             <button
@@ -53,9 +60,10 @@ export function NavigationTabs({ activeTab, onTabChange, language }: NavigationT
                 'relative z-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-200',
                 isActive
                   ? 'text-white'
-                  : 'text-muted-foreground hover:text-foreground hover:scale-105 active:scale-95'
+                  : 'text-black hover:text-gray-700 hover:scale-105 active:scale-95'
               )}
             >
+              <Icon className="w-4 h-4" />
               <span className="transition-colors duration-200">{tab.label[language]}</span>
             </button>
           );
