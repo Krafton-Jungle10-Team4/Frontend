@@ -64,44 +64,47 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
             </p>
           )}
 
-          {/* 통계 */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-            <div className="flex items-center gap-1">
-              <Download className="w-3 h-3" />
-              <span>{formatNumber(item.download_count)}</span>
+          {/* 태그 + 통계 */}
+          <div className="flex items-center justify-between gap-2 mt-auto">
+            {/* 태그 */}
+            <div className="flex flex-wrap gap-1">
+              {item.tags && item.tags.length > 0 ? (
+                <>
+                  {item.tags.slice(0, 3).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600"
+                    >
+                      <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                      {tag}
+                    </Badge>
+                  ))}
+                  {item.tags.length > 3 && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
+                      +{item.tags.length - 3}
+                    </Badge>
+                  )}
+                </>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
+                  <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                  태그 없음
+                </Badge>
+              )}
             </div>
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              <span>{formatNumber(item.view_count)}</span>
-            </div>
-          </div>
 
-          {/* 태그 */}
-          <div className="flex flex-wrap gap-1 mt-auto">
-            {item.tags && item.tags.length > 0 ? (
-              <>
-                {item.tags.slice(0, 3).map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600"
-                  >
-                    <TagIcon className="h-2.5 w-2.5 mr-0.5" />
-                    {tag}
-                  </Badge>
-                ))}
-                {item.tags.length > 3 && (
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
-                    +{item.tags.length - 3}
-                  </Badge>
-                )}
-              </>
-            ) : (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
-                <TagIcon className="h-2.5 w-2.5 mr-0.5" />
-                태그 없음
-              </Badge>
-            )}
+            {/* 통계 */}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
+              <div className="flex items-center gap-1">
+                <Download className="w-3 h-3" />
+                <span>{formatNumber(item.download_count)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                <span>{formatNumber(item.view_count)}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
