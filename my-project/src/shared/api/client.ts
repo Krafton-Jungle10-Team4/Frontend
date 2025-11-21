@@ -199,6 +199,8 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        console.log('🔄 [Token Refresh] Attempting to refresh access token...');
+
         // Refresh Token으로 Access Token 갱신 (httpOnly 쿠키 자동 전송)
         const { data } = await axios.post<{ access_token: string }>(
           `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
@@ -210,6 +212,7 @@ apiClient.interceptors.response.use(
 
         const newToken = data.access_token;
         localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, newToken);
+        console.log('✅ [Token Refresh] Successfully refreshed access token');
 
         // 대기 중인 요청들 처리
         processQueue(null, newToken);
@@ -222,6 +225,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh Token도 만료 → 로그아웃
+        console.error('❌ [Token Refresh] Failed to refresh token:', refreshError);
+        console.error('❌ [Token Refresh] Logging out and redirecting to login...');
         processQueue(refreshError as AxiosError, null);
         handleLogout();
 
