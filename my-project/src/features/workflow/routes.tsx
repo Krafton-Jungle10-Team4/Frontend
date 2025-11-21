@@ -24,3 +24,21 @@ export const workflowRoutes: RouteObject = {
     },
   ],
 };
+
+/**
+ * Template Preview Routes
+ *
+ * 읽기 전용 템플릿 미리보기 라우트
+ */
+export const templatePreviewRoutes: RouteObject = {
+  path: 'template',
+  children: [
+    {
+      path: ':templateId/preview',
+      lazy: () =>
+        import('./pages/TemplatePreviewPage').then((module) => ({
+          Component: module.TemplatePreviewPage,
+        })),
+    },
+  ],
+};

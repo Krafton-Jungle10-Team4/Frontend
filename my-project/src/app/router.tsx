@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RootLayout } from '@/widgets/layouts/RootLayout';
 import { RootErrorBoundary } from '@/widgets/layouts/RootErrorBoundary';
 import { ProtectedRoute, authRoutes } from '@/features/auth';
-import { workflowRoutes } from '@/features/workflow';
+import { workflowRoutes, templatePreviewRoutes } from '@/features/workflow';
 import { dashboardRoutes } from '@/features/dashboard';
 import { mcpRoutes } from '@/features/mcp';
 import { promptEngineeringStudioRoutes } from '@/features/prompt-engineering-studio';
@@ -84,6 +84,8 @@ export const router = createBrowserRouter([
 
       // Workflow routes - Feature 기반
       workflowRoutes,
+      // Template Preview routes - 읽기 전용 템플릿 미리보기
+      templatePreviewRoutes,
       // MCP routes - MCP 키 관리
       mcpRoutes,
       // Prompt Engineering Studio routes - 프롬프트 스튜디오 관리

@@ -1,6 +1,6 @@
 import type React from 'react';
-import { useCallback, useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ReactFlow,
   Background,
@@ -17,7 +17,9 @@ import type {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { AlignHorizontalJustifyCenter, Eye, EyeOff, Download } from 'lucide-react';
+import { AlignHorizontalJustifyCenter, MessageSquare, Download, CheckCircle2, Lock, Variable } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '@shared/components/badge';
 
 import { Button } from '@shared/components/button';
 import type {
@@ -61,7 +63,7 @@ import {
 } from '../nodes/question-classifier/utils/portSchemaGenerator';
 import { ValidationPanel } from '../ValidationPanel/ValidationPanel';
 import { ConversationVariablePanel } from '../ConversationVariablePanel';
-import { AgentImportAsNodeDialog } from '@/features/library/components/AgentImportAsNodeDialog';
+import { BotImportAsNodeDialog } from '../dialogs/BotImportAsNodeDialog';
 import { ImportedWorkflowNode } from '../nodes/imported-workflow/node';
 
 // React Flow 노드 타입 매핑 (React Flow가 인식할 수 있는 컴포넌트 매핑)
@@ -93,6 +95,15 @@ interface ContextMenuState {
  */
 const WorkflowInner = () => {
   const { botId } = useParams<{ botId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // versionId를 쿼리 파라미터에서 추출
+  const versionId = useMemo(() => searchParams.get('versionId') || undefined, [searchParams]);
+
+  // readonly 모드와 source 확인
+  const isReadonly = useMemo(() => searchParams.get('mode') === 'readonly', [searchParams]);
+  const source = useMemo(() => searchParams.get('source'), [searchParams]);
 
   // Zustand 스토어 사용
   const {
@@ -119,10 +130,10 @@ const WorkflowInner = () => {
   // Deployment store는 다이얼로그 컴포넌트 내부에서 사용됨
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [panelWidth, setPanelWidth] = useState(480); // 초기 너비 480px
+  const [panelWidth, setPanelWidth] = useState(360); // 초기 너비 360px
   const [isResizing, setIsResizing] = useState(false);
   const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
-  const [isAgentImportDialogOpen, setIsAgentImportDialogOpen] = useState(false);
+  const [isBotImportDialogOpen, setIsBotImportDialogOpen] = useState(false);
   const { screenToFlowPosition, fitView } = useReactFlow();
   const prevBotIdRef = useRef<string | undefined>();
   const initialFitViewDoneRef = useRef(false);
@@ -136,21 +147,62 @@ const WorkflowInner = () => {
   // 게시하기 단축키 (Cmd/Ctrl+Shift+P, E)
   useWorkflowShortcuts(botId || '');
 
-  // 봇 변경 시 상태 초기화 및 워크플로우 로드
+  // 버전 선택 핸들러
+  const handleSelectVersion = useCallback(() => {
+    if (!botId || !versionId) return;
+
+    console.log('[WorkflowBuilder] Navigating to deployment page with versionId:', versionId);
+    console.log('[WorkflowBuilder] botId:', botId);
+
+    // 배포 페이지로 이동하면서 선택된 버전 ID를 state로 전달
+    navigate(`/workspace/deployment/${botId}`, {
+      state: { selectedVersionId: versionId }
+    });
+
+    // 토스트는 배포 페이지에서만 표시하므로 여기서는 제거
+  }, [botId, versionId, navigate]);
+
+  // 마켓플레이스에서 가져오기 핸들러
+  const handleImportFromMarketplace = useCallback(async () => {
+    const marketplaceItemId = searchParams.get('marketplaceItemId');
+
+    if (!marketplaceItemId) {
+      toast.error('마켓플레이스 아이템 정보가 없습니다.');
+      return;
+    }
+
+    const toastId = toast.loading('워크플로우를 가져오는 중...');
+
+    try {
+      const { importMarketplaceWorkflow } = await import('@/features/marketplace/api/marketplaceApi');
+      const result = await importMarketplaceWorkflow(marketplaceItemId);
+
+      toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
+
+      // 스튜디오 페이지로 이동
+      navigate('/workspace/studio');
+    } catch (error) {
+      console.error('[WorkflowBuilder] Failed to import workflow:', error);
+      toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
+    }
+  }, [searchParams, navigate]);
+
+  // 봇 또는 버전 변경 시 상태 초기화 및 워크플로우 로드
   useEffect(() => {
     // 기존 상태 초기화 (선택/미리보기 등 정리)
     reset();
 
     // botId가 존재할 때만 워크플로우 로드
     if (botId) {
-      loadWorkflow(botId);
+      console.log('[WorkflowBuilder] Loading workflow:', { botId, versionId });
+      loadWorkflow(botId, versionId);
     }
 
     // 언마운트 시에도 잔여 상태 정리
     return () => {
       reset();
     };
-  }, [botId, loadWorkflow, reset]);
+  }, [botId, versionId, loadWorkflow, reset]);
 
   // 노드 타입 사전 로드
   useEffect(() => {
@@ -205,8 +257,8 @@ const WorkflowInner = () => {
 
     const handleMouseMove = (e: MouseEvent) => {
       const newWidth = window.innerWidth - e.clientX - 16; // 16px은 right-4 여백
-      // 최소 280px, 최대 600px로 제한
-      setPanelWidth(Math.min(Math.max(newWidth, 280), 600));
+      // 최소 280px, 최대 450px로 제한
+      setPanelWidth(Math.min(Math.max(newWidth, 280), 450));
     };
 
     const handleMouseUp = () => {
@@ -594,19 +646,24 @@ const WorkflowInner = () => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
+          onNodesChange={(versionId || isReadonly) ? undefined : onNodesChange}
+          onEdgesChange={(versionId || isReadonly) ? undefined : onEdgesChange}
+          onConnect={(versionId || isReadonly) ? undefined : onConnect}
+          onNodeClick={(versionId || isReadonly) ? undefined : onNodeClick}
           onPaneClick={onPaneClick}
-          onNodeContextMenu={onNodeContextMenu}
-          onEdgeContextMenu={onEdgeContextMenu}
-          onPaneContextMenu={onPaneContextMenu}
+          onNodeContextMenu={(versionId || isReadonly) ? undefined : onNodeContextMenu}
+          onEdgeContextMenu={(versionId || isReadonly) ? undefined : onEdgeContextMenu}
+          onPaneContextMenu={(versionId || isReadonly) ? undefined : onPaneContextMenu}
           onInit={handleReactFlowInit}
           nodeTypes={REACT_FLOW_NODE_TYPES}
           edgeTypes={REACT_FLOW_EDGE_TYPES}
           minZoom={0.25}
           maxZoom={2}
+          nodesDraggable={!(versionId || isReadonly)}
+          nodesConnectable={!(versionId || isReadonly)}
+          nodesFocusable={!(versionId || isReadonly)}
+          edgesFocusable={!(versionId || isReadonly)}
+          elementsSelectable={!(versionId || isReadonly)}
           defaultEdgeOptions={{
             type: 'custom',
           }}
@@ -628,70 +685,100 @@ const WorkflowInner = () => {
       </div>
 
       {/* 상단 툴바 - 캔버스 위 오버레이 (absolute 고정) */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex justify-end items-center pointer-events-none">
-        <div className="flex items-center gap-3 pointer-events-auto">
-          <ValidationPanel className="w-72 shrink-0" />
+      <div className="absolute top-4 left-4 right-2 z-10 flex justify-end items-center pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* 읽기 전용 모드 (versionId가 있거나 readonly 모드일 때) */}
+          {(versionId || isReadonly) ? (
+            <>
+              {/* 읽기 전용 뱃지 */}
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 border border-gray-300"
+              >
+                <Lock className="w-4 h-4" />
+                읽기 전용
+              </Badge>
 
-          {/* Preview 버튼 */}
-          <Button
-            variant="outline"
-            onClick={toggleChatVisibility}
-            title={
-              isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'
-            }
-            className="!text-blue-600 hover:!text-blue-700"
-          >
-            {isChatVisible ? (
-              <>
-                <EyeOff className="w-4 h-4" />
-                미리보기
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4" />
-                미리보기
-              </>
-            )}
-          </Button>
+              {/* 버전 선택/가져오기 버튼 */}
+              <Button
+                onClick={source === 'marketplace' ? handleImportFromMarketplace : handleSelectVersion}
+                className="!text-white rounded-none"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                {source === 'marketplace' ? '이 버전 가져오기' : '이 버전 선택'}
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* 일반 모드 - 모든 편집 버튼 표시 */}
+              <ValidationPanel className="w-72 shrink-0" />
 
-          <Button
-            variant="outline"
-            onClick={handleAutoLayout}
-            disabled={nodes.length === 0}
-            title="노드 자동 정렬"
-          >
-            <AlignHorizontalJustifyCenter className="w-4 h-4" />
-            정렬
-          </Button>
+              {/* Preview 버튼 */}
+              <Button
+                variant="outline"
+                onClick={toggleChatVisibility}
+                title={
+                  isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'
+                }
+                className="!text-blue-600 hover:!text-blue-700 group overflow-hidden !gap-0"
+              >
+                <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                  미리보기
+                </span>
+              </Button>
 
-          <Button
-            variant="outline"
-            onClick={() => setConversationPanelOpen(true)}
-            title="대화 변수 관리"
-          >
-            대화 변수
-          </Button>
+              <Button
+                variant="outline"
+                onClick={handleAutoLayout}
+                disabled={nodes.length === 0}
+                title="노드 자동 정렬"
+                className="group overflow-hidden !gap-0"
+              >
+                <AlignHorizontalJustifyCenter className="w-4 h-4 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                  정렬
+                </span>
+              </Button>
 
-          <Button
-            variant="outline"
-            onClick={() => setIsAgentImportDialogOpen(true)}
-            title="라이브러리에서 에이전트 가져오기"
-          >
-            <Download className="w-4 h-4" />
-            에이전트 가져오기
-          </Button>
+              <Button
+                variant="outline"
+                onClick={() => setConversationPanelOpen(true)}
+                title="대화 변수 관리"
+                className="group overflow-hidden !gap-0"
+              >
+                <Variable className="w-4 h-4 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                  대화 변수
+                </span>
+              </Button>
 
-          <WorkflowSettingsDialog />
+              <Button
+                variant="outline"
+                onClick={() => setIsBotImportDialogOpen(true)}
+                title="다른 봇의 워크플로우 가져오기"
+                className="group overflow-hidden !gap-0"
+              >
+                <Download className="w-4 h-4 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                  에이전트 가져오기
+                </span>
+              </Button>
 
-          <SaveButton />
+              <SaveButton />
 
-          {/* 게시하기 드롭다운 */}
-          {botId && <PublishDropdown botId={botId} />}
+              {/* 게시하기 드롭다운 */}
+              {botId && <PublishDropdown botId={botId} />}
+            </>
+          )}
         </div>
       </div>
 
-      {/* 컨텍스트 메뉴 백드롭 */}
-      {contextMenu && (
+      {/* 컨텍스트 메뉴 백드롭 - 읽기 전용 모드에서는 비활성화 */}
+      {contextMenu && !versionId && (
         <div
           className="fixed inset-0 z-40"
           onClick={closeContextMenu}
@@ -702,8 +789,8 @@ const WorkflowInner = () => {
         />
       )}
 
-      {/* 컨텍스트 메뉴 */}
-      {contextMenu && (
+      {/* 컨텍스트 메뉴 - 읽기 전용 모드에서는 비활성화 */}
+      {contextMenu && !versionId && (
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
@@ -718,8 +805,8 @@ const WorkflowInner = () => {
         />
       )}
 
-      {/* 우측 노드 설정 패널 - absolute 오버레이 (노드 선택 시에만 표시) */}
-      {selectedNodeId && (
+      {/* 우측 노드 설정 패널 - absolute 오버레이 (노드 선택 시에만 표시, 읽기 전용 모드에서는 비활성화) */}
+      {selectedNodeId && !versionId && (
         <div
           className="absolute top-20 right-4 bottom-4 border border-gray-300 dark:border-gray-600 border-l-2 bg-white dark:bg-gray-800 overflow-hidden z-20 shadow-2xl rounded-xl"
           style={{ width: `${panelWidth}px` }}
@@ -742,9 +829,9 @@ const WorkflowInner = () => {
         onOpenChange={setConversationPanelOpen}
       />
 
-      <AgentImportAsNodeDialog
-        open={isAgentImportDialogOpen}
-        onOpenChange={setIsAgentImportDialogOpen}
+      <BotImportAsNodeDialog
+        open={isBotImportDialogOpen}
+        onOpenChange={setIsBotImportDialogOpen}
         onImportSuccess={() => {
           // 성공 시 처리 (노드가 이미 추가됨)
         }}
