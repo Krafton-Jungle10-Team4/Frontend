@@ -86,7 +86,23 @@ export function WorkflowCard({
 
       <div className="px-5 py-3 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-1">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center gap-2">
+            {/* 버전 정보 (클릭 가능) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onVersionHistory();
+              }}
+              className={cn(
+                "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium transition-colors flex-shrink-0",
+                isDeployed
+                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                  : "text-gray-600 bg-gray-100 hover:bg-gray-200"
+              )}
+            >
+              {formatVersionLabel(workflow.latestVersion)}
+            </button>
+
             <h3 className="font-bold text-lg text-studio-text-primary text-gray-800">
               {workflow.name}
             </h3>
@@ -148,22 +164,6 @@ export function WorkflowCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* 버전 정보 (클릭 가능) */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onVersionHistory();
-          }}
-          className={cn(
-            "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mb-1.5 transition-colors w-fit",
-            isDeployed
-              ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-              : "text-gray-600 bg-gray-100 hover:bg-gray-200"
-          )}
-        >
-          {formatVersionLabel(workflow.latestVersion)}
-        </button>
 
         {/* 서비스 설명 */}
         {workflow.description && (
