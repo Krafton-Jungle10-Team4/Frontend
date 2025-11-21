@@ -150,7 +150,7 @@ export function StudioPage() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-72px)]">
+      <div className="flex h-[calc(100vh-56px)]">
         <FilterSidebar
           tags={sidebarTags}
           selectedTags={filters.tags}

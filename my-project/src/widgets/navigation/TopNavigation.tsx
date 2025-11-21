@@ -85,7 +85,7 @@ export function TopNavigation({
   const t = translations[language];
 
   return (
-    <div className="border-b transition-all h-[72px] bg-white border-border">
+    <div className="border-b transition-all h-14 bg-white border-border">
       <div className="w-full flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
@@ -93,7 +93,7 @@ export function TopNavigation({
             className="cursor-pointer"
           >
             <span
-              className="font-bold text-2xl bg-clip-text text-transparent"
+              className="font-bold text-xl bg-clip-text text-transparent"
               style={{ backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)' }}
             >
               SnapAgent
