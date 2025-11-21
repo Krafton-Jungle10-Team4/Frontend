@@ -117,7 +117,9 @@ export function TopNavigation({
           )}
         </div>
 
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">{navigationTabs}</div>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          {navigationTabs}
+        </div>
 
         <div className="flex items-center gap-4">
           <DropdownMenu>
@@ -133,8 +135,8 @@ export function TopNavigation({
             <DropdownMenuContent align="end" className="w-80 p-0">
               <div className="p-4 border-b bg-[#f8f9ff]">
                 <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-teal-500 text-white">
+                  <Avatar className="size-9">
+                    <AvatarFallback className="bg-blue-600 text-white">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
