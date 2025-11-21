@@ -150,23 +150,23 @@ export function StudioPage() {
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-56px)]">
-        {/* 상단 검색/필터 영역 */}
-        <div className="px-6 pb-5 pt-7 bg-white border-b border-gray-200">
-          <SearchAndFilters
-            searchValue={filters.search}
-            onSearchChange={(value) => setFilters({ search: value })}
-            tags={sidebarTags}
-            selectedTags={filters.tags}
-            onTagToggle={handleTagToggle}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            stats={workflowStats}
-          />
-        </div>
-
         {/* 메인 콘텐츠 */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="px-6 pt-6 pb-6">
+            {/* 상단 검색/필터 영역 */}
+            <div className="mb-6">
+              <SearchAndFilters
+                searchValue={filters.search}
+                onSearchChange={(value) => setFilters({ search: value })}
+                tags={sidebarTags}
+                selectedTags={filters.tags}
+                onTagToggle={handleTagToggle}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                stats={workflowStats}
+              />
+            </div>
+            {/* 워크플로우 그리드 */}
             {loading ? (
               <div className="flex h-64 items-center justify-center">
                 <p className="text-sm text-gray-500">로딩 중...</p>

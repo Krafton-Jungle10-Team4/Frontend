@@ -40,18 +40,18 @@ export function SearchAndFilters({
   return (
     <div>
       {/* 첫 번째 행: 태그 드롭다운 + 검색 + 정렬 */}
-      <div className="flex items-center gap-3 justify-between">
+      <div className="flex items-center gap-2 justify-between">
         {/* 정렬 */}
         <SortDropdown value={sortBy} onChange={onSortChange} />
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* 태그 필터 드롭다운 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 h-9">
-                <TagIcon className="h-4 w-4" />
+              <Button variant="ghost" className="gap-1.5 h-8 px-2.5 text-xs text-gray-700 bg-gray-200 hover:bg-gray-300 hover:text-gray-900">
+                <TagIcon className="h-3.5 w-3.5" />
                 <span>{getTagButtonLabel()}</span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
@@ -72,14 +72,14 @@ export function SearchAndFilters({
           </DropdownMenu>
 
           {/* 검색 바 */}
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative w-72">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
             <input
               type="text"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="서비스 검색..."
-              className="w-full h-9 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full h-8 pl-8 pr-3 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
             />
           </div>
         </div>
