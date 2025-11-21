@@ -1,6 +1,5 @@
-import { Button } from '@/shared/components/button';
 import { cn } from '@/shared/components/utils';
-import { MoreVertical, History, Pencil, Trash2, Plus, Tag as TagIcon } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, Plus, Tag as TagIcon, Rocket, Store } from 'lucide-react';
 import type { Workflow } from '@/shared/types/workflow';
 import { Badge } from '@/shared/components/badge';
 import {
@@ -85,10 +84,10 @@ export function WorkflowCard({
         } : undefined}
       />
 
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-3">
+      <div className="px-5 py-3 flex flex-col flex-1">
+        <div className="flex items-start justify-between mb-1">
           <div className="flex-1">
-            <h3 className="font-bold text-lg text-studio-text-primary">
+            <h3 className="font-bold text-lg text-studio-text-primary text-gray-800">
               {workflow.name}
             </h3>
           </div>
@@ -113,7 +112,27 @@ export function WorkflowCard({
                 className="cursor-pointer"
               >
                 <Pencil className="h-4 w-4 mr-2" />
-                수정
+                서비스 수정
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateDeployment?.();
+                }}
+                className="cursor-pointer"
+              >
+                <Rocket className="h-4 w-4 mr-2" />
+                배포 관리
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPublish();
+                }}
+                className="cursor-pointer"
+              >
+                <Store className="h-4 w-4 mr-2" />
+                마켓플레이스에 게시
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -124,26 +143,50 @@ export function WorkflowCard({
                 className="cursor-pointer text-red-600 focus:text-red-600"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                삭제
+                서비스 삭제
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
+        {/* 버전 정보 (클릭 가능) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onVersionHistory();
+          }}
+          className={cn(
+            "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mb-1.5 transition-colors w-fit",
+            isDeployed
+              ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+              : "text-gray-600 bg-gray-100 hover:bg-gray-200"
+          )}
+        >
+          {formatVersionLabel(workflow.latestVersion)}
+        </button>
+
+        {/* 서비스 설명 */}
+        {workflow.description && (
+          <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+            {workflow.description}
+          </p>
+        )}
+
+        {/* 태그 영역 (하단) */}
         {onEditTags && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          <div className="flex flex-wrap gap-1 mt-auto">
             {workflow.tags && workflow.tags.length > 0 ? (
               workflow.tags.map((tag) => (
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="text-xs cursor-pointer hover:bg-gray-300"
+                  className="text-[10px] px-1.5 py-0 h-4 cursor-pointer rounded text-gray-600 hover:bg-gray-300"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditTags(workflow.id, workflow.tags || []);
                   }}
                 >
-                  <TagIcon className="h-3 w-3 mr-1" />
+                  <TagIcon className="h-2.5 w-2.5 mr-0.5" />
                   {tag}
                 </Badge>
               ))
@@ -153,78 +196,14 @@ export function WorkflowCard({
                   e.stopPropagation();
                   onEditTags(workflow.id, []);
                 }}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
+                className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-2.5 w-2.5" />
                 태그 추가
               </button>
             )}
           </div>
         )}
-
-        <div className="flex items-center justify-end py-3 mb-4">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium text-black bg-white border border-gray-300">
-              {formatVersionLabel(workflow.latestVersion)}
-            </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onVersionHistory();
-              }}
-              className="relative overflow-hidden flex items-center gap-1 text-xs px-2 py-1 rounded group/history transition-all hover:scale-105 duration-200"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-black to-blue-600 translate-x-[-100%] group-hover/history:translate-x-0 transition-transform duration-300 ease-out" />
-              <span className="relative z-10 flex items-center gap-1 text-studio-primary group-hover/history:text-white transition-colors duration-300">
-                <History className="h-3 w-3" />
-                <span>버전 히스토리</span>
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex gap-2 mt-auto">
-          {isDeployed ? (
-            <Button
-              variant="default"
-              size="sm"
-              rounded="sharp"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onNavigateDeployment?.();
-              }}
-              className="flex-1 hover:opacity-90 hover:scale-105 transition-all duration-200"
-            >
-              배포 관리
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              rounded="sharp"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onNavigateDeployment?.();
-              }}
-              className="flex-1 bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200 hover:text-gray-700 hover:scale-105 transition-all duration-200"
-            >
-              미배포
-            </Button>
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            rounded="sharp"
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              onPublish();
-            }}
-            className="flex-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 hover:scale-105 transition-all duration-200"
-          >
-            마켓플레이스에 게시
-          </Button>
-        </div>
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
