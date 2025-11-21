@@ -286,10 +286,9 @@ export const ImportedWorkflowNode = memo(
       <div
         className={cn(
           'relative rounded-lg border-2 border-dashed',
-          'bg-white',
           'shadow-md transition-all duration-200',
-          // 선택 상태
-          selected && 'ring-2 ring-primary shadow-lg',
+          // 선택 상태 - 남색 테두리와 옅은 남색 배경
+          selected ? 'bg-blue-50 border-blue-700' : 'bg-white',
           // 실행 상태에 따른 테두리 색상
           showRunningBorder && '!border-primary',
           showSuccessBorder && '!border-green-500',
@@ -305,18 +304,20 @@ export const ImportedWorkflowNode = memo(
           minHeight: isExpanded ? size.minHeight : 'auto',
         }}
       >
-        {/* Read-only indicator */}
-        <div className="absolute top-2 left-2 z-10">
-          <Lock className="w-4 h-4 text-muted-foreground" />
-        </div>
-
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b bg-muted/50 rounded-t-lg">
-          <div className="flex-1 pr-2 pl-6">
-            <h3 className="font-semibold text-sm truncate">{data.title}</h3>
-            <p className="text-xs text-muted-foreground">
-              v{data.template_version}
-            </p>
+        <div className={cn(
+          "flex items-center justify-between p-3 bg-muted/50 rounded-t-lg",
+          !isExpanded && "border-b"
+        )}>
+          <div className="flex items-center gap-2 flex-1 pr-2">
+            {/* Read-only indicator */}
+            <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm truncate">{data.title}</h3>
+              <p className="text-xs text-muted-foreground">
+                v{data.template_version}
+              </p>
+            </div>
           </div>
 
           {/* 상태 아이콘 (실행 상태 피드백) */}

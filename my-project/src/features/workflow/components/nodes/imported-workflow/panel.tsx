@@ -1,9 +1,8 @@
 /**
  * ImportedWorkflowNode Config Panel (읽기 전용)
  */
-import { memo, useCallback } from 'react';
-import { Lock, ExternalLink } from 'lucide-react';
-import { Button } from '@/shared/components/button';
+import { memo } from 'react';
+import { Lock } from 'lucide-react';
 import { Badge } from '@/shared/components/badge';
 import { Separator } from '@/shared/components/separator';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
@@ -14,13 +13,6 @@ interface ImportedWorkflowPanelProps {
 
 export const ImportedWorkflowPanel = memo(
   ({ data }: ImportedWorkflowPanelProps) => {
-  const handleViewTemplate = useCallback(() => {
-    if (!data.template_id) return;
-    // 라이브러리 페이지에서 해당 버전을 쉽게 찾을 수 있도록 쿼리 전달
-    const url = `/workspace/library?version_id=${data.template_id}`;
-    window.open(url, '_blank');
-  }, [data.template_id]);
-
   return (
     <div className="space-y-4 p-4">
       {/* Read-Only Banner */}
@@ -46,12 +38,15 @@ export const ImportedWorkflowPanel = memo(
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">
             버전
           </label>
-          <p className="text-sm mt-1">
-            <Badge variant="outline">{data.template_version || 'v1.0.0'}</Badge>
-          </p>
+          <Badge
+            variant="outline"
+            className="font-mono bg-green-700 dark:bg-green-800 text-white border-green-800 dark:border-green-700"
+          >
+            {data.template_version || 'v1.0.0'}
+          </Badge>
         </div>
 
         {data.desc && (
@@ -68,20 +63,23 @@ export const ImportedWorkflowPanel = memo(
 
       {/* Ports */}
       {data.ports && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {data.ports.inputs && data.ports.inputs.length > 0 && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">
                 입력 포트
               </label>
-              <div className="space-y-1 mt-1">
+              <div className="space-y-2">
                 {data.ports.inputs.map((input) => (
                   <div
                     key={input.name}
-                    className="flex items-center justify-between text-xs p-2 rounded bg-muted/50"
+                    className="flex items-center justify-between gap-3 p-3 rounded-md bg-gray-100 dark:bg-gray-800"
                   >
-                    <span className="font-mono">{input.name}</span>
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{input.name}</span>
+                    <Badge
+                      variant="outline"
+                      className="font-mono bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-700"
+                    >
                       {input.type}
                     </Badge>
                   </div>
@@ -92,17 +90,20 @@ export const ImportedWorkflowPanel = memo(
 
           {data.ports.outputs && data.ports.outputs.length > 0 && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">
                 출력 포트
               </label>
-              <div className="space-y-1 mt-1">
+              <div className="space-y-2">
                 {data.ports.outputs.map((output) => (
                   <div
                     key={output.name}
-                    className="flex items-center justify-between text-xs p-2 rounded bg-muted/50"
+                    className="flex items-center justify-between gap-3 p-3 rounded-md bg-gray-100 dark:bg-gray-800"
                   >
-                    <span className="font-mono">{output.name}</span>
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{output.name}</span>
+                    <Badge
+                      variant="outline"
+                      className="font-mono bg-white dark:bg-gray-900 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700"
+                    >
                       {output.type}
                     </Badge>
                   </div>
@@ -111,21 +112,6 @@ export const ImportedWorkflowPanel = memo(
             </div>
           )}
         </div>
-      )}
-
-      <Separator />
-
-      {/* Actions */}
-      {data.template_id && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={handleViewTemplate}
-        >
-          <ExternalLink className="w-4 h-4 mr-2" />
-          에이전트 상세 보기
-        </Button>
       )}
     </div>
   );

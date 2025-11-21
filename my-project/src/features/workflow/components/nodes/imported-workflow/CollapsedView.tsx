@@ -31,7 +31,9 @@ export const CollapsedView = memo(({ ports, description }: CollapsedViewProps) =
                 key={input.name}
                 className="flex items-center gap-2 text-xs py-1 px-2 rounded bg-muted/50"
               >
-                <span className="font-mono">{input.display_name || input.name}</span>
+                <span className="font-mono px-2 py-0.5 rounded-md bg-gray-200 text-gray-700">
+                  {input.display_name || input.name}
+                </span>
                 <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                   {input.type}
                 </Badge>
@@ -58,7 +60,9 @@ export const CollapsedView = memo(({ ports, description }: CollapsedViewProps) =
                 key={output.name}
                 className="flex items-center gap-2 text-xs py-1 px-2 rounded bg-muted/50"
               >
-                <span className="font-mono">{output.display_name || output.name}</span>
+                <span className="font-mono px-2 py-0.5 rounded-md bg-gray-200 text-gray-700">
+                  {output.display_name || output.name}
+                </span>
                 <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                   {output.type}
                 </Badge>

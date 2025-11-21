@@ -63,6 +63,7 @@ const ReadOnlyFlow = memo(
         minZoom={0.2}
         maxZoom={1.5}
         defaultEdgeOptions={{ type: 'custom' }}
+        proOptions={{ hideAttribution: true }}
       >
         <Background />
         <Controls showInteractive={false} />
@@ -358,7 +359,7 @@ export const ExpandedView = memo(
 
     return (
       <div
-        className="relative rounded-b-lg overflow-auto border-t"
+        className="relative rounded-b-lg overflow-hidden"
         style={{
           width: `${bounds.width}px`,
           height: `${bounds.height}px`,
@@ -373,9 +374,6 @@ export const ExpandedView = memo(
             onNodeClick={handleNodeClick}
           />
         </ReactFlowProvider>
-
-        {/* Read-only overlay */}
-        <ReadOnlyOverlay />
       </div>
     );
   }
