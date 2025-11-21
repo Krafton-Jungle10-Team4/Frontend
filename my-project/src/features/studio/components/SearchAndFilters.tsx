@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Search, Tag as TagIcon, ChevronDown } from 'lucide-react';
 import { Badge } from '@/shared/components/badge';
 import { Button } from '@/shared/components/button';
@@ -5,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
 import { SortDropdown } from './SortDropdown';
@@ -30,12 +32,18 @@ export function SearchAndFilters({
   sortBy,
   onSortChange,
 }: SearchAndFiltersProps) {
+  const [tagSearchQuery, setTagSearchQuery] = useState('');
+
   const getTagButtonLabel = () => {
     if (selectedTags.length === 0) {
       return '모든 태그';
     }
     return `태그 (${selectedTags.length})`;
   };
+
+  const filteredTags = tags.filter(tag =>
+    tag.toLowerCase().includes(tagSearchQuery.toLowerCase())
+  );
 
   return (
     <div>
@@ -46,7 +54,7 @@ export function SearchAndFilters({
 
         <div className="flex items-center gap-2">
           {/* 태그 필터 드롭다운 */}
-          <DropdownMenu>
+          <DropdownMenu onOpenChange={(open) => !open && setTagSearchQuery('')}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-1.5 h-8 px-2.5 text-xs text-gray-700 bg-gray-200 hover:bg-gray-300 hover:text-gray-900">
                 <TagIcon className="h-3.5 w-3.5" />
@@ -55,8 +63,28 @@ export function SearchAndFilters({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              {tags.length > 0 ? (
-                tags.map((tag) => (
+              {/* 태그 검색 */}
+              <div className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={tagSearchQuery}
+                    onChange={(e) => setTagSearchQuery(e.target.value)}
+                    placeholder="태그 검색..."
+                    className="w-full h-8 pl-8 pr-3 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <DropdownMenuSeparator />
+
+              {/* 태그 목록 */}
+              {tags.length === 0 ? (
+                <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
+              ) : filteredTags.length > 0 ? (
+                filteredTags.map((tag) => (
                   <DropdownMenuCheckboxItem
                     key={tag}
                     checked={selectedTags.includes(tag)}
@@ -66,7 +94,7 @@ export function SearchAndFilters({
                   </DropdownMenuCheckboxItem>
                 ))
               ) : (
-                <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
+                <div className="px-2 py-1.5 text-sm text-gray-500">검색 결과 없음</div>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
