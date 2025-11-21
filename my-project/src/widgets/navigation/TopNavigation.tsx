@@ -85,7 +85,7 @@ export function TopNavigation({
   const t = translations[language];
 
   return (
-    <div className="border-b transition-all h-14 bg-white border-border">
+    <div className="border-b transition-all h-14 bg-gray-100 border-border">
       <div className="w-full flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
@@ -94,7 +94,9 @@ export function TopNavigation({
           >
             <span
               className="font-bold text-xl bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)' }}
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+              }}
             >
               SnapAgent
             </span>
@@ -106,37 +108,26 @@ export function TopNavigation({
               size="sm"
               onClick={() => navigate('/billing-settings')}
               className="text-[10px] font-medium px-2 py-0 h-5 rounded-full border text-white border-transparent hover:shadow-md transition-all duration-200 hover:scale-105"
-              style={{ backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)' }}
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+              }}
             >
               Free
             </Button>
           )}
         </div>
 
-        <div className="flex-1 flex justify-center">
-          {navigationTabs}
-        </div>
+        <div className="flex-1 flex justify-center">{navigationTabs}</div>
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onLanguageChange(language === 'en' ? 'ko' : 'en')}
-            className="text-sm gap-1 sm:gap-2 rounded-full border-none shadow-sm bg-white hover:bg-gray-50 transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95"
-          >
-            <Languages size={16} className="transition-colors duration-200" />
-            <span className="hidden sm:inline">
-              {language === 'en' ? '한국어' : 'English'}
-            </span>
-          </Button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus:outline-none flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 rounded-full px-2 py-1 hover:bg-white hover:shadow-md">
-                <span className="text-sm text-gray-700 inline-flex items-center gap-1 transition-colors duration-200">
-                  {userName}
-                  <ChevronDown size={12} className="transition-transform duration-200 group-hover:translate-y-0.5" />
-                </span>
+              <button className="focus:outline-none transition-all duration-200 hover:scale-105 active:scale-95">
+                <Avatar className="size-9">
+                  <AvatarFallback className="bg-blue-600 text-white">
+                    {userInitial}
+                  </AvatarFallback>
+                </Avatar>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0">
@@ -155,7 +146,7 @@ export function TopNavigation({
               </div>
 
               <div className="py-2">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="px-4 py-2 cursor-pointer"
                   onClick={() => navigate('/billing-settings')}
                 >
