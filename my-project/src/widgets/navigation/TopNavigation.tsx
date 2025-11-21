@@ -160,7 +160,7 @@ export function TopNavigation({
                   <Settings size={16} className="mr-3 text-gray-600" />
                   <span className="text-sm">{t.accountSettings}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
+                {/* <DropdownMenuItem className="px-4 py-2 cursor-pointer">
                   <Link2 size={16} className="mr-3 text-gray-600" />
                   <span className="text-sm">{t.linkSocialAccounts}</span>
                 </DropdownMenuItem>
@@ -175,7 +175,7 @@ export function TopNavigation({
                 <DropdownMenuItem className="px-4 py-2 cursor-pointer">
                   <Palette size={16} className="mr-3 text-gray-600" />
                   <span className="text-sm">{t.appearance}</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 {onLogout && (
                   <DropdownMenuItem
