@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Tag as TagIcon, ChevronDown } from 'lucide-react';
+import { Search, Tag as TagIcon, ChevronDown, X } from 'lucide-react';
 import { Badge } from '@/shared/components/badge';
 import { Button } from '@/shared/components/button';
 import {
@@ -46,12 +46,9 @@ export function SearchAndFilters({
   );
 
   return (
-    <div>
+    <div className="space-y-3">
       {/* 첫 번째 행: 태그 드롭다운 + 검색 + 정렬 */}
       <div className="flex items-center gap-2 justify-between">
-        {/* 정렬 */}
-        <SortDropdown value={sortBy} onChange={onSortChange} />
-
         <div className="flex items-center gap-2">
           {/* 태그 필터 드롭다운 */}
           <DropdownMenu onOpenChange={(open) => !open && setTagSearchQuery('')}>
@@ -80,22 +77,24 @@ export function SearchAndFilters({
 
               <DropdownMenuSeparator />
 
-              {/* 태그 목록 */}
-              {tags.length === 0 ? (
-                <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
-              ) : filteredTags.length > 0 ? (
-                filteredTags.map((tag) => (
-                  <DropdownMenuCheckboxItem
-                    key={tag}
-                    checked={selectedTags.includes(tag)}
-                    onCheckedChange={() => onTagToggle(tag)}
-                  >
-                    {tag}
-                  </DropdownMenuCheckboxItem>
-                ))
-              ) : (
-                <div className="px-2 py-1.5 text-sm text-gray-500">검색 결과 없음</div>
-              )}
+              {/* 태그 목록 - 최대 10개까지 보이고 스크롤 */}
+              <div className="max-h-[320px] overflow-y-auto">
+                {tags.length === 0 ? (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
+                ) : filteredTags.length > 0 ? (
+                  filteredTags.map((tag) => (
+                    <DropdownMenuCheckboxItem
+                      key={tag}
+                      checked={selectedTags.includes(tag)}
+                      onCheckedChange={() => onTagToggle(tag)}
+                    >
+                      {tag}
+                    </DropdownMenuCheckboxItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">검색 결과 없음</div>
+                )}
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -111,7 +110,27 @@ export function SearchAndFilters({
             />
           </div>
         </div>
+
+        {/* 정렬 */}
+        <SortDropdown value={sortBy} onChange={onSortChange} />
       </div>
+
+      {/* 두 번째 행: 선택된 태그 표시 */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer transition-colors"
+              onClick={() => onTagToggle(tag)}
+            >
+              <span>{tag}</span>
+              <X className="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
