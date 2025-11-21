@@ -1,10 +1,10 @@
 import { memo, useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, Loader2, Clock, ChevronDown } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Clock, ChevronDown, Cpu } from 'lucide-react';
 import { Card } from '@/shared/components/card';
 import { Badge } from '@/shared/components/badge';
 import { Skeleton } from '@/shared/components/skeleton';
 import { workflowApi } from '../../api/workflowApi';
-import type { WorkflowRunSummary, WorkflowRunDetail } from '../../../types/log.types';
+import type { WorkflowRunSummary, WorkflowRunDetail, NodeExecution } from '../../../types/log.types';
 const formatDateTime = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -48,9 +48,11 @@ const getStatusLabel = (status: WorkflowRunSummary['status']) => {
   }
 };
 
-const formatElapsedTime = (seconds?: number | null) => {
-  if (!seconds) return '-';
-  if (seconds < 60) return `${seconds.toFixed(1)}초`;
+const formatElapsedTime = (milliseconds?: number | null) => {
+  if (!milliseconds) return '-';
+  const seconds = milliseconds / 1000;
+  if (seconds < 1) return `${milliseconds.toFixed(0)}ms`;
+  if (seconds < 60) return `${seconds.toFixed(2)}초`;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}분 ${remainingSeconds.toFixed(0)}초`;
@@ -60,6 +62,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
   ({ run, isActive = false, onSelect, botId }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [runDetail, setRunDetail] = useState<WorkflowRunDetail | null>(null);
+    const [nodeExecutions, setNodeExecutions] = useState<NodeExecution[]>([]);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     const handleClick = () => {
@@ -70,9 +73,13 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
     useEffect(() => {
       if (isExpanded && !runDetail && botId) {
         setIsLoadingDetail(true);
-        workflowApi.getWorkflowRun(botId, run.id)
-          .then(detail => {
+        Promise.all([
+          workflowApi.getWorkflowRun(botId, run.id),
+          workflowApi.getWorkflowRunNodes(botId, run.id)
+        ])
+          .then(([detail, nodes]) => {
             setRunDetail(detail);
+            setNodeExecutions(nodes);
           })
           .catch(err => {
             console.error('Failed to load workflow run detail:', err);
@@ -143,6 +150,12 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
 
           {/* Stats */}
           <div className="flex items-center gap-4 text-xs">
+            {run.total_cost !== null && run.total_cost !== undefined && (
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">비용:</span>
+                <span className="font-medium text-green-600">${run.total_cost.toFixed(6)}</span>
+              </div>
+            )}
             {run.total_tokens !== null && run.total_tokens !== undefined && (
               <div className="flex items-center gap-1">
                 <span className="text-muted-foreground">토큰:</span>
@@ -236,6 +249,12 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                         </span>
                       </div>
                     )}
+                    {runDetail.total_cost !== null && runDetail.total_cost !== undefined && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground">총 비용:</span>
+                        <span className="font-medium text-green-600">${runDetail.total_cost.toFixed(6)}</span>
+                      </div>
+                    )}
                     {runDetail.total_tokens !== null && runDetail.total_tokens !== undefined && (
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-muted-foreground">총 토큰 사용량:</span>
@@ -250,6 +269,50 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                     )}
                   </div>
                 </div>
+
+                {/* LLM Node Details */}
+                {nodeExecutions.filter(ne => 
+                  (ne.node_type?.toLowerCase() === 'llm' || ne.node_type === 'LLMNodeV2') && 
+                  ne.cost !== null && ne.cost !== undefined
+                ).length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      <Cpu className="h-4 w-4" />
+                      LLM 노드별 사용량
+                    </h4>
+                    <div className="space-y-2">
+                      {nodeExecutions
+                        .filter(ne => 
+                          (ne.node_type?.toLowerCase() === 'llm' || ne.node_type === 'LLMNodeV2') && 
+                          ne.cost !== null && ne.cost !== undefined
+                        )
+                        .map((ne, index) => (
+                          <div key={ne.id} className="rounded-lg border bg-white p-3 space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-medium text-foreground">
+                                {ne.node_id || `LLM 노드 #${index + 1}`}
+                              </span>
+                              {ne.model && (
+                                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                                  {ne.model}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">토큰:</span>
+                                <span className="font-medium">{ne.tokens_used?.toLocaleString() || 0}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">비용:</span>
+                                <span className="font-medium text-green-600">${ne.cost.toFixed(6)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Inputs */}
                 {runDetail.inputs && (

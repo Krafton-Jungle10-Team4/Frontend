@@ -14,6 +14,7 @@ export interface WorkflowRunSummary {
   finished_at?: string | null;
   elapsed_time?: number | null;
   total_tokens?: number | null;
+  total_cost?: number | null;
   total_steps?: number | null;
   created_at: string;
   input_preview?: string | null;
@@ -38,6 +39,8 @@ export interface WorkflowNodeExecution {
   finished_at?: string | null;
   elapsed_time?: number | null;
   tokens_used?: number | null;
+  cost?: number | null;
+  model?: string | null;
   is_truncated?: boolean;
   truncated_fields?: Record<string, unknown> | null;
   inputs?: Record<string, unknown> | null;
@@ -45,6 +48,8 @@ export interface WorkflowNodeExecution {
   process_data?: Record<string, unknown> | null;
   created_at?: string;
 }
+
+export type NodeExecution = WorkflowNodeExecution;
 
 export interface WorkflowLogFilters {
   status?: WorkflowRunStatus | 'all';

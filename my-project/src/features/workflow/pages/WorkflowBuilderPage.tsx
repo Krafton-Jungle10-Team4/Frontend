@@ -1,5 +1,5 @@
 import { useState, memo, useEffect } from 'react';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import Workflow from '../components/WorkflowBuilder';
 import WorkflowSlimSidebar, {
@@ -16,6 +16,7 @@ import { useBotStore } from '@/features/bot/stores/botStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 import { NavigationTabs } from '@/features/workspace/components/NavigationTabs';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
+import { useSlackStore } from '@/features/integrations/stores/slackStore';
 
 const WorkflowWithChat = () => {
   const { language } = useApp();
@@ -85,6 +86,7 @@ export const WorkflowBuilderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { botId } = useParams<{ botId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeView, setActiveView] = useState<SidebarView>('flow');
   const setSelectedBotId = useBotStore((state) => state.setSelectedBotId);
   const fetchDocuments = useAsyncDocumentStore(
@@ -100,6 +102,9 @@ export const WorkflowBuilderPage = () => {
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
 
+  // Slack store - 연동 상태 새로고침
+  const fetchBotIntegration = useSlackStore((state) => state.fetchBotIntegration);
+
   // Keep bot store in sync with the workflow route param so other features (documents, knowledge nodes)
   // know which bot is currently being configured.
   useEffect(() => {
@@ -109,6 +114,31 @@ export const WorkflowBuilderPage = () => {
       setSelectedBotId(null);
     }
   }, [botId, setSelectedBotId]);
+
+  // Slack OAuth 성공 후 연동 상태 새로고침
+  useEffect(() => {
+    const slackSuccess = searchParams.get('slack');
+    const slackError = searchParams.get('slack_error');
+
+    if (slackSuccess === 'success' && botId) {
+      console.log('[WorkflowBuilder] Slack OAuth success detected, refreshing integration');
+      toast.success('Slack 연동이 완료되었습니다!');
+      
+      // Slack 연동 상태 새로고침
+      fetchBotIntegration(botId);
+      
+      // URL에서 파라미터 제거
+      searchParams.delete('slack');
+      setSearchParams(searchParams, { replace: true });
+    } else if (slackError) {
+      console.error('[WorkflowBuilder] Slack OAuth error:', slackError);
+      toast.error(`Slack 연동 실패: ${slackError}`);
+      
+      // URL에서 파라미터 제거
+      searchParams.delete('slack_error');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, botId, fetchBotIntegration]);
 
   // 문서 스토어를 미리 로드해 지식 노드/패널에서 바로 사용할 수 있도록 함
   useEffect(() => {

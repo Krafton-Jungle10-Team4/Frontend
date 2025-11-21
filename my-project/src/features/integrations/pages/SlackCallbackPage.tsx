@@ -14,17 +14,17 @@ export function SlackCallbackPage() {
 
   useEffect(() => {
     const processCallback = async () => {
+      const code = searchParams.get('code');
+      const state = searchParams.get('state');
       const error = searchParams.get('error');
       const success = searchParams.get('slack');
       const botId = searchParams.get('bot_id');
-      const tab = searchParams.get('tab');
 
-      // 에러가 있는 경우
+      // Slack OAuth 에러가 있는 경우
       if (error) {
         setStatus('error');
-        setMessage(`연동 실패: ${error}`);
+        setMessage(`Slack 연동 실패: ${error}`);
         
-        // 2초 후 워크플로우 페이지로 이동 (배포 의존성 제거)
         setTimeout(() => {
           if (botId) {
             navigate(`/workspace/studio/${botId}`);
@@ -35,12 +35,39 @@ export function SlackCallbackPage() {
         return;
       }
 
-      // 성공한 경우
+      // OAuth 콜백: code와 state가 있는 경우 백엔드로 전달
+      if (code && state) {
+        try {
+          setStatus('loading');
+          setMessage('Slack 연동을 처리하는 중...');
+
+          console.log('[SlackCallback] Processing OAuth:', { code: code.substring(0, 10) + '...', state: state.substring(0, 10) + '...' });
+
+          // 백엔드 OAuth 콜백 엔드포인트로 브라우저를 직접 리다이렉트
+          // 환경변수에서 백엔드 URL을 가져오거나, 로컬 개발 환경에서는 localhost:8001 사용
+          // 프로덕션: VITE_API_URL이 AWS Secrets Manager에서 주입됨 (예: https://api.snapagent.shop)
+          // 로컬: VITE_API_URL이 없으면 http://localhost:8001 사용
+          const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+          window.location.href = `${backendUrl}/api/v1/slack/oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+          return;
+
+        } catch (err) {
+          console.error('[SlackCallback] OAuth processing failed:', err);
+          setStatus('error');
+          setMessage('Slack 연동 처리 중 오류가 발생했습니다.');
+          
+          setTimeout(() => {
+            navigate('/workspace/studio');
+          }, 2000);
+          return;
+        }
+      }
+
+      // 이미 처리된 성공 케이스
       if (success === 'success') {
         setStatus('success');
         setMessage('Slack 연동이 완료되었습니다!');
         
-        // 1초 후 워크플로우로 돌아가기
         setTimeout(() => {
           if (botId) {
             navigate(`/workspace/studio/${botId}`);
@@ -51,16 +78,7 @@ export function SlackCallbackPage() {
         return;
       }
 
-      // 백엔드가 이미 리다이렉트 처리한 경우
-      // URL이 /workspace/studio/:botId?slack=success 형태
-      const pathname = window.location.pathname;
-      if (pathname.includes('/workspace/studio/') && success === 'success') {
-        setStatus('success');
-        setMessage('Slack 연동이 완료되었습니다!');
-        return;
-      }
-
-      // 그 외의 경우 홈으로 이동
+      // 그 외의 경우
       setStatus('error');
       setMessage('잘못된 요청입니다.');
       setTimeout(() => {
