@@ -39,12 +39,11 @@ export function NavigationTabs({ activeTab, onTabChange, language }: NavigationT
     <nav className="relative flex items-center gap-0">
       <div className="relative inline-flex items-center gap-8 bg-muted/50 rounded-lg p-1">
         <div
-          className="absolute h-[calc(100%-8px)] transition-all duration-300 ease-out"
+          className="absolute h-[calc(100%-8px)] transition-all duration-300 ease-out bg-white rounded-xl shadow-sm"
           style={{
             left: `${indicatorStyle.left}px`,
             width: `${indicatorStyle.width}px`,
             top: '4px',
-            backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
           }}
         />
         {tabs.map((tab, index) => {
@@ -59,8 +58,8 @@ export function NavigationTabs({ activeTab, onTabChange, language }: NavigationT
               className={cn(
                 'relative z-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'text-white'
-                  : 'text-black hover:text-gray-700 hover:scale-105 active:scale-95'
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900 hover:scale-105 active:scale-95'
               )}
             >
               <Icon className="w-4 h-4" />
