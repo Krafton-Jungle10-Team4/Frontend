@@ -5,6 +5,7 @@ import { ROUTES } from '@/shared/constants/routes';
 
 import { useAuth } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
+import { Logo } from '@/shared/components/Logo';
 import '../authStyles.css';
 
 /**
@@ -43,13 +44,8 @@ export const LoginPage = () => {
       <div className="auth-ambient" />
       <main className="auth-shell">
         <div className="auth-card">
-          <button className="auth-logo" onClick={() => navigate(ROUTES.LANDING)} type="button">
-            <span className="auth-logo-mark">
-              <span />
-              <span />
-              <span />
-              <span />
-            </span>
+          <button className="auth-logo group" onClick={() => navigate(ROUTES.LANDING)} type="button">
+            <Logo className="h-8 w-8 text-[#3735c3] transition-transform group-hover:scale-110" />
             SnapAgent
           </button>
 

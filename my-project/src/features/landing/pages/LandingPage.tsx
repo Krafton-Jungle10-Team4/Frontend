@@ -5,6 +5,7 @@ import pipelineImg from '../assets/pipeline.png';
 import '../newLanding.css';
 
 import { useAuth } from '@/features/auth';
+import { Logo } from '@/shared/components/Logo';
 
 type NodePoint = {
   x: number;
@@ -211,11 +212,8 @@ export function LandingPage() {
 
         <header className="top-nav">
           <button className="brand-mark" onClick={() => navigate('/landing')} type="button">
-            <div className="brand-grid">
-              <span />
-              <span />
-              <span />
-              <span />
+            <div className="brand-logo-wrapper text-indigo-500">
+              <Logo className="h-8 w-8" />
             </div>
             <div className="brand-name">SnapAgent</div>
           </button>
