@@ -144,6 +144,8 @@ export interface ImportWorkflowResponse {
   message: string;
   bot_id: string;
   bot_name: string;
+  workflow_version_id: string;
+  cloned_libraries_count: number;
 }
 
 export const importMarketplaceWorkflow = async (

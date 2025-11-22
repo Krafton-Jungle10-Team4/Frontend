@@ -34,7 +34,6 @@ export function MarketplacePublishDialog({
   // 기본값은 agent의 라이브러리 메타데이터 사용
   const [displayName, setDisplayName] = useState(agent.library_name || '');
   const [description, setDescription] = useState(agent.library_description || '');
-  const [category, setCategory] = useState(agent.library_category || '');
   const [tags, setTags] = useState<string[]>(agent.library_tags || []);
   const [tagInput, setTagInput] = useState('');
 
@@ -57,7 +56,6 @@ export function MarketplacePublishDialog({
         workflow_version_id: agent.id,
         display_name: displayName || undefined,
         description: description || undefined,
-        category: category || undefined,
         tags: tags.length > 0 ? tags : undefined,
       });
 
@@ -82,7 +80,7 @@ export function MarketplacePublishDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[85vh] overflow-y-auto rounded-none">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
@@ -95,7 +93,7 @@ export function MarketplacePublishDialog({
 
         {isSuccess ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-green-100 flex items-center justify-center">
               <Check className="w-10 h-10 text-green-600" />
             </div>
             <p className="text-lg font-semibold text-green-600">게시 완료!</p>
@@ -106,7 +104,7 @@ export function MarketplacePublishDialog({
         ) : (
           <div className="space-y-4 py-4">
             {/* 경고 안내 */}
-            <div className="flex items-start gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-2 p-4 bg-blue-50 border border-blue-200">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
               <div className="flex-1 text-sm">
                 <p className="font-semibold text-blue-900">전체 공개 게시</p>
@@ -121,15 +119,7 @@ export function MarketplacePublishDialog({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">워크플로우 버전:</span>
-                <Badge variant="outline">{agent.version}</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">노드 수:</span>
-                <span>{agent.node_count || 0}개</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">엣지 수:</span>
-                <span>{agent.edge_count || 0}개</span>
+                <Badge variant="outline" className="rounded-none">{agent.version}</Badge>
               </div>
             </div>
 
@@ -141,6 +131,8 @@ export function MarketplacePublishDialog({
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="마켓플레이스에 표시될 이름"
+                autoComplete="off"
+                className="bg-white rounded-none"
               />
               <p className="text-xs text-muted-foreground">
                 비어있으면 라이브러리 이름이 사용됩니다.
@@ -156,21 +148,11 @@ export function MarketplacePublishDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="이 워크플로우가 무엇을 하는지 설명해주세요"
                 rows={4}
+                className="rounded-none"
               />
               <p className="text-xs text-muted-foreground">
                 비어있으면 라이브러리 설명이 사용됩니다.
               </p>
-            </div>
-
-            {/* 카테고리 */}
-            <div className="space-y-2">
-              <Label htmlFor="category">카테고리</Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="예: 챗봇, 자동화, 분석"
-              />
             </div>
 
             {/* 태그 */}
@@ -188,8 +170,9 @@ export function MarketplacePublishDialog({
                     }
                   }}
                   placeholder="태그 입력 후 Enter"
+                  className="rounded-none"
                 />
-                <Button type="button" variant="outline" onClick={handleAddTag}>
+                <Button type="button" variant="outline" onClick={handleAddTag} className="rounded-none">
                   추가
                 </Button>
               </div>
@@ -199,7 +182,7 @@ export function MarketplacePublishDialog({
                     <Badge
                       key={tag}
                       variant="secondary"
-                      className="cursor-pointer"
+                      className="cursor-pointer rounded-none"
                       onClick={() => handleRemoveTag(tag)}
                     >
                       {tag} ×
@@ -213,13 +196,13 @@ export function MarketplacePublishDialog({
 
         {!isSuccess && (
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPublishing}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPublishing} className="rounded-none hover:scale-105 transition-transform">
               취소
             </Button>
             <Button
               onClick={handlePublish}
               disabled={isPublishing}
-              className="bg-brand-gradient hover:opacity-90"
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-transform hover:scale-105 rounded-none"
             >
               {isPublishing ? (
                 <>

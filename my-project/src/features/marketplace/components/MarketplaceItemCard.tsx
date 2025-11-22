@@ -41,61 +41,57 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
         />
 
         <div className="px-5 py-3 flex flex-col flex-1">
-          {/* 제목 */}
-          <h3 className="font-bold text-lg text-gray-800 line-clamp-1 mb-1">
+          {/* 봇 이름 */}
+          <h3 className="font-bold text-lg text-gray-800 line-clamp-1 mb-2">
             {item.display_name}
           </h3>
 
-          {/* 날짜 + publisher */}
-          <div className="text-xs text-muted-foreground mb-1">
-            <span>{formatDate(item.published_at)}</span>
-            {item.publisher?.username && (
-              <>
-                <span> | </span>
-                <span>{item.publisher.username}</span>
-              </>
-            )}
-          </div>
-
           {/* 설명 */}
           {item.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
               {item.description.replace(/\s*봇\s*$/, '')}
             </p>
           )}
 
-          {/* 태그 + 통계 */}
-          <div className="flex items-center justify-between gap-2 mt-auto">
-            {/* 태그 */}
-            <div className="flex flex-wrap gap-1">
-              {item.tags && item.tags.length > 0 ? (
-                <>
-                  {item.tags.slice(0, 3).map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600"
-                    >
-                      <TagIcon className="h-2.5 w-2.5 mr-0.5" />
-                      {tag}
-                    </Badge>
-                  ))}
-                  {item.tags.length > 3 && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
-                      +{item.tags.length - 3}
-                    </Badge>
-                  )}
-                </>
-              ) : (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
-                  <TagIcon className="h-2.5 w-2.5 mr-0.5" />
-                  태그 없음
-                </Badge>
+          {/* 태그 */}
+          <div className="flex flex-wrap gap-1 mb-3">
+            {item.tags && item.tags.length > 0 ? (
+              <>
+                {item.tags.slice(0, 3).map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600"
+                  >
+                    <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                    {tag}
+                  </Badge>
+                ))}
+                {item.tags.length > 3 && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
+                    +{item.tags.length - 3}
+                  </Badge>
+                )}
+              </>
+            ) : (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
+                <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                태그 없음
+              </Badge>
+            )}
+          </div>
+
+          {/* 게시자 및 통계 */}
+          <div className="flex items-center justify-between mt-auto">
+            {/* 게시자 */}
+            <div className="text-xs text-muted-foreground">
+              {item.publisher?.username && (
+                <span>{item.publisher.username}</span>
               )}
             </div>
 
             {/* 통계 */}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Download className="w-3 h-3" />
                 <span>{formatNumber(item.download_count)}</span>

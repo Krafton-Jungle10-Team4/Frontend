@@ -9,7 +9,7 @@ import {
 } from '@/shared/components/dialog';
 import { Badge } from '@/shared/components/badge';
 import { Button } from '@/shared/components/button';
-import { Download, Eye, Star, Calendar, User, ExternalLink } from 'lucide-react';
+import { Download, Eye, ThumbsUp, Calendar, User, Workflow } from 'lucide-react';
 import { getMarketplaceItem, type MarketplaceItem } from '../api/marketplaceApi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,7 +48,11 @@ export function MarketplaceItemDetailDialog({
       toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
 
       onClose();
-      navigate('/workspace/studio');
+
+      // 생성된 봇의 워크플로우 에디터로 직접 이동
+      navigate(`/bot/${result.bot_id}/workflow`, {
+        state: { botName: result.bot_name }
+      });
     } catch (error) {
       console.error('워크플로우 가져오기 실패:', error);
       toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
@@ -100,10 +104,14 @@ export function MarketplaceItemDetailDialog({
           <>
             <DialogHeader>
               <DialogTitle className="text-2xl">{item.display_name}</DialogTitle>
-              <div className="flex items-center justify-between gap-4 mt-2">
-                <DialogDescription className="flex-1">
-                  {item.description || '설명이 없습니다.'}
-                </DialogDescription>
+              <DialogDescription className="mt-2">
+                {item.description || '설명이 없습니다.'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* 서비스 보기 버튼 */}
+              <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
                   size="sm"
@@ -112,21 +120,12 @@ export function MarketplaceItemDetailDialog({
                     e.stopPropagation();
                     handleViewAgent();
                   }}
-                  className="flex items-center gap-1 whitespace-nowrap shrink-0"
+                  className="flex items-center gap-2 rounded-none relative overflow-hidden group border-gray-300 transition-transform duration-300 hover:scale-110"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                  서비스 보기
+                  <div className="absolute inset-0 bg-gradient-to-r from-black to-blue-600 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                  <Workflow className="w-4 h-4 relative z-10 group-hover:text-white transition-colors duration-300" />
+                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">서비스 보기</span>
                 </Button>
-              </div>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-              {/* 메타데이터 */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(item.published_at)}</span>
-                </div>
                 {item.category && (
                   <Badge variant="outline">{item.category}</Badge>
                 )}
@@ -138,7 +137,7 @@ export function MarketplaceItemDetailDialog({
                   <h3 className="text-sm font-semibold">태그</h3>
                   <div className="flex flex-wrap gap-2">
                     {item.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
+                      <Badge key={tag} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
                         {tag}
                       </Badge>
                     ))}
@@ -147,7 +146,7 @@ export function MarketplaceItemDetailDialog({
               )}
 
               {/* 통계 */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
                     <Download className="w-4 h-4 text-gray-700" />
@@ -161,16 +160,6 @@ export function MarketplaceItemDetailDialog({
                     <span className="text-sm font-semibold">조회수</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">{formatNumber(item.view_count)}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-semibold">평점</span>
-                  </div>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {item.rating_average.toFixed(1)}
-                    <span className="text-sm text-muted-foreground ml-1">({item.rating_count})</span>
-                  </p>
                 </div>
               </div>
 
@@ -217,16 +206,25 @@ export function MarketplaceItemDetailDialog({
                 </div>
               )}
 
-              {/* 게시자 정보 */}
-              {item.publisher && item.publisher.username && (
+              {/* 게시자 및 게시일 정보 */}
+              <div className="grid grid-cols-2 gap-4">
+                {item.publisher && item.publisher.username && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold">게시자</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <User className="w-4 h-4" />
+                      <span>{item.publisher.username}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">게시자</h3>
+                  <h3 className="text-sm font-semibold">게시일</h3>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span>{item.publisher.username}</span>
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(item.published_at)}</span>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </>
         ) : (

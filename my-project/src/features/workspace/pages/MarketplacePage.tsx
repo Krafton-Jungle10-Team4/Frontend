@@ -59,6 +59,16 @@ export function MarketplacePage() {
     <div className="flex flex-col h-[calc(100vh-56px)]">
       <main className="flex-1 overflow-y-auto bg-gray-100">
         <div className="px-10 pt-8 pb-6">
+          {/* 페이지 헤더 */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              마켓플레이스
+            </h1>
+            <p className="text-gray-600">
+              다양한 워크플로우를 탐색하고 나만의 프로젝트에 활용하세요
+            </p>
+          </div>
+
           {/* 검색/필터 영역 */}
           <div className="mb-6">
             <MarketplaceSearchBar
