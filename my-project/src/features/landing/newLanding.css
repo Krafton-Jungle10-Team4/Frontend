@@ -126,6 +126,18 @@
   gap: 12px;
 }
 
+/* Slightly smaller buttons only in top nav */
+.top-nav .cta-btn,
+.top-nav .ghost-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.top-nav .cta-btn {
+  box-shadow: 0 14px 40px rgba(27, 29, 58, 0.24), 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
 .cta-btn {
   position: relative;
   padding: 14px 20px;
