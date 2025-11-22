@@ -30,8 +30,8 @@ export function MarketplaceItemDetailDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleViewAgent = () => {
-    if (item?.workflow_version?.bot_id) {
-      navigate(`/bot/${item.workflow_version.bot_id}/workflow?mode=readonly&source=marketplace&marketplaceItemId=${item.id}`);
+    if (item?.workflow_version?.bot_id && item?.workflow_version?.id) {
+      navigate(`/bot/${item.workflow_version.bot_id}/workflow?mode=readonly&source=marketplace&marketplaceItemId=${item.id}&versionId=${item.workflow_version.id}`);
       onClose();
     }
   };
