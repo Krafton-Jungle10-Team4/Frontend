@@ -185,7 +185,7 @@ export function FilesTab({ language }: FilesTabProps) {
         await asyncStore.deleteDocument(fileId, createdBotId);
       } else {
         // Legacy flow: Use documentsService
-        await documentsService.deleteDocument(fileId, createdBotId);
+        await documentsService.deleteDocument(fileId);
       }
 
       setFiles((prev) => prev.filter((f) => f.id !== fileId));

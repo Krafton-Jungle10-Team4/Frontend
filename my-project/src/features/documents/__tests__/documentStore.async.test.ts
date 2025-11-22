@@ -4,20 +4,21 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useAsyncDocumentStore } from '../stores/documentStore.async';
-import { useBotStore } from '@features/bot/stores/botStore';
 import { documentsAsyncApi } from '../api/documentsApi.async';
+import { DocumentStatus } from '../types/document.types';
 
 // Mock the APIs
 vi.mock('../api/documentsApi.async');
-vi.mock('@features/bot/stores/botStore', () => ({
-  useBotStore: {
-    getState: vi.fn(),
-  },
-}));
 
-describe('AsyncDocumentStore - botId Guard', () => {
+const mockResponse = {
+  documents: [],
+  total: 0,
+  limit: 50,
+  offset: 0,
+};
+
+describe('AsyncDocumentStore - fetchDocuments', () => {
   beforeEach(() => {
-    // Reset store state before each test
     useAsyncDocumentStore.setState({
       documents: new Map(),
       pollingStates: new Map(),
@@ -34,206 +35,53 @@ describe('AsyncDocumentStore - botId Guard', () => {
       error: null,
     });
 
-    // Mock useBotStore.getState()
-    vi.mocked(useBotStore.getState).mockReturnValue({
-      bots: [],
-      selectedBotId: null,
-      loading: false,
-      error: null,
-      addBot: vi.fn(),
-      updateBot: vi.fn(),
-      deleteBot: vi.fn(),
-      setBots: vi.fn(),
-      selectBot: vi.fn(),
-      setSelectedBotId: vi.fn(),
-      getBotById: vi.fn(),
-      clearBots: vi.fn(),
-      reset: vi.fn(),
-      setLoading: vi.fn(),
-      setError: vi.fn(),
-    });
+    vi.mocked(documentsAsyncApi.listWithStatus).mockResolvedValue(mockResponse);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('fetchDocuments - botId resolution', () => {
-    const mockResponse = {
-      documents: [],
-      total: 0,
-      limit: 50,
-      offset: 0,
-    };
-
-    beforeEach(() => {
-      vi.mocked(documentsAsyncApi.listWithStatus).mockResolvedValue(
-        mockResponse
-      );
+  it('merges filters, request overrides, and pagination defaults', async () => {
+    useAsyncDocumentStore.setState({
+      filters: { status: DocumentStatus.DONE, searchQuery: 'plan' },
+      pagination: { limit: 20, offset: 0, total: 0 },
     });
 
-    it('should fetch documents without botId when none is provided', async () => {
-      const store = useAsyncDocumentStore.getState();
+    const store = useAsyncDocumentStore.getState();
+    await store.fetchDocuments();
 
-      await expect(store.fetchDocuments()).resolves.toBeUndefined();
+    expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: DocumentStatus.DONE,
+        searchQuery: 'plan',
+        limit: 20,
+        offset: 0,
+      })
+    );
+  });
 
-      const callArg = vi.mocked(documentsAsyncApi.listWithStatus).mock.calls[0][0];
-      expect(callArg.botId).toBeUndefined();
-      expect(useAsyncDocumentStore.getState().error).toBeNull();
+  it('allows request parameters to override filters and pagination', async () => {
+    useAsyncDocumentStore.setState({
+      filters: { status: DocumentStatus.QUEUED, searchQuery: 'draft' },
+      pagination: { limit: 20, offset: 10, total: 0 },
     });
 
-    it('should use botId from request parameter when provided', async () => {
-      const store = useAsyncDocumentStore.getState();
-
-      // Act
-      await store.fetchDocuments({ botId: 'request-bot-id' });
-
-      // Assert
-      expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
-        expect.objectContaining({
-          botId: 'request-bot-id',
-        })
-      );
+    const store = useAsyncDocumentStore.getState();
+    await store.fetchDocuments({
+      status: DocumentStatus.PROCESSING,
+      searchQuery: 'ready',
+      limit: 5,
+      offset: 100,
     });
 
-    it('should fallback to filters.botId when request.botId is not provided', async () => {
-      // Set filters.botId
-      useAsyncDocumentStore.setState({
-        filters: { botId: 'filter-bot-id' },
-      });
-
-      const store = useAsyncDocumentStore.getState();
-
-      // Act
-      await store.fetchDocuments();
-
-      // Assert
-      expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
-        expect.objectContaining({
-          botId: 'filter-bot-id',
-        })
-      );
-    });
-
-    it('should fallback to useBotStore.selectedBotId when request and filters have no botId', async () => {
-      // Mock botStore.selectedBotId
-      vi.mocked(useBotStore.getState).mockReturnValue({
-        bots: [],
-        selectedBotId: 'store-bot-id',
-        loading: false,
-        error: null,
-        addBot: vi.fn(),
-        updateBot: vi.fn(),
-        deleteBot: vi.fn(),
-        setBots: vi.fn(),
-        selectBot: vi.fn(),
-        setSelectedBotId: vi.fn(),
-        getBotById: vi.fn(),
-        clearBots: vi.fn(),
-        reset: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-      });
-
-      const store = useAsyncDocumentStore.getState();
-
-      // Act
-      await store.fetchDocuments();
-
-      // Assert
-      expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
-        expect.objectContaining({
-          botId: 'store-bot-id',
-        })
-      );
-    });
-
-    it('should prioritize request.botId over filters.botId', async () => {
-      // Set filters.botId
-      useAsyncDocumentStore.setState({
-        filters: { botId: 'filter-bot-id' },
-      });
-
-      const store = useAsyncDocumentStore.getState();
-
-      // Act
-      await store.fetchDocuments({ botId: 'request-bot-id' });
-
-      // Assert
-      expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
-        expect.objectContaining({
-          botId: 'request-bot-id',
-        })
-      );
-    });
-
-    it('should prioritize filters.botId over useBotStore.selectedBotId', async () => {
-      // Set filters.botId
-      useAsyncDocumentStore.setState({
-        filters: { botId: 'filter-bot-id' },
-      });
-
-      // Mock botStore.selectedBotId
-      vi.mocked(useBotStore.getState).mockReturnValue({
-        bots: [],
-        selectedBotId: 'store-bot-id',
-        loading: false,
-        error: null,
-        addBot: vi.fn(),
-        updateBot: vi.fn(),
-        deleteBot: vi.fn(),
-        setBots: vi.fn(),
-        selectBot: vi.fn(),
-        setSelectedBotId: vi.fn(),
-        getBotById: vi.fn(),
-        clearBots: vi.fn(),
-        reset: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-      });
-
-      const store = useAsyncDocumentStore.getState();
-
-      // Act
-      await store.fetchDocuments();
-
-      // Assert
-      expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
-        expect.objectContaining({
-          botId: 'filter-bot-id',
-        })
-      );
-    });
-
-    it('should allow explicit undefined botId to bypass fallback filters', async () => {
-      useAsyncDocumentStore.setState({
-        filters: { botId: 'filter-bot-id' },
-      });
-
-      // Also mock selected bot to ensure both are ignored
-      vi.mocked(useBotStore.getState).mockReturnValue({
-        bots: [],
-        selectedBotId: 'store-bot-id',
-        loading: false,
-        error: null,
-        addBot: vi.fn(),
-        updateBot: vi.fn(),
-        deleteBot: vi.fn(),
-        setBots: vi.fn(),
-        selectBot: vi.fn(),
-        setSelectedBotId: vi.fn(),
-        getBotById: vi.fn(),
-        clearBots: vi.fn(),
-        reset: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-      });
-
-      const store = useAsyncDocumentStore.getState();
-      await store.fetchDocuments({ botId: undefined });
-
-      const callArg = vi.mocked(documentsAsyncApi.listWithStatus).mock.calls.at(-1)?.[0];
-      expect(callArg?.botId).toBeUndefined();
-    });
+    expect(documentsAsyncApi.listWithStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: DocumentStatus.PROCESSING,
+        searchQuery: 'ready',
+        limit: 5,
+        offset: 100,
+      })
+    );
   });
 });

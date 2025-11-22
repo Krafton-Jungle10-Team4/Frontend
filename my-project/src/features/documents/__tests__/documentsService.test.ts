@@ -26,30 +26,25 @@ describe('DocumentsService - Authenticated Delete', () => {
     it('should use documentsApi.deleteDocument with authenticated client', async () => {
       // Arrange
       const documentId = 'test-doc-id';
-      const botId = 'test-bot-id';
 
       vi.mocked(documentsApi.deleteDocument).mockResolvedValue(undefined);
 
       // Act
-      await documentsService.deleteDocument(documentId, botId);
+      await documentsService.deleteDocument(documentId);
 
       // Assert: Should call documentsApi.deleteDocument (authenticated)
-      expect(documentsApi.deleteDocument).toHaveBeenCalledWith(
-        documentId,
-        botId
-      );
+      expect(documentsApi.deleteDocument).toHaveBeenCalledWith(documentId);
       expect(documentsApi.deleteDocument).toHaveBeenCalledTimes(1);
     });
 
     it('should NOT use legacy ApiClient.deleteFile', async () => {
       // Arrange
       const documentId = 'test-doc-id';
-      const botId = 'test-bot-id';
 
       vi.mocked(documentsApi.deleteDocument).mockResolvedValue(undefined);
 
       // Act
-      await documentsService.deleteDocument(documentId, botId);
+      await documentsService.deleteDocument(documentId);
 
       // Assert: Legacy ApiClient should NOT be called
       expect(ApiClient.deleteFile).not.toHaveBeenCalled();
@@ -58,32 +53,27 @@ describe('DocumentsService - Authenticated Delete', () => {
     it('should propagate errors from documentsApi.deleteDocument', async () => {
       // Arrange
       const documentId = 'test-doc-id';
-      const botId = 'test-bot-id';
       const error = new Error('Delete failed');
 
       vi.mocked(documentsApi.deleteDocument).mockRejectedValue(error);
 
       // Act & Assert
       await expect(
-        documentsService.deleteDocument(documentId, botId)
+        documentsService.deleteDocument(documentId)
       ).rejects.toThrow('Delete failed');
     });
 
     it('should pass correct parameters to documentsApi.deleteDocument', async () => {
       // Arrange
       const documentId = 'doc-123';
-      const botId = 'bot-456';
 
       vi.mocked(documentsApi.deleteDocument).mockResolvedValue(undefined);
 
       // Act
-      await documentsService.deleteDocument(documentId, botId);
+      await documentsService.deleteDocument(documentId);
 
       // Assert: Parameters should be passed in correct order
-      expect(documentsApi.deleteDocument).toHaveBeenCalledWith(
-        'doc-123',
-        'bot-456'
-      );
+      expect(documentsApi.deleteDocument).toHaveBeenCalledWith('doc-123');
     });
   });
 

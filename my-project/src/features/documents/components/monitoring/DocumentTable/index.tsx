@@ -15,7 +15,7 @@ import { useIsLoading } from '../../../stores/selectors';
 interface DocumentTableProps {
   documents: DocumentWithStatus[];
   onRetry?: (documentId: string) => void;
-  onDelete?: (documentId: string, botId: string) => void;
+  onDelete?: (documentId: string) => void;
   onView?: (documentId: string) => void;
 }
 

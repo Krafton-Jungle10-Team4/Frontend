@@ -67,9 +67,8 @@ export const documentsService = {
    * @param documentId Document ID
    * @param botId Bot ID
    */
-  deleteDocument: async (documentId: string, botId: string): Promise<void> => {
-    // Use authenticated API client for delete (FSD compliance)
-    return documentsApi.deleteDocument(documentId, botId);
+  deleteDocument: async (documentId: string): Promise<void> => {
+    return documentsApi.deleteDocument(documentId);
   },
 
   /**

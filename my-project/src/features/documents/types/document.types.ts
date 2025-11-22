@@ -127,8 +127,8 @@ export interface DocumentStatusResponse {
  * 문서 목록 요청 파라미터
  */
 export interface DocumentListRequest {
-  botId?: string;
   status?: DocumentStatus;
+  searchQuery?: string;
   limit?: number;
   offset?: number;
   sortBy?: 'created_at' | 'updated_at' | 'filename';

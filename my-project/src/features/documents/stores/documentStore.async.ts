@@ -22,7 +22,6 @@ interface AsyncDocumentStore {
 
   // Filters & Pagination
   filters: {
-    botId?: string;
     status?: DocumentStatus;
     searchQuery?: string;
   };
@@ -273,30 +272,12 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
         fetchDocuments: async (request?: DocumentListRequest) => {
           const { filters, pagination } = get();
 
-          // botId 우선순위:
-          // 1) request에 명시된 값 (undefined 포함)
-          // 2) 현재 저장된 필터
-          // 3) 선택된 봇
-          const requestHasBotId =
-            request !== undefined && Object.prototype.hasOwnProperty.call(request, 'botId');
-          const fallbackBotId = requestHasBotId
-            ? request?.botId
-            : filters.botId ?? useBotStore.getState().selectedBotId;
-
           const finalRequest: DocumentListRequest = {
             ...filters,
-            limit: pagination.limit,
-            offset: pagination.offset,
             ...request,
+            limit: request?.limit ?? pagination.limit,
+            offset: request?.offset ?? pagination.offset,
           };
-
-          if (requestHasBotId) {
-            finalRequest.botId = request?.botId;
-          } else if (fallbackBotId) {
-            finalRequest.botId = fallbackBotId;
-          } else {
-            delete finalRequest.botId;
-          }
 
           set({ isLoading: true, error: null });
 
@@ -376,7 +357,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
         },
 
         // Delete document
-        deleteDocument: async (documentId: string, botId: string) => {
+        deleteDocument: async (documentId: string) => {
           set({ isLoading: true, error: null });
 
           try {
@@ -384,7 +365,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             get().stopPolling(documentId);
 
             // Delete from backend
-            await documentsApi.deleteDocument(documentId, botId);
+            await documentsApi.deleteDocument(documentId);
 
             // Remove from state
             const documents = new Map(get().documents);

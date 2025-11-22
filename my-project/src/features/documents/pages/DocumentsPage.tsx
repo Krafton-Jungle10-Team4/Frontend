@@ -51,7 +51,7 @@ export const LegacyDocumentsView: React.FC<LegacyDocumentsViewProps> = ({ botId:
 
     try {
       const deleteDocument = useAsyncDocumentStore.getState().deleteDocument;
-      await deleteDocument(documentId, selectedBotId);
+        await deleteDocument(documentId);
       toast.success('문서가 삭제되었습니다');
     } catch (error) {
       toast.error('삭제 실패: ' + (error as Error).message);

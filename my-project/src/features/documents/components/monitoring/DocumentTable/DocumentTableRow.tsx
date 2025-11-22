@@ -10,7 +10,7 @@ interface DocumentTableRowProps {
   document: DocumentWithStatus;
   index: number;
   onRetry?: (documentId: string) => void;
-  onDelete?: (documentId: string, botId: string) => void;
+  onDelete?: (documentId: string) => void;
   onView?: (documentId: string) => void;
 }
 

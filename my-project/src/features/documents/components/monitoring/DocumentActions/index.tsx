@@ -12,7 +12,7 @@ import { DocumentWithStatus, DocumentStatus } from '../../../types/document.type
 interface DocumentActionsProps {
   document: DocumentWithStatus;
   onRetry?: (documentId: string) => void;
-  onDelete?: (documentId: string, botId: string) => void;
+  onDelete?: (documentId: string) => void;
   onView?: (documentId: string) => void;
 }
 
@@ -48,7 +48,7 @@ export const DocumentActions: React.FC<DocumentActionsProps> = ({
         )}
         {canDelete && onDelete && (
           <DropdownMenuItem
-            onClick={() => onDelete(document.documentId, document.botId)}
+            onClick={() => onDelete(document.documentId)}
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />

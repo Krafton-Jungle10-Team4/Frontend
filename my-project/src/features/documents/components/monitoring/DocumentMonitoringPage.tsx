@@ -50,9 +50,9 @@ export const DocumentMonitoringPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (documentId: string, botId: string) => {
+  const handleDelete = async (documentId: string) => {
     try {
-      await deleteDocument(documentId, botId);
+      await deleteDocument(documentId);
       toast.success('문서가 삭제되었습니다');
     } catch (error) {
       toast.error('삭제 실패: ' + (error as Error).message);
