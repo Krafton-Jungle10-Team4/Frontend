@@ -134,7 +134,7 @@ const WorkflowInner = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [isConversationPanelOpen, setConversationPanelOpen] = useState(false);
   const [isBotImportDialogOpen, setIsBotImportDialogOpen] = useState(false);
-  const { screenToFlowPosition, fitView } = useReactFlow();
+  const { screenToFlowPosition, fitView, getNodes } = useReactFlow();
   const prevBotIdRef = useRef<string | undefined>();
   const initialFitViewDoneRef = useRef(false);
 
@@ -285,6 +285,18 @@ const WorkflowInner = () => {
       setNodes(newNodes);
       push(newNodes, edges);
 
+      // 노드 삭제 시 선택 상태 초기화
+      const removedIds = changes
+        .filter((change) => change.type === 'remove' && 'id' in change)
+        .map((change) => change.id)
+        .filter((id): id is string => Boolean(id));
+      if (removedIds.length) {
+        const currentSelected = useWorkflowStore.getState().selectedNodeId;
+        if (currentSelected && removedIds.includes(currentSelected)) {
+          selectNode(null);
+        }
+      }
+
       // 선택 상태 변경 감지하여 selectedNodeId 업데이트
       const selectChange = changes.find((change) => change.type === 'select');
       if (selectChange && 'selected' in selectChange) {
@@ -350,12 +362,14 @@ const WorkflowInner = () => {
   );
 
   const handleAutoLayout = useCallback(() => {
-    if (nodes.length === 0) return;
+    // getNodes()를 사용하여 measured 정보가 포함된 실제 렌더링된 노드를 가져옵니다
+    const renderedNodes = getNodes();
+    if (renderedNodes.length === 0) return;
 
-    const laidOutNodes = computeWorkflowAutoLayout(nodes, edges);
+    const laidOutNodes = computeWorkflowAutoLayout(renderedNodes, edges);
     setNodes(laidOutNodes);
     push(laidOutNodes, edges);
-  }, [nodes, edges, setNodes, push]);
+  }, [getNodes, edges, setNodes, push]);
 
   // 노드 클릭 핸들러 (선택)
   const onNodeClick: NodeMouseHandler = useCallback(
@@ -548,17 +562,6 @@ const WorkflowInner = () => {
             getNodeDescription(nodeType.type as BlockEnum),
           ports: portSchema,
           ...defaultData,
-          ...(nodeType.type === BlockEnum.LLM && {
-            provider: 'openai',
-            model: { provider: 'openai', name: 'gpt-4o-mini' },
-            prompt: '프롬프트를 입력하세요.',
-          }),
-          ...(nodeType.type === BlockEnum.KnowledgeRetrieval && {
-            dataset: '',
-            retrievalMode: 'semantic',
-            topK: 5,
-            documentIds: [],
-          }),
         },
       };
 
@@ -716,55 +719,58 @@ const WorkflowInner = () => {
               {/* 일반 모드 - 모든 편집 버튼 표시 */}
               <ValidationPanel className="w-72 shrink-0" />
 
-              {/* Preview 버튼 */}
+              {/* 정렬 버튼 */}
+              <Button
+                variant="outline"
+                onClick={handleAutoLayout}
+                disabled={nodes.length === 0}
+                title="노드 자동 정렬"
+                className="!gap-2 relative overflow-hidden transition-all duration-300 hover:scale-105 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500 before:to-blue-600 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:-z-10 hover:!text-white hover:!border-blue-500"
+              >
+                <AlignHorizontalJustifyCenter className="w-4 h-4 flex-shrink-0 relative z-10" />
+                <span className="whitespace-nowrap relative z-10">
+                  정렬
+                </span>
+              </Button>
+
+              {/* 미리보기 버튼 */}
               <Button
                 variant="outline"
                 onClick={toggleChatVisibility}
                 title={
                   isChatVisible ? '채팅 미리보기 숨기기' : '채팅 미리보기 보기'
                 }
-                className="!text-blue-600 hover:!text-blue-700 group overflow-hidden !gap-0"
+                className="!gap-2 relative overflow-hidden transition-all duration-300 hover:scale-105 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500 before:to-blue-600 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:-z-10 hover:!text-white hover:!border-blue-500"
               >
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                <MessageSquare className="w-4 h-4 flex-shrink-0 relative z-10" />
+                <span className="whitespace-nowrap relative z-10">
                   미리보기
                 </span>
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={handleAutoLayout}
-                disabled={nodes.length === 0}
-                title="노드 자동 정렬"
-                className="group overflow-hidden !gap-0"
-              >
-                <AlignHorizontalJustifyCenter className="w-4 h-4 flex-shrink-0" />
-                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
-                  정렬
-                </span>
-              </Button>
-
+              {/* 대화 변수 버튼 */}
               <Button
                 variant="outline"
                 onClick={() => setConversationPanelOpen(true)}
                 title="대화 변수 관리"
-                className="group overflow-hidden !gap-0"
+                className="!gap-2 relative overflow-hidden transition-all duration-300 hover:scale-105 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500 before:to-blue-600 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:-z-10 hover:!text-white hover:!border-blue-500"
               >
-                <Variable className="w-4 h-4 flex-shrink-0" />
-                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
+                <Variable className="w-4 h-4 flex-shrink-0 relative z-10" />
+                <span className="whitespace-nowrap relative z-10">
                   대화 변수
                 </span>
               </Button>
 
+              {/* 가져오기 버튼 */}
               <Button
                 variant="outline"
                 onClick={() => setIsBotImportDialogOpen(true)}
                 title="다른 봇의 워크플로우 가져오기"
-                className="group overflow-hidden !gap-0"
+                className="!gap-2 relative overflow-hidden transition-all duration-300 hover:scale-105 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500 before:to-blue-600 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:-z-10 hover:!text-white hover:!border-blue-500"
               >
-                <Download className="w-4 h-4 flex-shrink-0" />
-                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 transition-all duration-200">
-                  에이전트 가져오기
+                <Download className="w-4 h-4 flex-shrink-0 relative z-10" />
+                <span className="whitespace-nowrap relative z-10">
+                  가져오기
                 </span>
               </Button>
 

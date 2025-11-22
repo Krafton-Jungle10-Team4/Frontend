@@ -92,8 +92,8 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
 
     return (
       <Card
-        className={`transition-all hover:shadow-md ${
-          isActive ? 'ring-2 ring-primary bg-primary/5' : ''
+        className={`rounded-none transition-all hover:scale-[1.005] hover:shadow-md ${
+          isActive ? 'ring-1 ring-blue-500 bg-primary/5' : ''
         }`}
       >
         <div
@@ -215,7 +215,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 {/* Run Summary */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-foreground">실행 요약</h4>
-                  <div className="rounded-lg border bg-white p-3 space-y-2">
+                  <div className="rounded-none border bg-white p-3 space-y-2 transition-all hover:scale-[1.005]">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-muted-foreground">상태:</span>
                       <span className="font-medium">
@@ -277,7 +277,6 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 ).length > 0 && (
                   <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Cpu className="h-4 w-4" />
                       LLM 노드별 사용량
                     </h4>
                     <div className="space-y-2">
@@ -287,7 +286,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                           ne.cost !== null && ne.cost !== undefined
                         )
                         .map((ne, index) => (
-                          <div key={ne.id} className="rounded-lg border bg-white p-3 space-y-2">
+                          <div key={ne.id} className="rounded-none border bg-white p-3 space-y-2 transition-all hover:scale-[1.005]">
                             <div className="flex justify-between items-center">
                               <span className="text-xs font-medium text-foreground">
                                 {ne.node_id || `LLM 노드 #${index + 1}`}
@@ -318,7 +317,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 {runDetail.inputs && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-foreground">입력 (Input)</h4>
-                    <div className="rounded-lg border bg-white p-3">
+                    <div className="rounded-none border bg-white p-3 transition-all hover:scale-[1.005]">
                       <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-64 overflow-y-auto">
                         {JSON.stringify(runDetail.inputs, null, 2)}
                       </pre>
@@ -330,7 +329,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 {runDetail.outputs && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-foreground">출력 (Output)</h4>
-                    <div className="rounded-lg border bg-white p-3">
+                    <div className="rounded-none border bg-white p-3 transition-all hover:scale-[1.005]">
                       <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-64 overflow-y-auto">
                         {JSON.stringify(runDetail.outputs, null, 2)}
                       </pre>
@@ -342,7 +341,7 @@ export const WorkflowLogRow = memo<WorkflowLogRowProps>(
                 {runDetail.error_message && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-red-600">에러 메시지</h4>
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                    <div className="rounded-none border border-red-200 bg-red-50 p-3 transition-all hover:scale-[1.005]">
                       <p className="text-xs text-red-700">{runDetail.error_message}</p>
                     </div>
                   </div>

@@ -104,7 +104,7 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {/* Run Summary */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">실행 요약</h3>
-                  <div className="rounded-lg border p-4 space-y-3">
+                  <div className="rounded-none border p-4 space-y-3 transition-all hover:scale-[1.005]">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">상태:</span>
                       <span className="text-sm font-medium capitalize">
@@ -175,7 +175,7 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {runDetail.inputs && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">입력 (Input)</h3>
-                    <div className="rounded-lg border bg-gray-50 p-4">
+                    <div className="rounded-none border bg-gray-50 p-4 transition-all hover:scale-[1.005]">
                       <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words font-mono">
                         {JSON.stringify(runDetail.inputs, null, 2)}
                       </pre>
@@ -187,7 +187,7 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {runDetail.outputs && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">출력 (Output)</h3>
-                    <div className="rounded-lg border bg-gray-50 p-4">
+                    <div className="rounded-none border bg-gray-50 p-4 transition-all hover:scale-[1.005]">
                       <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words font-mono">
                         {JSON.stringify(runDetail.outputs, null, 2)}
                       </pre>
@@ -199,7 +199,7 @@ export const WorkflowLogDetailPanel = memo<WorkflowLogDetailPanelProps>(
                 {runDetail.error_message && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-red-600">에러 메시지</h3>
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <div className="rounded-none border border-red-200 bg-red-50 p-4 transition-all hover:scale-[1.005]">
                       <p className="text-sm text-red-700">{runDetail.error_message}</p>
                     </div>
                   </div>

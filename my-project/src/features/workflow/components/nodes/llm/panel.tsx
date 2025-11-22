@@ -60,26 +60,30 @@ const extractProviderFromModel = (model: unknown): string => {
 };
 
 /**
- * model 값에서 실제 모델 ID 추출 (LLMModelSelect의 value prop에 사용)
+ * model 값을 ModelConfig 객체로 변환 (LLMModelSelect의 value prop에 사용)
+ *
+ * 주의: model 필드에는 실제 API 모델 ID가 저장됨 (예: "chatgpt-4o-latest", "gpt-4o-mini")
  */
-const extractModelNameFromModel = (model: unknown): string => {
-  // 객체 형태인 경우 (레거시 호환성)
-  if (typeof model === 'object' && model !== null) {
-    if ('name' in model) {
-      return (model as { name: string }).name;
-    }
-    if ('id' in model) {
-      return (model as { id: string }).id;
-    }
+const convertToModelConfig = (model: unknown, provider: string): import('@/shared/types/workflow.types').ModelConfig | undefined => {
+  // 이미 ModelConfig 객체인 경우
+  if (typeof model === 'object' && model !== null && 'name' in model && 'provider' in model) {
+    return model as import('@/shared/types/workflow.types').ModelConfig;
   }
 
-  // 문자열인 경우 그대로 반환 (모델 ID)
-  if (typeof model === 'string') {
-    return model;
+  // 문자열인 경우 ModelConfig 객체 생성 (model은 이제 API 모델 ID)
+  if (typeof model === 'string' && model) {
+    return {
+      provider: provider,
+      name: model, // 이미 모델 ID이므로 그대로 사용
+      mode: 'chat',
+      completion_params: {
+        temperature: 0.7,
+      },
+    };
   }
 
-  // 기본값: Bedrock Haiku 3 (ON_DEMAND 지원)
-  return 'anthropic.claude-3-haiku-20240307-v1:0';
+  // 값이 없으면 undefined 반환 (드롭다운이 비어있게)
+  return undefined;
 };
 
 export const LLMPanel = () => {
@@ -182,10 +186,10 @@ export const LLMPanel = () => {
           <Field label="모델" required>
             <LLMModelSelect
               selectedProvider={currentProvider}
-              value={extractModelNameFromModel(llmData.model)}
-              onChange={(modelId) => {
-                // 백엔드는 model을 문자열로 받음 (전체 모델 ID 사용)
-                handleUpdate('model', modelId);
+              value={convertToModelConfig(llmData.model, currentProvider)}
+              onChange={(modelConfig) => {
+                // 백엔드는 model을 문자열로 받음 (modelConfig.name 사용)
+                handleUpdate('model', modelConfig.name);
               }}
             />
           </Field>

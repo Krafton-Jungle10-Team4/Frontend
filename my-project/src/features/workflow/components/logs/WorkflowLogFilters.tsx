@@ -79,7 +79,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
       (filters.searchQuery && filters.searchQuery.length > 0);
 
     return (
-      <div className="space-y-4 rounded-lg border bg-card p-4">
+      <div className="space-y-4 rounded-none border bg-card p-4 transition-all hover:scale-[1.005]">
         <div className="flex flex-wrap items-center gap-4">
           {/* Status Filter */}
           <div className="flex items-center gap-2">
@@ -89,10 +89,10 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               onValueChange={handleStatusChange}
               disabled={isDisabled}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] rounded-none">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-none">
                 <SelectItem value="all">전체</SelectItem>
                 <SelectItem value="running">실행 중</SelectItem>
                 <SelectItem value="succeeded">성공</SelectItem>
@@ -108,6 +108,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
+                  rounded="sharp"
                   className="w-[240px] justify-start text-left font-normal"
                   disabled={isDisabled}
                 >
@@ -137,6 +138,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
+                  rounded="sharp"
                   className="w-[240px] justify-start text-left font-normal"
                   disabled={isDisabled}
                 >
@@ -169,7 +171,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 disabled={isDisabled}
-                className="pl-9"
+                className="pl-9 rounded-none"
               />
             </div>
           </div>
@@ -178,6 +180,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
           {hasActiveFilters && (
             <Button
               variant="ghost"
+              rounded="sharp"
               size="sm"
               onClick={onReset}
               disabled={isDisabled}
@@ -194,7 +197,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">활성 필터:</span>
             {filters.status !== 'all' && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 rounded-none">
                 상태: {filters.status === 'running' ? '실행 중' : filters.status === 'succeeded' ? '성공' : '실패'}
                 <button
                   onClick={() => handleStatusChange('all')}
@@ -206,7 +209,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               </Badge>
             )}
             {filters.startDate && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 rounded-none">
                 시작일: {formatDate(filters.startDate)}
                 <button
                   onClick={() => handleStartDateChange(undefined)}
@@ -218,7 +221,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               </Badge>
             )}
             {filters.endDate && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 rounded-none">
                 종료일: {formatDate(filters.endDate)}
                 <button
                   onClick={() => handleEndDateChange(undefined)}
@@ -230,7 +233,7 @@ export const WorkflowLogFilters = memo<WorkflowLogFiltersProps>(
               </Badge>
             )}
             {filters.searchQuery && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="secondary" className="gap-1 rounded-none">
                 검색: {filters.searchQuery}
                 <button
                   onClick={() => handleSearchChange('')}

@@ -10,14 +10,15 @@ import {
   SelectValue,
 } from '@shared/components/select';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@shared/components/sheet';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@shared/components/dialog';
 import { Label } from '@shared/components/label';
+import { ScrollArea } from '@shared/components/scroll-area';
 import { Trash2 } from 'lucide-react';
 import { useWorkflowStore } from '../stores/workflowStore';
 import { useVariablePoolStore } from '../stores/variablePoolStore';
@@ -182,17 +183,18 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-xl overflow-y-auto">
-        <SheetHeader className="space-y-2">
-          <SheetTitle>대화 변수</SheetTitle>
-          <SheetDescription>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
+          <DialogTitle>대화 변수</DialogTitle>
+          <DialogDescription>
             세션마다 유지되는 변수를 정의하고 기본 값을 지정할 수 있습니다. Variable Assigner, LLM 노드 등에서
             해당 변수를 읽거나 쓸 수 있습니다.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="mt-6 space-y-4">
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-4 pb-4">
           {error && (
             <div className="rounded-md border border-red-500/40 bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
@@ -296,17 +298,23 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </ScrollArea>
 
-        <SheetFooter className="mt-6">
-          <div className="ml-auto flex gap-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="px-6 py-4 border-t">
+          <div className="flex gap-2 w-full justify-end">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               닫기
             </Button>
-            <Button onClick={handleSave}>저장</Button>
+            <Button
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-105"
+            >
+              저장
+            </Button>
           </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

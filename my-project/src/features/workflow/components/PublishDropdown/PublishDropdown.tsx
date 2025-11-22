@@ -43,11 +43,8 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
   return (
     <>
       <Button
-        variant="default"
-        className="!text-white"
-        style={{
-          backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-        }}
+        variant="outline"
+        className="!text-white !bg-blue-600 hover:!bg-blue-700 !border-blue-600 hover:!border-blue-700 transition-all duration-300 hover:scale-105"
         onClick={handlePublishClick}
       >
         <GitCommit className="w-4 h-4" />

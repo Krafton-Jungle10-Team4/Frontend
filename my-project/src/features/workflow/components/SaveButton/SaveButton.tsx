@@ -52,7 +52,7 @@ export const SaveButton = () => {
         variant="outline"
         onClick={handleSave}
         disabled={isSaving || isValidating}
-        className={`transition-colors ${
+        className={`transition-all duration-300 hover:scale-105 ${
           isSaved
             ? 'border-green-500 hover:border-green-600 text-green-600'
             : hasUnsavedChanges

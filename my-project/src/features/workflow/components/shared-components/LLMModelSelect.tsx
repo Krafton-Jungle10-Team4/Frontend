@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { workflowApi } from '../../api/workflowApi';
 import type { ModelResponse } from '../../types/api.types';
+import type { ModelConfig } from '@/shared/types/workflow.types';
 import {
   Select,
   SelectContent,
@@ -17,8 +18,8 @@ import {
 } from '@shared/components/select';
 
 interface LLMModelSelectProps {
-  value?: string;
-  onChange: (model: string) => void;
+  value?: ModelConfig;
+  onChange: (model: ModelConfig) => void;
   selectedProvider?: string; // 선택된 provider로 필터링
 }
 
@@ -61,8 +62,29 @@ export const LLMModelSelect = ({
     );
   }
 
+  // 현재 선택된 모델: value.name에는 ID가 저장되어 있으므로,
+  // filteredModels에서 해당 ID를 가진 모델을 찾아서 표시명(name)을 사용
+  const currentModel = filteredModels.find((m) => m.id === value?.name);
+  const currentValue = currentModel?.name || '';
+
+  // 모델 선택 시 전체 ModelConfig 객체 생성
+  const handleModelSelect = (modelName: string) => {
+    const selectedModel = filteredModels.find((m) => m.name === modelName);
+    if (selectedModel) {
+      const modelConfig: ModelConfig = {
+        provider: selectedModel.provider,
+        name: selectedModel.id, // API에 전달할 실제 모델 ID 사용
+        mode: 'chat', // 기본값
+        completion_params: {
+          temperature: 0.7, // 기본값
+        },
+      };
+      onChange(modelConfig);
+    }
+  };
+
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={currentValue} onValueChange={handleModelSelect}>
       <SelectTrigger>
         <SelectValue placeholder="Select a model" />
       </SelectTrigger>
@@ -75,7 +97,7 @@ export const LLMModelSelect = ({
           </div>
         ) : (
           filteredModels.map((model) => (
-            <SelectItem key={`${model.provider}-${model.id}`} value={model.id}>
+            <SelectItem key={`${model.provider}-${model.id}`} value={model.name}>
               <div className="flex items-center gap-2">
                 <span className="font-medium">{model.name}</span>
                 {!selectedProvider && (
