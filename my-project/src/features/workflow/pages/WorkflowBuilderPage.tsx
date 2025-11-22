@@ -14,6 +14,7 @@ import { useAuthStore } from '@/features/auth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
+import { DocumentStatus } from '@/features/documents/types/document.types';
 import { NavigationTabs } from '@/features/workspace/components/NavigationTabs';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
 import { useSlackStore } from '@/features/integrations/stores/slackStore';
@@ -151,10 +152,16 @@ export const WorkflowBuilderPage = () => {
   }, [searchParams, setSearchParams, botId, fetchBotIntegration]);
 
   // 문서 스토어를 미리 로드해 지식 노드/패널에서 바로 사용할 수 있도록 함
+  // ✅ 완료된 문서만 조회하여 불필요한 폴링 방지
   useEffect(() => {
     if (!botId) return;
 
-    fetchDocuments({ botId }).catch((error) => {
+    fetchDocuments({ 
+      botId,
+      status: DocumentStatus.DONE, // 완료된 문서만 조회
+      limit: 100,
+      offset: 0,
+    }).catch((error) => {
       console.error('Failed to prefetch documents for workflow builder:', error);
     });
   }, [botId, fetchDocuments]);

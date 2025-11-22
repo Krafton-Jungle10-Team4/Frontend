@@ -8,6 +8,7 @@ import { useEffect, useMemo } from 'react';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 import { useCompletedDocuments } from '@/features/documents/stores/selectors';
+import { DocumentStatus } from '@/features/documents/types/document.types';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field, InputMappingSection } from '../_base/components';
 import { Input } from '@shared/components/input';
@@ -50,13 +51,14 @@ export const KnowledgeRetrievalPanel = () => {
   const fetchDocuments = useAsyncDocumentStore((state) => state.fetchDocuments);
   const completedDocuments = useCompletedDocuments();
 
-  // 완료된 문서 목록 가져오기
+  // 완료된 문서 목록만 가져오기 (폴링 방지)
   useEffect(() => {
     fetchDocuments({
       botId: undefined,
-      status: undefined,
+      status: DocumentStatus.DONE, // ✅ 완료된 문서만 조회하여 불필요한 폴링 방지
       searchQuery: undefined,
       offset: 0,
+      limit: 100, // 적절한 제한 설정
     }).catch((error) => {
       console.error('Failed to fetch documents:', error);
     });

@@ -303,14 +303,26 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
               isLoading: false,
             });
 
-            // Start polling for processing documents
+            // Start polling for processing documents only (not for completed ones)
+            // ✅ 이미 완료된 문서는 폴링하지 않음 (불필요한 API 호출 방지)
             response.documents.forEach((doc) => {
               const normalizedStatus = normalizeDocumentStatus(doc.status);
+              // QUEUED 또는 PROCESSING 상태인 문서만 폴링 시작
               if (
                 normalizedStatus === DocumentStatus.QUEUED ||
                 normalizedStatus === DocumentStatus.PROCESSING
               ) {
-                get().startPolling(doc.documentId);
+                // 중복 폴링 방지: 이미 폴링 중이면 스킵
+                const { pollingStates } = get();
+                if (!pollingStates.has(doc.documentId)) {
+                  get().startPolling(doc.documentId);
+                }
+              } else if (
+                normalizedStatus === DocumentStatus.DONE ||
+                normalizedStatus === DocumentStatus.FAILED
+              ) {
+                // 완료된 문서는 폴링 중지 (혹시 모를 경우 대비)
+                get().stopPolling(doc.documentId);
               }
             });
           } catch (error) {
