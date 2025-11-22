@@ -53,8 +53,8 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
-          placeholder="your@email.com"
-          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
+          placeholder="이메일을 입력하세요"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 transition-colors focus:border-[#d87438] focus:outline-none focus:ring-2 focus:ring-[#d87438]/22 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
           required
         />
       </div>
@@ -69,13 +69,13 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
             id="password"
             type={showPassword ? 'text' : 'password'}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            placeholder="••••••••"
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
-            minLength={6}
-            required
-          />
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+          placeholder="••••••••"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-[#d87438] focus:outline-none focus:ring-2 focus:ring-[#d87438]/22 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50"
+          minLength={6}
+          required
+        />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}

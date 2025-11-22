@@ -6,11 +6,13 @@
 interface GoogleLoginButtonProps {
   onClick: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export const GoogleLoginButton = ({
   onClick,
   disabled = false,
+  className = '',
 }: GoogleLoginButtonProps) => {
   return (
     <button
@@ -24,6 +26,7 @@ export const GoogleLoginButton = ({
         text-base font-semibold text-gray-700
         shadow-lg hover:shadow-xl
         transition-all duration-200
+        ${className}
         ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50 active:scale-[0.98]'}
       `}
     >
