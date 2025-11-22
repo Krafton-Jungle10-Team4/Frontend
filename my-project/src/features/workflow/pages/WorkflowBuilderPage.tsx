@@ -31,6 +31,16 @@ const WorkflowWithChat = () => {
     const fetchBotInfo = async () => {
       if (!botId) return;
 
+      // 마켓플레이스에서 접근할 때는 봇 정보 조회 건너뛰기
+      const searchParams = new URLSearchParams(location.search);
+      const source = searchParams.get('source');
+      if (source === 'marketplace') {
+        // 마켓플레이스에서는 state나 기본값 사용
+        const state = location.state as { botName?: string } | null;
+        setBotName(state?.botName || 'Marketplace Workflow');
+        return;
+      }
+
       try {
         const { botApi } = await import('@/features/bot/api/botApi');
         const botData = await botApi.getById(botId);
@@ -45,7 +55,7 @@ const WorkflowWithChat = () => {
     };
 
     fetchBotInfo();
-  }, [botId, getBotById, location.state]);
+  }, [botId, getBotById, location.state, location.search]);
 
   // Bot ID 확인
   console.log('[Workflow] Current Bot ID:', botId);
