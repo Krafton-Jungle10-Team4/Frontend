@@ -33,6 +33,7 @@ import { BlockEnum } from '@/shared/types/workflow.types';
 import CustomNode from '../nodes';
 import CustomEdge from '../edges/custom-edge';
 import ContextMenu from './ContextMenu';
+import NodeSelector from '../NodeSelector';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import { useHistoryStore } from '../../stores/historyStore';
 import { SaveButton } from '../SaveButton';
@@ -795,19 +796,24 @@ const WorkflowInner = () => {
         />
       )}
 
-      {/* 컨텍스트 메뉴 - 읽기 전용 모드에서는 비활성화 */}
-      {contextMenu && !versionId && (
+      {/* 컨텍스트 메뉴 - 노드/엣지 삭제용 (읽기 전용 모드에서는 비활성화) */}
+      {contextMenu && !versionId && (contextMenu.nodeId || contextMenu.edgeId) && (
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
           onClose={closeContextMenu}
           onDeleteNode={contextMenu.nodeId ? handleDeleteNode : undefined}
           onDeleteEdge={contextMenu.edgeId ? handleDeleteEdge : undefined}
-          onAddNode={
-            !contextMenu.nodeId && !contextMenu.edgeId
-              ? handleAddNode
-              : undefined
-          }
+        />
+      )}
+
+      {/* 노드 선택기 - 노드 추가용 (읽기 전용 모드에서는 비활성화) */}
+      {contextMenu && !versionId && !contextMenu.nodeId && !contextMenu.edgeId && (
+        <NodeSelector
+          nodes={availableNodeTypes}
+          onSelect={handleAddNode}
+          onClose={closeContextMenu}
+          position={{ x: contextMenu.x, y: contextMenu.y }}
         />
       )}
 
