@@ -164,7 +164,7 @@ export function DeploymentPage() {
         {activeTab === 'deployment' && (
           <div className="grid grid-cols-2 gap-6">
             {/* 좌측 컬럼 - 배포할 버전 선택 */}
-            <section className="rounded-none border p-6 space-y-3 bg-white transition-all duration-200 hover:scale-[1.005]">
+            <section className="rounded-lg border p-6 space-y-3 bg-white transition-all duration-200">
               <VersionSelector
                 botId={botId!}
                 currentVersionId={deploymentInfo.currentVersionId}
@@ -179,7 +179,7 @@ export function DeploymentPage() {
             </section>
 
             {/* 우측 컬럼 - 배포 방식 */}
-            <section className="rounded-none border p-6 space-y-4 bg-white transition-all duration-200 hover:scale-[1.005]">
+            <section className="rounded-lg border p-6 space-y-4 bg-white transition-all duration-200">
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold">배포 방식</h2>
                 <p className="text-sm text-muted-foreground">
@@ -191,7 +191,7 @@ export function DeploymentPage() {
                   <Button
                     variant="outline"
                     onClick={handleRunApp}
-                    className="group rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
                     style={{
                       backgroundImage: 'none',
                     }}
@@ -212,7 +212,7 @@ export function DeploymentPage() {
                         <Button
                           variant="outline"
                           disabled
-                          className="w-full rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
                         >
                           <span className="text-base font-semibold">앱 실행</span>
                           <span className="text-xs text-muted-foreground">별도 창에서 앱을 실행합니다</span>
@@ -226,7 +226,7 @@ export function DeploymentPage() {
                   <Button
                     variant="outline"
                     onClick={openEmbedDialog}
-                    className="group rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
                     style={{
                       backgroundImage: 'none',
                     }}
@@ -247,7 +247,7 @@ export function DeploymentPage() {
                         <Button
                           variant="outline"
                           disabled
-                          className="w-full rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
                         >
                           <span className="text-base font-semibold">사이트에 삽입</span>
                           <span className="text-xs text-muted-foreground">웹사이트에 임베드할 코드를 생성합니다</span>
@@ -261,7 +261,7 @@ export function DeploymentPage() {
                   <Button
                     variant="outline"
                     onClick={openApiDialog}
-                    className="group rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
                     style={{
                       backgroundImage: 'none',
                     }}
@@ -282,7 +282,7 @@ export function DeploymentPage() {
                         <Button
                           variant="outline"
                           disabled
-                          className="w-full rounded-none h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
                         >
                           <span className="text-base font-semibold">API 참조</span>
                           <span className="text-xs text-muted-foreground">API 엔드포인트 정보를 확인합니다</span>
@@ -314,7 +314,7 @@ export function DeploymentPage() {
         )}
 
         {activeTab === 'slack' && (
-          <div className="rounded-none border p-6 bg-white transition-all duration-200 hover:scale-[1.005]">
+          <div className="rounded-lg border p-6 bg-white transition-all duration-200">
             <IntegrationsPanel botId={botId} />
           </div>
         )}

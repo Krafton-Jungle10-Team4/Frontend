@@ -12,13 +12,13 @@ export function APIEndpointSection() {
       <CardContent className="space-y-3">
         <div>
           <p className="text-sm text-muted-foreground mb-2">Base URL</p>
-          <code className="px-2 py-1.5 bg-gray-100 rounded-none text-xs block text-gray-700 font-normal">
+          <code className="px-2 py-1.5 bg-gray-100 rounded text-xs block text-gray-700 font-normal">
             {PUBLIC_API_BASE_URL}
           </code>
         </div>
         <div>
           <p className="text-sm text-muted-foreground mb-2">워크플로우 실행</p>
-          <code className="px-2 py-1.5 bg-gray-100 rounded-none text-xs block text-gray-700 font-normal">
+          <code className="px-2 py-1.5 bg-gray-100 rounded text-xs block text-gray-700 font-normal">
             POST {PUBLIC_API_BASE_URL}/workflows/run
           </code>
         </div>
@@ -26,7 +26,7 @@ export function APIEndpointSection() {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-none transition-all duration-200 hover:scale-[1.03]"
+            className="transition-all duration-200 hover:scale-[1.03]"
             onClick={() =>
               window.open('https://docs.snapagent.com/api', '_blank')
             }

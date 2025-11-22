@@ -69,7 +69,7 @@ export function CreateAPIKeyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:!max-w-[500px] rounded-none">
+      <DialogContent className="sm:!max-w-[500px]">
         <DialogHeader>
           <DialogTitle>새 API 키 생성</DialogTitle>
           <DialogDescription>
@@ -90,7 +90,7 @@ export function CreateAPIKeyDialog({
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Production API Key"
-              className="rounded-none"
+              className=""
               required
             />
           </div>
@@ -105,7 +105,7 @@ export function CreateAPIKeyDialog({
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="프로덕션 환경용"
-              className="rounded-none"
+              className=""
               rows={2}
             />
           </div>
@@ -149,7 +149,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
-                  className="rounded-none"
+                  className=""
                   min={1}
                 />
               </div>
@@ -170,7 +170,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
-                  className="rounded-none"
+                  className=""
                   min={1}
                 />
               </div>
@@ -191,7 +191,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
-                  className="rounded-none"
+                  className=""
                   min={1}
                 />
               </div>
@@ -269,14 +269,14 @@ export function CreateAPIKeyDialog({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="rounded-none transition-all duration-200 hover:scale-[1.05]"
+              className="transition-all duration-200 hover:scale-[1.05]"
             >
               취소
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="rounded-none bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.05]"
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.05]"
             >
               {isLoading ? (
                 <>

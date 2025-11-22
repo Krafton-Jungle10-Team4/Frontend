@@ -81,7 +81,7 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="예: 엔비디아 소식을 알고싶어"
-          className="rounded-none"
+          className=""
           rows={4}
           disabled={!apiKey || isLoading}
         />
@@ -92,7 +92,7 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
           onClick={handleTest}
           disabled={!apiKey || isLoading || !input.trim()}
           style={{ backgroundColor: '#2563eb', width: '33.33%' }}
-          className="rounded-none text-white hover:bg-[#1d4ed8] transition-all duration-200 hover:scale-[1.03]"
+          className="text-white hover:bg-[#1d4ed8] transition-all duration-200 hover:scale-[1.03]"
         >
           {isLoading ? (
             <>

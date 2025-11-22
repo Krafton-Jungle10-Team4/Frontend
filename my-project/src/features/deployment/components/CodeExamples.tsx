@@ -98,17 +98,17 @@ console.log(data.outputs);`,
       </div>
 
       <Tabs defaultValue="curl" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 rounded-none gap-0">
-          <TabsTrigger value="curl" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">cURL</TabsTrigger>
-          <TabsTrigger value="python" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">Python</TabsTrigger>
-          <TabsTrigger value="javascript" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">JavaScript</TabsTrigger>
-          <TabsTrigger value="typescript" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">TypeScript</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 gap-2">
+          <TabsTrigger value="curl" className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">cURL</TabsTrigger>
+          <TabsTrigger value="python" className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">Python</TabsTrigger>
+          <TabsTrigger value="javascript" className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">JavaScript</TabsTrigger>
+          <TabsTrigger value="typescript" className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">TypeScript</TabsTrigger>
         </TabsList>
 
         {Object.entries(examples).map(([lang, code]) => (
           <TabsContent key={lang} value={lang} className="space-y-2">
             <div className="relative">
-              <div className="bg-white border border-gray-300 rounded-none overflow-hidden">
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
                 <pre className="overflow-x-auto text-[13px] leading-relaxed font-normal" style={{ fontFamily: "JetBrains Mono, Fira Code, SF Mono, Roboto Mono, Menlo, Monaco, Courier New, monospace" }}>
                   <code className="block">
                     {code.split('\n').map((line, index) => (
@@ -127,7 +127,7 @@ console.log(data.outputs);`,
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2 right-2 bg-white hover:bg-gray-100 border-gray-300 rounded-none transition-all duration-200 hover:scale-[1.03]"
+                className="absolute top-2 right-2 bg-white hover:bg-gray-100 border-gray-300 rounded-md transition-all duration-200 hover:scale-[1.03]"
                 onClick={() => handleCopy(lang, code)}
               >
                 {copiedLang === lang ? (
@@ -148,7 +148,7 @@ console.log(data.outputs);`,
       </Tabs>
 
       {!apiKey && (
-        <div className="rounded-none border border-blue-400 bg-gray-50 p-3">
+        <div className="rounded-lg border border-blue-400 bg-gray-50 p-3">
           <p className="text-sm text-gray-700 flex items-center gap-2">
             <span>🔑</span>
             <span>API 키를 생성하면 실제 키가 예제 코드에 표시됩니다.</span>

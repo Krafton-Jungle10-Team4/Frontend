@@ -706,7 +706,7 @@ const WorkflowInner = () => {
               {/* 버전 선택/가져오기 버튼 */}
               <Button
                 onClick={source === 'marketplace' ? handleImportFromMarketplace : handleSelectVersion}
-                className="!text-white rounded-none"
+                className="!text-white"
                 style={{
                   backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
                 }}

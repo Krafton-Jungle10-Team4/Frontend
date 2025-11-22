@@ -95,7 +95,7 @@ export function MarketplaceItemDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto rounded-none">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
@@ -120,7 +120,7 @@ export function MarketplaceItemDetailDialog({
                     e.stopPropagation();
                     handleViewAgent();
                   }}
-                  className="flex items-center gap-2 rounded-none relative overflow-hidden group border-gray-300 transition-transform duration-300 hover:scale-110"
+                  className="flex items-center gap-2 relative overflow-hidden group border-gray-300 transition-transform duration-300 hover:scale-110"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-black to-blue-600 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                   <Workflow className="w-4 h-4 relative z-10 group-hover:text-white transition-colors duration-300" />
@@ -147,14 +147,14 @@ export function MarketplaceItemDetailDialog({
 
               {/* 통계 */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
                     <Download className="w-4 h-4 text-gray-700" />
                     <span className="text-sm font-semibold">다운로드</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">{formatNumber(item.download_count)}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-none border border-gray-200">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2 mb-1">
                     <Eye className="w-4 h-4 text-gray-700" />
                     <span className="text-sm font-semibold">조회수</span>
@@ -167,7 +167,7 @@ export function MarketplaceItemDetailDialog({
               {item.workflow_version && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold">워크플로우 정보</h3>
-                  <div className="p-4 bg-gray-50 rounded-none border border-gray-200 space-y-2">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">버전:</span>
                       <span className="font-mono">{item.workflow_version.version}</span>
@@ -188,7 +188,7 @@ export function MarketplaceItemDetailDialog({
               {item.readme && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold">상세 설명</h3>
-                  <div className="p-4 bg-gray-50 rounded-none border border-gray-200 prose prose-sm max-w-none">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 prose prose-sm max-w-none">
                     <pre className="whitespace-pre-wrap text-sm">{item.readme}</pre>
                   </div>
                 </div>

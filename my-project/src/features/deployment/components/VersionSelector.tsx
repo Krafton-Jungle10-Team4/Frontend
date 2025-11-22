@@ -323,12 +323,12 @@ export function VersionSelector({
               <dd className="flex items-center gap-2">
                 <button
                   onClick={handleCopyWidgetKey}
-                  className="p-1.5 hover:bg-blue-50 rounded-none transition-colors"
+                  className="p-1.5 hover:bg-blue-50 rounded-md transition-colors"
                   title="복사"
                 >
                   <Copy className="w-4 h-4 text-gray-600 hover:text-blue-600" />
                 </button>
-                <code className="font-mono text-xs text-gray-700 bg-gray-100 px-3 py-2 rounded-none flex-1">
+                <code className="font-mono text-xs text-gray-700 bg-gray-100 px-3 py-2 rounded-md flex-1">
                   {widgetKey}
                 </code>
               </dd>
@@ -337,7 +337,7 @@ export function VersionSelector({
 
           {/* 허용 도메인 정보 (배포된 경우에만 표시) */}
           {currentVersionId && widgetKey && allowedDomains && (
-            <div className="rounded-none border p-3 bg-white space-y-2">
+            <div className="rounded-lg border p-3 bg-white space-y-2">
               <dt className="text-sm font-medium text-gray-700">허용 도메인</dt>
               <dd className="text-sm text-gray-600">
                 {allowedDomains.length
@@ -356,7 +356,7 @@ export function VersionSelector({
             <Button
               onClick={handleDeploy}
               disabled={isDeploying || !selectedVersionId || isDeleting}
-              className="h-8 px-4 rounded-none border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
+              className="h-8 px-4 rounded-md border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
               style={{ minWidth: '105px' }}
             >
               {isDeploying ? (
@@ -376,7 +376,7 @@ export function VersionSelector({
             <Button
               onClick={() => setShowDeleteDialog(true)}
               disabled={isDeleting || isDeploying}
-              className="h-8 px-4 rounded-none border-none bg-red-100 text-red-700 transition-all duration-200 hover:bg-[#ef4444] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-100 disabled:hover:text-red-700 disabled:hover:scale-100"
+              className="h-8 px-4 rounded-md border-none bg-red-100 text-red-700 transition-all duration-200 hover:bg-[#ef4444] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-100 disabled:hover:text-red-700 disabled:hover:scale-100"
               style={{ minWidth: '105px' }}
             >
               {isDeleting ? (
@@ -396,7 +396,7 @@ export function VersionSelector({
           <Button
             onClick={handleDeploy}
             disabled={isDeploying || !selectedVersionId}
-            className="h-8 px-4 rounded-none border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
+            className="h-8 px-4 rounded-md border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
             style={{ minWidth: '105px' }}
           >
             {isDeploying ? (
@@ -431,11 +431,11 @@ export function VersionSelector({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting} className="rounded-none">취소</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting} className="">취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 rounded-none"
+              className="bg-red-600 hover:bg-red-700"
             >
               {isDeleting ? (
                 <>

@@ -30,7 +30,7 @@ export function APIKeySection({ botId, apiKeys, isLoading }: APIKeySectionProps)
           <Button
             onClick={() => setShowCreateDialog(true)}
             style={{ backgroundColor: '#2563eb' }}
-            className="rounded-none hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03]"
+            className="hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03]"
           >
             <Plus className="mr-2 h-4 w-4" />
             새 API 키 생성

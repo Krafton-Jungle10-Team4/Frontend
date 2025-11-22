@@ -111,7 +111,7 @@ export function BotVersionSelectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[80vh] rounded-none">
+      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>
             {step === 'bot' ? '봇 선택' : '버전 선택'}
@@ -225,14 +225,14 @@ export function BotVersionSelectorDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="hover:scale-105 transition-transform rounded-none">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="hover:scale-105 transition-transform">
             취소
           </Button>
           {step === 'version' && (
             <Button
               onClick={handleConfirm}
               disabled={!selectedVersion}
-              className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-transform rounded-none"
+              className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-transform"
             >
               확인
             </Button>

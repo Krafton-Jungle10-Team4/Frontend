@@ -88,7 +88,7 @@ export function VersionHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl rounded-none max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {botName} - 버전 히스토리
@@ -176,7 +176,7 @@ export function VersionHistoryModal({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-none border-blue-500 text-blue-600 hover:bg-blue-50"
+                        className="border-blue-500 text-blue-600 hover:bg-blue-50"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenVersion(version.id);
@@ -195,14 +195,14 @@ export function VersionHistoryModal({
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="rounded-none"
+                className=""
               >
                 취소
               </Button>
               <Button
                 onClick={handleConfirm}
                 disabled={!selectedVersionId}
-                className="rounded-none bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 확인
               </Button>
