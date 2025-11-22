@@ -85,7 +85,7 @@ export function TopNavigation({
   const t = translations[language];
 
   return (
-    <div className="border-b transition-all h-14 bg-gray-100 border-border">
+    <div className="border-b transition-all h-16 bg-gray-100 border-border">
       <div className="relative w-full flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
@@ -124,12 +124,13 @@ export function TopNavigation({
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus:outline-none transition-all duration-200 hover:scale-105 active:scale-95">
+              <button className="focus:outline-none transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2">
                 <Avatar className="size-9">
                   <AvatarFallback className="bg-blue-600 text-white">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
+                <span className="text-sm font-medium text-gray-700">{userName}</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0">

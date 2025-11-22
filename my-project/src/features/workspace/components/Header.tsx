@@ -27,7 +27,7 @@ export function Header({
   const tabLabels = {
     marketplace: { en: 'Marketplace', ko: '마켓플레이스' },
     studio: { en: 'Studio', ko: '스튜디오' },
-    knowledge: { en: 'Knowledge', ko: '지식' },
+    knowledge: { en: 'Knowledge', ko: '지식 관리' },
     library: { en: 'Library', ko: '라이브러리' },
   } as const;
 

@@ -50,25 +50,27 @@ export function StandaloneAppPage() {
 
   return (
     <div
-      className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-muted/20"
+      className="min-h-screen flex items-center justify-center p-0 sm:p-4 md:p-6 bg-white dark:bg-slate-950"
       role="main"
       aria-label="챗봇 대화 페이지"
     >
-      <ChatHeader config={config} />
-      <ChatMessageList messages={messages} config={config} />
-      {chatError && (
-        <div className="px-4 sm:px-6 pb-2 animate-in slide-in-from-top-2 duration-300">
-          <Alert variant="destructive" className="shadow-md">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-sm">{chatError}</AlertDescription>
-          </Alert>
-        </div>
-      )}
-      <ChatInput
-        onSend={sendMessage}
-        disabled={sending}
-        placeholder={config?.config.placeholder_text || '메시지를 입력하세요...'}
-      />
+      <div className="w-full sm:w-auto sm:min-w-[640px] sm:max-w-[896px] h-screen sm:h-[calc(100vh-4rem)] md:h-[85vh] flex flex-col bg-background sm:bg-background/95 backdrop-blur-none sm:backdrop-blur-sm border-0 sm:border sm:border-border/50 rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl overflow-hidden">
+        <ChatHeader config={config} />
+        <ChatMessageList messages={messages} config={config} />
+        {chatError && (
+          <div className="px-4 sm:px-6 pb-2 animate-in slide-in-from-top-2 duration-300">
+            <Alert variant="destructive" className="shadow-md">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-sm">{chatError}</AlertDescription>
+            </Alert>
+          </div>
+        )}
+        <ChatInput
+          onSend={sendMessage}
+          disabled={sending}
+          placeholder={config?.config.placeholder_text || '메시지를 입력하세요...'}
+        />
+      </div>
     </div>
   );
 }

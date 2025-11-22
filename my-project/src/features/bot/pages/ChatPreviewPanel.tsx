@@ -520,8 +520,8 @@ export function ChatPreviewPanel({
       {/* Chat Header */}
       <div className="bg-white text-gray-800 p-4 flex items-center justify-between border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center">
-            <span className="text-xs text-gray-900">{botInitial}</span>
+          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-xs text-white">{botInitial}</span>
           </div>
           <h3 className="text-sm">{botName}</h3>
         </div>
@@ -540,8 +540,8 @@ export function ChatPreviewPanel({
       >
         {/* Bot Avatar and Name */}
         <div className="flex flex-col items-center mb-6 mt-4">
-          <div className="w-20 h-20 bg-teal-400 rounded-full flex items-center justify-center mb-3">
-            <span className="text-2xl text-gray-900">{botInitial}</span>
+          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mb-3">
+            <span className="text-2xl text-white">{botInitial}</span>
           </div>
           <p className="text-gray-800 text-sm">{botName}</p>
         </div>
@@ -588,7 +588,7 @@ export function ChatPreviewPanel({
             <div key={message.id}>
               {message.type === 'user' ? (
                 <div className="flex justify-end">
-                  <div className="bg-teal-400 text-gray-900 rounded-2xl px-4 py-2 max-w-[80%]">
+                  <div className="bg-blue-600 text-white rounded-2xl px-4 py-2 max-w-[80%]">
                     <p className="text-sm whitespace-pre-wrap">
                       {message.content}
                     </p>
@@ -596,8 +596,8 @@ export function ChatPreviewPanel({
                 </div>
               ) : (
                 <div className="flex justify-start gap-2">
-                  <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-xs text-gray-900">{botInitial}</span>
+                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-xs text-white">{botInitial}</span>
                   </div>
                   <div className="max-w-[80%]">
                     <div className="bg-white text-gray-800 rounded-2xl px-4 py-2 border border-gray-200">
@@ -651,8 +651,8 @@ export function ChatPreviewPanel({
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex justify-start gap-2">
-              <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <span className="text-xs text-gray-900">{botInitial}</span>
+              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-xs text-white">{botInitial}</span>
               </div>
               <div className="bg-white text-gray-800 rounded-2xl px-4 py-3 flex gap-1 border border-gray-200">
                 <div

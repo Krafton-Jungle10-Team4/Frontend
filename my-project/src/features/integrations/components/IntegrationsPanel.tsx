@@ -63,7 +63,12 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId }) =
             워크플로우에서 Slack으로 메시지를 전송하려면 연동이 필요합니다.
           </p>
         </div>
-        <Button onClick={handleConnect} disabled={isLoading} className="gap-2">
+        <Button
+          onClick={handleConnect}
+          disabled={isLoading}
+          style={{ backgroundColor: '#2563eb' }}
+          className="gap-2 rounded-none hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03]"
+        >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -87,13 +92,17 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId }) =
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : displayIntegrations.length === 0 ? (
-        <Card>
+        <Card className="rounded-none">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Slack className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">
               연동된 Slack 워크스페이스가 없습니다.
             </p>
-            <Button onClick={handleConnect} variant="outline" className="gap-2">
+            <Button
+              onClick={handleConnect}
+              variant="outline"
+              className="gap-2 rounded-none border-[#2563eb] text-[#2563eb] hover:bg-[#2563eb] hover:text-white transition-all duration-200 hover:scale-[1.03]"
+            >
               <Slack className="h-4 w-4" />
               Slack 연동하기
             </Button>
@@ -102,7 +111,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId }) =
       ) : (
         <div className="grid gap-4">
           {displayIntegrations.map((integration) => (
-            <Card key={integration.id}>
+            <Card key={integration.id} className="rounded-none">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -180,7 +189,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId }) =
       )}
 
       {/* Info */}
-      <Alert>
+      <Alert className="rounded-none">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           <strong>안내:</strong> Slack 연동을 통해 워크플로우에서 Slack 채널로 메시지를

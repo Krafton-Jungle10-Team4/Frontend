@@ -11,7 +11,7 @@ interface NavigationTabsProps {
 const tabs = [
   { id: 'marketplace', label: { en: 'Marketplace', ko: '마켓플레이스' }, icon: Store },
   { id: 'studio', label: { en: 'Studio', ko: '스튜디오' }, icon: Workflow },
-  { id: 'knowledge', label: { en: 'Knowledge', ko: '지식' }, icon: BookOpen },
+  { id: 'knowledge', label: { en: 'Knowledge', ko: '지식 관리' }, icon: BookOpen },
 ] as const;
 
 export function NavigationTabs({ activeTab, onTabChange, language }: NavigationTabsProps) {
