@@ -27,6 +27,16 @@ export const CATEGORY_ORDER: NodeCategory[] = [
 ];
 
 /**
+ * NodeSelector에서 제외할 노드 타입
+ * - variable-assigner: 레거시 노드 (assigner로 대체됨)
+ * - imported-workflow: 가져오기 기능을 통해서만 추가 가능
+ */
+export const EXCLUDED_NODE_TYPES: string[] = [
+  'variable-assigner',
+  'imported-workflow',
+];
+
+/**
  * 노드 타입별 카테고리 매핑
  */
 export const NODE_CATEGORIES: Record<string, NodeCategory> = {

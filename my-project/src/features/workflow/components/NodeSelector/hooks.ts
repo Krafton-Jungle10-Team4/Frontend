@@ -5,20 +5,25 @@
 import { useMemo } from 'react';
 import type { NodeTypeResponse } from '../../types/api.types';
 import { NodeCategory, type GroupedNodes } from './types';
-import { NODE_CATEGORIES } from './constants';
+import { NODE_CATEGORIES, EXCLUDED_NODE_TYPES } from './constants';
 
 /**
- * 노드 필터링 훅 (검색어 기반)
+ * 노드 필터링 훅 (검색어 기반 + 제외 노드 필터링)
  */
 export function useFilteredNodes(
   nodes: NodeTypeResponse[],
   searchText: string
 ): NodeTypeResponse[] {
   return useMemo(() => {
-    if (!searchText.trim()) return nodes;
+    // 제외할 노드 타입 필터링
+    const availableNodes = nodes.filter(
+      (node) => !EXCLUDED_NODE_TYPES.includes(node.type)
+    );
+
+    if (!searchText.trim()) return availableNodes;
 
     const lowerSearch = searchText.toLowerCase();
-    return nodes.filter(
+    return availableNodes.filter(
       (node) =>
         node.label.toLowerCase().includes(lowerSearch) ||
         node.description?.toLowerCase().includes(lowerSearch) ||
