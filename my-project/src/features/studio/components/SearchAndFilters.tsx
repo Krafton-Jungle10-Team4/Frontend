@@ -47,8 +47,11 @@ export function SearchAndFilters({
 
   return (
     <div className="space-y-3">
-      {/* 첫 번째 행: 태그 드롭다운 + 검색 + 정렬 */}
+      {/* 첫 번째 행: 정렬 + 태그 드롭다운 + 검색 */}
       <div className="flex items-center gap-2 justify-between">
+        {/* 정렬 (왼쪽) */}
+        <SortDropdown value={sortBy} onChange={onSortChange} />
+
         <div className="flex items-center gap-2">
           {/* 태그 필터 드롭다운 */}
           <DropdownMenu onOpenChange={(open) => !open && setTagSearchQuery('')}>
@@ -59,7 +62,7 @@ export function SearchAndFilters({
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="end" className="w-56">
               {/* 태그 검색 */}
               <div className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
                 <div className="relative">
@@ -110,9 +113,6 @@ export function SearchAndFilters({
             />
           </div>
         </div>
-
-        {/* 정렬 */}
-        <SortDropdown value={sortBy} onChange={onSortChange} />
       </div>
 
       {/* 두 번째 행: 선택된 태그 표시 */}

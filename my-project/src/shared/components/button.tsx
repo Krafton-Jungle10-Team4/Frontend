@@ -30,7 +30,7 @@ const buttonVariants = cva(
         icon: 'size-9',
       },
       rounded: {
-        default: 'rounded-none',
+        default: 'rounded-md',
         sharp: 'rounded-sharp',
         studio: 'rounded-studio',
         full: 'rounded-full',

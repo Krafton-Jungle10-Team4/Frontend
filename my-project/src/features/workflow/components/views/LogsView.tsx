@@ -207,7 +207,7 @@ const LogsView = () => {
             {isLoading && runs.length === 0 ? (
               renderSkeletons()
             ) : runs.length === 0 ? (
-              <Card className="rounded-none p-8 text-center text-muted-foreground transition-all hover:scale-[1.005]">
+              <Card className="rounded-lg p-8 text-center text-muted-foreground transition-all hover:scale-[1.005]">
                 조건에 맞는 실행 로그가 없습니다.
               </Card>
             ) : (

@@ -155,7 +155,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-none">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <div className="flex items-center gap-2">
               <DialogTitle>{defaultBotName} 버전 커밋</DialogTitle>
@@ -177,7 +177,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       id="library_description"
                       placeholder="현재 버전의 변경점에 대해 설명해주세요 (선택사항)"
                       rows={3}
-                      className="rounded-none"
+                      className=""
                       {...register('library_description', {
                         maxLength: {
                           value: 500,
@@ -201,7 +201,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
-                      className="rounded-none"
+                      className=""
                     />
                     {tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
@@ -209,7 +209,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="cursor-pointer rounded-none"
+                            className="cursor-pointer"
                             onClick={() => handleRemoveTag(tag)}
                           >
                             {tag} ×
@@ -241,14 +241,14 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isPublishing}
-                className="rounded-none hover:scale-[1.05] transition-transform"
+                className="hover:scale-[1.05] transition-transform"
               >
                 취소
               </Button>
               <Button
                 type="submit"
                 disabled={isPublishing}
-                className="!text-white rounded-none hover:scale-[1.05] transition-transform"
+                className="!text-white hover:scale-[1.05] transition-transform"
                 style={{
                   backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
                 }}
