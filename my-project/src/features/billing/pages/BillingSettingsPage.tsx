@@ -10,7 +10,7 @@ import { useUIStore } from '@/shared/stores/uiStore';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import { Progress } from '@/shared/components/progress';
-import { LeftSidebar, TopNavigation, WorkspaceSidebar } from '@/widgets';
+import { TopNavigation } from '@/widgets';
 import { mockPlans } from '../mock/billingMock';
 import { costApi, type DailyCostSummary, type ModelUsageBreakdown } from '../api/costApi';
 import { UsageChart } from '@/shared/components/usage/UsageChart';
@@ -27,7 +27,6 @@ export function BillingSettingsPage() {
   const userEmail = user?.email || '';
   const { logout } = useAuth();
   
-  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const language = useUIStore((state) => state.language);
   const setLanguage = useUIStore((state) => state.setLanguage);
@@ -627,16 +626,6 @@ export function BillingSettingsPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <WorkspaceSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        userName={userName}
-        currentPage={t.currentPage}
-        language={language}
-      />
-      <div className="hidden lg:block">
-        <LeftSidebar onLogoClick={() => navigate('/home')} />
-      </div>
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavigation
           onToggleSidebar={() => setSidebarOpen(true)}
