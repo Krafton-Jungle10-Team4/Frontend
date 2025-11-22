@@ -66,13 +66,6 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">API 테스트</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          실제 공개 API로 워크플로우를 실행해보세요.
-        </p>
-      </div>
-
       {!apiKey && (
         <Alert>
           <AlertDescription>
@@ -88,28 +81,32 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="예: 엔비디아 소식을 알고싶어"
+          className="rounded-none"
           rows={4}
           disabled={!apiKey || isLoading}
         />
       </div>
 
-      <Button
-        onClick={handleTest}
-        disabled={!apiKey || isLoading || !input.trim()}
-        className="w-full"
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            실행 중...
-          </>
-        ) : (
-          <>
-            <Play className="mr-2 h-4 w-4" />
-            실행
-          </>
-        )}
-      </Button>
+      <div className="flex justify-end">
+        <Button
+          onClick={handleTest}
+          disabled={!apiKey || isLoading || !input.trim()}
+          style={{ backgroundColor: '#2563eb', width: '33.33%' }}
+          className="rounded-none text-white hover:bg-[#1d4ed8] transition-all duration-200 hover:scale-[1.03]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              실행 중...
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              실행
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* 에러 표시 */}
       {error && (
@@ -124,7 +121,7 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
       {result && (
         <div className="space-y-2">
           <Label>응답 결과</Label>
-          <div className="rounded-lg border bg-muted/30">
+          <div className="rounded-lg border bg-gray-50">
             <div className="p-4 space-y-3">
               {/* 상태 */}
               <div className="flex items-center justify-between">
@@ -167,7 +164,7 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
             {result.outputs && (
               <div className="border-t p-4">
                 <Label className="mb-2 block">출력</Label>
-                <pre className="p-3 bg-background rounded text-sm overflow-x-auto">
+                <pre className="p-3 bg-gray-100 text-gray-800 rounded text-sm overflow-x-auto">
                   {JSON.stringify(result.outputs, null, 2)}
                 </pre>
               </div>
@@ -175,11 +172,11 @@ export function InlineTester({ botId, apiKey }: InlineTesterProps) {
 
             {/* 전체 응답 (디버깅용) */}
             <details className="border-t">
-              <summary className="p-4 cursor-pointer text-sm font-medium hover:bg-muted/50">
+              <summary className="p-4 cursor-pointer text-sm font-medium hover:bg-gray-100">
                 전체 응답 보기
               </summary>
               <div className="p-4 pt-0">
-                <pre className="p-3 bg-background rounded text-xs overflow-x-auto">
+                <pre className="p-3 bg-gray-100 text-gray-800 rounded text-xs overflow-x-auto">
                   {JSON.stringify(result, null, 2)}
                 </pre>
               </div>

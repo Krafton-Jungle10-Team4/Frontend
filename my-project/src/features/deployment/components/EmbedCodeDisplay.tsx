@@ -53,9 +53,9 @@ export function EmbedCodeDisplay({
   const syntaxStyle = theme === 'dark' ? vscDarkPlus : vs;
 
   return (
-    <div className="relative rounded-lg border bg-muted/40 overflow-hidden">
+    <div className="relative rounded-none border bg-muted/40 overflow-hidden">
       {/* 헤더: 언어 표시 + 복사 버튼 */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/60">
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/20">
         <span className="text-xs font-mono text-muted-foreground uppercase">
           {language}
         </span>
@@ -63,7 +63,7 @@ export function EmbedCodeDisplay({
           variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-7 gap-1.5 px-2"
+          className="h-7 gap-1.5 px-2 hover:scale-[1.005] transition-transform"
         >
           {isCopied ? (
             <>

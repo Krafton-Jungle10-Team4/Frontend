@@ -69,7 +69,7 @@ export function CreateAPIKeyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:!max-w-[500px] rounded-none">
         <DialogHeader>
           <DialogTitle>새 API 키 생성</DialogTitle>
           <DialogDescription>
@@ -90,6 +90,7 @@ export function CreateAPIKeyDialog({
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Production API Key"
+              className="rounded-none"
               required
             />
           </div>
@@ -104,6 +105,7 @@ export function CreateAPIKeyDialog({
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="프로덕션 환경용"
+              className="rounded-none"
               rows={2}
             />
           </div>
@@ -119,6 +121,7 @@ export function CreateAPIKeyDialog({
                   bind_to_latest_published: checked === true,
                 })
               }
+              className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
             />
             <Label htmlFor="bind_to_latest" className="font-normal">
               최신 published 버전 자동 사용
@@ -146,6 +149,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="rounded-none"
                   min={1}
                 />
               </div>
@@ -166,6 +170,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="rounded-none"
                   min={1}
                 />
               </div>
@@ -186,6 +191,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="rounded-none"
                   min={1}
                 />
               </div>
@@ -209,6 +215,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <Label htmlFor="perm_run" className="font-normal">
                   실행
@@ -227,6 +234,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <Label htmlFor="perm_read" className="font-normal">
                   조회
@@ -245,6 +253,7 @@ export function CreateAPIKeyDialog({
                       },
                     })
                   }
+                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <Label htmlFor="perm_stop" className="font-normal">
                   중지
@@ -260,10 +269,15 @@ export function CreateAPIKeyDialog({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
+              className="rounded-none transition-all duration-200 hover:scale-[1.05]"
             >
               취소
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="rounded-none bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.05]"
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

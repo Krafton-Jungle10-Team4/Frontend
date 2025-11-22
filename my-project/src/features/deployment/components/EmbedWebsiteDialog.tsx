@@ -89,11 +89,11 @@ export function EmbedWebsiteDialog({ botId: _botId }: EmbedWebsiteDialogProps) {
           )}
 
           <DialogFooter className="shrink-0">
-            <Button variant="outline" onClick={closeDialog}>
+            <Button variant="outline" onClick={closeDialog} className="hover:scale-[1.005] transition-transform">
               닫기
             </Button>
             {embedScript && (
-              <Button onClick={handleCopyAndClose}>코드 복사 후 닫기</Button>
+              <Button onClick={handleCopyAndClose} className="bg-blue-600 hover:bg-blue-700 hover:scale-[1.005] transition-transform">코드 복사 후 닫기</Button>
             )}
           </DialogFooter>
         </div>

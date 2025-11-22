@@ -99,7 +99,7 @@ export function APIKeyList({ botId, keys, isLoading }: APIKeyListProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <code className="text-xs bg-muted px-2 py-1 rounded">
+                  <code className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
                     {key.key_preview}
                   </code>
                 </TableCell>

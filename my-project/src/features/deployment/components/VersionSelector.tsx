@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/shared/components/alert-dialog';
-import { Loader2, CheckCircle2, Calendar, GitBranch, Trash2, Eye, EyeOff, History } from 'lucide-react';
+import { Loader2, CheckCircle2, Calendar, GitBranch, Trash2, History, RefreshCw, Copy } from 'lucide-react';
 import { workflowApi } from '@/features/workflow/api/workflowApi';
 import { deploymentApi } from '../api/deploymentApi';
 import { toast } from 'sonner';
@@ -55,7 +55,6 @@ export function VersionSelector({
   const [isDeploying, setIsDeploying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showWidgetKey, setShowWidgetKey] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // 게시된 버전 목록 조회
@@ -201,11 +200,19 @@ export function VersionSelector({
     });
   };
 
-  const maskWidgetKey = (key: string) => {
-    if (!key || key.length <= 3) return key;
-    const start = key.slice(0, 3);
-    const masked = '*'.repeat(key.length - 3);
-    return `${start}${masked}`;
+  const handleCopyWidgetKey = async () => {
+    if (!widgetKey) return;
+
+    try {
+      await navigator.clipboard.writeText(widgetKey);
+      toast.success('Widget Key가 클립보드에 복사되었습니다', {
+        id: `copy-widget-key-${botId}`,
+      });
+    } catch (error) {
+      toast.error('복사에 실패했습니다', {
+        id: `copy-widget-key-error-${botId}`,
+      });
+    }
   };
 
   const selectedVersion = versions.find((v) => v.id === selectedVersionId);
@@ -234,91 +241,105 @@ export function VersionSelector({
   }
 
   return (
-    <div className="space-y-6">
-      {/* 버전 히스토리 */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GitBranch className="w-5 h-5 text-muted-foreground" />
-            <h3 className="text-lg font-semibold">배포할 버전 선택</h3>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-none"
-            onClick={() => setShowVersionHistory(true)}
-          >
-            <History className="w-4 h-4 mr-2" />
-            버전 히스토리
-          </Button>
-        </div>
-      </div>
-
-      {/* 선택된 버전 상세 정보 */}
+    <div className="flex flex-col h-full">
       {selectedVersion && (
-        <div className="rounded-lg border p-4 bg-muted/30 space-y-3">
-          {/* 선택된 버전 표시 */}
-          <div className="flex items-center gap-2">
-            {selectedVersion.id === currentVersionId ? (
-              <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-700 border-green-200">
-                {botName && <span className="font-semibold">{botName}</span>}
-                <span className="text-green-600 font-normal">{selectedVersion.version}</span>
-                <span className="text-green-600 font-normal ml-1">(운영 중)</span>
-              </Badge>
-            ) : preSelectedVersionId ? (
-              <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-700 border-blue-200">
-                <span className="font-semibold">선택된 버전:</span>
-                <span className="text-blue-600 font-normal">{selectedVersion.version}</span>
+        <div className="flex-1 space-y-6">
+          {/* 상단: 배포됨/미배포 + 봇 이름 + 버전 (배포된 경우에만) */}
+          <div className="flex items-center gap-3">
+            {currentVersionId ? (
+              <Badge variant="default" className="px-4 py-1.5 text-base bg-green-100 text-green-700 border-green-200 font-semibold">
+                배포됨
               </Badge>
             ) : (
-              <Badge variant="default" className="flex items-center gap-1 bg-gray-100 text-gray-700 border-gray-200">
-                <span className="font-semibold">버전:</span>
-                <span className="text-gray-600 font-normal">{selectedVersion.version}</span>
+              <Badge variant="default" className="px-4 py-1.5 text-base bg-gray-100 text-gray-700 border-gray-200 font-semibold">
+                미배포
+              </Badge>
+            )}
+            {botName && (
+              <h3 className="text-xl font-bold text-gray-900">{botName}</h3>
+            )}
+            {currentVersionId && (
+              <Badge variant="outline" className="px-3 py-1 text-sm border-none bg-gray-100">
+                {selectedVersion.version}
               </Badge>
             )}
           </div>
 
-          {/* Widget Key 정보 */}
-          {widgetKey && (
-            <div className="space-y-2">
-              <dt className="text-sm text-muted-foreground">Widget Key</dt>
-              <dd className="flex items-center gap-2">
-                <code className="font-mono text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                  {showWidgetKey ? widgetKey : maskWidgetKey(widgetKey)}
-                </code>
-                <button
-                  onClick={() => setShowWidgetKey(!showWidgetKey)}
-                  className="p-1 hover:bg-muted rounded transition-colors"
-                  title={showWidgetKey ? '키 숨기기' : '키 보기'}
+          {/* 구분선 */}
+          <div className="border-t border-gray-200 mx-4" />
+
+          {/* 버전 선택 (미배포인 경우에만 표시) */}
+          {!currentVersionId && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">버전을 선택하여 배포해주세요:</label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="border-none transition-all duration-200 hover:scale-105 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => setShowVersionHistory(true)}
                 >
-                  {showWidgetKey ? (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  )}
+                  <History className="w-4 h-4 mr-2" />
+                  버전 히스토리
+                </Button>
+              </div>
+              {selectedVersionId ? (
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <Badge variant="outline" className="px-3 py-1 text-base border-none bg-blue-100 text-blue-700 font-semibold">
+                    {selectedVersion.version}
+                  </Badge>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                  <p className="text-sm text-gray-500">버전을 선택해주세요</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 배포 날짜 + 버전 히스토리 (배포된 경우에만 표시) */}
+          {currentVersionId && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="w-4 h-4" />
+                {formatDate(selectedVersion.published_at || selectedVersion.created_at)}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="border-none transition-all duration-200 hover:scale-105 hover:bg-blue-50 hover:text-blue-600"
+                onClick={() => setShowVersionHistory(true)}
+              >
+                <History className="w-4 h-4 mr-2" />
+                버전 히스토리
+              </Button>
+            </div>
+          )}
+
+          {/* Widget Key 정보 (배포된 경우에만 표시) */}
+          {currentVersionId && widgetKey && (
+            <div className="space-y-3">
+              <dt className="text-sm font-medium text-gray-700">Widget Key</dt>
+              <dd className="flex items-center gap-2">
+                <button
+                  onClick={handleCopyWidgetKey}
+                  className="p-1.5 hover:bg-blue-50 rounded-none transition-colors"
+                  title="복사"
+                >
+                  <Copy className="w-4 h-4 text-gray-600 hover:text-blue-600" />
                 </button>
+                <code className="font-mono text-xs text-gray-700 bg-gray-100 px-3 py-2 rounded-none flex-1">
+                  {widgetKey}
+                </code>
               </dd>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              {formatDate(selectedVersion.published_at || selectedVersion.created_at)}
-            </div>
-            {selectedVersion.node_count !== undefined && (
-              <span>노드: {selectedVersion.node_count}개</span>
-            )}
-            {selectedVersion.edge_count !== undefined && (
-              <span>연결: {selectedVersion.edge_count}개</span>
-            )}
-          </div>
-
-          {/* 허용 도메인 정보 */}
-          {widgetKey && allowedDomains && (
-            <div className="pt-2 border-t space-y-1">
-              <dt className="text-sm text-muted-foreground">허용 도메인</dt>
-              <dd className="text-sm">
+          {/* 허용 도메인 정보 (배포된 경우에만 표시) */}
+          {currentVersionId && widgetKey && allowedDomains && (
+            <div className="rounded-none border p-3 bg-white space-y-2">
+              <dt className="text-sm font-medium text-gray-700">허용 도메인</dt>
+              <dd className="text-sm text-gray-600">
                 {allowedDomains.length
                   ? allowedDomains.join(', ')
                   : '모든 도메인 허용'}
@@ -330,54 +351,64 @@ export function VersionSelector({
 
       {/* 배포 버튼 */}
       <div className="flex justify-end gap-3">
-        {currentVersionId && (
+        {currentVersionId ? (
+          <>
+            <Button
+              onClick={handleDeploy}
+              disabled={isDeploying || !selectedVersionId || isDeleting}
+              className="h-8 px-4 rounded-none border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
+              style={{ minWidth: '105px' }}
+            >
+              {isDeploying ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                  배포 중...
+                </>
+              ) : selectedVersionId === currentVersionId ? (
+                <>
+                  <RefreshCw className="w-3 h-3 mr-1.5" />
+                  재배포
+                </>
+              ) : (
+                '이 버전으로 배포'
+              )}
+            </Button>
+            <Button
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isDeleting || isDeploying}
+              className="h-8 px-4 rounded-none border-none bg-red-100 text-red-700 transition-all duration-200 hover:bg-[#ef4444] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-100 disabled:hover:text-red-700 disabled:hover:scale-100"
+              style={{ minWidth: '105px' }}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                  삭제 중...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-3 h-3 mr-1.5" />
+                  배포 삭제
+                </>
+              )}
+            </Button>
+          </>
+        ) : (
           <Button
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={isDeleting || isDeploying}
-            variant="destructive"
-            size="lg"
-            className="min-w-[120px] rounded-none"
+            onClick={handleDeploy}
+            disabled={isDeploying || !selectedVersionId}
+            className="h-8 px-4 rounded-none border-none bg-blue-100 text-blue-700 transition-all duration-200 hover:bg-[#2563eb] hover:text-white hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 disabled:hover:text-blue-700 disabled:hover:scale-100"
+            style={{ minWidth: '105px' }}
           >
-            {isDeleting ? (
+            {isDeploying ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                삭제 중...
+                <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                배포 중...
               </>
             ) : (
-              <>
-                <Trash2 className="w-4 h-4 mr-2" />
-                배포 삭제
-              </>
+              '이 버전으로 배포하기'
             )}
           </Button>
         )}
-        <Button
-          onClick={handleDeploy}
-          disabled={isDeploying || !selectedVersionId || isDeleting}
-          size="lg"
-          className="min-w-[200px] rounded-none text-white"
-          style={{
-            backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-          }}
-        >
-          {isDeploying ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              배포 중...
-            </>
-          ) : selectedVersionId === currentVersionId ? (
-            '재배포'
-          ) : (
-            '이 버전으로 배포'
-          )}
-        </Button>
-      </div>
-
-      {/* 안내 메시지 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-xs text-blue-900">
-          💡 배포하면 Widget Key가 생성되어 웹사이트 임베드 및 API 연동이 가능해집니다.
-        </p>
       </div>
 
       {/* 삭제 확인 다이얼로그 */}
@@ -426,6 +457,13 @@ export function VersionSelector({
         botId={botId}
         currentVersionId={currentVersionId}
         botName={botName}
+        onVersionSelect={(versionId) => {
+          setSelectedVersionId(versionId);
+          toast.success('버전이 선택되었습니다', {
+            id: `version-selected-${botId}-${versionId}`,
+            description: '배포 버튼을 클릭하여 이 버전으로 배포하세요.',
+          });
+        }}
       />
     </div>
   );

@@ -25,6 +25,7 @@ interface VersionHistoryModalProps {
   botId: string;
   currentVersionId?: string;
   botName?: string;
+  onVersionSelect?: (versionId: string) => void;
 }
 
 export function VersionHistoryModal({
@@ -33,10 +34,12 @@ export function VersionHistoryModal({
   botId,
   currentVersionId,
   botName = 'Agent',
+  onVersionSelect,
 }: VersionHistoryModalProps) {
   const navigate = useNavigate();
   const [versions, setVersions] = useState<WorkflowVersionSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(currentVersionId);
 
   const fetchVersions = useCallback(async () => {
     try {
@@ -56,8 +59,9 @@ export function VersionHistoryModal({
   useEffect(() => {
     if (open && botId) {
       fetchVersions();
+      setSelectedVersionId(currentVersionId);
     }
-  }, [open, botId, fetchVersions]);
+  }, [open, botId, fetchVersions, currentVersionId]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -70,6 +74,13 @@ export function VersionHistoryModal({
 
   const handleOpenVersion = (versionId: string) => {
     navigate(`/bot/${botId}/workflow?versionId=${versionId}`);
+    onOpenChange(false);
+  };
+
+  const handleConfirm = () => {
+    if (selectedVersionId && onVersionSelect) {
+      onVersionSelect(selectedVersionId);
+    }
     onOpenChange(false);
   };
 
@@ -106,7 +117,7 @@ export function VersionHistoryModal({
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">현재 기본 버전:</span>
-                  <Badge className="bg-black text-white px-3 py-1 font-semibold">
+                  <Badge className="bg-blue-600 text-white px-3 py-1 font-semibold">
                     {currentVersion.version}
                   </Badge>
                   <Badge className="bg-green-100 text-green-700 border-green-200">
@@ -119,17 +130,25 @@ export function VersionHistoryModal({
             <div className="space-y-3">
               {versions.map((version) => {
                 const isCurrentVersion = version.id === currentVersionId;
+                const isSelected = version.id === selectedVersionId;
 
                 return (
                   <div
                     key={version.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    onClick={() => setSelectedVersionId(version.id)}
+                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${
+                      isSelected
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'hover:bg-muted/50 hover:border-gray-400'
+                    }`}
                   >
                     <div className="flex items-center gap-4">
                       <Badge
                         className={`px-3 py-1 font-semibold text-base ${
-                          isCurrentVersion
-                            ? 'bg-black text-white'
+                          isSelected
+                            ? 'bg-blue-600 text-white'
+                            : isCurrentVersion
+                            ? 'bg-green-100 text-green-700'
                             : 'bg-gray-100 text-gray-700'
                         }`}
                       >
@@ -158,7 +177,10 @@ export function VersionHistoryModal({
                         variant="outline"
                         size="sm"
                         className="rounded-none border-blue-500 text-blue-600 hover:bg-blue-50"
-                        onClick={() => handleOpenVersion(version.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenVersion(version.id);
+                        }}
                       >
                         이 버전 열기
                       </Button>
@@ -166,6 +188,24 @@ export function VersionHistoryModal({
                   </div>
                 );
               })}
+            </div>
+
+            {/* 확인 버튼 */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="rounded-none"
+              >
+                취소
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!selectedVersionId}
+                className="rounded-none bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                확인
+              </Button>
             </div>
           </div>
         )}

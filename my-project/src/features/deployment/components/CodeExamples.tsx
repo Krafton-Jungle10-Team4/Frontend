@@ -98,23 +98,36 @@ console.log(data.outputs);`,
       </div>
 
       <Tabs defaultValue="curl" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="curl">cURL</TabsTrigger>
-          <TabsTrigger value="python">Python</TabsTrigger>
-          <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-          <TabsTrigger value="typescript">TypeScript</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 rounded-none gap-0">
+          <TabsTrigger value="curl" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">cURL</TabsTrigger>
+          <TabsTrigger value="python" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">Python</TabsTrigger>
+          <TabsTrigger value="javascript" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">JavaScript</TabsTrigger>
+          <TabsTrigger value="typescript" className="rounded-none transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100">TypeScript</TabsTrigger>
         </TabsList>
 
         {Object.entries(examples).map(([lang, code]) => (
           <TabsContent key={lang} value={lang} className="space-y-2">
             <div className="relative">
-              <pre className="p-4 bg-muted rounded-md overflow-x-auto text-sm">
-                <code>{code}</code>
-              </pre>
+              <div className="bg-white border border-gray-300 rounded-none overflow-hidden">
+                <pre className="overflow-x-auto text-[13px] leading-relaxed font-normal" style={{ fontFamily: "JetBrains Mono, Fira Code, SF Mono, Roboto Mono, Menlo, Monaco, Courier New, monospace" }}>
+                  <code className="block">
+                    {code.split('\n').map((line, index) => (
+                      <div key={index} className="flex hover:bg-blue-50">
+                        <span className="inline-block w-12 flex-shrink-0 text-right pr-4 select-none text-gray-400 bg-gray-50 border-r border-gray-200" style={{ userSelect: 'none' }}>
+                          {index + 1}
+                        </span>
+                        <span className="inline-block px-4 text-gray-800 flex-1" style={{ letterSpacing: '-0.02em' }}>
+                          {line || ' '}
+                        </span>
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 bg-white hover:bg-gray-100 border-gray-300 rounded-none transition-all duration-200 hover:scale-[1.03]"
                 onClick={() => handleCopy(lang, code)}
               >
                 {copiedLang === lang ? (
@@ -135,9 +148,10 @@ console.log(data.outputs);`,
       </Tabs>
 
       {!apiKey && (
-        <div className="rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-950 p-3">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
-            API 키를 생성하면 실제 키가 예제 코드에 표시됩니다.
+        <div className="rounded-none border border-blue-400 bg-gray-50 p-3">
+          <p className="text-sm text-gray-700 flex items-center gap-2">
+            <span>🔑</span>
+            <span>API 키를 생성하면 실제 키가 예제 코드에 표시됩니다.</span>
           </p>
         </div>
       )}

@@ -35,7 +35,7 @@ export function APIKeyCreatedDialog({
 
   return (
     <Dialog open={!!apiKey} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:!max-w-[50%]">
         <DialogHeader>
           <DialogTitle>⚠️ API 키가 생성되었습니다</DialogTitle>
           <DialogDescription>
@@ -51,7 +51,11 @@ export function APIKeyCreatedDialog({
 
           {/* 버튼 */}
           <div className="flex gap-2">
-            <Button onClick={handleCopy} className="flex-1" disabled={copied}>
+            <Button
+              onClick={handleCopy}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={copied}
+            >
               {copied ? (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -70,8 +74,8 @@ export function APIKeyCreatedDialog({
           </div>
 
           {/* 경고 메시지 */}
-          <div className="rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-950 p-3">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+          <div className="rounded-md border border-blue-400 bg-blue-50 p-3">
+            <p className="text-sm text-blue-900">
               <strong>중요:</strong> API 키는 생성 시 한 번만 표시됩니다.
               분실하면 새 키를 만들어야 합니다.
             </p>
