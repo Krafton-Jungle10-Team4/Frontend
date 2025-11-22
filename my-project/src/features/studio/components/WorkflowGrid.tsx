@@ -4,9 +4,13 @@ import { CreateAgentCard } from './CreateAgentCard';
 import { VersionHistoryModal } from '@/features/deployment/components/VersionHistoryModal';
 import { StudioDeploymentOptionsDialog } from './StudioDeploymentOptionsDialog';
 import { EditWorkflowDialog } from './EditWorkflowDialog';
+import { BotVersionSelectorDialog } from './BotVersionSelectorDialog';
+import { MarketplacePublishDialog } from '@/features/library/components/MarketplacePublishDialog';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 import { selectSortedWorkflows } from '@/features/studio/stores/selectors';
+import { workflowApi } from '@/features/workflow/api/workflowApi';
 import type { Workflow, SortOption } from '@/shared/types/workflow';
+import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { toast } from 'sonner';
 
 interface WorkflowGridProps {
@@ -42,27 +46,46 @@ export function WorkflowGrid({
     workflow?: Workflow;
   }>({ open: false });
 
-  const handlePublish = async (workflow: Workflow) => {
-    try {
-      if (!workflow.latestVersionId) {
-        toast.error('게시 가능한 버전이 없습니다.');
-        return;
-      }
+  const [versionSelectorDialog, setVersionSelectorDialog] = useState(false);
+  const [currentWorkflowForPublish, setCurrentWorkflowForPublish] = useState<Workflow | null>(null);
+  const [publishDialog, setPublishDialog] = useState<{
+    open: boolean;
+    agent?: LibraryAgentVersion;
+  }>({ open: false });
 
-      const config = {
-        workflow_version_id: workflow.latestVersionId,
-        display_name: workflow.name,
-        description: workflow.description || '',
-        category: workflow.category,
-        tags: workflow.tags,
+  const handlePublish = (workflow: Workflow) => {
+    setCurrentWorkflowForPublish(workflow);
+    setVersionSelectorDialog(true);
+  };
+
+  const handleVersionSelected = async (botId: string, versionId: string, botName: string) => {
+    try {
+      // 선택된 버전의 상세 정보 조회
+      const versionDetail = await workflowApi.getWorkflowVersionDetail(botId, versionId);
+
+      // LibraryAgentVersion 형태로 변환
+      const agentVersion: LibraryAgentVersion = {
+        id: versionId,
+        bot_id: botId,
+        version: versionDetail.version || '1.0',
+        status: 'published',
+        created_at: versionDetail.created_at || new Date().toISOString(),
+        updated_at: versionDetail.updated_at || new Date().toISOString(),
+        library_name: currentWorkflowForPublish?.name || botName,
+        library_description: currentWorkflowForPublish?.description,
+        library_category: currentWorkflowForPublish?.category,
+        library_tags: currentWorkflowForPublish?.tags || [],
+        library_visibility: 'public',
+        is_in_library: false,
+        library_published_at: new Date().toISOString(),
+        node_count: versionDetail.node_count || 0,
+        edge_count: versionDetail.edge_count || 0,
       };
 
-      await publishToMarketplace(workflow.id, config);
-      toast.success('마켓플레이스에 게시되었습니다.');
-      await fetchWorkflows();
+      setPublishDialog({ open: true, agent: agentVersion });
     } catch (error) {
-      console.error('게시 실패:', error);
-      toast.error('마켓플레이스 게시에 실패했습니다.');
+      console.error('버전 상세 정보 조회 실패:', error);
+      toast.error('버전 정보를 가져오는데 실패했습니다.');
     }
   };
 
@@ -176,6 +199,27 @@ export function WorkflowGrid({
             }
             workflow={editDialog.workflow}
             onSave={handleSaveUpdate}
+          />
+        )}
+
+        <BotVersionSelectorDialog
+          open={versionSelectorDialog}
+          onOpenChange={setVersionSelectorDialog}
+          onSelect={handleVersionSelected}
+          initialBotId={currentWorkflowForPublish?.id}
+          initialBotName={currentWorkflowForPublish?.name}
+        />
+
+        {publishDialog.agent && (
+          <MarketplacePublishDialog
+            open={publishDialog.open}
+            onOpenChange={(open) =>
+              setPublishDialog((prev) => ({
+                open,
+                agent: open ? prev.agent : undefined,
+              }))
+            }
+            agent={publishDialog.agent}
           />
         )}
     </>

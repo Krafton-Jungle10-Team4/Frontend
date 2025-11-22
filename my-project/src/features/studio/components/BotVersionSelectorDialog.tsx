@@ -21,12 +21,16 @@ interface BotVersionSelectorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (botId: string, versionId: string, botName: string) => void;
+  initialBotId?: string;
+  initialBotName?: string;
 }
 
 export function BotVersionSelectorDialog({
   open,
   onOpenChange,
   onSelect,
+  initialBotId,
+  initialBotName,
 }: BotVersionSelectorDialogProps) {
   const [bots, setBots] = useState<Bot[]>([]);
   const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
@@ -38,14 +42,23 @@ export function BotVersionSelectorDialog({
 
   useEffect(() => {
     if (open) {
-      loadBots();
+      if (initialBotId && initialBotName) {
+        // 특정 봇이 지정된 경우 바로 버전 선택 단계로
+        setSelectedBot({ id: initialBotId, name: initialBotName } as Bot);
+        loadVersions(initialBotId);
+        setStep('version');
+      } else {
+        // 봇이 지정되지 않은 경우 봇 선택부터
+        loadBots();
+        setStep('bot');
+      }
     } else {
       setSelectedBot(null);
       setSelectedVersion(null);
       setVersions([]);
       setStep('bot');
     }
-  }, [open]);
+  }, [open, initialBotId, initialBotName]);
 
   const loadBots = async () => {
     setIsLoadingBots(true);
@@ -98,7 +111,7 @@ export function BotVersionSelectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[80vh] rounded-none">
         <DialogHeader>
           <DialogTitle>
             {step === 'bot' ? '봇 선택' : '버전 선택'}
@@ -172,16 +185,17 @@ export function BotVersionSelectorDialog({
                 </p>
               </div>
             ) : (
-              <ScrollArea className="h-[400px] pr-4">
+              <ScrollArea className="max-h-[450px] pr-4">
                 <div className="space-y-2">
                   {versions.map((version) => (
                     <button
                       key={version.id}
                       onClick={() => handleVersionSelect(version)}
                       className={cn(
-                        'w-full flex items-center justify-between p-4 rounded-lg border',
-                        'hover:bg-accent transition-colors text-left',
-                        selectedVersion?.id === version.id && 'bg-accent border-accent-foreground/20'
+                        'w-full flex items-center justify-between p-4 border transition-colors text-left',
+                        selectedVersion?.id === version.id
+                          ? 'bg-green-50 border-2 border-green-500'
+                          : 'border-gray-200 hover:bg-accent'
                       )}
                     >
                       <div className="flex-1 min-w-0">
@@ -211,18 +225,14 @@ export function BotVersionSelectorDialog({
         )}
 
         <DialogFooter>
-          {step === 'version' && (
-            <Button variant="outline" onClick={handleBack}>
-              이전
-            </Button>
-          )}
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="hover:scale-105 transition-transform rounded-none">
             취소
           </Button>
           {step === 'version' && (
             <Button
               onClick={handleConfirm}
               disabled={!selectedVersion}
+              className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-transform rounded-none"
             >
               확인
             </Button>

@@ -90,6 +90,7 @@ export function StudioPage() {
     try {
       const versionDetail = await workflowApi.getWorkflowVersionDetail(botId, versionId);
 
+      // 1. 새 봇 생성 (빈 워크플로우로)
       const newBot = await botApi.create({
         name: `${botName} 복사본`,
         description: `${botName}의 워크플로우를 기반으로 생성됨`,
@@ -100,20 +101,26 @@ export function StudioPage() {
         },
       });
 
+      // 2. BotWorkflowVersion draft 생성 (템플릿 워크플로우 복사)
       if (versionDetail.graph) {
-        await botApi.update(newBot.id, {
-          workflow: {
-            nodes: versionDetail.graph.nodes || [],
-            edges: versionDetail.graph.edges || [],
-          },
-        });
+        await workflowApi.upsertDraftWorkflow(
+          newBot.id,
+          versionDetail.graph.nodes || [],
+          versionDetail.graph.edges || [],
+          {
+            environment_variables: versionDetail.environment_variables || {},
+            conversation_variables: versionDetail.conversation_variables || {},
+          }
+        );
       }
 
       toast.success('템플릿에서 새 봇을 생성했습니다.');
 
       await fetchWorkflows();
 
-      navigate(`/bot/${newBot.id}/workflow`);
+      navigate(`/bot/${newBot.id}/workflow`, {
+        state: { botName: `${botName} 복사본` }
+      });
     } catch (error) {
       console.error('Failed to create bot from template:', error);
       toast.error('템플릿에서 봇 생성에 실패했습니다.');

@@ -111,7 +111,7 @@ export function WorkflowCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity rounded hover:bg-studio-hover"
+                className="p-1 -mr-1 transition-opacity rounded hover:bg-studio-hover"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
