@@ -12,16 +12,28 @@ import { DocumentStatus } from '../types/document.types';
 import type { DocumentWithStatus } from '../types/document.types';
 
 // Mock stores
-vi.mock('@/features/bot/stores/botStore', () => ({
-  useBotStore: vi.fn((selector: any) => {
+vi.mock('@/features/bot/stores/botStore', () => {
+  const state = {
+    bots: [{ id: 'test-bot-123', name: 'Test Bot' }],
+    selectedBotId: 'test-bot-123',
+  };
+
+  const useBotStoreMock = vi.fn((selector?: any) => {
     if (selector) {
-      return selector({ selectedBotId: 'test-bot-123' });
+      return selector(state);
     }
-    return { selectedBotId: 'test-bot-123' };
-  }),
-  selectSelectedBot: vi.fn(() => ({ id: 'test-bot-123', name: 'Test Bot' })),
-  selectSelectedBotId: vi.fn(() => 'test-bot-123'),
-}));
+    return state;
+  });
+
+  useBotStoreMock.getState = () => state;
+
+  return {
+    useBotStore: useBotStoreMock,
+    selectSelectedBot: vi.fn(() => ({ id: 'test-bot-123', name: 'Test Bot' })),
+    selectSelectedBotId: vi.fn(() => 'test-bot-123'),
+    selectBots: vi.fn(() => state.bots),
+  };
+});
 
 // Mock toast
 vi.mock('sonner', () => ({
@@ -82,7 +94,7 @@ describe('DocumentMonitoring Integration Tests', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockUpload).toHaveBeenCalledWith(file, 'test-bot-123');
+      expect(mockUpload).toHaveBeenCalledWith(file);
     });
 
     // Verify polling started (check if document appears in store)

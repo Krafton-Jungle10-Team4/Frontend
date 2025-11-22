@@ -5,11 +5,9 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 import { useCompletedDocuments } from '@/features/documents/stores/selectors';
-import { useBotStore } from '@/features/bot/stores/botStore';
 import { BasePanel } from '../_base/base-panel';
 import { Box, Group, Field, InputMappingSection } from '../_base/components';
 import { Input } from '@shared/components/input';
@@ -50,23 +48,19 @@ const EMPTY_DOCUMENT_IDS: string[] = [];
 export const KnowledgeRetrievalPanel = () => {
   const { selectedNodeId, nodes, updateNode } = useWorkflowStore();
   const fetchDocuments = useAsyncDocumentStore((state) => state.fetchDocuments);
-
-  // 봇 ID 결정 (URL 파라미터 또는 선택된 봇)
-  const { botId: routeBotId } = useParams<{ botId: string }>();
-  const selectedBotId = useBotStore((state) => state.selectedBotId);
-  const activeBotId = selectedBotId || routeBotId || null;
+  const completedDocuments = useCompletedDocuments();
 
   // 완료된 문서 목록 가져오기
-  const completedDocuments = useCompletedDocuments(activeBotId);
-
-  // 문서 목록 로드
   useEffect(() => {
-    if (activeBotId) {
-      fetchDocuments({ botId: activeBotId }).catch((error) => {
-        console.error('Failed to fetch documents:', error);
-      });
-    }
-  }, [activeBotId, fetchDocuments]);
+    fetchDocuments({
+      botId: undefined,
+      status: undefined,
+      searchQuery: undefined,
+      offset: 0,
+    }).catch((error) => {
+      console.error('Failed to fetch documents:', error);
+    });
+  }, [fetchDocuments]);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
@@ -81,7 +75,6 @@ export const KnowledgeRetrievalPanel = () => {
       node={node}
       updateNode={updateNode}
       completedDocuments={completedDocuments}
-      activeBotId={activeBotId}
     />
   );
 };
@@ -91,7 +84,6 @@ interface KnowledgeRetrievalPanelContentProps {
   node: WorkflowNode;
   updateNode: ReturnType<typeof useWorkflowStore>['updateNode'];
   completedDocuments: ReturnType<typeof useCompletedDocuments>;
-  activeBotId: string | null;
 }
 
 function KnowledgeRetrievalPanelContent({
@@ -99,7 +91,6 @@ function KnowledgeRetrievalPanelContent({
   node,
   updateNode,
   completedDocuments,
-  activeBotId,
 }: KnowledgeRetrievalPanelContentProps) {
   const krData = node.data as KnowledgeRetrievalNodeType;
 
@@ -191,7 +182,6 @@ function KnowledgeRetrievalPanelContent({
           <Field label="문서 선택 (선택사항)">
             <MultiSelect
               id="documentIds"
-              disabled={!activeBotId}
               value={sanitizedDocumentIds}
               onChange={(selectedIds: string[]) => {
                 // 유효한 ID만 필터링
@@ -204,17 +194,11 @@ function KnowledgeRetrievalPanelContent({
                 value: doc.id,
                 label: `${doc.filename} (${(doc.size / 1024 / 1024).toFixed(2)} MB) • ${doc.id}`,
               }))}
-              placeholder={
-                activeBotId
-                  ? '검색할 문서를 선택하세요...'
-                  : '먼저 봇을 선택해주세요.'
-              }
+              placeholder="검색할 문서를 선택하세요..."
               emptyMessage={
-                !activeBotId
-                  ? '봇이 선택되지 않았습니다.'
-                  : completedDocuments.length === 0
-                    ? '완료된 문서가 없습니다. 먼저 문서를 업로드하거나 처리가 끝날 때까지 기다려주세요.'
-                    : '문서를 찾을 수 없습니다.'
+                completedDocuments.length === 0
+                  ? '완료된 문서가 없습니다. 먼저 문서를 업로드하거나 처리가 끝날 때까지 기다려주세요.'
+                  : '문서를 찾을 수 없습니다.'
               }
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

@@ -113,6 +113,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ files, onFilesChange
           accept=".pdf,.txt,.docx"
           onChange={handleFileChange}
           className="hidden"
+          aria-label="파일 선택"
         />
         <Upload className="h-10 w-10 text-muted-foreground mb-4 transition-colors group-hover:text-gray-600" />
         {isDragActive ? (

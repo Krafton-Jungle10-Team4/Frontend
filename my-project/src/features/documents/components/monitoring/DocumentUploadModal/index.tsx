@@ -11,7 +11,7 @@ import { Button } from '@/shared/components/button';
 import { FileDropzone } from './FileDropzone';
 import { UploadProgress } from './UploadProgress';
 import { useAsyncDocumentStore } from '../../../stores/documentStore.async';
-import { useBotStore } from '@/features/bot/stores/botStore';
+import { useBotStore, selectBots } from '@/features/bot/stores/botStore';
 import { toast } from 'sonner';
 
 interface DocumentUploadModalProps {
@@ -26,14 +26,10 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const { uploadDocumentAsync } = useAsyncDocumentStore();
-  const selectedBotId = useBotStore((state) => state.selectedBotId);
+  const bots = useBotStore(selectBots);
+  const hasUploadTarget = bots.length > 0;
 
   const handleUpload = async () => {
-    if (!selectedBotId) {
-      toast.error('봇을 선택해주세요');
-      return;
-    }
-
     if (files.length === 0) {
       toast.error('파일을 선택해주세요');
       return;
@@ -44,7 +40,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     try {
       // Upload files sequentially
       for (const file of files) {
-        await uploadDocumentAsync(file, selectedBotId);
+        await uploadDocumentAsync(file);
         toast.success(`${file.name} 업로드가 시작되었습니다`);
       }
 
@@ -76,7 +72,14 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
 
         <div className="py-4">
           {!uploading ? (
-            <FileDropzone files={files} onFilesChange={setFiles} />
+            <div className="space-y-3">
+              <FileDropzone files={files} onFilesChange={setFiles} />
+              {!hasUploadTarget && (
+                <p className="text-sm text-red-500">
+                  업로드할 수 있는 워크플로우가 없습니다. 먼저 챗봇을 생성하세요.
+                </p>
+              )}
+            </div>
           ) : (
             <UploadProgress files={files} />
           )}
@@ -88,7 +91,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           </Button>
           <Button
             onClick={handleUpload}
-            disabled={files.length === 0 || uploading}
+            disabled={files.length === 0 || uploading || !hasUploadTarget}
             className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300"
           >
             {uploading ? '업로드 중...' : `업로드 (${files.length}개)`}

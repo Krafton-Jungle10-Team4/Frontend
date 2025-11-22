@@ -39,7 +39,7 @@ interface AsyncDocumentStore {
   error: Error | null;
 
   // Actions - Upload
-  uploadDocumentAsync: (file: File, botId: string) => Promise<string>;
+  uploadDocumentAsync: (file: File, botId?: string) => Promise<string>;
 
   // Actions - Polling
   startPolling: (documentId: string) => void;
@@ -105,14 +105,29 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
         error: null,
 
         // Upload with automatic polling
-        uploadDocumentAsync: async (file: File, botId: string) => {
+        uploadDocumentAsync: async (file: File, botId?: string) => {
           set({ isLoading: true, error: null, uploadProgress: 0 });
+
+          const botStoreState = useBotStore.getState();
+          const resolvedBotId =
+            botId ??
+            botStoreState.selectedBotId ??
+            botStoreState.bots[0]?.id ??
+            null;
+
+          if (!resolvedBotId) {
+            const error = new Error(
+              '업로드 가능한 워크플로우를 찾을 수 없습니다. 먼저 챗봇을 생성하세요.'
+            );
+            set({ error, isLoading: false, uploadProgress: 0 });
+            throw error;
+          }
 
           try {
             // Upload file
             const response = await documentsAsyncApi.uploadAsync(
               file,
-              botId,
+              resolvedBotId,
               (progressEvent) => {
                 if (progressEvent.total) {
                   const progress = Math.round(
@@ -128,7 +143,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
               file.name.split('.').pop()?.toLowerCase() || '';
             const newDocument: DocumentWithStatus = {
               documentId: response.jobId,
-              botId,
+              botId: resolvedBotId,
               userUuid: '', // Will be populated by backend
               originalFilename: file.name,
               fileExtension,
@@ -258,27 +273,30 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
         fetchDocuments: async (request?: DocumentListRequest) => {
           const { filters, pagination } = get();
 
-          // Guard: Ensure botId is provided through fallback chain
-          const botId =
-            request?.botId ??
-            filters.botId ??
-            useBotStore.getState().selectedBotId;
-
-          if (!botId) {
-            const error = new Error(
-              'botId is required for fetching documents. Please provide botId in request, filters, or select a bot.'
-            );
-            set({ error, isLoading: false });
-            throw error;
-          }
+          // botId 우선순위:
+          // 1) request에 명시된 값 (undefined 포함)
+          // 2) 현재 저장된 필터
+          // 3) 선택된 봇
+          const requestHasBotId =
+            request !== undefined && Object.prototype.hasOwnProperty.call(request, 'botId');
+          const fallbackBotId = requestHasBotId
+            ? request?.botId
+            : filters.botId ?? useBotStore.getState().selectedBotId;
 
           const finalRequest: DocumentListRequest = {
             ...filters,
             limit: pagination.limit,
             offset: pagination.offset,
             ...request,
-            botId, // Ensure botId is always present
           };
+
+          if (requestHasBotId) {
+            finalRequest.botId = request?.botId;
+          } else if (fallbackBotId) {
+            finalRequest.botId = fallbackBotId;
+          } else {
+            delete finalRequest.botId;
+          }
 
           set({ isLoading: true, error: null });
 

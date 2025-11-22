@@ -30,21 +30,28 @@ export function KnowledgePage() {
         });
 
         // Document를 Knowledge 형식으로 변환
-        const knowledgeList: Knowledge[] = response.documents.map((doc) => ({
-          id: doc.document_id,
-          user_id: '', // Document API에는 user_id가 없음
-          name: doc.original_filename,
-          description: `${doc.file_extension.toUpperCase()} 파일 (${(doc.file_size / 1024).toFixed(2)} KB)`,
-          tags: [doc.bot_id, doc.status], // bot_id와 status를 태그로 사용
-          document_count: 1,
-          documents: [doc],
-          created_at: doc.created_at,
-          updated_at: doc.updated_at || doc.created_at,
-        }));
+        const knowledgeList: Knowledge[] = response.documents.map((doc) => {
+          const tags = [doc.status];
+          if (doc.file_extension) {
+            tags.push(doc.file_extension.toUpperCase());
+          }
+
+          return {
+            id: doc.document_id,
+            user_id: '', // Document API에는 user_id가 없음
+            name: doc.original_filename,
+            description: `${doc.file_extension.toUpperCase()} 파일 (${(doc.file_size / 1024).toFixed(2)} KB)`,
+            tags,
+            document_count: 1,
+            documents: [doc],
+            created_at: doc.created_at,
+            updated_at: doc.updated_at || doc.created_at,
+          };
+        });
 
         setKnowledgeList(knowledgeList);
 
-        // 태그 목록 추출 (bot_id와 status)
+        // 태그 목록 추출 (상태 / 파일 확장자)
         const tagSet = new Set<string>();
         knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
         setAllTags(Array.from(tagSet));
