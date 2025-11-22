@@ -81,7 +81,10 @@ gemini_api_key.json
 .gemini_token
 .gemini_auth
 *.gemini.creds
-*api*key*
+*api*key*.json
+*api*key*.txt
+*api*key*.env
+.env*api*key*
 
 # Vite 관련
 .vite/
