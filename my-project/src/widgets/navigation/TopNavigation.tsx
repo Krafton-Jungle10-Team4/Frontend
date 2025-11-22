@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
+import { Logo } from '@/shared/components/Logo';
 import { cn } from '@/shared/components/utils';
 
 type Language = 'en' | 'ko';
@@ -53,7 +54,7 @@ export function TopNavigation({
   showSidebarToggle = true,
 }: TopNavigationProps) {
   const navigate = useNavigate();
-  const { isFreePlan } = useBilling();
+  const { isFreePlan, billingStatus } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
   const brandAccent = '#1CC8A0';
 
@@ -84,6 +85,24 @@ export function TopNavigation({
 
   const t = translations[language];
 
+  const planId = billingStatus?.current_plan.plan_id ?? (isFreePlan ? 'free' : 'pro');
+  const planName = billingStatus?.current_plan.name ?? (isFreePlan ? 'Free' : 'Pro');
+
+  const planBadgeStyle = {
+    free: 'border border-slate-200 bg-white text-slate-600 shadow-sm',
+    pro: 'text-white shadow-[0_10px_25px_rgba(55,53,195,0.25)] bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff]',
+    enterprise:
+      'text-amber-950 bg-gradient-to-r from-[#fff1d6] via-[#ffe3aa] to-[#e6f6ff] border border-amber-100 shadow-[0_10px_26px_rgba(255,183,94,0.4)]',
+  } as const;
+
+  const planClass = planBadgeStyle[planId as 'free' | 'pro' | 'enterprise'] ?? planBadgeStyle.free;
+  const planDotStyle = {
+    free: 'bg-slate-400/80',
+    pro: 'bg-white/80',
+    enterprise: 'bg-amber-600/80',
+  } as const;
+  const planDotClass = planDotStyle[planId as 'free' | 'pro' | 'enterprise'] ?? planDotStyle.free;
+
   return (
     <div className="border-b transition-all h-16 bg-gray-100 border-border">
       <div className="relative w-full flex h-full items-center justify-between px-4">
@@ -92,29 +111,19 @@ export function TopNavigation({
             onClick={onLogoClick ?? onHomeClick}
             className="cursor-pointer"
           >
-            <span
-              className="font-bold text-xl bg-clip-text text-transparent"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-              }}
-            >
-              SnapAgent
-            </span>
+            <div className="flex items-center gap-2">
+              <Logo className="h-7 w-7 text-indigo-600" />
+              <span
+                className="font-bold text-xl bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+                }}
+              >
+                SnapAgent
+              </span>
+            </div>
           </button>
 
-          {isFreePlan && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/billing-settings')}
-              className="text-[10px] font-medium px-2 py-0 h-5 rounded-full border text-white border-transparent hover:shadow-md transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-              }}
-            >
-              Free
-            </Button>
-          )}
         </div>
 
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -122,6 +131,16 @@ export function TopNavigation({
         </div>
 
         <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              'inline-flex items-center justify-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200',
+              planClass
+            )}
+            aria-label={`Current plan: ${planName}`}
+          >
+            <span className={cn('inline-block h-2.5 w-2.5 rounded-full shadow-sm', planDotClass)} />
+            {planName}
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="focus:outline-none transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2">
