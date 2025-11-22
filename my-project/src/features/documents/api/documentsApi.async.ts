@@ -25,17 +25,18 @@ export const documentsAsyncApi = {
    */
   uploadAsync: async (
     file: File,
-    botId: string,
+    botId?: string,
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
   ): Promise<AsyncDocumentUploadResponse> => {
     const formData = new FormData();
     formData.append('file', file);
+    const params = botId ? { bot_id: botId } : undefined;
 
     const { data } = await apiClient.post(
       API_ENDPOINTS.DOCUMENTS.UPLOAD,
       formData,
       {
-        params: { bot_id: botId },
+        params,
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress,
       }

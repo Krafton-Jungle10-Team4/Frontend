@@ -112,15 +112,7 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             botId ??
             botStoreState.selectedBotId ??
             botStoreState.bots[0]?.id ??
-            null;
-
-          if (!resolvedBotId) {
-            const error = new Error(
-              '업로드 가능한 워크플로우를 찾을 수 없습니다. 먼저 챗봇을 생성하세요.'
-            );
-            set({ error, isLoading: false, uploadProgress: 0 });
-            throw error;
-          }
+            undefined;
 
           try {
             // Upload file
@@ -140,9 +132,10 @@ export const useAsyncDocumentStore = create<AsyncDocumentStore>()(
             // Create initial document state (using standard schema)
             const fileExtension =
               file.name.split('.').pop()?.toLowerCase() || '';
+            const fallbackBotId = resolvedBotId ?? 'user-library';
             const newDocument: DocumentWithStatus = {
               documentId: response.jobId,
-              botId: resolvedBotId,
+              botId: fallbackBotId,
               userUuid: '', // Will be populated by backend
               originalFilename: file.name,
               fileExtension,
