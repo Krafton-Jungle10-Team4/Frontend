@@ -15,6 +15,60 @@ const DEFAULT_OPTIONS: Required<LayoutOptions> = {
   marginY: 120,
 };
 
+// 노드의 기본 높이 (measured가 없을 때 사용)
+const DEFAULT_NODE_HEIGHT = 150;
+
+/**
+ * 노드의 handle Y 좌표를 계산합니다 (노드 중심점)
+ */
+const getNodeHandleY = (node: Node, positionY: number): number => {
+  const height = node.measured?.height ?? DEFAULT_NODE_HEIGHT;
+  return positionY + height / 2;
+};
+
+const snapToGrid = (value: number, gap: number, offset: number) => {
+  if (!gap) {
+    return value;
+  }
+  const snapped = Math.round((value - offset) / gap) * gap + offset;
+  return snapped;
+};
+
+const resolveCollision = (
+  target: number,
+  used: number[],
+  gap: number,
+  minY: number
+) => {
+  const sorted = [...used].sort((a, b) => a - b);
+  const minDistance = gap * 0.6;
+
+  const isFree = (candidate: number) =>
+    sorted.every((value) => Math.abs(value - candidate) >= minDistance);
+
+  if (isFree(target) && target >= minY) {
+    return target;
+  }
+
+  let offset = gap;
+  while (offset < gap * 20) {
+    const up = target - offset;
+    const down = target + offset;
+
+    if (up >= minY && isFree(up)) {
+      return up;
+    }
+
+    if (isFree(down)) {
+      return down;
+    }
+
+    offset += gap;
+  }
+
+  return Math.max(minY, target);
+};
+
 const blockPriority: Record<BlockEnum, number> = {
   [BlockEnum.Start]: 0,
   [BlockEnum.KnowledgeRetrieval]: 1,
@@ -153,26 +207,56 @@ export const computeWorkflowAutoLayout = (
     columns.set(level, column);
   });
 
-  const maxRows =
-    Math.max(...Array.from(columns.values()).map((column) => column.length)) ||
-    1;
-  const canvasHeight = (maxRows - 1) * settings.verticalGap;
-
   const assignedPositions = new Map<string, { x: number; y: number }>();
+  const columnUsage = new Map<number, number[]>();
   const sortedLevels = Array.from(columns.keys()).sort((a, b) => a - b);
 
   sortedLevels.forEach((level) => {
     const columnNodes = columns.get(level)!;
     columnNodes.sort(sortByCurrentAppearance);
 
-    const columnHeight = (columnNodes.length - 1) * settings.verticalGap;
-    const columnStartY =
-      settings.marginY + Math.max(0, (canvasHeight - columnHeight) / 2);
+    const usedYs = columnUsage.get(level) ?? [];
 
-    columnNodes.forEach((node, index) => {
+    columnNodes.forEach((node) => {
+      // 현재 노드의 높이
+      const nodeHeight = node.measured?.height ?? DEFAULT_NODE_HEIGHT;
+
+      // 부모 노드들의 handle Y 좌표를 수집
+      const parentHandleYs = edges
+        .filter((edge) => edge.target === node.id)
+        .map((edge) => {
+          const parentNode = nodeMap.get(edge.source);
+          const parentPos = assignedPositions.get(edge.source);
+          if (!parentNode || !parentPos) return null;
+          return getNodeHandleY(parentNode, parentPos.y);
+        })
+        .filter((y): y is number => typeof y === 'number');
+
+      let targetHandleY: number;
+      if (parentHandleYs.length > 0) {
+        // 부모들의 handle Y 좌표 평균
+        targetHandleY = parentHandleYs.reduce((sum, value) => sum + value, 0) / parentHandleYs.length;
+      } else {
+        // 부모가 없으면 기본 위치
+        targetHandleY = settings.marginY + nodeHeight / 2 + usedYs.length * settings.verticalGap;
+      }
+
+      // handle Y를 기준으로 노드의 position Y를 계산
+      let targetY = targetHandleY - nodeHeight / 2;
+
+      targetY = snapToGrid(targetY, settings.verticalGap, settings.marginY);
+      const resolvedY = resolveCollision(
+        targetY,
+        usedYs,
+        settings.verticalGap,
+        settings.marginY
+      );
+
+      usedYs.push(resolvedY);
+      columnUsage.set(level, usedYs);
+
       const x = settings.marginX + level * settings.horizontalGap;
-      const y = columnStartY + index * settings.verticalGap;
-      assignedPositions.set(node.id, { x, y });
+      assignedPositions.set(node.id, { x, y: resolvedY });
     });
   });
 

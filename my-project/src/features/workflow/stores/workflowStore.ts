@@ -17,6 +17,7 @@ import { clonePortSchema, cloneNodePortSchema } from '@/shared/constants/nodePor
 import { withEdgeMetadata } from '../utils/edgeHelpers';
 import type { Connection } from '@xyflow/react';
 import { useVariableAssignerStore } from '@features/workflow/nodes/variable-assigner/stores/variableAssignerStore';
+import { useWorkflowStore as useStudioWorkflowStore } from '@features/studio/stores/workflowStore';
 import { generatePortSchema } from '@features/workflow/nodes/variable-assigner/utils/portSchemaGenerator';
 import { checkValid } from '@features/workflow/nodes/variable-assigner/utils/validation';
 import type { VariableAssignerNodeData } from '@features/workflow/nodes/variable-assigner/types';
@@ -67,6 +68,23 @@ const stringifyValue = (value: unknown): string => {
 
 const isVariableAssignerNode = (node: Node): boolean =>
   (node.data.type as BlockEnum) === BlockEnum.VariableAssigner;
+
+const refreshStudioWorkflows = () => {
+  try {
+    const fetchStudioWorkflows = useStudioWorkflowStore.getState().fetchWorkflows;
+    if (typeof fetchStudioWorkflows === 'function') {
+      fetchStudioWorkflows().catch((error) => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug('[workflowStore] Failed to refresh studio workflows', error);
+        }
+      });
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[workflowStore] Studio store not initialized', error);
+    }
+  }
+};
 
 const ensureVariableAssignerData = (
   rawData: Record<string, any>
@@ -1347,6 +1365,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         hasUnsavedChanges: false,
         lastSaveError: null,
       });
+
+      refreshStudioWorkflows();
 
       return result;
     } catch (error) {
