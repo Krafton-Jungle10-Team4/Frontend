@@ -259,6 +259,7 @@ const WorkflowInner = () => {
       // 큐가 비었고 실행이 완료되었으면 전체 뷰로 복귀
       if (isExecutionCompleteRef.current) {
         isExecutionCompleteRef.current = false;
+        console.log('[WorkflowBuilder] Focus queue empty, returning to full view');
         fitView({
           duration: 800,
           padding: 0.15,
@@ -267,13 +268,32 @@ const WorkflowInner = () => {
       return;
     }
 
+    // 노드 존재 여부 확인
+    const currentNodes = getNodes();
+    const focusingNode = currentNodes.find((node) => node.id === nextNodeId);
+
+    // 노드가 없으면 건너뛰기
+    if (!focusingNode) {
+      console.warn('[WorkflowBuilder] Node not found for focus, skipping:', nextNodeId);
+      console.log('[WorkflowBuilder] Available nodes:', currentNodes.map(n => ({ id: n.id, type: n.data?.type })));
+      enqueuedNodeIdsRef.current.delete(nextNodeId);
+      // 다음 노드로 즉시 이동
+      processFocusQueue();
+      return;
+    }
+
+    console.log('[WorkflowBuilder] Focusing on node:', {
+      id: nextNodeId,
+      type: focusingNode.data?.type,
+      position: focusingNode.position,
+      measured: focusingNode.measured,
+    });
+
     focusInProgressRef.current = true;
     focusedNodeRef.current = nextNodeId;
 
     // 시작 노드를 포커스하는 경우 플래그 설정
-    const currentNodes = getNodes();
-    const focusingNode = currentNodes.find((node) => node.id === nextNodeId);
-    if (focusingNode && focusingNode.data?.type === BlockEnum.Start) {
+    if (focusingNode.data?.type === BlockEnum.Start) {
       hasStartNodeFocusedRef.current = true;
     }
 
@@ -293,14 +313,19 @@ const WorkflowInner = () => {
       focusedNodeRef.current = null;
       processFocusQueue();
     }, 900);
-  }, [fitView]);
+  }, [fitView, getNodes]);
 
   const enqueueFocusNode = useCallback(
     (nodeId: string | null | undefined) => {
       if (!nodeId) return;
-      if (enqueuedNodeIdsRef.current.has(nodeId)) return;
+      if (enqueuedNodeIdsRef.current.has(nodeId)) {
+        console.log('[WorkflowBuilder] Node already enqueued, skipping:', nodeId);
+        return;
+      }
+      console.log('[WorkflowBuilder] Enqueueing node for focus:', nodeId);
       enqueuedNodeIdsRef.current.add(nodeId);
       focusQueueRef.current.push(nodeId);
+      console.log('[WorkflowBuilder] Focus queue length:', focusQueueRef.current.length);
       processFocusQueue();
     },
     [processFocusQueue]
@@ -324,18 +349,33 @@ const WorkflowInner = () => {
   useEffect(() => {
     if (!executionState?.currentNodeId) return;
 
+    console.log('[WorkflowBuilder] Execution state changed, currentNodeId:', executionState.currentNodeId);
+
     // 실행이 완료되었으면 더 이상 새 노드를 큐에 추가하지 않음
-    if (isExecutionCompleteRef.current) return;
+    if (isExecutionCompleteRef.current) {
+      console.log('[WorkflowBuilder] Execution complete, not enqueueing node');
+      return;
+    }
 
     const nodeId = executionState.currentNodeId;
     if (focusedNodeRef.current === nodeId) {
+      console.log('[WorkflowBuilder] Node already focused, skipping:', nodeId);
       return;
     }
 
     // 시작 노드가 이미 포커스되었으면 다시 추가하지 않음
     const currentNodes = getNodes();
     const currentNode = currentNodes.find((node) => node.id === nodeId);
+
+    console.log('[WorkflowBuilder] Current node info:', {
+      id: nodeId,
+      found: !!currentNode,
+      type: currentNode?.data?.type,
+      position: currentNode?.position,
+    });
+
     if (currentNode && currentNode.data?.type === BlockEnum.Start && hasStartNodeFocusedRef.current) {
+      console.log('[WorkflowBuilder] Start node already focused, skipping');
       return;
     }
 
@@ -504,12 +544,17 @@ const WorkflowInner = () => {
         data: enriched.data,
       };
 
+      // Zustand store 업데이트
       addWorkflowEdge(newEdge);
 
+      // React Flow가 즉시 변경사항을 감지하도록 명시적으로 setEdges 호출
       const latestState = useWorkflowStore.getState();
+      setEdges(latestState.edges);
+
+      // History 업데이트
       push(latestState.nodes, latestState.edges);
     },
-    [nodes, addWorkflowEdge, push]
+    [nodes, addWorkflowEdge, setEdges, push]
   );
 
   const handleAutoLayout = useCallback(() => {
