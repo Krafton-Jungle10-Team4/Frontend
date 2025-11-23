@@ -42,6 +42,25 @@ const DEFAULT_WORKFLOW_VARIABLES = {
   conversation_variables: {},
 };
 
+const NODE_TYPE_DESCRIPTIONS: Record<string, string> = {
+  start: '워크플로우의 시작점',
+  end: '워크플로우의 종료점',
+  llm: 'LLM을 사용하여 텍스트 생성',
+  'knowledge-retrieval': '지식베이스에서 관련 정보 검색',
+  answer: '워크플로우의 최종 응답을 생성합니다',
+  'question-classifier': '질문 분류 노드',
+  'if-else': '조건 분기 노드',
+  'template-transform': '템플릿을 사용하여 텍스트 변환',
+  assigner: '변수 조작 및 할당',
+  'variable-assigner': '변수 수집 및 그룹화',
+  mcp: 'MCP 도구 호출',
+  'tavily-search': '실시간 웹 검색',
+  http: 'HTTP 요청 전송',
+  code: '사용자 정의 코드 실행',
+  slack: 'Slack 메시지 전송',
+  'imported-workflow': '가져온 워크플로우 실행',
+};
+
 export const workflowApi = {
   /**
    * 노드 타입 목록 조회
@@ -309,7 +328,7 @@ const mapNodeTypeResponse = (raw: any): NodeTypeResponse => {
     label: raw.label ?? raw.name ?? raw.type,
     icon: raw.icon ?? raw.type,
     category: raw.category,
-    description: raw.description,
+    description: raw.description || NODE_TYPE_DESCRIPTIONS[raw.type] || '',
     max_instances: raw.max_instances ?? -1,
     configurable: raw.configurable ?? true,
     ports,
