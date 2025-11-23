@@ -59,7 +59,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
   [BlockEnum.MCP]: 'bg-purple-500',
   [BlockEnum.Answer]: 'bg-cyan-500',
-  [BlockEnum.TemplateTransform]: 'bg-amber-500',
+  [BlockEnum.TemplateTransform]: 'bg-blue-500',
   [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
   [BlockEnum.TavilySearch]: 'bg-util-colors-blue-brand-blue-brand-500',
