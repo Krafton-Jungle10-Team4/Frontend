@@ -18,10 +18,8 @@ import {
   DialogFooter,
 } from '@shared/components/dialog';
 import { Label } from '@shared/components/label';
-import { ScrollArea } from '@shared/components/scroll-area';
 import { Trash2 } from 'lucide-react';
 import { useWorkflowStore } from '../stores/workflowStore';
-import { useVariablePoolStore } from '../stores/variablePoolStore';
 
 type VariableType = 'string' | 'number' | 'boolean' | 'object' | 'array';
 
@@ -119,7 +117,6 @@ type ConversationVariablePanelProps = {
 export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVariablePanelProps) => {
   const conversationVariables = useWorkflowStore((state) => state.conversationVariables);
   const setConversationVariables = useWorkflowStore((state) => state.setConversationVariables);
-  const liveConversationVariables = useVariablePoolStore((state) => state.conversationVariables);
 
   const [items, setItems] = useState<VariableItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +181,7 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>대화 변수</DialogTitle>
           <DialogDescription>
@@ -193,7 +190,7 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6">
           <div className="space-y-4 pb-4">
           {error && (
             <div className="rounded-md border border-red-500/40 bg-red-50 px-3 py-2 text-sm text-red-600">
@@ -286,20 +283,9 @@ export const ConversationVariablePanel = ({ open, onOpenChange }: ConversationVa
             + 변수 추가
           </Button>
 
-          <div className="mt-6 space-y-2">
-            <Label className="text-xs text-gray-600 dark:text-gray-300">실시간 미리보기</Label>
-            <div className="rounded-lg border bg-gray-50 dark:bg-gray-900/40 p-3 text-xs text-gray-700 dark:text-gray-200">
-              {liveConversationVariables && Object.keys(liveConversationVariables).length > 0 ? (
-                <pre className="whitespace-pre-wrap text-[11px] leading-relaxed">
-                  {JSON.stringify(liveConversationVariables, null, 2)}
-                </pre>
-              ) : (
-                <p className="text-muted-foreground">워크플로우 실행 중 수집된 대화 변수가 없습니다.</p>
-              )}
-            </div>
+          
           </div>
-          </div>
-        </ScrollArea>
+        </div>
 
         <DialogFooter className="px-6 py-4 border-t">
           <div className="flex gap-2 w-full justify-end">
