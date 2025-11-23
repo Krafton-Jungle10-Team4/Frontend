@@ -10,6 +10,7 @@ import IfElse from '../../icons/IfElse';
 import QuestionClassifier from '../../icons/QuestionClassifier';
 import Search from '../../icons/Search';
 import Assigner from '../../icons/Assigner';
+import Slack from '../../icons/Slack';
 import clsx from 'clsx';
 
 type BlockIconProps = {
@@ -45,6 +46,7 @@ const getIcon = (type: BlockEnum, className: string) => {
     [BlockEnum.QuestionClassifier]: <QuestionClassifier className={className} />,
     [BlockEnum.TavilySearch]: <Search className={className} />,
     [BlockEnum.Assigner]: <Assigner className={className} />,
+    [BlockEnum.Slack]: <Slack className={className} />,
   };
   return iconMap[type] || null;
 };
@@ -64,6 +66,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
   [BlockEnum.TavilySearch]: 'bg-util-colors-blue-brand-blue-brand-500',
   [BlockEnum.Assigner]: 'bg-teal-500',
+  [BlockEnum.Slack]: 'bg-white',
 };
 
 /**
