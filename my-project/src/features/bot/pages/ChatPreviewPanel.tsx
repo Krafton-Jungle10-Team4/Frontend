@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { RotateCw } from 'lucide-react';
 import { sendMessageStream } from '@/features/chat/api/chatApi';
 import { toast } from 'sonner';
@@ -85,6 +85,10 @@ export function ChatPreviewPanel({
   const [nodeEvents, setNodeEvents] = useState<WorkflowNodeEvent[]>([]);
   const typingBufferRef = useRef('');
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isAbortedRef = useRef(false);
+  const pendingEndNodeRef = useRef<WorkflowNodeEvent | null>(null);
+  const isGeneratingRef = useRef(false);
   
   // 워크플로우 노드 상태 업데이트
   const {
@@ -115,10 +119,25 @@ export function ChatPreviewPanel({
   };
 
   const handleStopGeneration = () => {
-    stopTypingAnimation();
-    setIsTyping(false);
+    if (!isGenerating) return;
+
+    // 중지 플래그 설정 - 이후 onChunk에서 새로운 청크를 무시함
+    isAbortedRef.current = true;
     setIsGenerating(false);
-    failExecution('사용자가 생성을 중지했습니다.');
+    setIsTyping(false);
+    stopTypingAnimation();
+    failExecution(
+      language === 'ko'
+        ? '사용자가 응답 생성을 중지했습니다.'
+        : 'Generation stopped by user.'
+    );
+    pendingEndNodeRef.current = null;
+
+    // SSE 스트림 중단
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   };
 
   const enqueueTypingChunk = (chunk: string) => {
@@ -162,6 +181,10 @@ export function ChatPreviewPanel({
   useEffect(() => {
     return () => {
       stopTypingAnimation();
+      // 컴포넌트 언마운트 시 진행 중인 스트림 중단
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
@@ -205,6 +228,7 @@ export function ChatPreviewPanel({
     // 모든 노드와 엣지 상태 초기화
     resetWorkflowNodeStates();
     useWorkflowStore.setState({ executionState: null });
+    pendingEndNodeRef.current = null;
   };
 
   const handleNodeEventUpdate = (event: WorkflowNodeEvent) => {
@@ -234,8 +258,15 @@ export function ChatPreviewPanel({
       _runningStatus: runningStatus,
     });
 
+    const isEndNodeEvent =
+      event.node_type?.toLowerCase().includes('end') ||
+      event.node_id?.toLowerCase().includes('end');
+
     // 모든 노드 이벤트에 대해 currentNodeId 업데이트 (큐 기반 포커스를 위해)
     if (event.status === 'running') {
+      if (isEndNodeEvent && isResponseRendering()) {
+        return;
+      }
       updateExecutionState({
         currentNodeId: event.node_id,
         status: 'running',
@@ -246,20 +277,21 @@ export function ChatPreviewPanel({
       });
       failExecution(event.message || `노드 ${event.node_id} 실행 중 오류가 발생했습니다.`);
     } else if (event.status === 'completed') {
+      if (isEndNodeEvent) {
+        pendingEndNodeRef.current = event;
+        if (!isResponseRendering()) {
+          flushPendingEndNode();
+        }
+        return;
+      }
       const executedNodes =
         useWorkflowStore.getState().executionState?.executedNodes || [];
 
-      // completed 상태에서도 currentNodeId 업데이트하여 포커스 큐에 추가되도록 함
       updateExecutionState({
         currentNodeId: event.node_id,
         executedNodes: executedNodes.includes(event.node_id)
           ? executedNodes
           : [...executedNodes, event.node_id],
-      });
-    } else if (event.status === 'pending' || event.status === 'skipped') {
-      // pending/skipped 상태도 포커스되도록 currentNodeId 업데이트
-      updateExecutionState({
-        currentNodeId: event.node_id,
       });
     }
 
@@ -293,16 +325,45 @@ export function ChatPreviewPanel({
     }
   };
 
-  const waitForTypingToFinish = () => {
+  useEffect(() => {
+    isGeneratingRef.current = isGenerating;
+  }, [isGenerating]);
+
+  const isResponseRendering = useCallback(() => {
+    return (
+      isGeneratingRef.current ||
+      typingBufferRef.current.length > 0 ||
+      typingIntervalRef.current !== null
+    );
+  }, []);
+
+  const waitForTypingToFinish = useCallback((onFinish?: () => void) => {
     const poll = () => {
       if (!typingBufferRef.current.length && !typingIntervalRef.current) {
         setIsTyping(false);
+        onFinish?.();
         return;
       }
       requestAnimationFrame(poll);
     };
     poll();
-  };
+  }, []);
+
+  const flushPendingEndNode = useCallback(() => {
+    const pending = pendingEndNodeRef.current;
+    if (!pending) return;
+    pendingEndNodeRef.current = null;
+
+    const executedNodes =
+      useWorkflowStore.getState().executionState?.executedNodes || [];
+
+    updateExecutionState({
+      currentNodeId: pending.node_id,
+      executedNodes: executedNodes.includes(pending.node_id)
+        ? executedNodes
+        : [...executedNodes, pending.node_id],
+    });
+  }, [updateExecutionState]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -349,6 +410,10 @@ export function ChatPreviewPanel({
       // 이전 실행 상태 초기화
       resetWorkflowNodeStates();
 
+      // 새 AbortController 생성 및 중지 플래그 초기화
+      abortControllerRef.current = new AbortController();
+      isAbortedRef.current = false;
+
       startExecution();
 
       await sendMessageStream(userMessageContent, botId, {
@@ -357,7 +422,10 @@ export function ChatPreviewPanel({
         temperature: 0.7,
         maxTokens: 1000,
         includeSources: true,
+        signal: abortControllerRef.current.signal,
         onChunk: (chunk) => {
+          // 중지된 경우 새로운 청크 무시
+          if (isAbortedRef.current) return;
           enqueueTypingChunk(chunk);
         },
         onSources: (sources: Source[]) => {
@@ -375,13 +443,24 @@ export function ChatPreviewPanel({
           });
         },
         onComplete: () => {
-          waitForTypingToFinish();
-          completeExecution();
-          setIsGenerating(false);
+          const wasAborted = isAbortedRef.current;
+          abortControllerRef.current = null;
+          waitForTypingToFinish(() => {
+            if (wasAborted) {
+              isAbortedRef.current = false;
+              setIsTyping(false);
+              setIsGenerating(false);
+              return;
+            }
+            flushPendingEndNode();
+            completeExecution();
+            setIsGenerating(false);
+          });
         },
         onError: (error) => {
           setIsTyping(false);
           setIsGenerating(false);
+          pendingEndNodeRef.current = null;
           const errorText =
             language === 'ko'
               ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
@@ -402,11 +481,13 @@ export function ChatPreviewPanel({
 
           toast.error(errorText);
           failExecution(error.message);
+          abortControllerRef.current = null;
         },
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
       setIsGenerating(false);
+      pendingEndNodeRef.current = null;
       failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
@@ -450,6 +531,7 @@ export function ChatPreviewPanel({
       });
 
       toast.error(errorText);
+      abortControllerRef.current = null;
     }
   };
 
@@ -492,6 +574,10 @@ export function ChatPreviewPanel({
         );
       }
 
+      // 새 AbortController 생성 및 중지 플래그 초기화
+      abortControllerRef.current = new AbortController();
+      isAbortedRef.current = false;
+
       startExecution();
 
       await sendMessageStream(msg, botId, {
@@ -500,7 +586,10 @@ export function ChatPreviewPanel({
         temperature: 0.7,
         maxTokens: 1000,
         includeSources: true,
+        signal: abortControllerRef.current.signal,
         onChunk: (chunk) => {
+          // 중지된 경우 새로운 청크 무시
+          if (isAbortedRef.current) return;
           enqueueTypingChunk(chunk);
         },
         onSources: (sources: Source[]) => {
@@ -518,14 +607,25 @@ export function ChatPreviewPanel({
           });
         },
         onComplete: () => {
-          waitForTypingToFinish();
-          completeExecution();
-          setIsGenerating(false);
+          const wasAborted = isAbortedRef.current;
+          abortControllerRef.current = null;
+          waitForTypingToFinish(() => {
+            if (wasAborted) {
+              isAbortedRef.current = false;
+              setIsTyping(false);
+              setIsGenerating(false);
+              return;
+            }
+            flushPendingEndNode();
+            completeExecution();
+            setIsGenerating(false);
+          });
         },
         onError: (error) => {
           setIsGenerating(false);
           stopTypingAnimation();
           waitForTypingToFinish();
+          pendingEndNodeRef.current = null;
           const errorText =
             language === 'ko'
               ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
@@ -545,11 +645,13 @@ export function ChatPreviewPanel({
 
           toast.error(errorText);
           failExecution(error.message);
+          abortControllerRef.current = null;
         },
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
       setIsGenerating(false);
+      pendingEndNodeRef.current = null;
       failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
@@ -592,6 +694,7 @@ export function ChatPreviewPanel({
       });
 
       toast.error(errorText);
+      abortControllerRef.current = null;
     }
   };
 

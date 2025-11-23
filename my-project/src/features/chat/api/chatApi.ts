@@ -148,6 +148,7 @@ export async function sendMessageStream(
     temperature?: number;
     maxTokens?: number;
     includeSources?: boolean;
+    signal?: AbortSignal;
     onChunk?: (chunk: string) => void;
     onSources?: (sources: Source[]) => void;
     onError?: (error: Error) => void;
@@ -174,6 +175,9 @@ export async function sendMessageStream(
       onError: options?.onError,
       onComplete: options?.onComplete,
       onNodeEvent: options?.onNodeEvent,
+    },
+    {
+      signal: options?.signal,
     }
   );
 }

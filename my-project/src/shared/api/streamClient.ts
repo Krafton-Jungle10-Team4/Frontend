@@ -17,6 +17,7 @@ interface StreamRequestOptions {
   headers?: Record<string, string>;
   useAuth?: boolean;
   credentials?: RequestCredentials;
+  signal?: AbortSignal; // 외부에서 스트림 중단을 위한 signal
 }
 
 /**
@@ -43,6 +44,7 @@ export async function streamRequest({
   headers = {},
   useAuth = true,
   credentials = 'include',
+  signal: externalSignal,
 }: StreamRequestOptions): Promise<void> {
   // 1. 인증 헤더 구성
   let requestHeaders: Record<string, string> = { ...headers };
@@ -60,6 +62,21 @@ export async function streamRequest({
   const timeoutId = setTimeout(() => {
     abortController.abort();
   }, timeout);
+
+  // 3. 외부 signal이 있으면 연결
+  const handleExternalAbort = () => {
+    abortController.abort();
+  };
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      // 이미 abort된 signal이면 즉시 중단
+      abortController.abort();
+    } else {
+      // abort 이벤트 리스너 등록
+      externalSignal.addEventListener('abort', handleExternalAbort);
+    }
+  }
 
   try {
     // 3. Fetch 요청
@@ -178,9 +195,18 @@ export async function streamRequest({
 
     // AbortError 처리
     if ((error as Error).name === 'AbortError') {
-      const timeoutError = new Error('요청 시간이 초과되었습니다.');
-      callbacks.onError?.(timeoutError);
-      throw timeoutError;
+      // 외부 signal에 의한 중단인지 타임아웃인지 구분
+      if (externalSignal?.aborted) {
+        // 사용자가 중지한 경우 - 정상 완료로 처리
+        console.log('[SSE] User aborted stream - treating as normal completion');
+        callbacks.onComplete?.();
+        return; // 에러를 throw하지 않고 정상 종료
+      } else {
+        // 타임아웃인 경우 - 에러로 처리
+        const timeoutError = new Error('요청 시간이 초과되었습니다.');
+        callbacks.onError?.(timeoutError);
+        throw timeoutError;
+      }
     }
 
     // 기타 에러
@@ -188,6 +214,10 @@ export async function streamRequest({
     throw error;
   } finally {
     clearTimeout(timeoutId);
+    // 외부 signal 이벤트 리스너 제거
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', handleExternalAbort);
+    }
   }
 }
 

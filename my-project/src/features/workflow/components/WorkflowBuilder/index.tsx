@@ -140,10 +140,12 @@ const WorkflowInner = () => {
   const prevBotIdRef = useRef<string | undefined>();
   const initialFitViewDoneRef = useRef(false);
   const focusQueueRef = useRef<string[]>([]);
+  const enqueuedNodeIdsRef = useRef<Set<string>>(new Set());
   const focusInProgressRef = useRef(false);
   const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focusedNodeRef = useRef<string | null>(null);
   const isExecutionCompleteRef = useRef(false);
+  const hasStartNodeFocusedRef = useRef(false);
 
   // 실시간 검증 비활성화
   useRealtimeValidation(false);
@@ -268,6 +270,13 @@ const WorkflowInner = () => {
     focusInProgressRef.current = true;
     focusedNodeRef.current = nextNodeId;
 
+    // 시작 노드를 포커스하는 경우 플래그 설정
+    const currentNodes = getNodes();
+    const focusingNode = currentNodes.find((node) => node.id === nextNodeId);
+    if (focusingNode && focusingNode.data?.type === BlockEnum.Start) {
+      hasStartNodeFocusedRef.current = true;
+    }
+
     fitView({
       nodes: [{ id: nextNodeId }],
       duration: 800,
@@ -286,6 +295,17 @@ const WorkflowInner = () => {
     }, 900);
   }, [fitView]);
 
+  const enqueueFocusNode = useCallback(
+    (nodeId: string | null | undefined) => {
+      if (!nodeId) return;
+      if (enqueuedNodeIdsRef.current.has(nodeId)) return;
+      enqueuedNodeIdsRef.current.add(nodeId);
+      focusQueueRef.current.push(nodeId);
+      processFocusQueue();
+    },
+    [processFocusQueue]
+  );
+
   useEffect(() => {
     return () => {
       focusQueueRef.current = [];
@@ -296,6 +316,7 @@ const WorkflowInner = () => {
         clearTimeout(focusTimerRef.current);
         focusTimerRef.current = null;
       }
+      enqueuedNodeIdsRef.current.clear();
     };
   }, []);
 
@@ -307,36 +328,47 @@ const WorkflowInner = () => {
     if (isExecutionCompleteRef.current) return;
 
     const nodeId = executionState.currentNodeId;
-    if (
-      focusedNodeRef.current === nodeId ||
-      focusQueueRef.current.includes(nodeId)
-    ) {
+    if (focusedNodeRef.current === nodeId) {
       return;
     }
 
-    focusQueueRef.current.push(nodeId);
-    processFocusQueue();
-  }, [executionState?.currentNodeId, processFocusQueue]);
+    // 시작 노드가 이미 포커스되었으면 다시 추가하지 않음
+    const currentNodes = getNodes();
+    const currentNode = currentNodes.find((node) => node.id === nodeId);
+    if (currentNode && currentNode.data?.type === BlockEnum.Start && hasStartNodeFocusedRef.current) {
+      return;
+    }
+
+    enqueueFocusNode(nodeId);
+  }, [executionState?.currentNodeId, enqueueFocusNode, getNodes]);
 
   // 실행 시작 시 isExecutionCompleteRef 초기화 및 시작 노드 자동 포커스
   useEffect(() => {
     if (executionState?.status === 'running') {
       isExecutionCompleteRef.current = false;
+      if (
+        executionState.executedNodes.length === 0 &&
+        !executionState.currentNodeId
+      ) {
+        hasStartNodeFocusedRef.current = false;
+        focusQueueRef.current = [];
+        enqueuedNodeIdsRef.current.clear();
+        focusInProgressRef.current = false;
+        focusedNodeRef.current = null;
+      }
 
       // 시작 노드를 자동으로 큐에 추가하여 반드시 포커스되도록 함
+      // 단, 이미 한 번 포커스된 경우에는 추가하지 않음
       // getNodes()를 사용하여 nodes 의존성 제거 (노드 상태 변경 시 재실행 방지)
-      const currentNodes = getNodes();
-      const startNode = currentNodes.find((node) => node.data?.type === BlockEnum.Start);
-      if (
-        startNode &&
-        !focusQueueRef.current.includes(startNode.id) &&
-        focusedNodeRef.current !== startNode.id
-      ) {
-        focusQueueRef.current.push(startNode.id);
-        processFocusQueue();
+      if (!hasStartNodeFocusedRef.current) {
+        const currentNodes = getNodes();
+        const startNode = currentNodes.find((node) => node.data?.type === BlockEnum.Start);
+        if (startNode && focusedNodeRef.current !== startNode.id) {
+          enqueueFocusNode(startNode.id);
+        }
       }
     }
-  }, [executionState?.status, getNodes, processFocusQueue]);
+  }, [executionState?.status, getNodes, enqueueFocusNode]);
 
   // 실행 완료/오류 시 플래그 설정 (큐에 있는 노드들은 계속 처리됨)
   useEffect(() => {

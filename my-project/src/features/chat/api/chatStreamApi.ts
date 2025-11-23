@@ -8,10 +8,18 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/shared/constants/apiEndpoints';
 import type { StreamChatRequest, StreamCallbacks } from '@/shared/types/streaming.types';
 
 /**
+ * 스트리밍 메시지 전송 옵션
+ */
+interface SendMessageOptions {
+  signal?: AbortSignal; // 외부에서 스트림 중단을 위한 signal
+}
+
+/**
  * 스트리밍 메시지 전송
  *
  * @param request - 스트리밍 요청 파라미터
  * @param callbacks - 이벤트 콜백
+ * @param options - 추가 옵션 (signal 등)
  *
  * @example
  * await sendMessageStream(
@@ -21,12 +29,14 @@ import type { StreamChatRequest, StreamCallbacks } from '@/shared/types/streamin
  *     onSources: (sources) => console.log('출처:', sources),
  *     onComplete: () => console.log('완료'),
  *     onError: (error) => console.error(error),
- *   }
+ *   },
+ *   { signal: abortController.signal }
  * );
  */
 export async function sendMessageStream(
   request: StreamChatRequest,
-  callbacks: StreamCallbacks
+  callbacks: StreamCallbacks,
+  options?: SendMessageOptions
 ): Promise<void> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.CHAT.STREAM}`;
 
@@ -45,5 +55,6 @@ export async function sendMessageStream(
     },
     callbacks,
     timeout: 60000, // 60초
+    signal: options?.signal,
   });
 }
