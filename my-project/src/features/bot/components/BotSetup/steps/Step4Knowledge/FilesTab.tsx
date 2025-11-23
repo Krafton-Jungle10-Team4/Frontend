@@ -19,25 +19,16 @@ const isAsyncUploadEnabled = (): boolean => {
 };
 
 interface FilesTabProps {
-  language: Language;
+  language?: Language;
 }
 
-export function FilesTab({ language }: FilesTabProps) {
+export function FilesTab({ language: _language = 'ko' }: FilesTabProps) {
   const { files, setFiles, createdBotId } = useBotSetup();
 
   // Async document store (feature flag controlled)
   const asyncStore = useAsyncDocumentStore();
 
   const translations = {
-    en: {
-      dragAndDrop: "Drag 'n' drop files here, or click to select",
-      fileUsage: 'You will be able to add more later.',
-      uploadingFiles: 'Uploading Files:',
-      uploaded: 'Uploaded',
-      deleting: 'Deleting...',
-      maxSize: `Max ${FILE_UPLOAD.MAX_SIZE_MB}MB per file`,
-      allowedTypes: 'PDF, TXT, MD, DOCX',
-    },
     ko: {
       dragAndDrop: '파일을 드래그하거나 클릭하여 선택하세요',
       fileUsage: '나중에 더 추가할 수 있습니다.',
@@ -49,7 +40,7 @@ export function FilesTab({ language }: FilesTabProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const totalSize = files.reduce((sum, f) => sum + f.file.size, 0);
 
@@ -59,14 +50,14 @@ export function FilesTab({ language }: FilesTabProps) {
     const validFiles = Array.from(selectedFiles).filter((file) => {
       // Validate file type
       if (!isValidFileType(file, FILE_UPLOAD.ALLOWED_TYPES)) {
-        toast.error(`${file.name}: Unsupported file type`);
+        toast.error(`${file.name}: 지원하지 않는 파일 형식입니다`);
         return false;
       }
 
       // Validate file size
       if (!isValidFileSize(file, FILE_UPLOAD.MAX_SIZE_MB)) {
         toast.error(
-          `${file.name}: File size exceeds ${FILE_UPLOAD.MAX_SIZE_MB}MB`
+          `${file.name}: 파일 크기가 ${FILE_UPLOAD.MAX_SIZE_MB}MB를 초과합니다`
         );
         return false;
       }
@@ -87,7 +78,7 @@ export function FilesTab({ language }: FilesTabProps) {
       try {
         // Use createdBotId for file upload
         if (!createdBotId) {
-          throw new Error('Bot not created yet');
+          throw new Error('서비스가 아직 생성되지 않았습니다');
         }
 
         if (isAsyncUploadEnabled()) {
@@ -110,7 +101,7 @@ export function FilesTab({ language }: FilesTabProps) {
             )
           );
           toast.success(
-            `${fileItem.file.name} uploaded - processing in background`
+            `${fileItem.file.name} 업로드 완료 - 백그라운드에서 처리됩니다`
           );
         } else {
           // Legacy flow: Use documentsService
@@ -134,7 +125,7 @@ export function FilesTab({ language }: FilesTabProps) {
               )
             );
             toast.success(
-              `${fileItem.file.name} uploaded - ${response.message}`
+              `${fileItem.file.name} 업로드 완료 - ${response.message}`
             );
           } else {
             // Legacy sync upload - processing complete
@@ -149,13 +140,13 @@ export function FilesTab({ language }: FilesTabProps) {
                   : f
               )
             );
-            toast.success(`${fileItem.file.name} uploaded successfully`);
+            toast.success(`${fileItem.file.name} 업로드가 완료되었습니다`);
           }
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
-        toast.error(`Failed to upload ${fileItem.file.name}: ${errorMessage}`);
+        toast.error(`${fileItem.file.name} 업로드 실패: ${errorMessage}`);
         setFiles((prev) => prev.filter((f) => f.id !== fileItem.id));
       }
     }
@@ -177,7 +168,7 @@ export function FilesTab({ language }: FilesTabProps) {
     try {
       // Use createdBotId for file deletion
       if (!createdBotId) {
-        throw new Error('Bot not created yet');
+        throw new Error('서비스가 아직 생성되지 않았습니다');
       }
 
       if (isAsyncUploadEnabled()) {
@@ -189,11 +180,7 @@ export function FilesTab({ language }: FilesTabProps) {
       }
 
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      toast.success(
-        language === 'ko'
-          ? '파일이 삭제되었습니다'
-          : 'File deleted successfully'
-      );
+      toast.success('파일이 삭제되었습니다');
     } catch {
       // Revert status on error
       setFiles((prev) =>
@@ -201,9 +188,7 @@ export function FilesTab({ language }: FilesTabProps) {
           f.id === fileId ? { ...f, status: 'uploaded' as FileStatus } : f
         )
       );
-      toast.error(
-        language === 'ko' ? '파일 삭제 실패' : 'Failed to delete file'
-      );
+      toast.error('파일 삭제 실패');
     }
   };
 
@@ -258,7 +243,7 @@ export function FilesTab({ language }: FilesTabProps) {
                   {fileItem.status === 'uploading' && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Loader2 size={16} className="animate-spin" />
-                      <span className="hidden sm:inline">Uploading...</span>
+                      <span className="hidden sm:inline">업로드 중...</span>
                     </div>
                   )}
 
@@ -271,7 +256,7 @@ export function FilesTab({ language }: FilesTabProps) {
                       <button
                         onClick={() => handleDeleteFile(fileItem.id)}
                         className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                        title="Delete file"
+                        title="파일 삭제"
                       >
                         <X size={16} />
                       </button>

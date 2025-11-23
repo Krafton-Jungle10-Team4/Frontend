@@ -16,12 +16,12 @@ export function DocumentList({
   documents,
   onSelect,
   onDelete,
-  language = 'ko',
+  language: _language = 'ko',
 }: DocumentListProps) {
   if (documents.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-sm text-gray-400">
-        {language === 'ko' ? '문서가 없습니다' : 'No documents'}
+        문서가 없습니다
       </div>
     );
   }
@@ -48,9 +48,7 @@ export function DocumentList({
             </p>
             <p className="text-xs text-gray-500">
               {formatFileSize(document.size)} •{' '}
-              {new Date(document.uploadedAt).toLocaleDateString(
-                language === 'ko' ? 'ko-KR' : 'en-US'
-              )}
+              {new Date(document.uploadedAt).toLocaleDateString('ko-KR')}
             </p>
           </div>
           {onDelete && (

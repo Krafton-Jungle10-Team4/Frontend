@@ -18,11 +18,7 @@ export function SetupCompletePage() {
   const handleComplete = () => {
     // botId 유효성 검증
     if (!botId) {
-      toast.error(
-        language === 'ko'
-          ? '서비스 ID를 찾을 수 없습니다. 홈으로 이동합니다.'
-          : 'Bot ID not found. Redirecting to home.'
-      );
+      toast.error('서비스 ID를 찾을 수 없습니다. 홈으로 이동합니다.');
       navigate('/home');
       return;
     }

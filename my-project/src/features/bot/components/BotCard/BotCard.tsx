@@ -34,7 +34,7 @@ interface BotCardProps {
   onVersionHistory?: (botId: string) => void;
   onEditTags?: (botId: string, currentTags: string[]) => void;
   viewMode?: 'grid' | 'list';
-  language: Language;
+  language?: Language;
 }
 
 const StatsGrid = ({ stats, bot }: { stats: Array<{ label: string; value: string | number; isVersion?: boolean }>; bot: BotCardData }) => (
@@ -63,22 +63,11 @@ function BotCard({
   onVersionHistory,
   onEditTags,
   viewMode = 'grid',
-  language,
+  language = 'ko',
 }: BotCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [suppressNextClick, setSuppressNextClick] = useState(false);
   const translations = {
-    en: {
-      created: 'Created',
-      nodes: 'Nodes',
-      edges: 'Edges',
-      version: 'Version',
-      deploy: 'Deploy',
-      deploymentManage: 'Deployment Management',
-      delete: 'Delete',
-      versionHistory: 'Version History',
-      addTag: 'Add Tag',
-    },
     ko: {
       created: '생성:',
       nodes: '노드 수',
@@ -92,7 +81,7 @@ function BotCard({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
   const stats = useMemo(
     () => [
       { label: t.nodes, value: bot.nodeCount },

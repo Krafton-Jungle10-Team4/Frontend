@@ -15,12 +15,6 @@ export function formatTimeAgo(date: Date, language: Language): string {
   const diffDays = Math.floor(diffMs / 86400000);
 
   const translations = {
-    en: {
-      justNow: 'just now',
-      minutes: (n: number) => `${n} minute${n > 1 ? 's' : ''} ago`,
-      hours: (n: number) => `${n} hour${n > 1 ? 's' : ''} ago`,
-      days: (n: number) => `${n} day${n > 1 ? 's' : ''} ago`,
-    },
     ko: {
       justNow: '방금 전',
       minutes: (n: number) => `${n}분 전`,
@@ -29,7 +23,7 @@ export function formatTimeAgo(date: Date, language: Language): string {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   if (diffMins < 1) return t.justNow;
   if (diffMins < 60) return t.minutes(diffMins);
@@ -59,8 +53,8 @@ export function truncateText(text: string, maxLength: number): string {
 /**
  * Format number with thousands separator
  */
-export function formatNumber(num: number, locale: string = 'en-US'): string {
-  return new Intl.NumberFormat(locale).format(num);
+export function formatNumber(num: number, locale: string = 'ko-KR'): string {
+  return new Intl.NumberFormat(locale ?? 'ko-KR').format(num);
 }
 
 /**

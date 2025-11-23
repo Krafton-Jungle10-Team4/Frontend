@@ -8,7 +8,7 @@ interface KnowledgeGridProps {
   knowledgeList: Knowledge[];
   loading: boolean;
   error: string | null;
-  language: Language;
+  language?: Language;
   onImportFromFile: () => void;
   onKnowledgeClick: (knowledgeId: string) => void;
   onDeleteKnowledge: (knowledgeId: string) => void;
@@ -18,7 +18,7 @@ export function KnowledgeGrid({
   knowledgeList,
   loading,
   error,
-  language,
+  language: _language = 'ko',
   onImportFromFile,
   onKnowledgeClick,
   onDeleteKnowledge,
@@ -26,9 +26,7 @@ export function KnowledgeGrid({
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-sm text-gray-500">
-          {language === 'ko' ? '로딩 중...' : 'Loading...'}
-        </p>
+        <p className="text-sm text-gray-500">로딩 중...</p>
       </div>
     );
   }
@@ -39,7 +37,7 @@ export function KnowledgeGrid({
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={() => window.location.reload()}>
-            {language === 'ko' ? '다시 시도' : 'Retry'}
+            다시 시도
           </Button>
         </div>
       </div>

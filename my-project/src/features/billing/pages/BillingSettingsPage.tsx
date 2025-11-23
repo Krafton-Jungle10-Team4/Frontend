@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { useBilling } from '../hooks/useBilling';
 import { useBillingStore } from '@/shared/stores/billingStore';
 import { useAuth, useAuthStore } from '@/features/auth';
-import { useUIStore } from '@/shared/stores/uiStore';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import { Progress } from '@/shared/components/progress';
@@ -26,10 +25,6 @@ export function BillingSettingsPage() {
   const userName = user?.name || 'User';
   const userEmail = user?.email || '';
   const { logout } = useAuth();
-  
-  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
-  const language = useUIStore((state) => state.language);
-  const setLanguage = useUIStore((state) => state.setLanguage);
 
   // 일별 비용 및 모델별 사용량 데이터
   const [dailyCosts, setDailyCosts] = useState<DailyCostSummary[]>([]);
@@ -611,14 +606,10 @@ export function BillingSettingsPage() {
     <div className="flex h-screen bg-[#f7f8fb]">
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavigation
-          onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
           userEmail={userEmail}
           onHomeClick={() => navigate('/workspace/studio')}
-          language={language}
-          onLanguageChange={setLanguage}
           onLogout={handleLogout}
-          currentPage="결제"
         />
         <div className="flex-1 overflow-auto">
           {renderContent()}

@@ -134,16 +134,9 @@ export function HomePage() {
     );
   };
 
-  const translations = {
-    en: {
-      currentPage: 'Home',
-    },
-    ko: {
-      currentPage: '홈',
-    },
+  const t = {
+    currentPage: '홈',
   };
-
-  const t = translations[language];
 
   return (
     <div className="flex h-screen bg-background">
@@ -165,12 +158,9 @@ export function HomePage() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation */}
         <TopNavigation
-          onToggleSidebar={() => setSidebarOpen(true)}
           userName={userName}
           userEmail={userEmail}
-        onHomeClick={() => navigate('/workspace/studio')}
-          language={language}
-          onLanguageChange={setLanguage}
+          onHomeClick={() => navigate('/workspace/studio')}
           onLogout={handleLogout}
         />
 
@@ -208,9 +198,7 @@ export function HomePage() {
             {botsLoading && isEmpty ? (
               <div className="flex items-center justify-center h-64 text-gray-500">
                 <p className="text-sm sm:text-base">
-                  {language === 'en'
-                    ? 'Loading bots...'
-                    : '서비스들을 불러오는 중입니다...'}
+                  서비스들을 불러오는 중입니다...
                 </p>
               </div>
             ) : (
@@ -230,9 +218,7 @@ export function HomePage() {
             )}
             {botsError && (
               <p className="mt-4 text-sm text-red-500">
-                {language === 'en'
-                  ? 'Failed to load bots. Please try again.'
-                  : '서비스 목록을 불러오지 못했습니다. 다시 시도해주세요.'}
+                서비스 목록을 불러오지 못했습니다. 다시 시도해주세요.
               </p>
             )}
           </div>

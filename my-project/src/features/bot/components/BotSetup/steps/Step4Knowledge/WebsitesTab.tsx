@@ -16,27 +16,16 @@ import type { Language } from '@/shared/types';
 import type { DiscoveredUrl } from '../../types';
 
 interface WebsitesTabProps {
-  language: Language;
+  language?: Language;
 }
 
-export function WebsitesTab({ language }: WebsitesTabProps) {
+export function WebsitesTab({ language: _language = 'ko' }: WebsitesTabProps) {
   const { websites, setWebsites, isDiscoveringUrls, setIsDiscoveringUrls } =
     useBotSetup();
 
   const [currentWebsiteUrl, setCurrentWebsiteUrl] = useState('');
 
   const translations = {
-    en: {
-      websiteUrl: 'Website URL',
-      add: 'Add',
-      discoverUrls: 'Discover URLs',
-      pages: 'pages',
-      invalidUrl: 'Please enter a valid URL',
-      websiteRemoved: 'Website removed',
-      websiteDiscovered: 'Website discovered successfully',
-      discoveryFailed: 'Failed to discover website',
-      deleteFailedMessage: 'Failed to remove website',
-    },
     ko: {
       websiteUrl: '웹사이트 URL',
       add: '추가',
@@ -50,7 +39,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const handleAddWebsite = () => {
     if (!currentWebsiteUrl.trim()) return;
@@ -249,7 +238,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
                 <button
                   onClick={() => handleRemoveWebsite(website.id)}
                   className="p-1 text-gray-400 hover:text-red-600 transition-colors ml-2"
-                  title="Remove website"
+                  title="웹사이트 제거"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -266,7 +255,7 @@ export function WebsitesTab({ language }: WebsitesTabProps) {
                   {isDiscoveringUrls === website.id ? (
                     <>
                       <Loader2 size={16} className="animate-spin mr-2" />
-                      {language === 'ko' ? '탐색 중...' : 'Discovering...'}
+                      탐색 중...
                     </>
                   ) : (
                     t.discoverUrls

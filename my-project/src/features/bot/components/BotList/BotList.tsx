@@ -11,7 +11,7 @@ interface BotListProps {
   bots: BotCardData[];
   searchQuery: string;
   viewMode: ViewMode;
-  language: Language;
+  language?: Language;
   isEmpty: boolean;
   hasResults: boolean;
   onDelete: (botId: string, botName: string) => void;
@@ -32,7 +32,7 @@ export function BotList({
   bots,
   searchQuery,
   viewMode,
-  language,
+  language: _language = 'ko',
   isEmpty,
   hasResults,
   onDelete,
@@ -43,19 +43,16 @@ export function BotList({
   onEditTags,
 }: BotListProps) {
   const translations = {
-    en: {
-      noBotsFound: 'No bots found matching',
-    },
     ko: {
       noBotsFound: '와 일치하는 서비스가 없습니다',
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   // Empty state: 봇이 하나도 없음
   if (isEmpty) {
-    return <EmptyState onCreateBot={onCreateBot} language={language} />;
+    return <EmptyState onCreateBot={onCreateBot} language={_language} />;
   }
 
   // No results: 검색 결과 없음
@@ -63,9 +60,8 @@ export function BotList({
     return (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500">
         <p className="text-sm sm:text-base text-center px-4">
-          {language === 'en'
-            ? `No bots found matching "${searchQuery}"`
-            : `"${searchQuery}"${t.noBotsFound}`}
+          "{searchQuery}"
+          {t.noBotsFound}
         </p>
       </div>
     );

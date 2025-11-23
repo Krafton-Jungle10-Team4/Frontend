@@ -24,7 +24,7 @@ interface BotTagsDialogProps {
   botId: string;
   currentTags: string[];
   onSave: (botId: string, tags: string[]) => Promise<void>;
-  language: Language;
+  language?: Language;
 }
 
 export function BotTagsDialog({
@@ -33,7 +33,7 @@ export function BotTagsDialog({
   botId,
   currentTags,
   onSave,
-  language,
+  language: _language = 'ko',
 }: BotTagsDialogProps) {
   const [tags, setTags] = useState<string[]>(currentTags);
   const [inputValue, setInputValue] = useState('');
@@ -47,16 +47,6 @@ export function BotTagsDialog({
   }, [open, currentTags]);
 
   const translations = {
-    en: {
-      title: 'Edit Tags',
-      description: 'Add or remove tags for this bot',
-      placeholder: 'Enter tag name...',
-      add: 'Add',
-      cancel: 'Cancel',
-      save: 'Save',
-      maxTags: 'Maximum 10 tags allowed',
-      tagExists: 'Tag already exists',
-    },
     ko: {
       title: '태그 편집',
       description: '이 서비스의 태그를 추가하거나 제거하세요',
@@ -69,7 +59,7 @@ export function BotTagsDialog({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const handleAddTag = () => {
     const trimmedValue = inputValue.trim();
@@ -169,7 +159,7 @@ export function BotTagsDialog({
               </div>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                {language === 'en' ? 'No tags yet' : '태그가 없습니다'}
+                태그가 없습니다
               </div>
             )}
           </div>
@@ -189,7 +179,7 @@ export function BotTagsDialog({
             {t.cancel}
           </Button>
           <Button type="button" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (language === 'en' ? 'Saving...' : '저장 중...') : t.save}
+            {isSaving ? '저장 중...' : t.save}
           </Button>
         </DialogFooter>
       </DialogContent>

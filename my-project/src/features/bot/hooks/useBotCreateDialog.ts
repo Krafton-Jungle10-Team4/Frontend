@@ -10,7 +10,6 @@ import { botApi } from '../api/botApi';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@features/activity';
 import { useAuthStore } from '@features/auth';
-import { useUIStore } from '@shared/stores/uiStore';
 import { buildMinimalWorkflow } from '../utils/workflowUtils';
 
 interface CreateBotInput {
@@ -19,13 +18,6 @@ interface CreateBotInput {
 }
 
 const translations = {
-  en: {
-    creating: 'Creating bot...',
-    success: 'Bot created successfully',
-    error: 'Failed to create bot',
-    nameRequired: 'Bot name is required',
-    activityCreated: 'created a bot',
-  },
   ko: {
     creating: '서비스를 생성하는 중...',
     success: '서비스가 성공적으로 생성되었습니다',
@@ -43,10 +35,9 @@ export function useBotCreateDialog() {
   const addBot = useBotStore((state) => state.addBot);
   const addActivity = useActivityStore((state) => state.addActivity);
   const user = useAuthStore((state) => state.user);
-  const language = useUIStore((state) => state.language);
 
   const userName = user?.name || 'User';
-  const t = translations[language];
+  const t = translations.ko;
 
   const openDialog = useCallback(() => {
     setIsOpen(true);

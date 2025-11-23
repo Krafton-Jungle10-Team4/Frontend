@@ -18,7 +18,7 @@ export function RightSidebar({
   activities,
   maxBots = 5,
   userName = 'User',
-  language,
+  language: _language,
 }: RightSidebarProps) {
   const isUnlimited = !Number.isFinite(maxBots);
   const usagePercentage =
@@ -27,28 +27,15 @@ export function RightSidebar({
       : Math.min(100, Math.round((totalBots / maxBots) * 100));
   const userInitial = userName.charAt(0).toUpperCase();
 
-  const translations = {
-    en: {
-      bots: 'Bots',
-      manage: 'Manage',
-      used: 'used',
-      of: 'of',
-      recentActivity: 'Recent Activity',
-      viewAll: 'View All',
-      unlimited: 'Unlimited',
-    },
-    ko: {
-      bots: '서비스',
-      manage: '관리',
-      used: '사용 중',
-      of: '/',
-      recentActivity: '최근 활동',
-      viewAll: '모두 보기',
-      unlimited: '무제한',
-    },
+  const t = {
+    bots: '서비스',
+    manage: '관리',
+    used: '사용 중',
+    of: '/',
+    recentActivity: '최근 활동',
+    viewAll: '모두 보기',
+    unlimited: '무제한',
   };
-
-  const t = translations[language];
 
   return (
     <div className="w-80 h-full border-l border-gray-200 bg-gray-50 p-6 overflow-auto">
@@ -99,9 +86,7 @@ export function RightSidebar({
                     `${activity.type} - ${activity.botName || ''}`}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date(activity.timestamp).toLocaleString(
-                    language === 'ko' ? 'ko-KR' : 'en-US'
-                  )}
+                  {new Date(activity.timestamp).toLocaleString('ko-KR')}
                 </p>
               </div>
             </div>

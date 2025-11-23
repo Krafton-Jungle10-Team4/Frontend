@@ -10,7 +10,7 @@ interface ChatMessageProps {
   language?: 'en' | 'ko';
 }
 
-export function ChatMessage({ message, language = 'ko' }: ChatMessageProps) {
+export function ChatMessage({ message, language: _language = 'ko' }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
   return (
@@ -22,9 +22,7 @@ export function ChatMessage({ message, language = 'ko' }: ChatMessageProps) {
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         <p className="text-xs mt-1 opacity-70">
-          {new Date(message.timestamp).toLocaleTimeString(
-            language === 'ko' ? 'ko-KR' : 'en-US'
-          )}
+          {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
         </p>
       </div>
     </div>

@@ -18,7 +18,7 @@ interface Message {
 interface ChatPreviewPanelProps {
   botId?: string;
   botName: string;
-  language: 'en' | 'ko';
+  language?: 'en' | 'ko';
 }
 
 /**
@@ -28,22 +28,9 @@ interface ChatPreviewPanelProps {
 export function ChatPreviewPanel({
   botId,
   botName,
-  language,
+  language: _language = 'ko',
 }: ChatPreviewPanelProps) {
   const translations = {
-    en: {
-      initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
-      botResponse:
-        "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
-      today: 'Today',
-      delivered: 'Delivered',
-      placeholder: 'Type your message...',
-      quickMessages: [
-        'How do I set up my first AI agent?',
-        'Where can I find tutorials or guides?',
-        "I'm having trouble with a feature",
-      ],
-    },
     ko: {
       initialMessage: `안녕하세요! 👋 AI 에이전트 웹 플랫폼 지원팀입니다. 무엇을 도와드릴까요?`,
       botResponse:
@@ -59,13 +46,13 @@ export function ChatPreviewPanel({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
   const statusLabels = {
-    running: language === 'ko' ? '진행 중' : 'Running',
-    completed: language === 'ko' ? '완료' : 'Completed',
-    failed: language === 'ko' ? '실패' : 'Failed',
-    pending: language === 'ko' ? '대기' : 'Pending',
-    skipped: language === 'ko' ? '건너뜀' : 'Skipped',
+    running: '진행 중',
+    completed: '완료',
+    failed: '실패',
+    pending: '대기',
+    skipped: '건너뜀',
   } as const;
   const statusColors = {
     running: 'text-amber-500',
@@ -126,11 +113,7 @@ export function ChatPreviewPanel({
     setIsGenerating(false);
     setIsTyping(false);
     stopTypingAnimation();
-    failExecution(
-      language === 'ko'
-        ? '사용자가 응답 생성을 중지했습니다.'
-        : 'Generation stopped by user.'
-    );
+    failExecution('사용자가 응답 생성을 중지했습니다.');
     pendingEndNodeRef.current = null;
 
     // SSE 스트림 중단
@@ -396,11 +379,7 @@ export function ChatPreviewPanel({
 
     try {
       if (!botId) {
-        throw new Error(
-          language === 'ko'
-            ? '봇 ID가 없어 스트리밍을 시작할 수 없습니다.'
-            : 'Cannot start streaming without a bot ID.'
-        );
+        throw new Error('봇 ID가 없어 스트리밍을 시작할 수 없습니다.');
       }
 
       const activeSessionId = sessionIdRef.current || ensureSessionId();
@@ -461,10 +440,7 @@ export function ChatPreviewPanel({
           setIsTyping(false);
           setIsGenerating(false);
           pendingEndNodeRef.current = null;
-          const errorText =
-            language === 'ko'
-              ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
-              : `Sorry, an error occurred: ${error.message}`;
+          const errorText = `죄송합니다. 오류가 발생했습니다: ${error.message}`;
 
           stopTypingAnimation();
           setMessages((prev) => {
@@ -494,27 +470,15 @@ export function ChatPreviewPanel({
       console.error('Chat error:', error);
       console.error('Chat error:', error);
 
-      let errorText =
-        language === 'ko'
-          ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
-          : 'Sorry, an error occurred while processing your response.';
+      let errorText = '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.';
 
       if (error instanceof Error) {
         if (error.message.includes('401') || error.message.includes('403')) {
-          errorText =
-            language === 'ko'
-              ? '로그인이 필요합니다. 다시 로그인해주세요.'
-              : 'Authentication required. Please log in again.';
+          errorText = '로그인이 필요합니다. 다시 로그인해주세요.';
         } else if (error.message.includes('404')) {
-          errorText =
-            language === 'ko'
-              ? 'API 엔드포인트를 찾을 수 없습니다.'
-              : 'API endpoint not found.';
+          errorText = 'API 엔드포인트를 찾을 수 없습니다.';
         } else if (error.message.includes('500')) {
-          errorText =
-            language === 'ko'
-              ? '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
-              : 'Server error. Please try again later.';
+          errorText = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
         }
       }
 
@@ -567,11 +531,7 @@ export function ChatPreviewPanel({
       resetWorkflowNodeStates();
 
       if (!botId) {
-        throw new Error(
-          language === 'ko'
-            ? '봇 ID가 없어 스트리밍을 시작할 수 없습니다.'
-            : 'Cannot start streaming without a bot ID.'
-        );
+        throw new Error('봇 ID가 없어 스트리밍을 시작할 수 없습니다.');
       }
 
       // 새 AbortController 생성 및 중지 플래그 초기화
@@ -626,10 +586,7 @@ export function ChatPreviewPanel({
           stopTypingAnimation();
           waitForTypingToFinish();
           pendingEndNodeRef.current = null;
-          const errorText =
-            language === 'ko'
-              ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
-              : `Sorry, an error occurred: ${error.message}`;
+          const errorText = `죄송합니다. 오류가 발생했습니다: ${error.message}`;
 
           setMessages((prev) => {
             const updated = [...prev];
@@ -657,27 +614,15 @@ export function ChatPreviewPanel({
       waitForTypingToFinish();
       console.error('Chat error:', error);
 
-      let errorText =
-        language === 'ko'
-          ? '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.'
-          : 'Sorry, an error occurred while processing your response.';
+      let errorText = '죄송합니다. 응답을 처리하는 중 오류가 발생했습니다.';
 
       if (error instanceof Error) {
         if (error.message.includes('401') || error.message.includes('403')) {
-          errorText =
-            language === 'ko'
-              ? '로그인이 필요합니다. 다시 로그인해주세요.'
-              : 'Authentication required. Please log in again.';
+          errorText = '로그인이 필요합니다. 다시 로그인해주세요.';
         } else if (error.message.includes('404')) {
-          errorText =
-            language === 'ko'
-              ? 'API 엔드포인트를 찾을 수 없습니다.'
-              : 'API endpoint not found.';
+          errorText = 'API 엔드포인트를 찾을 수 없습니다.';
         } else if (error.message.includes('500')) {
-          errorText =
-            language === 'ko'
-              ? '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
-              : 'Server error. Please try again later.';
+          errorText = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
         }
       }
 
@@ -794,7 +739,7 @@ export function ChatPreviewPanel({
                     {message.sources && message.sources.length > 0 && (
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-gray-500 px-2">
-                          {language === 'ko' ? '출처:' : 'Sources:'}
+                          출처:
                         </p>
                         {message.sources.map((source, idx) => (
                           <div
@@ -804,9 +749,7 @@ export function ChatPreviewPanel({
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="text-gray-700 font-medium mb-1">
-                                  {language === 'ko'
-                                    ? `출처 ${idx + 1}`
-                                    : `Source ${idx + 1}`}
+                                  {`출처 ${idx + 1}`}
                                 </p>
                                 <p className="text-gray-600 line-clamp-2 whitespace-pre-wrap">
                                   {source.content.replace(/\*\*/g, '')}

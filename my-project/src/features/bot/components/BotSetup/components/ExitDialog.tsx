@@ -13,20 +13,13 @@ import type { Language } from '@/shared/types';
 
 interface ExitDialogProps {
   onBack: () => void;
-  language: Language;
+  language?: Language;
 }
 
-export function ExitDialog({ onBack, language }: ExitDialogProps) {
+export function ExitDialog({ onBack, language: _language = 'ko' }: ExitDialogProps) {
   const { showExitDialog, setShowExitDialog, resetAllData } = useBotSetup();
 
   const translations = {
-    en: {
-      title: 'Are you sure you want to exit?',
-      message:
-        'Uploaded files, websites, and text information will be deleted.',
-      yes: 'Yes',
-      no: 'No',
-    },
     ko: {
       title: '정말 종료하시겠습니까?',
       message: '업로드한 파일이나 웹사이트, 텍스트 정보가 삭제됩니다.',
@@ -35,7 +28,7 @@ export function ExitDialog({ onBack, language }: ExitDialogProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const handleConfirmExit = async () => {
     try {

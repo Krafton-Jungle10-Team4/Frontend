@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function MyBotsSidebar() {
   const bots = useBotStore(state => state.bots);
-  const language = useUIStore(state => state.language);
+  const _language = useUIStore(state => state.language);
   const navigate = useNavigate();
 
   const handleBotClick = (botId: string) => {
@@ -19,18 +19,18 @@ export function MyBotsSidebar() {
           <Rocket className="w-4 h-4 text-white" />
         </div>
         <span className="text-sm font-semibold text-gray-900">
-          {language === 'ko' ? '마켓플레이스' : 'Marketplace'}
+          마켓플레이스
         </span>
       </div>
 
       <div className="flex-1 p-4">
         <h3 className="text-xs font-medium text-gray-500 mb-3 px-1">
-          {language === 'ko' ? '작업 공간' : 'Workspace'}
+          작업 공간
         </h3>
         <div className="space-y-0.5">
           {bots.length === 0 ? (
             <div className="text-xs text-gray-400 py-3 px-3">
-              {language === 'ko' ? '생성된 서비스가 없습니다' : 'No bots created'}
+              생성된 서비스가 없습니다
             </div>
           ) : (
             bots.map(bot => (

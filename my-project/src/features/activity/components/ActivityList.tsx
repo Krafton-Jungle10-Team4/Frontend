@@ -15,14 +15,14 @@ interface ActivityListProps {
 export function ActivityList({
   activities,
   userName = 'User',
-  language = 'ko',
+  language: _language = 'ko',
 }: ActivityListProps) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   if (activities.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-sm text-gray-400">
-        {language === 'ko' ? '최근 활동이 없습니다' : 'No recent activity'}
+        최근 활동이 없습니다
       </div>
     );
   }
@@ -42,9 +42,7 @@ export function ActivityList({
                 `${activity.type} - ${activity.botName || ''}`}
             </p>
             <p className="text-xs text-gray-400">
-              {new Date(activity.timestamp).toLocaleString(
-                language === 'ko' ? 'ko-KR' : 'en-US'
-              )}
+              {new Date(activity.timestamp).toLocaleString('ko-KR')}
             </p>
           </div>
         </div>

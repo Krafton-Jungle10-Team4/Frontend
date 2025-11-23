@@ -48,7 +48,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [language, setLanguage] = useState<Language>('ko');
+  const [languageState, setLanguageState] = useState<Language>('ko');
   const [bots, setBots] = useState<Bot[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
 
@@ -66,7 +66,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // TODO: localStorage.setItem('language', language);
-  }, [language]);
+  }, [languageState]);
 
   // Filter bots based on search query
   const filteredBots = bots.filter((bot) =>
@@ -76,7 +76,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Add a new bot
   const addBot = (botName: string) => {
     const translations = {
-      en: { action: 'published a bot named' },
       ko: { action: '서비스를 발행했습니다' },
     };
 
@@ -85,7 +84,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const newActivity = createMockActivity(
       userName,
-      translations[language].action,
+      translations.ko.action,
       newBot.name
     );
     setActivities([newActivity, ...activities]);
@@ -96,16 +95,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBots(bots.filter((bot) => bot.id !== botId));
 
     const translations = {
-      en: { action: 'deleted a bot named', timestamp: 'just now' },
       ko: { action: '서비스를 삭제했습니다', timestamp: '방금 전' },
     };
 
     const newActivity: Activity = {
       id: Date.now().toString(),
       user: userName,
-      action: translations[language].action,
+      action: translations.ko.action,
       botName: botName,
-      timestamp: translations[language].timestamp,
+      timestamp: translations.ko.timestamp,
     };
 
     setActivities([newActivity, ...activities]);
@@ -120,8 +118,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSearchQuery,
     viewMode,
     setViewMode,
-    language,
-    setLanguage,
+    language: languageState,
+    setLanguage: () => setLanguageState('ko'),
     bots,
     setBots,
     addBot,

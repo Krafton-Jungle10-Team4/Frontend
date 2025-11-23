@@ -17,7 +17,7 @@ interface MarketplaceGridProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  language: Language;
+  language?: Language;
 }
 
 export function MarketplaceGrid({
@@ -26,7 +26,7 @@ export function MarketplaceGrid({
   currentPage,
   totalPages,
   onPageChange,
-  language,
+  language: _language = 'ko',
 }: MarketplaceGridProps) {
   if (loading) {
     return (
@@ -40,7 +40,7 @@ export function MarketplaceGrid({
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">
-          {language === 'ko' ? '마켓플레이스 아이템을 찾을 수 없습니다.' : 'No marketplace items found.'}
+          마켓플레이스 아이템을 찾을 수 없습니다.
         </p>
       </div>
     );

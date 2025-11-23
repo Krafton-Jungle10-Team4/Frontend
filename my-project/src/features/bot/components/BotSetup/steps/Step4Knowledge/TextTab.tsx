@@ -4,25 +4,20 @@ import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import type { Language } from '@/shared/types';
 
 interface TextTabProps {
-  language: Language;
+  language?: Language;
 }
 
-export function TextTab({ language }: TextTabProps) {
+export function TextTab({ language: _language = 'ko' }: TextTabProps) {
   const { knowledgeText, setKnowledgeText } = useBotSetup();
 
   const translations = {
-    en: {
-      placeholder:
-        'Add FAQs, documentation, or any text content your bot should reference',
-      charactersRemaining: 'characters remaining',
-    },
     ko: {
       placeholder: 'FAQ, 문서 또는 챗봇이 참조할 텍스트 콘텐츠를 추가하세요',
       charactersRemaining: '자 남음',
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="space-y-2">
