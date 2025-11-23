@@ -93,7 +93,7 @@ export function StudioPage() {
       // 1. 새 봇 생성 (빈 워크플로우로)
       const newBot = await botApi.create({
         name: `${botName} 복사본`,
-        description: `${botName}의 워크플로우를 기반으로 생성됨`,
+        description: `${botName}을 기반으로 생성됨`,
         category: 'workflow',
         workflow: {
           nodes: [],
@@ -114,7 +114,7 @@ export function StudioPage() {
         );
       }
 
-      toast.success('템플릿에서 새 봇을 생성했습니다.');
+      toast.success('템플릿에서 새 서비스를 생성했습니다.');
 
       await fetchWorkflows();
 
@@ -123,7 +123,7 @@ export function StudioPage() {
       });
     } catch (error) {
       console.error('Failed to create bot from template:', error);
-      toast.error('템플릿에서 봇 생성에 실패했습니다.');
+      toast.error('템플릿에서 서비스 생성에 실패했습니다.');
     } finally {
       setIsCreatingFromTemplate(false);
     }

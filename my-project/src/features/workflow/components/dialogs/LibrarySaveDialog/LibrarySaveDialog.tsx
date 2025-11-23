@@ -167,7 +167,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1">
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+            <div className="flex-1 overflow-y-auto space-y-4 px-2">
                   {/* 설명 */}
                   <div className="space-y-2">
                     <Label htmlFor="library_description">
