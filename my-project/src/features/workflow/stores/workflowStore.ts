@@ -1481,11 +1481,21 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   // 실행 상태 관리
   updateExecutionState: (updates) => {
-    set((state) => ({
-      executionState: state.executionState
-        ? { ...state.executionState, ...updates }
-        : null,
-    }));
+    set((state) => {
+      const baseState: ExecutionState =
+        state.executionState ?? {
+          status: 'idle',
+          currentNodeId: null,
+          executedNodes: [],
+          nodeOutputs: {},
+        };
+      return {
+        executionState: {
+          ...baseState,
+          ...updates,
+        },
+      };
+    });
   },
 
   onNodeExecutionComplete: (nodeId, outputs) => {

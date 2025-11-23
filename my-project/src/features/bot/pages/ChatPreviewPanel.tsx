@@ -86,7 +86,15 @@ export function ChatPreviewPanel({
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   // 워크플로우 노드 상태 업데이트
-  const { updateNode, edges, setEdges } = useWorkflowStore();
+  const {
+    updateNode,
+    edges,
+    setEdges,
+    updateExecutionState,
+    startExecution,
+    completeExecution,
+    failExecution,
+  } = useWorkflowStore();
 
   const ensureSessionId = () => {
     if (!sessionIdRef.current) {
@@ -188,6 +196,7 @@ export function ChatPreviewPanel({
 
     // 모든 노드와 엣지 상태 초기화
     resetWorkflowNodeStates();
+    useWorkflowStore.setState({ executionState: null });
   };
 
   const handleNodeEventUpdate = (event: WorkflowNodeEvent) => {
@@ -211,11 +220,40 @@ export function ChatPreviewPanel({
     };
 
     const runningStatus = statusMap[event.status] || NodeRunningStatus.NotStart;
-    
+
     // 노드 상태 업데이트
     updateNode(event.node_id, {
       _runningStatus: runningStatus,
     });
+
+    // 모든 노드 이벤트에 대해 currentNodeId 업데이트 (큐 기반 포커스를 위해)
+    if (event.status === 'running') {
+      updateExecutionState({
+        currentNodeId: event.node_id,
+        status: 'running',
+      });
+    } else if (event.status === 'failed') {
+      updateExecutionState({
+        currentNodeId: event.node_id,
+      });
+      failExecution(event.message || `노드 ${event.node_id} 실행 중 오류가 발생했습니다.`);
+    } else if (event.status === 'completed') {
+      const executedNodes =
+        useWorkflowStore.getState().executionState?.executedNodes || [];
+
+      // completed 상태에서도 currentNodeId 업데이트하여 포커스 큐에 추가되도록 함
+      updateExecutionState({
+        currentNodeId: event.node_id,
+        executedNodes: executedNodes.includes(event.node_id)
+          ? executedNodes
+          : [...executedNodes, event.node_id],
+      });
+    } else if (event.status === 'pending' || event.status === 'skipped') {
+      // pending/skipped 상태도 포커스되도록 currentNodeId 업데이트
+      updateExecutionState({
+        currentNodeId: event.node_id,
+      });
+    }
 
     // 노드가 완료되면 해당 노드에서 나가는 엣지도 업데이트 (Dify 스타일: 실행 경로 추적)
     const outgoingEdges = edges.filter((edge) => edge.source === event.node_id);
@@ -302,6 +340,8 @@ export function ChatPreviewPanel({
       // 이전 실행 상태 초기화
       resetWorkflowNodeStates();
 
+      startExecution();
+
       await sendMessageStream(userMessageContent, botId, {
         sessionId: activeSessionId,
         topK: 5,
@@ -325,7 +365,10 @@ export function ChatPreviewPanel({
             return updated;
           });
         },
-        onComplete: () => waitForTypingToFinish(),
+        onComplete: () => {
+          waitForTypingToFinish();
+          completeExecution();
+        },
         onError: (error) => {
           setIsTyping(false);
           const errorText =
@@ -347,10 +390,12 @@ export function ChatPreviewPanel({
           });
 
           toast.error(errorText);
+          failExecution(error.message);
         },
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
+      failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
       console.error('Chat error:', error);
@@ -421,6 +466,11 @@ export function ChatPreviewPanel({
     setIsTyping(true);
 
     try {
+      const activeSessionId = sessionIdRef.current || ensureSessionId();
+
+      // 이전 실행 상태 초기화
+      resetWorkflowNodeStates();
+
       if (!botId) {
         throw new Error(
           language === 'ko'
@@ -429,10 +479,7 @@ export function ChatPreviewPanel({
         );
       }
 
-      const activeSessionId = sessionIdRef.current || ensureSessionId();
-
-      // 이전 실행 상태 초기화
-      resetWorkflowNodeStates();
+      startExecution();
 
       await sendMessageStream(msg, botId, {
         sessionId: activeSessionId,
@@ -457,7 +504,10 @@ export function ChatPreviewPanel({
             return updated;
           });
         },
-        onComplete: () => waitForTypingToFinish(),
+        onComplete: () => {
+          waitForTypingToFinish();
+          completeExecution();
+        },
         onError: (error) => {
           stopTypingAnimation();
           waitForTypingToFinish();
@@ -479,10 +529,12 @@ export function ChatPreviewPanel({
           });
 
           toast.error(errorText);
+          failExecution(error.message);
         },
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
+      failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
       console.error('Chat error:', error);

@@ -113,6 +113,7 @@ const WorkflowInner = () => {
     isLoading,
     selectedNodeId,
     isChatVisible,
+    executionState,
     setNodes,
     setEdges,
     loadWorkflow,
@@ -138,6 +139,11 @@ const WorkflowInner = () => {
   const { screenToFlowPosition, fitView, getNodes } = useReactFlow();
   const prevBotIdRef = useRef<string | undefined>();
   const initialFitViewDoneRef = useRef(false);
+  const focusQueueRef = useRef<string[]>([]);
+  const focusInProgressRef = useRef(false);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusedNodeRef = useRef<string | null>(null);
+  const isExecutionCompleteRef = useRef(false);
 
   // 실시간 검증 비활성화
   useRealtimeValidation(false);
@@ -240,6 +246,105 @@ const WorkflowInner = () => {
       return () => clearTimeout(timer);
     }
   }, [botId, isLoading, nodes.length, fitView]);
+
+  const processFocusQueue = useCallback(() => {
+    if (focusInProgressRef.current) {
+      return;
+    }
+
+    const nextNodeId = focusQueueRef.current.shift();
+    if (!nextNodeId) {
+      // 큐가 비었고 실행이 완료되었으면 전체 뷰로 복귀
+      if (isExecutionCompleteRef.current) {
+        isExecutionCompleteRef.current = false;
+        fitView({
+          duration: 800,
+          padding: 0.15,
+        });
+      }
+      return;
+    }
+
+    focusInProgressRef.current = true;
+    focusedNodeRef.current = nextNodeId;
+
+    fitView({
+      nodes: [{ id: nextNodeId }],
+      duration: 800,
+      padding: 0.2,
+      maxZoom: 1.5,
+    });
+
+    if (focusTimerRef.current) {
+      clearTimeout(focusTimerRef.current);
+    }
+
+    focusTimerRef.current = setTimeout(() => {
+      focusInProgressRef.current = false;
+      focusedNodeRef.current = null;
+      processFocusQueue();
+    }, 900);
+  }, [fitView]);
+
+  useEffect(() => {
+    return () => {
+      focusQueueRef.current = [];
+      focusInProgressRef.current = false;
+      focusedNodeRef.current = null;
+      isExecutionCompleteRef.current = false;
+      if (focusTimerRef.current) {
+        clearTimeout(focusTimerRef.current);
+        focusTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // 워크플로우 실행 중 현재 실행 노드로 자동 포커스 (큐 기반)
+  useEffect(() => {
+    if (!executionState?.currentNodeId) return;
+
+    // 실행이 완료되었으면 더 이상 새 노드를 큐에 추가하지 않음
+    if (isExecutionCompleteRef.current) return;
+
+    const nodeId = executionState.currentNodeId;
+    if (
+      focusedNodeRef.current === nodeId ||
+      focusQueueRef.current.includes(nodeId)
+    ) {
+      return;
+    }
+
+    focusQueueRef.current.push(nodeId);
+    processFocusQueue();
+  }, [executionState?.currentNodeId, processFocusQueue]);
+
+  // 실행 시작 시 isExecutionCompleteRef 초기화
+  useEffect(() => {
+    if (executionState?.status === 'running') {
+      isExecutionCompleteRef.current = false;
+    }
+  }, [executionState?.status]);
+
+  // 실행 완료/오류 시 플래그 설정 (큐에 있는 노드들은 계속 처리됨)
+  useEffect(() => {
+    if (!executionState) return;
+    if (executionState.status !== 'success' && executionState.status !== 'error') {
+      return;
+    }
+
+    // 실행 완료 플래그 설정 (큐는 건드리지 않음)
+    isExecutionCompleteRef.current = true;
+
+    // 큐가 비어있으면 즉시 전체 뷰로 복귀
+    // 큐에 노드가 있으면 processFocusQueue가 모두 처리한 후 전체 뷰로 복귀
+    if (focusQueueRef.current.length === 0 && !focusInProgressRef.current) {
+      isExecutionCompleteRef.current = false;
+      fitView({
+        duration: 800,
+        padding: 0.15,
+      });
+    }
+  }, [executionState?.status, fitView]);
 
   useWorkflowAutoSave(botId);
 
