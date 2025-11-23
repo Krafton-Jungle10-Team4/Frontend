@@ -151,7 +151,7 @@ export const botApi = {
       // CreateBotDto → CreateBotRequest 변환
       const request: CreateBotRequest = {
         name: dto.name,
-        goal: dto.goal as any,
+        goal: dto.description || dto.goal as any,
         personality: dto.personality,
         knowledge: dto.knowledge,
         category: dto.category,
