@@ -2,10 +2,12 @@
  * ImportedWorkflowNode Config Panel (읽기 전용)
  */
 import { memo } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, X } from 'lucide-react';
 import { Badge } from '@/shared/components/badge';
+import { Button } from '@/shared/components/button';
 import { Separator } from '@/shared/components/separator';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
+import { useWorkflowStore } from '../../../stores/workflowStore';
 
 interface ImportedWorkflowPanelProps {
   data: ImportedWorkflowNodeData;
@@ -13,8 +15,21 @@ interface ImportedWorkflowPanelProps {
 
 export const ImportedWorkflowPanel = memo(
   ({ data }: ImportedWorkflowPanelProps) => {
+  const { selectNode } = useWorkflowStore();
+
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 relative">
+      {/* 닫기 버튼 */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 z-10 hover:bg-gray-100 dark:hover:bg-gray-700"
+        onClick={() => selectNode(null)}
+        title="패널 닫기"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+
       {/* Read-Only Banner */}
       <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
         <Lock className="w-5 h-5 text-muted-foreground" />
