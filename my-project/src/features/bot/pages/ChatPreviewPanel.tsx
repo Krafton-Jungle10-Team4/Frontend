@@ -149,21 +149,17 @@ export function ChatPreviewPanel({
     };
   }, []);
 
-  const handleResetChat = () => {
-    stopTypingAnimation();
-    setMessages([]);
-    setInputValue('');
-    stopTypingAnimation();
-    setIsTyping(false);
-    setNodeEvents([]);
-    
-    // 모든 노드와 엣지 상태 초기화
+  const resetWorkflowNodeStates = () => {
     const { nodes } = useWorkflowStore.getState();
+
+    // 모든 노드 상태 초기화
     nodes.forEach((node) => {
       updateNode(node.id, {
         _runningStatus: NodeRunningStatus.NotStart,
       });
     });
+
+    // 모든 엣지 상태 초기화
     setEdges((currentEdges) =>
       currentEdges.map((edge) => {
         const currentData = (edge.data || {}) as Partial<CommonEdgeType>;
@@ -180,6 +176,18 @@ export function ChatPreviewPanel({
         };
       })
     );
+  };
+
+  const handleResetChat = () => {
+    stopTypingAnimation();
+    setMessages([]);
+    setInputValue('');
+    stopTypingAnimation();
+    setIsTyping(false);
+    setNodeEvents([]);
+
+    // 모든 노드와 엣지 상태 초기화
+    resetWorkflowNodeStates();
   };
 
   const handleNodeEventUpdate = (event: WorkflowNodeEvent) => {
@@ -290,6 +298,9 @@ export function ChatPreviewPanel({
       const activeSessionId = sessionIdRef.current || ensureSessionId();
       setNodeEvents([]);
       setNodeEvents([]);
+
+      // 이전 실행 상태 초기화
+      resetWorkflowNodeStates();
 
       await sendMessageStream(userMessageContent, botId, {
         sessionId: activeSessionId,
@@ -419,6 +430,9 @@ export function ChatPreviewPanel({
       }
 
       const activeSessionId = sessionIdRef.current || ensureSessionId();
+
+      // 이전 실행 상태 초기화
+      resetWorkflowNodeStates();
 
       await sendMessageStream(msg, botId, {
         sessionId: activeSessionId,
