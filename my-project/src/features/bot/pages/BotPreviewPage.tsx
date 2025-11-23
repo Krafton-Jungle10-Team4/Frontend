@@ -36,7 +36,7 @@ export function BotPreviewPage() {
     // Add activity log
     const translations = {
       en: { action: 'created bot' },
-      ko: { action: '봇을 생성했습니다' },
+      ko: { action: '서비스를 생성했습니다' },
     };
     addActivity({
       type: 'bot_created',

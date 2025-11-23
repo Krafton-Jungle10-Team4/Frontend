@@ -36,10 +36,10 @@ export function useBotActions() {
           error: 'Failed to delete bot',
         },
         ko: {
-          deleting: '봇을 삭제하는 중...',
-          success: '봇이 성공적으로 삭제되었습니다',
-          alreadyDeleted: '봇을 제거했습니다 (이미 삭제됨)',
-          error: '봇 삭제에 실패했습니다',
+          deleting: '서비스를 삭제하는 중...',
+          success: '서비스가 성공적으로 삭제되었습니다',
+          alreadyDeleted: '서비스를 제거했습니다 (이미 삭제됨)',
+          error: '서비스 삭제에 실패했습니다',
         },
       };
 
@@ -58,7 +58,7 @@ export function useBotActions() {
           type: 'bot_deleted',
           botId,
           botName,
-          message: `${userName} ${language === 'en' ? 'deleted bot' : '봇을 삭제했습니다'}: ${botName}`,
+          message: `${userName} ${language === 'en' ? 'deleted bot' : '서비스를 삭제했습니다'}: ${botName}`,
         });
 
         toast.success(t.success);
@@ -79,7 +79,7 @@ export function useBotActions() {
             type: 'bot_deleted',
             botId,
             botName,
-            message: `${userName} ${language === 'en' ? 'removed bot (already deleted)' : '봇을 제거했습니다 (이미 삭제됨)'}: ${botName}`,
+            message: `${userName} ${language === 'en' ? 'removed bot (already deleted)' : '서비스를 제거했습니다 (이미 삭제됨)'}: ${botName}`,
           });
 
           toast.success(t.alreadyDeleted);
@@ -99,7 +99,7 @@ export function useBotActions() {
           type: 'bot_deleted',
           botId,
           botName,
-          message: `${userName} ${language === 'en' ? 'attempted to delete bot' : '봇 삭제를 시도했습니다'}: ${botName} (offline)`,
+          message: `${userName} ${language === 'en' ? 'attempted to delete bot' : '서비스 삭제를 시도했습니다'}: ${botName} (offline)`,
         });
 
         toast.error(t.error);

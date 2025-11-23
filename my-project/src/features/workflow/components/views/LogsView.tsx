@@ -158,8 +158,8 @@ const LogsView = () => {
       <div className="flex h-full items-center justify-center bg-gray-50">
         <EmptyState
           icon={Loader2}
-          title="봇을 선택해 주세요"
-          description="좌측 사이드바에서 로그를 확인할 봇을 먼저 선택해야 합니다."
+          title="서비스를 선택해 주세요"
+          description="좌측 사이드바에서 로그를 확인할 서비스를 먼저 선택해야 합니다."
         />
       </div>
     );

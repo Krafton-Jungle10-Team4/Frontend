@@ -28,7 +28,7 @@ export function CreateBotCard({
     },
     ko: {
       title: '앱 만들기',
-      subtitle: '새로운 봇을 만들어보세요',
+      subtitle: '새로운 서비스를 만들어보세요',
       blank: '빈 상태로 시작',
       template: '템플릿에서 시작',
     },

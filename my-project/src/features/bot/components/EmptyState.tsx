@@ -15,9 +15,9 @@ export function EmptyState({ onCreateBot, language }: EmptyStateProps) {
       button: '+ Create Bot',
     },
     ko: {
-      title: '워크스페이스에 챗봇이 없습니다',
-      description: '새로운 챗봇을 생성하여 시작하세요.',
-      button: '+ 챗봇 생성',
+      title: '워크스페이스에 서비스가 없습니다',
+      description: '새로운 서비스를 생성하여 시작하세요.',
+      button: '+ 서비스 생성',
     },
   };
 

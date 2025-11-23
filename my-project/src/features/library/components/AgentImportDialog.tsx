@@ -53,7 +53,7 @@ export function AgentImportDialog({ open, onClose, agent }: AgentImportDialogPro
       setBots(data || []);
     } catch (error) {
       console.error('Failed to fetch bots:', error);
-      toast.error('봇 목록을 불러올 수 없습니다.');
+      toast.error('서비스 목록을 불러올 수 없습니다.');
     } finally {
       setIsFetchingBots(false);
     }
@@ -61,7 +61,7 @@ export function AgentImportDialog({ open, onClose, agent }: AgentImportDialogPro
 
   const handleImport = async () => {
     if (!selectedBotId) {
-      toast.error('봇을 선택해주세요.');
+      toast.error('서비스를 선택해주세요.');
       return;
     }
 

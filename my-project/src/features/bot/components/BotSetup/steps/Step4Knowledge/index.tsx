@@ -25,7 +25,7 @@ export function Step4Knowledge({ language }: Step4KnowledgeProps) {
     ko: {
       title: '지식',
       subtitle:
-        '챗봇이 질문에 답변할 수 있도록 지식 소스를 추가하세요. 나중에 더 추가할 수 있습니다.',
+        '서비스가 질문에 답변할 수 있도록 지식 소스를 추가하세요. 나중에 더 추가할 수 있습니다.',
       websites: '웹사이트',
       files: '파일',
       text: '텍스트',

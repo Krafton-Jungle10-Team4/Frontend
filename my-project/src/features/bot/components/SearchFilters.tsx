@@ -20,7 +20,7 @@ const translations = {
     listView: 'List view',
   },
   ko: {
-    searchPlaceholder: '봇 검색...',
+    searchPlaceholder: '서비스 검색...',
     gridView: '격자 보기',
     listView: '목록 보기',
   },

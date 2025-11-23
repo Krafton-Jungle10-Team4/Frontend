@@ -114,11 +114,11 @@ export function BotVersionSelectorDialog({
       <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>
-            {step === 'bot' ? '봇 선택' : '버전 선택'}
+            {step === 'bot' ? '서비스' : '버전 선택'}
           </DialogTitle>
           <DialogDescription>
             {step === 'bot'
-              ? '워크플로우를 가져올 봇을 선택하세요.'
+              ? '워크플로우를 가져올 서비스을 선택하세요.'
               : `${selectedBot?.name}의 발행된 버전을 선택하세요.`}
           </DialogDescription>
         </DialogHeader>

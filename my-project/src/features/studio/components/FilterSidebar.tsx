@@ -39,7 +39,7 @@ const StudioSearchBar: React.FC<{ value: string; onChange: (value: string) => vo
   );
 };
 
-export const FilterSidebar: React.FC<FilterSidebarProps> = ({
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({image.png
   tags,
   selectedTags,
   onTagToggle,

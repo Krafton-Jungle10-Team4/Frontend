@@ -48,7 +48,7 @@ const MonitoringView = () => {
 
         {!botId && (
           <div className="text-sm text-gray-500">
-            워크플로우 사용 현황을 보려면 먼저 봇을 선택하세요.
+            워크플로우 사용 현황을 보려면 먼저 서비스를 선택하세요.
           </div>
         )}
         {errorMessage && (

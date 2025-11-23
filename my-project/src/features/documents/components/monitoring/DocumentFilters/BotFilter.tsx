@@ -28,10 +28,10 @@ export const BotFilter: React.FC<BotFilterProps> = ({ value, onChange }) => {
       onValueChange={(val) => onChange(val === 'all' ? undefined : val)}
     >
       <SelectTrigger className="w-[200px] h-10">
-        <SelectValue placeholder="모든 봇" />
+        <SelectValue placeholder="모든 서비스" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">모든 봇</SelectItem>
+        <SelectItem value="all">모든 서비스</SelectItem>
         {bots.map((bot) => (
           <SelectItem key={bot.id} value={bot.id}>
             {bot.name}

@@ -118,7 +118,7 @@ export function StudioDeploymentOptionsDialog({
             <div className="flex flex-col items-start">
               <span className="font-medium">앱 실행</span>
               <span className="text-xs text-muted-foreground">
-                독립 실행형 챗봇 페이지를 새 탭에서 열기
+                독립 실행형 서비스 페이지를 새 탭에서 열기
               </span>
             </div>
           </Button>

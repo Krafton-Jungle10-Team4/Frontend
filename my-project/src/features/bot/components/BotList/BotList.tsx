@@ -47,7 +47,7 @@ export function BotList({
       noBotsFound: 'No bots found matching',
     },
     ko: {
-      noBotsFound: '와 일치하는 봇이 없습니다',
+      noBotsFound: '와 일치하는 서비스가 없습니다',
     },
   };
 

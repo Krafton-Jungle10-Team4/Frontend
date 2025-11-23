@@ -27,11 +27,11 @@ const translations = {
     activityCreated: 'created a bot',
   },
   ko: {
-    creating: '챗봇을 생성하는 중...',
-    success: '챗봇이 성공적으로 생성되었습니다',
-    error: '챗봇 생성에 실패했습니다',
-    nameRequired: '챗봇 이름은 필수입니다',
-    activityCreated: '챗봇을 생성했습니다',
+    creating: '서비스를 생성하는 중...',
+    success: '서비스가 성공적으로 생성되었습니다',
+    error: '서비스 생성에 실패했습니다',
+    nameRequired: '서비스 이름은 필수입니다',
+    activityCreated: '서비스를 생성했습니다',
   },
 };
 

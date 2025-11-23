@@ -61,7 +61,7 @@ export function BotImportAsNodeDialog({
     } catch (error) {
       console.error('Failed to load bots:', error);
       toast.error('로드 실패', {
-        description: '봇 목록을 불러오는 중 오류가 발생했습니다.',
+        description: '서비스 목록을 불러오는 중 오류가 발생했습니다.',
       });
     } finally {
       setIsLoadingBots(false);
@@ -110,7 +110,7 @@ export function BotImportAsNodeDialog({
   const handleImportAsNode = async () => {
     if (!selectedBot || !selectedVersion) {
       toast.error('선택 오류', {
-        description: '봇과 버전을 모두 선택해주세요.',
+        description: '서비스과 버전을 모두 선택해주세요.',
       });
       return;
     }
@@ -200,9 +200,9 @@ export function BotImportAsNodeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>봇 선택</DialogTitle>
+          <DialogTitle>서비스 선택</DialogTitle>
           <DialogDescription>
-            워크플로우를 가져올 봇을 선택하세요.
+            워크플로우를 가져올 서비스를 선택하세요.
           </DialogDescription>
         </DialogHeader>
 
@@ -215,7 +215,7 @@ export function BotImportAsNodeDialog({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mb-3" />
               <p className="text-sm text-muted-foreground">
-                사용 가능한 봇이 없습니다.
+                사용 가능한 서비스가 없습니다.
               </p>
             </div>
           ) : (

@@ -77,7 +77,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addBot = (botName: string) => {
     const translations = {
       en: { action: 'published a bot named' },
-      ko: { action: '봇을 발행했습니다' },
+      ko: { action: '서비스를 발행했습니다' },
     };
 
     const newBot = createMockBot(botName);
@@ -97,7 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const translations = {
       en: { action: 'deleted a bot named', timestamp: 'just now' },
-      ko: { action: '봇을 삭제했습니다', timestamp: '방금 전' },
+      ko: { action: '서비스를 삭제했습니다', timestamp: '방금 전' },
     };
 
     const newActivity: Activity = {

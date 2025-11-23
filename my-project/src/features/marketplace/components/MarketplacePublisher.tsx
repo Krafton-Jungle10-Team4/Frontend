@@ -125,7 +125,7 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
           <SelectContent>
             <SelectItem value="automation">자동화</SelectItem>
             <SelectItem value="analytics">분석</SelectItem>
-            <SelectItem value="chatbot">챗봇</SelectItem>
+            <SelectItem value="chatbot">서비스</SelectItem>
             <SelectItem value="integration">통합</SelectItem>
             <SelectItem value="customer-support">고객 지원</SelectItem>
             <SelectItem value="data-processing">데이터 처리</SelectItem>

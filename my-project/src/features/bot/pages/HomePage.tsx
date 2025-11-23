@@ -210,7 +210,7 @@ export function HomePage() {
                 <p className="text-sm sm:text-base">
                   {language === 'en'
                     ? 'Loading bots...'
-                    : '봇을 불러오는 중입니다...'}
+                    : '서비스들을 불러오는 중입니다...'}
                 </p>
               </div>
             ) : (
@@ -232,7 +232,7 @@ export function HomePage() {
               <p className="mt-4 text-sm text-red-500">
                 {language === 'en'
                   ? 'Failed to load bots. Please try again.'
-                  : '봇 목록을 불러오지 못했습니다. 다시 시도해주세요.'}
+                  : '서비스 목록을 불러오지 못했습니다. 다시 시도해주세요.'}
               </p>
             )}
           </div>

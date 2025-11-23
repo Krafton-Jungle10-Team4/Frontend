@@ -306,7 +306,7 @@ export const MCPKeyManagement: React.FC = () => {
               {/* 봇 ID */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  봇 ID (선택)
+                서비스 ID (선택)
                 </label>
                 <input
                   type="text"
@@ -315,11 +315,11 @@ export const MCPKeyManagement: React.FC = () => {
                     setFormData({ ...formData, bot_id: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="특정 봇에만 제한하려면 봇 ID 입력"
+                  placeholder="특정 서비스에만 제한하려면 서비스 ID 입력"
                   disabled={isSubmitting}
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  비워두면 모든 봇에서 사용 가능합니다.
+                  비워두면 모든 서비스에서 사용 가능합니다.
                 </p>
               </div>
 

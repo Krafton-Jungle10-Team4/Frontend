@@ -135,7 +135,7 @@ fetch('https://api.snapagent.shop/api/v1/widget/chat', {
           <DialogHeader>
             <DialogTitle>API 참조</DialogTitle>
             <DialogDescription>
-              챗봇 위젯 API 사용 방법 및 엔드포인트 정보
+            서비스 위젯 API 사용 방법 및 엔드포인트 정보
             </DialogDescription>
           </DialogHeader>
         </div>

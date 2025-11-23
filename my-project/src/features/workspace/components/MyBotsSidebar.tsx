@@ -30,7 +30,7 @@ export function MyBotsSidebar() {
         <div className="space-y-0.5">
           {bots.length === 0 ? (
             <div className="text-xs text-gray-400 py-3 px-3">
-              {language === 'ko' ? '생성된 봇이 없습니다' : 'No bots created'}
+              {language === 'ko' ? '생성된 서비스가 없습니다' : 'No bots created'}
             </div>
           ) : (
             bots.map(bot => (

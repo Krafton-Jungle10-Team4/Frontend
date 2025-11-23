@@ -27,11 +27,11 @@ export const DashboardStats = ({ stats, loading }: DashboardStatsProps) => {
   return (
     <div className="dashboard-stats">
       <div className="stat-card">
-        <h3>전체 봇</h3>
+        <h3>전체 서비스</h3>
         <p className="stat-value">{stats.totalBots}</p>
       </div>
       <div className="stat-card">
-        <h3>활성 봇</h3>
+        <h3>활성 서비스</h3>
         <p className="stat-value">{stats.activeBots}</p>
       </div>
       <div className="stat-card">

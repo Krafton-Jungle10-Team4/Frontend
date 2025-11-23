@@ -81,7 +81,7 @@ export function EmbedWebsiteDialog({ botId: _botId }: EmbedWebsiteDialogProps) {
               <Alert variant="destructive" className="shrink-0">
                 <InfoIcon className="h-4 w-4" />
                 <AlertDescription>
-                  아직 배포되지 않았습니다. 먼저 "업데이트 게시"를 눌러 봇을
+                  아직 배포되지 않았습니다. 먼저 "업데이트 게시"를 눌러 서비스를
                   배포하세요.
                 </AlertDescription>
               </Alert>

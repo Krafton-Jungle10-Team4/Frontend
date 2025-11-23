@@ -380,18 +380,18 @@ export function WidgetChatPage() {
         className="px-4 py-3 border-b text-white shadow-sm"
         style={{ background: primaryColor }}
         role="banner"
-        aria-label="챗봇 헤더"
+        aria-label="서비스 헤더"
       >
         <div className="flex items-center gap-3">
           {config?.config.avatar_url && (
             <img
               src={config.config.avatar_url}
-              alt={`${config?.config.bot_name || '챗봇'} 아바타`}
+              alt={`${config?.config.bot_name || '서비스'} 아바타`}
               className="w-8 h-8 rounded-full"
             />
           )}
           <h1 className="font-semibold text-lg">
-            {config?.config.bot_name || '챗봇'}
+            {config?.config.bot_name || '서비스'}
           </h1>
         </div>
       </header>
@@ -406,7 +406,7 @@ export function WidgetChatPage() {
           <article
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            aria-label={`${msg.role === 'user' ? '사용자' : '챗봇'} 메시지`}
+            aria-label={`${msg.role === 'user' ? '사용자' : '서비스'} 메시지`}
           >
             <div
               className={`max-w-[80%] rounded-lg p-3 shadow-sm ${

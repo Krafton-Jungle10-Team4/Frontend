@@ -446,7 +446,7 @@ export function BillingSettingsPage() {
               <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-slate-500">
-                    활성 봇 수
+                    활성 서비스 수
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -462,7 +462,7 @@ export function BillingSettingsPage() {
               <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-slate-500">
-                    봇당 평균 비용
+                  서비스 당 평균 비용
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -535,16 +535,16 @@ export function BillingSettingsPage() {
           <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-slate-900">
-                봇별 사용량
+              서비스 별 사용량
               </CardTitle>
               <p className="text-sm text-slate-500">
-                이번 결제 주기 동안 각 봇이 사용한 비용과 토큰 수입니다.
+                이번 결제 주기 동안 각 서비스가 사용한 비용과 토큰 수입니다.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               {sortedBotUsage.length === 0 ? (
                 <div className="rounded-2xl bg-indigo-50/60 p-6 text-center text-sm text-slate-500">
-                  아직 사용량이 기록된 봇이 없습니다.
+                  아직 사용량이 기록된 서비스가 없습니다.
                 </div>
               ) : (
                 <div className="space-y-3">

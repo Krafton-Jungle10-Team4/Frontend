@@ -59,7 +59,7 @@ export function BotTagsDialog({
     },
     ko: {
       title: '태그 편집',
-      description: '이 봇의 태그를 추가하거나 제거하세요',
+      description: '이 서비스의 태그를 추가하거나 제거하세요',
       placeholder: '태그 이름 입력...',
       add: '추가',
       cancel: '취소',

@@ -20,7 +20,7 @@ export function SetupCompletePage() {
     if (!botId) {
       toast.error(
         language === 'ko'
-          ? '봇 ID를 찾을 수 없습니다. 홈으로 이동합니다.'
+          ? '서비스 ID를 찾을 수 없습니다. 홈으로 이동합니다.'
           : 'Bot ID not found. Redirecting to home.'
       );
       navigate('/home');

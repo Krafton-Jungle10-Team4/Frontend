@@ -38,7 +38,7 @@ export function RightSidebar({
       unlimited: 'Unlimited',
     },
     ko: {
-      bots: '챗봇',
+      bots: '서비스',
       manage: '관리',
       used: '사용 중',
       of: '/',

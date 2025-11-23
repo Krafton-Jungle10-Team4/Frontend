@@ -171,7 +171,7 @@ export const WorkflowBuilderPage = () => {
     const state = location.state as { botName?: string; showSuccessToast?: boolean } | null;
     if (state?.showSuccessToast) {
       const message = language === 'ko'
-        ? '챗봇이 성공적으로 생성되었습니다'
+        ? '서비스가 성공적으로 생성되었습니다'
         : 'Bot created successfully';
       toast.success(message);
 

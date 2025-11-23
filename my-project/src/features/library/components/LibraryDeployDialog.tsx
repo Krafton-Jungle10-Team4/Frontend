@@ -19,7 +19,7 @@ import { botApi } from '@/features/bot/api/botApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 
 const formSchema = z.object({
-  target_bot_id: z.string().min(1, "대상 봇을 선택해주세요."),
+  target_bot_id: z.string().min(1, "대상 서비스를 선택해주세요."),
 });
 
 interface LibraryDeployDialogProps {
@@ -174,7 +174,7 @@ export function LibraryDeployDialog({
 
             <div className="bg-muted p-3 rounded-md">
               <p className="text-sm text-muted-foreground">
-                ⚠️ 선택한 봇의 기존 배포가 있다면 이 버전으로 업데이트됩니다.
+                ⚠️ 선택한 서비스의 기존 배포가 있다면 이 버전으로 업데이트됩니다.
               </p>
             </div>
 

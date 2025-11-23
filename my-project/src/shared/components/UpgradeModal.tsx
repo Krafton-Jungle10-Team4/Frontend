@@ -34,12 +34,12 @@ export function UpgradeModal({ isOpen, onClose, onUpgrade }: UpgradeModalProps) 
             Pro 플랜으로 업그레이드
           </DialogTitle>
           <DialogDescription>
-            더 강력한 기능으로 최고의 봇을 만들어보세요.
+            더 강력한 기능으로 최고의 서비스를 만들어보세요.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <ul className="list-disc list-inside space-y-2">
-            <li>최대 10개의 봇 생성</li>
+            <li>최대 10개의 서비스 생성</li>
             <li>최대 5명의 팀원 초대</li>
             <li>모든 고급 워크플로우 노드 사용</li>
             <li>"Powered by SnapShot" 브랜딩 제거</li>

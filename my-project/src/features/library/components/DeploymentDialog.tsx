@@ -71,7 +71,7 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
 
   const handleDeploy = async () => {
     if (!selectedBotId) {
-      toast.error('배포할 봇을 선택하세요.');
+      toast.error('배포할 서비스를 선택하세요.');
       return;
     }
     setIsLoading(true);
@@ -130,13 +130,13 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
         <div className="space-y-4 py-4">
           {/* Bot Selector */}
           <div className="space-y-2">
-            <p className="text-sm font-medium">배포할 봇 선택</p>
+            <p className="text-sm font-medium">배포할 서비스 선택</p>
             <Select
               value={selectedBotId}
               onValueChange={(value) => setSelectedBotId(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="봇을 선택하세요" />
+                <SelectValue placeholder="서비스를 선택하세요" />
               </SelectTrigger>
               <SelectContent>
                 {bots.map((bot) => (
@@ -198,7 +198,7 @@ export function DeploymentDialog({ open, onClose, versionId, agentName, botId }:
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 <li>이 서비스 버전을 원하는 서비스에 배포할 수 있습니다.</li>
                 <li>배포하면 해당 서비스의 기존 활성 배포가 비활성화됩니다.</li>
-                <li>배포된 버전은 챗봇 API에서 실행됩니다.</li>
+                <li>배포된 버전은 서비스 API에서 실행됩니다.</li>
               </ul>
             </div>
             </>

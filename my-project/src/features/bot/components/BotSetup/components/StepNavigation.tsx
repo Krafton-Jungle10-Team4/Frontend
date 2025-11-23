@@ -44,7 +44,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
       step: '단계',
       of: '/',
       next: '다음',
-      trainAgent: '챗봇 학습',
+      trainAgent: '서비스 학습',
       prev: '이전',
     },
   };
@@ -79,7 +79,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
         // Step 3: Complete setup - PATCH status to ACTIVE
         if (!createdBotId) {
           toast.error(
-            language === 'ko' ? '봇 ID를 찾을 수 없습니다' : 'Bot ID not found'
+            language === 'ko' ? '서비스 ID를 찾을 수 없습니다' : 'Bot ID not found'
           );
           return;
         }
@@ -103,7 +103,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
 
         // 성공 메시지
         toast.success(
-          language === 'ko' ? '봇이 생성되었습니다' : 'Bot created successfully'
+          language === 'ko' ? '서비스가 생성되었습니다' : 'Bot created successfully'
         );
 
         // Workflow 화면으로 이동

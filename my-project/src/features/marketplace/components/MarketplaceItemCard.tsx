@@ -49,7 +49,7 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
           {/* 설명 */}
           {item.description && (
             <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-              {item.description.replace(/\s*봇\s*$/, '')}
+              {item.description.replace(/\s*서비스\s*$/, '')}
             </p>
           )}
 
