@@ -202,7 +202,7 @@ export function MarketplacePublishDialog({
             <Button
               onClick={handlePublish}
               disabled={isPublishing}
-              className="bg-brand-gradient hover:opacity-90"
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
               {isPublishing ? (
                 <>
