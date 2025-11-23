@@ -6,7 +6,6 @@ import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
 import type { NodePortSchema } from '@shared/types/workflow';
-import { OutputVarList } from '../../variable/OutputVarList';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import { StatusIndicator } from './StatusIndicator';
@@ -149,25 +148,6 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
 
       {/* 노드 내용 */}
       {children}
-
-      {/* 출력 변수 섹션 (실행 중이거나 완료된 경우) */}
-      {ports &&
-        (data._runningStatus === NodeRunningStatus.Running ||
-          data._runningStatus === NodeRunningStatus.Succeeded ||
-          data._runningStatus === NodeRunningStatus.Failed ||
-          data._runningStatus === NodeRunningStatus.Exception) && (
-          <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2 rounded-b-[13px]">
-            <OutputVarList
-              nodeId={id}
-              showValues={
-                data._runningStatus === NodeRunningStatus.Succeeded ||
-                data._runningStatus === NodeRunningStatus.Failed ||
-                data._runningStatus === NodeRunningStatus.Exception
-              }
-              showEmptyState={false}
-            />
-          </div>
-        )}
     </div>
   );
 };
