@@ -318,12 +318,25 @@ const WorkflowInner = () => {
     processFocusQueue();
   }, [executionState?.currentNodeId, processFocusQueue]);
 
-  // 실행 시작 시 isExecutionCompleteRef 초기화
+  // 실행 시작 시 isExecutionCompleteRef 초기화 및 시작 노드 자동 포커스
   useEffect(() => {
     if (executionState?.status === 'running') {
       isExecutionCompleteRef.current = false;
+
+      // 시작 노드를 자동으로 큐에 추가하여 반드시 포커스되도록 함
+      // getNodes()를 사용하여 nodes 의존성 제거 (노드 상태 변경 시 재실행 방지)
+      const currentNodes = getNodes();
+      const startNode = currentNodes.find((node) => node.data?.type === BlockEnum.Start);
+      if (
+        startNode &&
+        !focusQueueRef.current.includes(startNode.id) &&
+        focusedNodeRef.current !== startNode.id
+      ) {
+        focusQueueRef.current.push(startNode.id);
+        processFocusQueue();
+      }
     }
-  }, [executionState?.status]);
+  }, [executionState?.status, getNodes, processFocusQueue]);
 
   // 실행 완료/오류 시 플래그 설정 (큐에 있는 노드들은 계속 처리됨)
   useEffect(() => {
