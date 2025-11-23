@@ -41,17 +41,19 @@ export const SUPPORTED_NODE_TYPES = [
   'end',
   'answer',
   'llm',
-  'knowledge',
+  'knowledge-base',
   'knowledge-retrieval',
   'if-else',
   'code',
-  'http-request',
+  'http',
   'template-transform',
+  'variable-assigner',
   'assigner',
   'question-classifier',
   'mcp',
   'tavily-search',
   'imported-workflow',
+  'slack',
 ] as const;
 
 /**
