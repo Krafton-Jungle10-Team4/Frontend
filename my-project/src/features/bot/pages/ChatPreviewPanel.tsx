@@ -78,6 +78,7 @@ export function ChatPreviewPanel({
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [_sessionId, setSessionId] = useState<string>('');
   const sessionIdRef = useRef<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -111,6 +112,13 @@ export function ChatPreviewPanel({
       typingIntervalRef.current = null;
     }
     typingBufferRef.current = '';
+  };
+
+  const handleStopGeneration = () => {
+    stopTypingAnimation();
+    setIsTyping(false);
+    setIsGenerating(false);
+    failExecution('사용자가 생성을 중지했습니다.');
   };
 
   const enqueueTypingChunk = (chunk: string) => {
@@ -323,6 +331,7 @@ export function ChatPreviewPanel({
 
     setMessages((prev) => [...prev, emptyAssistantMessage]);
     setIsTyping(true);
+    setIsGenerating(true);
 
     try {
       if (!botId) {
@@ -368,9 +377,11 @@ export function ChatPreviewPanel({
         onComplete: () => {
           waitForTypingToFinish();
           completeExecution();
+          setIsGenerating(false);
         },
         onError: (error) => {
           setIsTyping(false);
+          setIsGenerating(false);
           const errorText =
             language === 'ko'
               ? `죄송합니다. 오류가 발생했습니다: ${error.message}`
@@ -395,6 +406,7 @@ export function ChatPreviewPanel({
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
+      setIsGenerating(false);
       failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
@@ -464,6 +476,7 @@ export function ChatPreviewPanel({
 
     setMessages((prev) => [...prev, emptyAssistantMessage]);
     setIsTyping(true);
+    setIsGenerating(true);
 
     try {
       const activeSessionId = sessionIdRef.current || ensureSessionId();
@@ -507,8 +520,10 @@ export function ChatPreviewPanel({
         onComplete: () => {
           waitForTypingToFinish();
           completeExecution();
+          setIsGenerating(false);
         },
         onError: (error) => {
+          setIsGenerating(false);
           stopTypingAnimation();
           waitForTypingToFinish();
           const errorText =
@@ -534,6 +549,7 @@ export function ChatPreviewPanel({
         onNodeEvent: handleNodeEventUpdate,
       });
     } catch (error) {
+      setIsGenerating(false);
       failExecution(error instanceof Error ? error.message : '워크플로우 실행 중 오류가 발생했습니다.');
       stopTypingAnimation();
       waitForTypingToFinish();
@@ -755,27 +771,52 @@ export function ChatPreviewPanel({
             placeholder={t.placeholder}
             className="flex-1 bg-transparent text-gray-800 text-sm outline-none placeholder-gray-500"
           />
-          <button
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim()}
-            className="text-teal-500 disabled:text-gray-400"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          {isGenerating ? (
+            <button
+              onClick={handleStopGeneration}
+              className="text-red-500 hover:text-red-600"
+              title="중지"
             >
-              <path
-                d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="5"
+                  y="5"
+                  width="10"
+                  height="10"
+                  fill="currentColor"
+                  rx="1"
+                />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim()}
+              className="text-teal-500 disabled:text-gray-400"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </div>
