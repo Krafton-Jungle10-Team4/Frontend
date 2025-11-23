@@ -29,22 +29,25 @@ const SIZE_MAP = {
   xs: 'w-4 h-4 rounded',
   sm: 'w-5 h-5 rounded-md',
   md: 'w-6 h-6 rounded-lg',
+  lg: 'w-7 h-7 rounded-lg',
 };
 
 const ICON_SIZE_MAP = {
   xs: 'w-2.5 h-2.5',
   sm: 'w-3 h-3',
   md: 'w-3.5 h-3.5',
+  lg: 'w-4 h-4',
 };
 
 // Fallback 아이콘 (로딩 중 또는 아이콘이 없을 때)
-const FallbackIcon: FC<{ size: 'xs' | 'sm' | 'md' }> = ({ size }) => (
+const FallbackIcon: FC<{ size: 'xs' | 'sm' | 'md' | 'lg' }> = ({ size }) => (
   <span
     className={cn(
       'text-white font-medium',
       size === 'xs' && 'text-[8px]',
       size === 'sm' && 'text-[10px]',
-      size === 'md' && 'text-xs'
+      size === 'md' && 'text-xs',
+      size === 'lg' && 'text-sm'
     )}
   >
     ?

@@ -31,11 +31,11 @@ export const SearchInput: FC<SearchInputProps> = memo(
           placeholder={placeholder}
           className={cn(
             'w-full h-9 pl-9 pr-9 rounded-lg',
-            'bg-gray-100 dark:bg-gray-700',
+            'bg-gray-100',
             'border border-transparent',
-            'focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800',
-            'text-sm text-gray-900 dark:text-gray-100',
-            'placeholder:text-gray-400 dark:placeholder:text-gray-500',
+            'focus:border-blue-500 focus:bg-white',
+            'text-sm text-gray-900',
+            'placeholder:text-gray-400',
             'outline-none transition-colors'
           )}
         />
@@ -43,9 +43,9 @@ export const SearchInput: FC<SearchInputProps> = memo(
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute right-5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="absolute right-5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-gray-200 transition-colors"
           >
-            <X className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+            <X className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600" />
           </button>
         )}
       </div>

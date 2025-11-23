@@ -78,6 +78,6 @@ export interface NodeItemProps {
  */
 export interface BlockIconProps {
   type: string;
-  size?: 'xs' | 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
