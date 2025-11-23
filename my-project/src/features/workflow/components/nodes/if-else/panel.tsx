@@ -124,8 +124,8 @@ function IfElsePanelContent({
             </div>
           </div>
 
-          <div className="mt-3 rounded-md border border-dashed border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/40 p-3 text-xs text-gray-600 dark:text-gray-400">
-            <p className="font-medium text-gray-700 dark:text-gray-200 mb-1">분기 라우팅 안내</p>
+          <div className="mt-3 rounded-md border border-dashed border-gray-300 bg-gray-100 p-3 text-xs text-gray-600">
+            <p className="font-medium text-gray-700 mb-1">분기 라우팅 안내</p>
             <ul className="list-disc pl-5 space-y-1">
               <li><code className="font-mono">if</code>, <code className="font-mono">elif_N</code>, <code className="font-mono">else</code> 출력 핸들이 그대로 엣지 source_handle이 됩니다.</li>
               <li>각 케이스의 <code className="font-mono">case_id</code>를 지정하면 해당 문자열도 핸들로 사용되어 조건별 라우팅을 명확히 할 수 있습니다.</li>

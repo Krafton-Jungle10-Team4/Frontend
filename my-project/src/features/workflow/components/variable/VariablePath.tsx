@@ -21,12 +21,12 @@ export function VariablePath({
 
   if (compact) {
     return (
-      <span className="inline-flex items-center gap-1 text-sm">
-        <span className={cn('font-medium', meta.color)}>
+      <span className="inline-flex items-center gap-1 text-sm overflow-hidden">
+        <span className={cn('font-medium truncate', meta.color)}>
           {variable.nodeTitle}
         </span>
-        <RiArrowRightSLine size={16} className="text-gray-400" />
-        <span className="text-gray-600 dark:text-gray-400">
+        <RiArrowRightSLine size={16} className="text-gray-400 flex-shrink-0" />
+        <span className="text-gray-600 dark:text-gray-400 truncate">
           {variable.portDisplayName}
         </span>
       </span>

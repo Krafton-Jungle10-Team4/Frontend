@@ -52,7 +52,7 @@ export function VariableSelector({ nodeId, value, onChange }: VariableSelectorPr
       portType={PortType.ANY}
       value={currentSelector}
       onChange={handleChange}
-      placeholder="변수를 선택하세요"
+      placeholder="변수"
     />
   );
 }

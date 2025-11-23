@@ -98,13 +98,15 @@ export function VarReferencePicker({
           className="w-full justify-between"
           disabled={disabled}
         >
-          {selectedVariable ? (
-            <VariablePath variable={selectedVariable} showType={false} compact />
-          ) : (
-            <span className="text-gray-400">{placeholder}</span>
-          )}
+          <div className="flex-1 min-w-0 overflow-hidden">
+            {selectedVariable ? (
+              <VariablePath variable={selectedVariable} showType={false} compact />
+            ) : (
+              <span className="text-gray-400">{placeholder}</span>
+            )}
+          </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {selectedVariable && (
               <div
                 role="button"
@@ -125,7 +127,6 @@ export function VarReferencePicker({
                 <RiCloseLine size={16} />
               </div>
             )}
-            <RiCodeBoxLine size={16} />
           </div>
         </Button>
       </PopoverTrigger>

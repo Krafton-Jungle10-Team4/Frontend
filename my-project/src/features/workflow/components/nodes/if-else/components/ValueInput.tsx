@@ -32,7 +32,7 @@ export function ValueInput({ varType, value, onChange }: ValueInputProps) {
           const num = parseFloat(e.target.value);
           onChange(isNaN(num) ? 0 : num);
         }}
-        placeholder="숫자 입력..."
+        placeholder="값"
         className="w-full"
       />
     );
@@ -44,7 +44,7 @@ export function ValueInput({ varType, value, onChange }: ValueInputProps) {
       type="text"
       value={value !== undefined ? String(value) : ''}
       onChange={(e) => onChange(e.target.value)}
-      placeholder="값 입력..."
+      placeholder="값"
       className="w-full"
     />
   );
