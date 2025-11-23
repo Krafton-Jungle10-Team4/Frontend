@@ -239,25 +239,34 @@ export function BotImportAsNodeDialog({
                             : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                         )}
                       >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                        <div className="flex-1 min-w-0 mr-2 overflow-hidden">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-medium text-sm truncate">
                               {bot.name}
                             </h3>
-                            <Badge variant={bot.status === 'active' ? 'success' : 'default'}>
+                            <Badge variant={bot.status === 'active' ? 'success' : 'default'} className="flex-shrink-0">
                               {bot.status === 'active' ? '활성' : '비활성'}
                             </Badge>
                           </div>
                           {bot.description && (
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p
+                              className="text-xs text-muted-foreground overflow-hidden"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word'
+                              }}
+                            >
                               {bot.description}
                             </p>
                           )}
                         </div>
                         {isExpanded ? (
-                          <ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-2" />
+                          <ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                         ) : (
-                          <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-2" />
+                          <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                         )}
                       </button>
 
@@ -291,20 +300,29 @@ export function BotImportAsNodeDialog({
                                       : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50'
                                   )}
                                 >
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
+                                  <div className="flex-1 min-w-0 overflow-hidden">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                                       <h4 className="font-medium text-xs">
                                         버전 {version.version}
                                       </h4>
-                                      <Badge variant="outline" className="text-xs">
+                                      <Badge variant="outline" className="text-xs flex-shrink-0">
                                         발행됨
                                       </Badge>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground truncate">
                                       {new Date(version.created_at).toLocaleString('ko-KR')}
                                     </p>
                                     {version.description && (
-                                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                                      <p
+                                        className="text-xs text-muted-foreground mt-1 overflow-hidden"
+                                        style={{
+                                          display: '-webkit-box',
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: 'vertical',
+                                          wordBreak: 'break-word',
+                                          overflowWrap: 'break-word'
+                                        }}
+                                      >
                                         {version.description}
                                       </p>
                                     )}
