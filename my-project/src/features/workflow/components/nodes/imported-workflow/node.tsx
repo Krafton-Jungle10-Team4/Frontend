@@ -2,8 +2,10 @@
  * ImportedWorkflowNode - 에이전트를 표현하는 노드
  */
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import { Handle, Position, type NodeProps, useUpdateNodeInternals } from '@xyflow/react';
+import { type NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import BlockIcon from '../_base/block-icon';
+import { NodeSourceHandle, NodeTargetHandle } from '../_base/node-handle';
 import { Button } from '@/shared/components/button';
 import { cn } from '@/shared/utils/cn';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
@@ -11,7 +13,7 @@ import { CollapsedView } from './CollapsedView';
 import { ExpandedView } from './ExpandedView';
 import { StatusIndicator } from '../_base/StatusIndicator';
 import { IMPORTED_NODE_SIZE } from '../../../constants/templateDefaults';
-import { NodeRunningStatus } from '@/shared/types/workflow.types';
+import { BlockEnum, NodeRunningStatus } from '@/shared/types/workflow.types';
 import { calculateTemplateGraphBounds, TEMPLATE_HEADER_OFFSET } from '../../../utils/templateBounds';
 import { isNodeInTemplate } from '../../../utils/templateImporter';
 import { useWorkflowStore } from '../../../stores/workflowStore';
@@ -285,7 +287,7 @@ export const ImportedWorkflowNode = memo(
     return (
       <div
         className={cn(
-          'relative rounded-lg border-2 border-dashed',
+          'relative rounded-lg border-2 border-solid',
           'shadow-md transition-all duration-200',
           // 선택 상태 - 남색 테두리와 옅은 남색 배경
           selected ? 'bg-blue-50 border-blue-700' : 'bg-white',
@@ -306,18 +308,18 @@ export const ImportedWorkflowNode = memo(
       >
         {/* Header */}
         <div className={cn(
-          "flex items-center justify-between p-3 bg-muted/50 rounded-t-lg",
+          "flex items-center p-3 bg-muted/50 rounded-t-lg",
           !isExpanded && "border-b"
         )}>
-          <div className="flex items-center gap-2 flex-1 pr-2">
-            {/* Read-only indicator */}
-            <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm truncate">{data.title}</h3>
-              <p className="text-xs text-muted-foreground">
-                v{data.template_version}
-              </p>
-            </div>
+          {/* Node Icon - 다른 노드들과 동일한 패턴 */}
+          <BlockIcon className="mr-2 shrink-0" type={BlockEnum.TemplateTransform} size="md" />
+
+          {/* Title and Version */}
+          <div className="flex-1 min-w-0 mr-2">
+            <h3 className="font-semibold text-sm truncate">{data.title}</h3>
+            <p className="text-xs text-muted-foreground">
+              v{data.template_version}
+            </p>
           </div>
 
           {/* 상태 아이콘 (실행 상태 피드백) */}
@@ -326,11 +328,14 @@ export const ImportedWorkflowNode = memo(
             singleRunningStatus={data._singleRunningStatus}
           />
 
+          {/* Read-only indicator - 확장/축소 버튼 옆으로 이동 */}
+          <Lock className="w-4 h-4 text-muted-foreground mx-1 shrink-0" />
+
           <Button
             size="sm"
             variant="ghost"
             onClick={handleToggleExpand}
-            className="h-8 w-8 p-0 ml-1"
+            className="h-8 w-8 p-0"
           >
             {isExpanded ? (
               <ChevronUp className="h-4 w-4" />
@@ -352,23 +357,11 @@ export const ImportedWorkflowNode = memo(
           )}
         </div>
 
-        {/* Input Handle - BaseNode 패턴: 1개만 렌더링 */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          id={defaultInputHandleId}
-          className="!bg-blue-500 !border-2 !border-white !w-3 !h-3"
-          style={{ top: '50%', transform: 'translateY(-50%)' }}
-        />
+        {/* Input Handle - BaseNode 패턴 */}
+        <NodeTargetHandle data={data} handleId={defaultInputHandleId} />
 
-        {/* Output Handle - BaseNode 패턴: 1개만 렌더링 */}
-        <Handle
-          type="source"
-          position={Position.Right}
-          id={defaultOutputHandleId}
-          className="!bg-green-500 !border-2 !border-white !w-3 !h-3"
-          style={{ top: '50%', transform: 'translateY(-50%)' }}
-        />
+        {/* Output Handle - BaseNode 패턴 */}
+        <NodeSourceHandle data={data} handleId={defaultOutputHandleId} />
       </div>
     );
   }
