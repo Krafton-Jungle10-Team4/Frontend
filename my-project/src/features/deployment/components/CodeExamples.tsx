@@ -20,7 +20,7 @@ export function CodeExamples({ botId, apiKey }: CodeExamplesProps) {
   -H "Content-Type: application/json" \\
   -d '{
     "inputs": {
-      "user_query": "엔비디아 소식을 알고싶어"
+      "query": ""
     },
     "response_mode": "blocking"
   }'`,
@@ -31,7 +31,7 @@ response = requests.post(
     "${PUBLIC_API_BASE_URL}/workflows/run",
     headers={"X-API-Key": "${displayApiKey}"},
     json={
-        "inputs": {"user_query": "엔비디아 소식을 알고싶어"},
+        "inputs": {"query": ""},
         "response_mode": "blocking"
     }
 )
@@ -46,7 +46,7 @@ print(result['outputs'])`,
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    inputs: { user_query: '엔비디아 소식을 알고싶어' },
+    inputs: { query: '' },
     response_mode: 'blocking'
   })
 });
@@ -72,7 +72,7 @@ const response = await fetch('${PUBLIC_API_BASE_URL}/workflows/run', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    inputs: { user_query: '엔비디아 소식을 알고싶어' },
+    inputs: { query: '' },
     response_mode: 'blocking'
   })
 });
