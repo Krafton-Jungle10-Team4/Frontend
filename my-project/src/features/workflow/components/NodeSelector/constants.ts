@@ -84,5 +84,5 @@ export const ICON_BG_COLORS: Record<string, string> = {
   'tavily-search': 'bg-blue-500',
   http: 'bg-pink-500',
   code: 'bg-slate-500',
-  slack: 'bg-fuchsia-500',
+  slack: 'bg-white',
 };

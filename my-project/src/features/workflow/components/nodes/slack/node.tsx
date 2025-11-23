@@ -3,7 +3,7 @@
  * Slack 채널로 메시지를 전송하는 노드
  */
 import type { CommonNodeType } from '@/shared/types/workflow.types';
-import { MessageSquare } from 'lucide-react';
+import SlackMessageIcon from '@/features/workflow/components/icons/SlackMessage';
 
 interface SlackNodeData extends CommonNodeType {
   channel?: string;
@@ -16,10 +16,10 @@ export default function SlackNode({ data }: { data: SlackNodeData }) {
   return (
     <div className="space-y-2 p-3">
       <div className="flex items-center gap-2 text-sm">
-        <MessageSquare className="w-4 h-4 text-purple-600" />
+        <SlackMessageIcon className="w-4 h-4 text-fuchsia-700" />
         <span className="font-medium">Slack 메시지</span>
       </div>
-      
+
       <div className="text-xs text-gray-600 space-y-1">
         <div className="flex items-center gap-1">
           <span className="text-gray-500">채널:</span>
