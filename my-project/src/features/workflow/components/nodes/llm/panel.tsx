@@ -177,8 +177,6 @@ export const LLMPanel = () => {
               <SelectContent>
                 <SelectItem value="bedrock">Bedrock (AWS)</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="anthropic">Anthropic</SelectItem>
-                <SelectItem value="google">Google</SelectItem>
               </SelectContent>
             </Select>
           </Field>
