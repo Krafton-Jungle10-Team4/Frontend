@@ -1,19 +1,8 @@
 import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Languages,
-  Settings,
-  Link2,
-  KeyRound,
-  Bug,
-  Palette,
-  LogOut,
-  ChevronDown,
-  CreditCard,
-} from 'lucide-react';
+import { Settings, LogOut, CreditCard } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
-import { Button } from '@/shared/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,12 +16,11 @@ import { cn } from '@/shared/components/utils';
 type Language = 'en' | 'ko';
 
 interface TopNavigationProps {
-  onToggleSidebar: () => void;
   userName?: string;
   userEmail?: string;
   onHomeClick?: () => void;
-  language: Language;
-  onLanguageChange: (lang: Language) => void;
+  language?: Language;
+  onLanguageChange?: (lang: Language) => void;
   onLogout?: () => Promise<void> | void;
   activeTabLabel?: string;
   onLogoClick?: () => void;
@@ -41,49 +29,26 @@ interface TopNavigationProps {
 }
 
 export function TopNavigation({
-  onToggleSidebar,
   userName = 'User',
   userEmail = '',
   onHomeClick,
-  language,
-  onLanguageChange,
+  language: _language = 'ko',
+  onLanguageChange: _onLanguageChange = () => undefined,
   onLogout,
-  activeTabLabel,
+  activeTabLabel: _activeTabLabel,
   onLogoClick,
   navigationTabs,
-  showSidebarToggle = true,
+  showSidebarToggle: _showSidebarToggle = true,
 }: TopNavigationProps) {
   const navigate = useNavigate();
   const { isFreePlan, billingStatus } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
-  const brandAccent = '#1CC8A0';
 
-  const translations = {
-    en: {
-      workspace: "'s Workspace",
-      upgrade: 'Upgrade',
-      billing: 'Billing & Usage',
-      accountSettings: 'Account Settings',
-      linkSocialAccounts: 'Link social accounts',
-      changePassword: 'Change password',
-      reportBug: 'Report a bug',
-      appearance: 'Appearance',
-      signOut: 'Sign out',
-    },
-    ko: {
-      workspace: '의 워크스페이스',
-      upgrade: '업그레이드',
-      billing: '결제 및 사용량',
-      accountSettings: '계정 설정',
-      linkSocialAccounts: '소셜 계정 연결',
-      changePassword: '비밀번호 변경',
-      reportBug: '버그 신고',
-      appearance: '외관',
-      signOut: '로그아웃',
-    },
+  const t = {
+    billing: '결제 및 사용량',
+    accountSettings: '계정 설정',
+    signOut: '로그아웃',
   };
-
-  const t = translations[language];
 
   const planId = billingStatus?.current_plan.plan_id ?? (isFreePlan ? 'free' : 'pro');
   const planName = billingStatus?.current_plan.name ?? (isFreePlan ? 'Free' : 'Pro');
@@ -136,7 +101,7 @@ export function TopNavigation({
               'inline-flex items-center justify-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200',
               planClass
             )}
-            aria-label={`Current plan: ${planName}`}
+            aria-label={`현재 플랜: ${planName}`}
           >
             <span className={cn('inline-block h-2.5 w-2.5 rounded-full shadow-sm', planDotClass)} />
             {planName}

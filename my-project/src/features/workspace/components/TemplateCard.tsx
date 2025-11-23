@@ -5,10 +5,10 @@ import type { Template } from '@/data/mockTemplates';
 interface TemplateCardProps {
   template: Template;
   onClick: (templateId: string) => void;
-  language: 'en' | 'ko';
+  language?: 'en' | 'ko';
 }
 
-export function TemplateCard({ template, onClick, language }: TemplateCardProps) {
+export function TemplateCard({ template, onClick, language: _language = 'ko' }: TemplateCardProps) {
   return (
     <Card
       className="h-[200px] cursor-pointer transition-all hover:shadow-lg"
@@ -33,9 +33,9 @@ export function TemplateCard({ template, onClick, language }: TemplateCardProps)
             {template.author}
           </span>
           <Badge variant="secondary" className="text-xs flex-shrink-0">
-            {template.type === 'workflow' && (language === 'ko' ? '워크플로우' : 'Workflow')}
-            {template.type === 'chatbot' && (language === 'ko' ? '서비스' : 'Chatbot')}
-            {template.type === 'agent' && (language === 'ko' ? '서비스' : 'Agent')}
+            {template.type === 'workflow' && '워크플로우'}
+            {template.type === 'chatbot' && '서비스'}
+            {template.type === 'agent' && '서비스'}
           </Badge>
         </div>
       </div>

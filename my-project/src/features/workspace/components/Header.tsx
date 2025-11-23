@@ -6,9 +6,6 @@ interface HeaderProps {
   onTabChange: (tab: HeaderProps['activeTab']) => void;
   userName: string;
   userEmail: string;
-  language: 'en' | 'ko';
-  onLanguageChange: (lang: 'en' | 'ko') => void;
-  onToggleSidebar: () => void;
   onLogout: () => Promise<void> | void;
   onLogoClick: () => void;
 }
@@ -18,40 +15,32 @@ export function Header({
   onTabChange,
   userName,
   userEmail,
-  language,
-  onLanguageChange,
-  onToggleSidebar,
   onLogout,
   onLogoClick,
 }: HeaderProps) {
   const tabLabels = {
-    marketplace: { en: 'Marketplace', ko: '마켓플레이스' },
-    studio: { en: 'Studio', ko: '스튜디오' },
-    knowledge: { en: 'Knowledge', ko: '지식 관리' },
-    library: { en: 'Library', ko: '라이브러리' },
+    marketplace: '마켓플레이스',
+    studio: '스튜디오',
+    knowledge: '지식 관리',
+    library: '라이브러리',
   } as const;
 
-  const activeTabLabel = tabLabels[activeTab][language];
+  const activeTabLabel = tabLabels[activeTab];
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur">
       <TopNavigation
-        onToggleSidebar={onToggleSidebar}
         userName={userName}
         userEmail={userEmail}
         onHomeClick={() => onTabChange('studio')}
         onLogoClick={onLogoClick}
-        language={language}
-        onLanguageChange={onLanguageChange}
         onLogout={onLogout}
-        serviceName="SnapAgent"
         activeTabLabel={activeTabLabel}
         showSidebarToggle={false}
         navigationTabs={
           <NavigationTabs
             activeTab={activeTab}
             onTabChange={onTabChange}
-            language={language}
           />
         }
       />

@@ -15,7 +15,7 @@ interface WorkspaceHeaderProps {
   userName?: string;
   botCount?: number;
   maxBots?: number;
-  language: Language;
+  language?: Language;
 }
 
 export function WorkspaceHeader({
@@ -24,18 +24,11 @@ export function WorkspaceHeader({
   userName = 'User',
   botCount = 0,
   maxBots = 5,
-  language,
+  language: _language = 'ko',
 }: WorkspaceHeaderProps) {
   const isLimitReached = botCount >= maxBots;
 
   const translations = {
-    en: {
-      workspace: "'s Workspace",
-      createBot: '+ Create Bot',
-      creating: 'Creating...',
-      limitTooltip: 'You have reached the limit of bots you can create.',
-      deleteInstruction: 'Please delete the bot and try again.',
-    },
     ko: {
       workspace: '의 워크스페이스',
       createBot: '+ 서비스 생성',
@@ -45,7 +38,7 @@ export function WorkspaceHeader({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-200">
@@ -76,7 +69,7 @@ export function WorkspaceHeader({
                       {isCreatingBot ? t.creating : t.createBot}
                     </span>
                     <span className="sm:hidden">
-                      {isCreatingBot ? t.creating : '+ Bot'}
+                      {isCreatingBot ? t.creating : '+ 서비스'}
                     </span>
                   </Button>
                 </div>

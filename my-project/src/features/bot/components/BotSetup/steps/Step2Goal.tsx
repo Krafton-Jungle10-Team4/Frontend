@@ -15,7 +15,7 @@ import type { Language } from '@/shared/types';
 import type { GoalType } from '@/shared/types';
 
 interface Step2GoalProps {
-  language: Language;
+  language?: Language;
 }
 
 const goalIcons = {
@@ -25,7 +25,7 @@ const goalIcons = {
   other: Sparkles,
 };
 
-export function Step2Goal({ language }: Step2GoalProps) {
+export function Step2Goal({ language: _language = 'ko' }: Step2GoalProps) {
   const {
     selectedGoal,
     setSelectedGoal,
@@ -38,26 +38,6 @@ export function Step2Goal({ language }: Step2GoalProps) {
   } = useBotSetup();
 
   const translations = {
-    en: {
-      title: 'Goal',
-      subtitleSelect:
-        "Select your bot's primary goal so we can tailor its behavior.",
-      subtitleCustom:
-        "Describe your bot's primary goal so we can tailor its behavior.",
-      customerSupport: 'Customer Support',
-      customerSupportDesc: 'Fix problems and help users along the way',
-      aiAssistant: 'AI Assistant',
-      aiAssistantDesc: 'Help customers with anything about your brand',
-      sales: 'Sales',
-      salesDesc: 'Help customers discover the right products for them',
-      other: 'Other',
-      otherDesc: "Shape your agent's unique personality",
-      backToUseCases: 'Back to all use cases',
-      refinePrompt: 'Refine Prompt',
-      customGoalPlaceholder:
-        'Describe the role of this AI agent in less than 1500 characters',
-      charactersRemaining: 'characters remaining',
-    },
     ko: {
       title: '목표',
       subtitleSelect: '챗봇의 주요 목표를 선택하여 동작 방식을 맞춤화하세요.',
@@ -77,7 +57,7 @@ export function Step2Goal({ language }: Step2GoalProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const goals: Array<{ type: GoalType; label: string; description: string }> = [
     {
@@ -131,15 +111,9 @@ export function Step2Goal({ language }: Step2GoalProps) {
         customGoal.trim() + '\n\n[This is a refined version from the LLM]';
       setCustomGoal(refined.slice(0, TEXT_LIMITS.BOT_GOAL.MAX));
 
-      toast.success(
-        language === 'ko'
-          ? '프롬프트가 최적화되었습니다!'
-          : 'Prompt refined successfully!'
-      );
+      toast.success('프롬프트가 최적화되었습니다!');
     } catch {
-      toast.error(
-        language === 'ko' ? '프롬프트 최적화 실패' : 'Failed to refine prompt'
-      );
+      toast.error('프롬프트 최적화 실패');
     } finally {
       setIsRefiningPrompt(false);
     }
@@ -212,7 +186,7 @@ export function Step2Goal({ language }: Step2GoalProps) {
                 {isRefiningPrompt ? (
                   <>
                     <Loader2 size={16} className="animate-spin mr-2" />
-                    {language === 'ko' ? '최적화 중...' : 'Refining...'}
+                    최적화 중...
                   </>
                 ) : (
                   <>

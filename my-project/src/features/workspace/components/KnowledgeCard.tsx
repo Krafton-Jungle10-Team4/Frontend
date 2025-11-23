@@ -16,20 +16,20 @@ interface KnowledgeCardProps {
   knowledge: Knowledge;
   onClick: () => void;
   onDelete: () => void;
-  language: 'en' | 'ko';
+  language?: 'en' | 'ko';
 }
 
 export function KnowledgeCard({
   knowledge,
   onClick,
   onDelete,
-  language,
+  language: _language = 'ko',
 }: KnowledgeCardProps) {
   const formatDate = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
-        locale: language === 'ko' ? ko : undefined,
+        locale: ko,
       });
     } catch {
       return dateString;
@@ -54,7 +54,7 @@ export function KnowledgeCard({
               </h3>
               <p className="text-xs text-muted-foreground">
                 {knowledge.document_count}{' '}
-                {language === 'ko' ? '개의 문서' : 'documents'}
+                개의 문서
               </p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export function KnowledgeCard({
                 className="text-destructive"
               >
                 <RiDeleteBinLine className="mr-2 h-4 w-4" />
-                {language === 'ko' ? '삭제' : 'Delete'}
+                삭제
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -106,7 +106,7 @@ export function KnowledgeCard({
         </div>
 
         <div className="text-[10px] text-muted-foreground">
-          {language === 'ko' ? '업데이트' : 'Updated'}{' '}
+          업데이트{' '}
           {formatDate(knowledge.updated_at)}
         </div>
       </div>

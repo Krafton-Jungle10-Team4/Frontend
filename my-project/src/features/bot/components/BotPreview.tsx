@@ -16,7 +16,7 @@ import type { Language } from '@/shared/types';
 interface BotPreviewProps {
   botName: string;
   onContinue: () => void;
-  language: Language;
+  language?: Language;
 }
 
 interface Message {
@@ -26,7 +26,7 @@ interface Message {
   timestamp: Date;
 }
 
-export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
+export function BotPreview({ botName, onContinue, language: _language = 'ko' }: BotPreviewProps) {
   // TODO: Get botId from props or context
   const [_botId, _setBotId] = useState<string | null>(null); // Backend should provide this
   const messageIdCounter = useRef(0);
@@ -36,32 +36,6 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
   }, []);
 
   const translations = {
-    en: {
-      initialMessage: `Hello! 👋 Welcome to the AI Agent Web Platform support. How can I assist you today?`,
-      botResponse:
-        "I apologize, but I'm currently in preview mode and cannot process requests yet. Please connect the bot to a knowledge base to enable full functionality.",
-      today: 'Today',
-      delivered: 'Delivered',
-      placeholder: 'Type your message...',
-      quickMessages: [
-        'How do I set up my first AI agent?',
-        'Where can I find tutorials or guides?',
-        "I'm having trouble with a feature",
-      ],
-      ready: 'Your bot is ready!',
-      trainingComplete: 'Training complete',
-      nextSteps: 'Next Steps',
-      testBot: 'Test your bot',
-      enterStudio: 'Enter Studio to fine tune your bot',
-      extendBot: 'Extend your bot with Integrations',
-      shareBot: 'Share your bot',
-      getAccess: 'Get access to more features',
-      premiumDesc:
-        'Custom branding, human handoff, and role-based access control are available on premium plans.',
-      viewPlans: 'View Plans',
-      share: 'Share',
-      continue: 'Continue',
-    },
     ko: {
       initialMessage: `안녕하세요! 👋 AI 에이전트 웹 플랫폼 지원팀입니다. 무엇을 도와드릴까요?`,
       botResponse:
@@ -90,7 +64,7 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const initialMessage: Message = {
     id: '1',
@@ -303,21 +277,13 @@ export function BotPreview({ botName, onContinue, language }: BotPreviewProps) {
       await navigator.clipboard.writeText(shareUrl);
 
       // Show success toast
-      toast.success(
-        language === 'ko'
-          ? '공유 링크가 클립보드에 복사되었습니다!'
-          : 'Share link copied to clipboard!'
-      );
+      toast.success('공유 링크가 클립보드에 복사되었습니다!');
 
       // Optional: Open in new tab
       // window.open(shareUrl, '_blank');
     } catch (error) {
       console.error('Share error:', error);
-      toast.error(
-        language === 'ko'
-          ? '공유 링크 생성에 실패했습니다'
-          : 'Failed to generate share link'
-      );
+      toast.error('공유 링크 생성에 실패했습니다');
     }
   };
 

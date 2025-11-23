@@ -22,24 +22,12 @@ import type { Language } from '@shared/types';
 interface BotCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  language: Language;
+  language?: Language;
   onSubmit: (input: { name: string; description?: string }) => Promise<void>;
   isCreating?: boolean;
 }
 
 const translations = {
-  en: {
-    title: 'Create New Bot',
-    description: 'Enter a name and description for your bot',
-    nameLabel: 'Bot Name',
-    namePlaceholder: 'e.g., Customer Support Assistant',
-    descriptionLabel: 'Description (Optional)',
-    descriptionPlaceholder: 'What is the purpose of this bot?',
-    cancel: 'Cancel',
-    create: 'Create Bot',
-    creating: 'Creating...',
-    nameRequired: 'Bot name is required',
-  },
   ko: {
     title: '새 서비스 만들기',
     description: '서비스의 이름과 설명을 입력하세요',
@@ -57,11 +45,11 @@ const translations = {
 export function BotCreateDialog({
   open,
   onOpenChange,
-  language,
+  language = 'ko',
   onSubmit,
   isCreating = false,
 }: BotCreateDialogProps) {
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,7 +65,7 @@ export function BotCreateDialog({
 }
 
 interface BotCreateFormProps {
-  translations: (typeof translations)['en'];
+  translations: (typeof translations)['ko'];
   isCreating: boolean;
   onSubmit: (input: { name: string; description?: string }) => Promise<void>;
   onClose: () => void;

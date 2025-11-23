@@ -7,21 +7,13 @@ import type { Language } from '@/shared/types';
 import type { KnowledgeTab } from '../../types';
 
 interface Step4KnowledgeProps {
-  language: Language;
+  language?: Language;
 }
 
-export function Step4Knowledge({ language }: Step4KnowledgeProps) {
+export function Step4Knowledge({ language: _language = 'ko' }: Step4KnowledgeProps) {
   const { knowledgeTab, setKnowledgeTab } = useBotSetup();
 
   const translations = {
-    en: {
-      title: 'Knowledge',
-      subtitle:
-        'Add knowledge sources to help your bot answer questions. You can add more later.',
-      websites: 'Websites',
-      files: 'Files',
-      text: 'Text',
-    },
     ko: {
       title: '지식',
       subtitle:
@@ -32,7 +24,7 @@ export function Step4Knowledge({ language }: Step4KnowledgeProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   const tabs: Array<{
     key: KnowledgeTab;
@@ -74,9 +66,9 @@ export function Step4Knowledge({ language }: Step4KnowledgeProps) {
 
       {/* Tab Content */}
       <div className="min-h-[200px]">
-        {knowledgeTab === 'websites' && <WebsitesTab language={language} />}
-        {knowledgeTab === 'files' && <FilesTab language={language} />}
-        {knowledgeTab === 'text' && <TextTab language={language} />}
+        {knowledgeTab === 'websites' && <WebsitesTab language={_language} />}
+        {knowledgeTab === 'files' && <FilesTab language={_language} />}
+        {knowledgeTab === 'text' && <TextTab language={_language} />}
       </div>
     </div>
   );

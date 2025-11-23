@@ -3,17 +3,11 @@ import type { Language } from '@/shared/types';
 
 interface EmptyStateProps {
   onCreateBot: () => void;
-  language: Language;
+  language?: Language;
 }
 
-export function EmptyState({ onCreateBot, language }: EmptyStateProps) {
+export function EmptyState({ onCreateBot, language: _language = 'ko' }: EmptyStateProps) {
   const translations = {
-    en: {
-      title: 'Workspace has no bots',
-      description:
-        'Your workspace has no bots. Get started by creating a new bot.',
-      button: '+ Create Bot',
-    },
     ko: {
       title: '워크스페이스에 서비스가 없습니다',
       description: '새로운 서비스를 생성하여 시작하세요.',
@@ -21,7 +15,7 @@ export function EmptyState({ onCreateBot, language }: EmptyStateProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-4">

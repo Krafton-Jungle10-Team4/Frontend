@@ -11,27 +11,23 @@ interface BotFilterSidebarProps {
   allTags: string[];
   selectedTags: string[];
   onTagToggle: (tag: string) => void;
-  language: Language;
+  language?: Language;
 }
 
 export function BotFilterSidebar({
   allTags,
   selectedTags,
   onTagToggle,
-  language,
+  language: _language = 'ko',
 }: BotFilterSidebarProps) {
   const translations = {
-    en: {
-      tagFilter: 'Tag Filter',
-      noTags: 'No tags available',
-    },
     ko: {
       tagFilter: '태그 필터',
       noTags: '태그가 없습니다',
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <aside className="w-[280px] h-full bg-white border-r border-gray-200 p-5 space-y-4">

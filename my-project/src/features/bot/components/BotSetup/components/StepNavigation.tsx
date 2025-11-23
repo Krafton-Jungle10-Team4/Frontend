@@ -10,10 +10,10 @@ import { getErrorMessage } from '@/shared/api/errorHandler';
 
 interface StepNavigationProps {
   onBack: () => void;
-  language: Language;
+  language?: Language;
 }
 
-export function StepNavigation({ onBack, language }: StepNavigationProps) {
+export function StepNavigation({ onBack, language: _language = 'ko' }: StepNavigationProps) {
   const context = useBotSetup();
   const {
     step,
@@ -33,13 +33,6 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const translations = {
-    en: {
-      step: 'Step',
-      of: 'of',
-      next: 'Next',
-      trainAgent: 'Train agent',
-      prev: 'Prev',
-    },
     ko: {
       step: '단계',
       of: '/',
@@ -49,7 +42,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
   const navigate = useNavigate();
 
   const handleNext = async () => {
@@ -78,9 +71,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
       } else if (step === 3) {
         // Step 3: Complete setup - PATCH status to ACTIVE
         if (!createdBotId) {
-          toast.error(
-            language === 'ko' ? '서비스 ID를 찾을 수 없습니다' : 'Bot ID not found'
-          );
+          toast.error('서비스 ID를 찾을 수 없습니다');
           return;
         }
 
@@ -102,9 +93,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
         console.log('✅ [Step 3] Bot status set to ACTIVE');
 
         // 성공 메시지
-        toast.success(
-          language === 'ko' ? '서비스가 생성되었습니다' : 'Bot created successfully'
-        );
+        toast.success('서비스가 생성되었습니다');
 
         // Workflow 화면으로 이동
         navigate(`/bot/${createdBotId}/workflow`, {
@@ -184,13 +173,7 @@ export function StepNavigation({ onBack, language }: StepNavigationProps) {
               step > 1 ? 'flex-[8]' : 'w-full'
             }`}
           >
-            {isUpdating
-              ? language === 'ko'
-                ? '처리 중...'
-                : 'Processing...'
-              : step === 3
-                ? t.trainAgent
-                : t.next}
+            {isUpdating ? '처리 중...' : step === 3 ? t.trainAgent : t.next}
             {!isUpdating && <ArrowRight size={18} className="ml-2" />}
           </Button>
         </div>

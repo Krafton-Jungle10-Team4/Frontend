@@ -6,13 +6,13 @@ import type { Language } from '@/shared/types';
 interface SetupCompleteProps {
   botName: string;
   onComplete: () => void;
-  language: Language;
+  language?: Language;
 }
 
 export function SetupComplete({
   botName: _botName,
   onComplete,
-  language,
+  language: _language = 'ko',
 }: SetupCompleteProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -20,20 +20,6 @@ export function SetupComplete({
   // const [botId, setBotId] = useState<string | null>(null); // Backend should provide this
 
   const translations = {
-    en: {
-      steps: [
-        'Defining instructions for your bot...',
-        'Processing knowledge sources...',
-        'Your bot is learning from your content...',
-        'Training AI model...',
-        'Optimizing responses...',
-      ],
-      title: 'Setup complete',
-      description: 'Personalizing your agent with your content.',
-      finishedTraining: 'Finished training',
-      mayTakeTime: 'This may take some time',
-      sitBackRelax: 'Sit back and relax while we set your bot up for you.',
-    },
     ko: {
       steps: [
         '챗봇 지침을 정의하는 중...',
@@ -50,7 +36,7 @@ export function SetupComplete({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   useEffect(() => {
     // TODO: GET /api/bots/{botId}/training-status

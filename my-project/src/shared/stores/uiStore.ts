@@ -34,7 +34,7 @@ export const useUIStore = create<UIStore>()(
         isSidebarOpen: true,
         searchQuery: '',
         viewMode: 'grid',
-        language: 'en',
+        language: 'ko',
         isPricingModalOpen: false,
 
         // Toggle sidebar
@@ -51,7 +51,7 @@ export const useUIStore = create<UIStore>()(
         setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
 
         // Set language
-        setLanguage: (lang: Language) => set({ language: lang }),
+        setLanguage: (_lang: Language) => set({ language: 'ko' }),
 
         // Clear search
         clearSearch: () => set({ searchQuery: '' }),

@@ -11,21 +11,15 @@ import type { Language } from '@/shared/types';
 interface CreateBotCardProps {
   onCreateBlank: () => void;
   onCreateFromTemplate: () => void;
-  language: Language;
+  language?: Language;
 }
 
 export function CreateBotCard({
   onCreateBlank,
   onCreateFromTemplate,
-  language,
+  language: _language = 'ko',
 }: CreateBotCardProps) {
   const translations = {
-    en: {
-      title: 'Create App',
-      subtitle: 'Start building your bot',
-      blank: 'Start from Blank',
-      template: 'Start from Template',
-    },
     ko: {
       title: '앱 만들기',
       subtitle: '새로운 서비스를 만들어보세요',
@@ -34,7 +28,7 @@ export function CreateBotCard({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-primary hover:shadow-md transition-all cursor-default bg-muted/30">

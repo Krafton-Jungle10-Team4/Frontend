@@ -7,7 +7,6 @@ import { useCallback } from 'react';
 import { useBotStore } from '../stores/botStore';
 import { useActivityStore } from '@/features/activity';
 import { useAuthStore } from '@/features/auth';
-import { useUIStore } from '@/shared/stores/uiStore';
 import { botApi } from '../api/botApi';
 import { toast } from 'sonner';
 
@@ -21,7 +20,6 @@ export function useBotActions() {
   const addActivity = useActivityStore((state) => state.addActivity);
   const user = useAuthStore((state) => state.user);
   const userName = user?.name || 'User';
-  const language = useUIStore((state) => state.language);
 
   /**
    * Bot 삭제 및 활동 로그 추가
@@ -29,12 +27,6 @@ export function useBotActions() {
   const handleDeleteBot = useCallback(
     async (botId: string, botName: string) => {
       const translations = {
-        en: {
-          deleting: 'Deleting bot...',
-          success: 'Bot deleted successfully',
-          alreadyDeleted: 'Bot removed (already deleted)',
-          error: 'Failed to delete bot',
-        },
         ko: {
           deleting: '서비스를 삭제하는 중...',
           success: '서비스가 성공적으로 삭제되었습니다',
@@ -43,7 +35,7 @@ export function useBotActions() {
         },
       };
 
-      const t = translations[language];
+      const t = translations.ko;
 
       try {
         // 1. 백엔드 API 호출하여 DB에서 삭제
@@ -58,7 +50,7 @@ export function useBotActions() {
           type: 'bot_deleted',
           botId,
           botName,
-          message: `${userName} ${language === 'en' ? 'deleted bot' : '서비스를 삭제했습니다'}: ${botName}`,
+          message: `${userName} 서비스를 삭제했습니다: ${botName}`,
         });
 
         toast.success(t.success);
@@ -79,7 +71,7 @@ export function useBotActions() {
             type: 'bot_deleted',
             botId,
             botName,
-            message: `${userName} ${language === 'en' ? 'removed bot (already deleted)' : '서비스를 제거했습니다 (이미 삭제됨)'}: ${botName}`,
+            message: `${userName} 서비스를 제거했습니다 (이미 삭제됨): ${botName}`,
           });
 
           toast.success(t.alreadyDeleted);
@@ -99,13 +91,13 @@ export function useBotActions() {
           type: 'bot_deleted',
           botId,
           botName,
-          message: `${userName} ${language === 'en' ? 'attempted to delete bot' : '서비스 삭제를 시도했습니다'}: ${botName} (offline)`,
+          message: `${userName} 서비스 삭제를 시도했습니다: ${botName} (오프라인)`,
         });
 
         toast.error(t.error);
       }
     },
-    [deleteBot, setBots, addActivity, userName, language]
+    [deleteBot, setBots, addActivity, userName]
   );
 
   return {

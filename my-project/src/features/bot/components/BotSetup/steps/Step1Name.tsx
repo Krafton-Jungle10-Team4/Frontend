@@ -4,19 +4,13 @@ import { TEXT_LIMITS } from '@/shared/constants/textLimits';
 import type { Language } from '@/shared/types';
 
 interface Step1NameProps {
-  language: Language;
+  language?: Language;
 }
 
-export function Step1Name({ language }: Step1NameProps) {
+export function Step1Name({ language: _language = 'ko' }: Step1NameProps) {
   const { botName, setBotName } = useBotSetup();
 
   const translations = {
-    en: {
-      title: 'Setup',
-      subtitle:
-        "We'll guide you through four quick steps. First, name your bot.",
-      placeholder: 'What should we call your bot?',
-    },
     ko: {
       title: '설정',
       subtitle: '4단계로 챗봇을 설정합니다. 먼저 챗봇의 이름을 정해주세요.',
@@ -24,7 +18,7 @@ export function Step1Name({ language }: Step1NameProps) {
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="space-y-6">

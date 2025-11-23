@@ -5,16 +5,16 @@ import { Store, Workflow, BookOpen } from 'lucide-react';
 interface NavigationTabsProps {
   activeTab: 'marketplace' | 'studio' | 'knowledge' | 'library';
   onTabChange: (tab: NavigationTabsProps['activeTab']) => void;
-  language: 'en' | 'ko';
+  language?: 'en' | 'ko';
 }
 
 const tabs = [
-  { id: 'marketplace', label: { en: 'Marketplace', ko: '마켓플레이스' }, icon: Store },
-  { id: 'studio', label: { en: 'Studio', ko: '스튜디오' }, icon: Workflow },
-  { id: 'knowledge', label: { en: 'Knowledge', ko: '지식 관리' }, icon: BookOpen },
+  { id: 'marketplace', label: '마켓플레이스', icon: Store },
+  { id: 'studio', label: '스튜디오', icon: Workflow },
+  { id: 'knowledge', label: '지식 관리', icon: BookOpen },
 ] as const;
 
-export function NavigationTabs({ activeTab, onTabChange, language }: NavigationTabsProps) {
+export function NavigationTabs({ activeTab, onTabChange, language: _language = 'ko' }: NavigationTabsProps) {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -63,7 +63,7 @@ export function NavigationTabs({ activeTab, onTabChange, language }: NavigationT
               )}
             >
               <Icon className="w-4 h-4" />
-              <span className="transition-colors duration-200">{tab.label[language]}</span>
+              <span className="transition-colors duration-200">{tab.label}</span>
             </button>
           );
         })}

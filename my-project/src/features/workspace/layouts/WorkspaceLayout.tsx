@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/stores/authStore';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useUIStore } from '@/shared/stores/uiStore';
 import { Header } from '../components/Header';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
 
@@ -11,9 +10,6 @@ export function WorkspaceLayout() {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const { logout } = useAuth();
-  const language = useUIStore((state) => state.language);
-  const setLanguage = useUIStore((state) => state.setLanguage);
-  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
 
   // Determine active tab from location
   const detectedTab = useMemo(() => {
@@ -50,9 +46,6 @@ export function WorkspaceLayout() {
         onTabChange={handleTabChange}
         userName={user?.name || 'User'}
         userEmail={user?.email || ''}
-        language={language}
-        onLanguageChange={setLanguage}
-        onToggleSidebar={() => setSidebarOpen(true)}
         onLogout={handleLogout}
         onLogoClick={() => navigate('/landing')}
       />

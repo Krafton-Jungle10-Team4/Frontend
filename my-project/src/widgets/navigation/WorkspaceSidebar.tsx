@@ -27,7 +27,7 @@ interface WorkspaceSidebarProps {
   onClose: () => void;
   userName?: string;
   currentPage?: string;
-  language: Language;
+  language?: Language;
   menuItems?: MenuItem[];
   activeItemId?: string;
 }
@@ -37,7 +37,7 @@ export function WorkspaceSidebar({
   onClose,
   userName = 'User',
   currentPage = 'Home',
-  language,
+  language: _language = 'ko',
   menuItems,
   activeItemId,
 }: WorkspaceSidebarProps) {
@@ -46,14 +46,6 @@ export function WorkspaceSidebar({
   if (!isOpen) return null;
 
   const translations = {
-    en: {
-      workspace: "'s Workspace",
-      home: 'Home',
-      integrations: 'Integrations',
-      usage: 'Usage',
-      billing: 'Billing',
-      settings: 'Settings',
-    },
     ko: {
       workspace: '의 워크스페이스',
       home: '홈',
@@ -64,7 +56,7 @@ export function WorkspaceSidebar({
     },
   };
 
-  const t = translations[language];
+  const t = translations.ko;
 
   // Default menu items (Home page)
   const defaultMenuItems: MenuItem[] = [
@@ -138,9 +130,9 @@ export function WorkspaceSidebar({
 
           {/* Credit Usage Widget 추가 */}
           <div className="mt-auto p-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-2">Credit Usage</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-2">크레딧 사용량</h3>
             {isLoading ? (
-              <p className="text-xs text-gray-500">Loading...</p>
+              <p className="text-xs text-gray-500">불러오는 중...</p>
             ) : billingStatus ? (
               <div>
                 <Progress value={(billingStatus.usage.monthly_cost / billingStatus.usage.total_credit) * 100} className="h-2" />

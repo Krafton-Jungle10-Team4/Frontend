@@ -57,11 +57,7 @@ export function KnowledgePage() {
         setAllTags(Array.from(tagSet));
       } catch (err) {
         console.error('Failed to fetch documents:', err);
-        setError(
-          language === 'ko'
-            ? '문서 목록을 불러오는데 실패했습니다.'
-            : 'Failed to load document list.'
-        );
+        setError('문서 목록을 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
@@ -118,7 +114,7 @@ export function KnowledgePage() {
   };
 
   const handleDeleteKnowledge = async (documentId: string) => {
-    if (!confirm(language === 'ko' ? '정말 삭제하시겠습니까?' : 'Are you sure you want to delete?')) {
+    if (!confirm('정말 삭제하시겠습니까?')) {
       return;
     }
 
@@ -131,11 +127,7 @@ export function KnowledgePage() {
       console.log('Document deleted:', documentId);
     } catch (err) {
       console.error('Failed to delete document:', err);
-      alert(
-        language === 'ko'
-          ? '문서 삭제에 실패했습니다.'
-          : 'Failed to delete document.'
-      );
+      alert('문서 삭제에 실패했습니다.');
     }
   };
 

@@ -10,15 +10,10 @@ interface SearchFiltersProps {
   onSearchChange: (query: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  language: Language;
+  language?: Language;
 }
 
 const translations = {
-  en: {
-    searchPlaceholder: 'Search bots...',
-    gridView: 'Grid view',
-    listView: 'List view',
-  },
   ko: {
     searchPlaceholder: '서비스 검색...',
     gridView: '격자 보기',
@@ -31,9 +26,9 @@ export const SearchFilters = ({
   onSearchChange,
   viewMode,
   onViewModeChange,
-  language,
+  language: _language = 'ko',
 }: SearchFiltersProps) => {
-  const t = translations[language];
+  const t = translations.ko;
 
   return (
     <div className="flex items-center gap-4 px-6 py-4 border-b">
