@@ -60,7 +60,7 @@ export function KnowledgeGrid({
           knowledge={knowledge}
           onClick={() => onKnowledgeClick(knowledge.id)}
           onDelete={() => onDeleteKnowledge(knowledge.id)}
-          language={language}
+          language={_language}
         />
       ))}
     </div>
