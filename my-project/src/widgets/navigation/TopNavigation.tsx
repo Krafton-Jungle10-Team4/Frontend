@@ -70,18 +70,18 @@ export function TopNavigation({
 
   return (
     <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
-      <div className="relative w-full h-full max-w-7xl mx-auto flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+      <div className="relative w-full h-full flex items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-3">
           <button
             onClick={onLogoClick ?? onHomeClick}
-            className="cursor-pointer rounded-full px-2 py-1 transition-all duration-200 hover:bg-white/80 hover:shadow-[0_8px_24px_rgba(55,53,195,0.12)]"
+            className="cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Logo className="h-8 w-8 text-[#3735c3] drop-shadow-[0_10px_30px_rgba(55,53,195,0.35)]" />
+              <Logo className="h-7 w-7 text-indigo-600" />
               <span
-                className="font-bold text-xl bg-clip-text text-transparent tracking-tight"
+                className="font-bold text-xl bg-clip-text text-transparent"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, #3735c3, #5f5bff, #7ac8ff)',
+                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
                 }}
               >
                 SnapAgent

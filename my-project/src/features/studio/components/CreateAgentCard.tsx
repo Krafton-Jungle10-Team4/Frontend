@@ -13,35 +13,36 @@ export function CreateAgentCard({
   return (
     <div
       className={cn(
-        'relative bg-white/80 rounded-2xl overflow-hidden border border-white/60',
-        'group h-[180px] flex flex-col shadow-[0_14px_40px_rgba(55,53,195,0.12)] backdrop-blur-md'
+        'relative bg-white/85 rounded-2xl overflow-hidden border border-white/70',
+        'group flex flex-col shadow-[0_16px_44px_rgba(55,53,195,0.12)] backdrop-blur'
       )}
     >
-      <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff]" />
-      <div className="p-5 pt-6 flex flex-col h-full">
-        <h3 className="font-semibold text-sm text-gray-800 mb-3 px-1">
-          서비스 만들기
-        </h3>
+      <div className="p-5 flex flex-col gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-500">서비스 만들기</p>
+          <h3 className="font-semibold text-lg text-gray-900">새 봇을 시작하거나 템플릿 복제</h3>
+          <p className="text-sm text-gray-600 mt-1">빈 상태로 만들거나 기존 템플릿을 기반으로 빠르게 시작하세요.</p>
+        </div>
 
-        <p className="text-xs text-gray-500 mb-3 px-1">
-          새 봇을 시작하거나 템플릿을 바로 복제해보세요.
-        </p>
-
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             onClick={onCreateBlank}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-[#3735c3]/10 hover:text-[#3735c3] rounded-lg transition-colors text-left border border-transparent hover:border-[#3735c3]/30"
+            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#3735c3] hover:bg-indigo-50"
           >
-            <Plus className="h-4 w-4 flex-shrink-0" />
-            <span className="font-semibold">빈 상태로 시작</span>
+            <div className="flex items-center gap-2">
+              <Plus className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
+              <span>빈 상태로 시작</span>
+            </div>
           </button>
 
           <button
             onClick={onCreateFromTemplate}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-[#3735c3]/10 hover:text-[#3735c3] rounded-lg transition-colors text-left border border-transparent hover:border-[#3735c3]/30"
+            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#3735c3] hover:bg-indigo-50"
           >
-            <FileText className="h-4 w-4 flex-shrink-0" />
-            <span className="font-semibold">템플릿에서 시작</span>
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
+              <span>템플릿에서 시작</span>
+            </div>
           </button>
         </div>
       </div>

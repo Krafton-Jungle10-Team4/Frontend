@@ -160,81 +160,51 @@ export function StudioPage() {
       label: '전체 봇',
       value: workflowStats.total || filteredWorkflows.length,
       tone: 'from-[#3735c3] to-[#5f5bff]',
-      hint: '운영 중인 서비스 수',
+      hint: '등록된 봇 수',
     },
     {
-      label: '실행 중',
-      value: workflowStats.running,
-      tone: 'from-[#7ac8ff] to-[#5f5bff]',
-      hint: '현재 활성 상태',
-    },
-    {
-      label: '배포됨',
+      label: '배포 완료',
       value: workflowStats.deployed,
       tone: 'from-[#5f5bff] to-[#3735c3]',
-      hint: '프로덕션 배포 완료',
-    },
-    {
-      label: '모니터링',
-      value: workflowStats.error + workflowStats.pending,
-      tone: 'from-[#f97316] to-[#facc15]',
-      hint: '점검이 필요한 항목',
+      hint: '프로덕션 배포 상태',
     },
   ];
 
   return (
     <>
-      <div className="flex flex-col h-[calc(100vh-56px)]">
-        {/* 메인 콘텐츠 */}
-        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 via-white to-indigo-50/40">
-          <div className="mx-auto max-w-7xl px-6 pt-10 pb-12 space-y-8">
-            <div className="rounded-3xl border border-white/70 bg-white/80 backdrop-blur-xl shadow-[0_18px_60px_rgba(55,53,195,0.12)] px-6 py-6 lg:px-8 lg:py-7 space-y-6">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3735c3]">Bot Studio</p>
-                  <h1 className="text-3xl font-bold text-gray-900 leading-tight">Bot Studio</h1>
-                  <p className="text-gray-600 mt-2">워크스페이스를 가볍게 운영할 수 있는 봇 대시보드입니다.</p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={handleCreateFromTemplate}
-                    className="h-11 px-4 rounded-xl border border-indigo-100 bg-white/70 text-[#3735c3] font-semibold shadow-[0_10px_30px_rgba(55,53,195,0.08)] hover:border-[#3735c3] hover:bg-[#3735c3]/10 transition-all backdrop-blur disabled:opacity-60"
-                    disabled={isCreatingFromTemplate}
-                  >
-                    템플릿에서 생성
-                  </button>
-                  <button
-                    onClick={openCreateDialog}
-                    className="h-11 px-5 rounded-xl bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff] text-white font-semibold shadow-[0_15px_40px_rgba(55,53,195,0.35)] hover:shadow-[0_18px_50px_rgba(55,53,195,0.45)] transition-transform hover:-translate-y-0.5"
-                  >
-                    새 봇 생성
-                  </button>
-                </div>
+      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-white via-slate-50 to-indigo-50/35 text-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(168,85,247,0.14),transparent_36%)]" />
+        <main className="relative w-full flex-1 flex-col gap-5 px-4 md:px-8 py-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between px-2">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-500">Studio</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-3xl font-bold text-gray-900">Bot Studio</h1>
+                <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
+                  {filteredWorkflows.length} 템플릿
+                </span>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {statCards.map((card) => (
-                  <div
-                    key={card.label}
-                    className="rounded-2xl border border-white/60 bg-white/80 backdrop-blur-md p-4 shadow-[0_12px_40px_rgba(55,53,195,0.08)]"
-                  >
-                    <div className="text-xs font-semibold text-gray-600 mb-1">{card.label}</div>
-                    <div className="flex items-end justify-between">
-                      <div className="text-2xl font-bold text-gray-900">{card.value}</div>
-                      <div className={cn(
-                        'px-2 py-1 rounded-lg text-[11px] font-semibold text-white shadow-sm bg-gradient-to-r',
-                        card.tone
-                      )}>
-                        {card.hint}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-slate-600">Landing 무드의 밝은 글래스 톤으로 템플릿 기반 봇을 관리하세요.</p>
             </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleCreateFromTemplate}
+                className="h-10 px-4 rounded-lg border border-indigo-100 bg-white text-[#3735c3] font-semibold shadow-[0_8px_24px_rgba(55,53,195,0.08)] hover:border-[#3735c3] disabled:opacity-60"
+                disabled={isCreatingFromTemplate}
+              >
+                템플릿에서 생성
+              </button>
+              <button
+                onClick={openCreateDialog}
+                className="h-10 px-4 rounded-lg bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff] text-white font-semibold shadow-[0_12px_34px_rgba(55,53,195,0.25)] hover:shadow-[0_14px_40px_rgba(55,53,195,0.32)]"
+              >
+                새 봇 생성
+              </button>
+            </div>
+          </div>
 
-            <div className="rounded-3xl border border-white/70 bg-white/80 backdrop-blur-xl shadow-[0_18px_60px_rgba(55,53,195,0.1)] px-6 py-6 lg:px-8 lg:py-7 space-y-6">
-              {/* 상단 검색/필터 영역 */}
+          <div className="rounded-2xl border border-white/70 bg-white/85 p-4 md:p-5 shadow-[0_14px_40px_rgba(55,53,195,0.12)] backdrop-blur space-y-4">
+            <div className="rounded-xl border border-white/70 bg-white/90 p-4 shadow-inner shadow-indigo-100/70">
               <SearchAndFilters
                 searchValue={filters.search}
                 onSearchChange={(value) => setFilters({ search: value })}
@@ -245,14 +215,13 @@ export function StudioPage() {
                 onSortChange={setSortBy}
                 stats={workflowStats}
               />
+            </div>
 
-              {/* 워크플로우 그리드 */}
+            <div className="rounded-xl border border-white/70 bg-white/90 p-3 shadow-inner shadow-indigo-100/70">
               {loading ? (
-                <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-indigo-100 bg-indigo-50/40 text-[#3735c3]">
-                  <p className="text-sm font-medium">로딩 중...</p>
-                </div>
+                <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
               ) : error ? (
-                <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-red-200 bg-red-50 text-red-600">
+                <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600">
                   <p className="text-sm">오류가 발생했습니다: {error.message}</p>
                 </div>
               ) : (
