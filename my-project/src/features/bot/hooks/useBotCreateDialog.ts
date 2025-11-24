@@ -15,6 +15,7 @@ import { buildMinimalWorkflow } from '../utils/workflowUtils';
 interface CreateBotInput {
   name: string;
   description?: string;
+  tags: string[];
 }
 
 const translations = {
@@ -62,6 +63,7 @@ export function useBotCreateDialog() {
           name: input.name.trim(),
           goal: input.description?.trim() || undefined,
           workflow: buildMinimalWorkflow(),
+          tags: input.tags?.length ? input.tags : [],
         });
 
         // Zustand 스토어에 추가
