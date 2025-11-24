@@ -63,29 +63,38 @@ export function WorkflowCard({
   };
 
   const isDeployed = workflow.deploymentState === 'deployed';
+  const deploymentLabel =
+    workflow.deploymentState === 'deployed'
+      ? '배포됨'
+      : workflow.deploymentState === 'deploying'
+        ? '배포 중'
+        : '초안';
+  const lastUpdatedLabel = workflow.updatedAt
+    ? new Date(workflow.updatedAt).toLocaleDateString('ko-KR')
+    : '—';
 
   return (
     <div
       className={cn(
-        'relative bg-white rounded-lg overflow-hidden',
-        'shadow-md hover:shadow-studio-card hover:scale-[1.02] transition-all duration-200',
-        'cursor-pointer group h-[160px] flex flex-col',
-        isDeployed ? '' : 'border-t-4 border-t-gray-300 border border-studio-card-border'
+        'relative bg-white/80 rounded-2xl overflow-hidden backdrop-blur-md',
+        'shadow-[0_15px_50px_rgba(55,53,195,0.08)] hover:shadow-[0_20px_60px_rgba(55,53,195,0.18)] hover:-translate-y-2 transition-all duration-300',
+        'cursor-pointer group h-[190px] flex flex-col border border-white/70',
+        isDeployed ? 'border-[#3735c3]/50' : 'border-studio-card-border/50'
       )}
       onClick={handleCardClick}
     >
       <div
         className={cn(
-          'h-1 flex-shrink-0',
-          !isDeployed && 'bg-gray-300'
+          'h-1.5 flex-shrink-0',
+          !isDeployed && 'bg-gray-200'
         )}
         style={isDeployed ? {
-          backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+          backgroundImage: 'linear-gradient(90deg, #3735c3, #5f5bff, #7ac8ff)',
         } : undefined}
       />
 
-      <div className="px-5 py-3 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-1">
+      <div className="px-5 py-4 flex flex-col flex-1">
+        <div className="flex items-start justify-between mb-2">
           <div className="flex-1 flex items-center gap-2">
             {/* 버전 정보 (클릭 가능) */}
             <button
@@ -94,10 +103,10 @@ export function WorkflowCard({
                 onVersionHistory();
               }}
               className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium transition-colors flex-shrink-0",
+                "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold transition-colors flex-shrink-0 border",
                 isDeployed
-                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-                  : "text-gray-600 bg-gray-100 hover:bg-gray-200"
+                  ? "text-[#3735c3] bg-indigo-50 border-indigo-100 hover:border-[#3735c3]"
+                  : "text-gray-700 bg-white/70 border-gray-200 hover:border-[#3735c3]/40"
               )}
             >
               {formatVersionLabel(workflow.latestVersion)}
@@ -140,16 +149,16 @@ export function WorkflowCard({
                 <Rocket className="h-4 w-4 mr-2" />
                 배포 관리
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPublish();
-                }}
-                className="cursor-pointer"
-              >
-                <Store className="h-4 w-4 mr-2" />
-                마켓플레이스에 게시
-              </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPublish();
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Store className="h-4 w-4 mr-2" />
+                  마켓플레이스에 게시
+                </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={(e) => {
@@ -165,28 +174,45 @@ export function WorkflowCard({
           </DropdownMenu>
         </div>
 
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm',
+              isDeployed
+                ? 'bg-[#3735c3]/10 text-[#3735c3]'
+                : workflow.deploymentState === 'deploying'
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'bg-gray-100 text-gray-700'
+            )}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {deploymentLabel}
+          </span>
+          <span className="text-[12px] text-gray-500">최근 업데이트 {lastUpdatedLabel}</span>
+        </div>
+
         {/* 서비스 설명 */}
         {workflow.description && (
-          <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
             {workflow.description}
           </p>
         )}
 
         {/* 태그 영역 (하단) */}
         {onEditTags && (
-          <div className="flex flex-wrap gap-1 mt-auto">
+          <div className="flex flex-wrap gap-2 mt-auto">
             {workflow.tags && workflow.tags.length > 0 ? (
               workflow.tags.map((tag) => (
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="text-[10px] px-1.5 py-0 h-4 cursor-pointer rounded text-gray-600 hover:bg-gray-300"
+                  className="text-[11px] px-2 py-0.5 h-5 cursor-pointer rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700 hover:border-[#3735c3]"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditTags(workflow.id, workflow.tags || []);
                   }}
                 >
-                  <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+                  <TagIcon className="h-3 w-3 mr-1" />
                   {tag}
                 </Badge>
               ))
@@ -194,8 +220,8 @@ export function WorkflowCard({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEditTags(workflow.id, []);
-                }}
+                onEditTags(workflow.id, []);
+              }}
                 className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
               >
                 <Plus className="h-2.5 w-2.5" />

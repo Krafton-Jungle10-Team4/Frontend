@@ -25,7 +25,10 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-1.5 h-8 px-2.5 text-xs text-gray-700 bg-gray-200 hover:bg-gray-300 hover:text-gray-900">
+        <Button
+          variant="ghost"
+          className="gap-1.5 h-10 px-3 text-sm font-medium text-gray-700 bg-white/80 border border-white/70 rounded-xl shadow-[0_10px_30px_rgba(55,53,195,0.08)] hover:border-[#3735c3] hover:text-[#3735c3] hover:shadow-[0_16px_40px_rgba(55,53,195,0.14)] focus-visible:ring-2 focus-visible:ring-[#3735c3] focus-visible:ring-offset-0 backdrop-blur"
+        >
           <span>{SORT_OPTIONS[value]}</span>
           <ChevronDown className="h-3.5 w-3.5" />
         </Button>

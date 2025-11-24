@@ -39,14 +39,15 @@ export function KnowledgeCard({
 
   return (
     <Card
-      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer h-[160px]"
+      className="group relative overflow-hidden transition-all duration-300 hover:shadow-[0_20px_60px_rgba(55,53,195,0.16)] hover:-translate-y-2 cursor-pointer h-[190px] bg-white/80 border border-white/70 backdrop-blur-md shadow-[0_15px_50px_rgba(55,53,195,0.08)] gap-0"
       onClick={onClick}
     >
+      <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff]" />
       <div className="p-5 h-full flex flex-col">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <RiBookLine className="h-5 w-5 text-primary" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#3735c3]/10 text-[#3735c3] shadow-inner">
+              <RiBookLine className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-base line-clamp-1">
@@ -84,30 +85,49 @@ export function KnowledgeCard({
         </div>
 
         {knowledge.description && (
-          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
             {knowledge.description}
           </p>
         )}
 
-        <div className="flex flex-wrap gap-1 mb-2 mt-auto">
+        <div className="flex flex-wrap gap-2 mb-3 mt-auto">
           {knowledge.tags && knowledge.tags.length > 0 ? (
             knowledge.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-600">
-                <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+              <Badge key={tag} variant="secondary" className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700">
+                <TagIcon className="h-3 w-3 mr-1" />
                 {tag}
               </Badge>
             ))
           ) : (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded text-gray-500">
-              <TagIcon className="h-2.5 w-2.5 mr-0.5" />
+            <Badge variant="secondary" className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700">
+              <TagIcon className="h-3 w-3 mr-1" />
               태그 없음
             </Badge>
           )}
         </div>
 
-        <div className="text-[10px] text-muted-foreground">
-          업데이트{' '}
-          {formatDate(knowledge.updated_at)}
+        <div className="flex items-center justify-between text-[11px] text-gray-500">
+          <span>업데이트 {formatDate(knowledge.updated_at)}</span>
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
+              className="px-3 py-1 rounded-full bg-[#3735c3]/10 text-[#3735c3] font-semibold hover:bg-[#3735c3]/15"
+            >
+              열기
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="px-3 py-1 rounded-full bg-rose-50 text-rose-600 font-semibold hover:bg-rose-100"
+            >
+              삭제
+            </button>
+          </div>
         </div>
       </div>
     </Card>
