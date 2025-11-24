@@ -3,7 +3,7 @@
  * 봇 태그 추가/편집 다이얼로그
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Plus, Tag as TagIcon } from 'lucide-react';
 import {
   Dialog,
@@ -18,10 +18,45 @@ import { Input } from '@/shared/components/input';
 import { Badge } from '@/shared/components/badge';
 import type { Language } from '@/shared/types';
 import {
-  BOT_CATEGORY_PRESETS,
-  DEFAULT_CATEGORY_PRESET,
-  getCategoryIcon,
-} from '../constants/categoryPresets';
+  DEFAULT_TAGS,
+  TAG_BACKGROUND_MAP,
+  TAG_ICON_COLOR_MAP,
+  TAG_ICON_MAP,
+  type DefaultTag,
+} from '@/features/studio/constants/tagIcons';
+
+const translations = {
+  ko: {
+    title: '태그 편집',
+    description: '이 서비스의 태그를 추가하거나 제거하세요',
+    placeholder: '태그 이름 입력...',
+    add: '추가',
+    cancel: '취소',
+    save: '저장',
+    maxTags: '최대 10개의 태그까지 허용됩니다',
+    tagExists: '이미 존재하는 태그입니다',
+  },
+};
+
+const TAG_DESCRIPTIONS: Record<DefaultTag, string> = {
+  고객지원: '문의 응대, FAQ, 상담 챗봇에 활용',
+  마케팅: '캠페인, 콘텐츠 아이디어, 홍보 메시지',
+  데이터분석: '지표 요약, 리포트 자동화, 대시보드 설명',
+  문서작성: '초안 작성, 정리, 편집 보조',
+  기타: '범용 태그로 자유롭게 활용',
+};
+
+const RECOMMENDED_TAGS = DEFAULT_TAGS.map((tag) => ({
+  value: tag,
+  label: tag,
+  description: TAG_DESCRIPTIONS[tag],
+  background: TAG_BACKGROUND_MAP[tag],
+  color: TAG_ICON_COLOR_MAP[tag],
+  Icon: TAG_ICON_MAP[tag],
+}));
+
+const DEFAULT_CATEGORY: DefaultTag =
+  (DEFAULT_TAGS.find((tag) => tag === '기타') as DefaultTag | undefined) || DEFAULT_TAGS[0];
 
 interface BotTagsDialogProps {
   open: boolean;
@@ -40,18 +75,10 @@ export function BotTagsDialog({
   onSave,
   language: _language = 'ko',
 }: BotTagsDialogProps) {
-  const categoryOptions = useMemo(
-    () => BOT_CATEGORY_PRESETS.filter((preset) => preset.value !== '기타'),
-    []
-  );
-  const categoryValues = useMemo(
-    () => categoryOptions.map((preset) => preset.value),
-    [categoryOptions]
-  );
+  const t = translations.ko;
+  const recommendedTagValues = DEFAULT_TAGS;
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    DEFAULT_CATEGORY_PRESET.value
-  );
+  const [selectedCategory, setSelectedCategory] = useState<DefaultTag>(DEFAULT_CATEGORY);
   const [otherTags, setOtherTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -59,8 +86,9 @@ export function BotTagsDialog({
   useEffect(() => {
     if (open) {
       const initialCategory =
-        currentTags.find((tag) => categoryValues.includes(tag)) ||
-        DEFAULT_CATEGORY_PRESET.value;
+        (currentTags.find((tag) => recommendedTagValues.includes(tag as DefaultTag)) as
+          | DefaultTag
+          | undefined) || DEFAULT_CATEGORY;
       const initialOthers = currentTags
         .filter((tag) => tag !== initialCategory)
         .filter((tag, idx, arr) => arr.indexOf(tag) === idx);
@@ -69,22 +97,7 @@ export function BotTagsDialog({
       setOtherTags(initialOthers);
       setInputValue('');
     }
-  }, [open, currentTags, categoryValues]);
-
-  const translations = {
-    ko: {
-      title: '태그 편집',
-      description: '이 서비스의 태그를 추가하거나 제거하세요',
-      placeholder: '태그 이름 입력...',
-      add: '추가',
-      cancel: '취소',
-      save: '저장',
-      maxTags: '최대 10개의 태그까지 허용됩니다',
-      tagExists: '이미 존재하는 태그입니다',
-    },
-  };
-
-  const t = translations.ko;
+  }, [open, currentTags, recommendedTagValues]);
 
   const currentAllTags = [selectedCategory, ...otherTags];
 
@@ -93,16 +106,15 @@ export function BotTagsDialog({
 
     if (!trimmedValue) return;
 
-    // 입력으로 카테고리 변경
-    if (categoryValues.includes(trimmedValue)) {
-      setSelectedCategory(trimmedValue);
-      setOtherTags((prev) => prev.filter((tag) => tag !== trimmedValue));
-      setInputValue('');
+    if (currentAllTags.length >= 10) {
+      alert(t.maxTags);
       return;
     }
 
-    if (currentAllTags.length >= 10) {
-      alert(t.maxTags);
+    if (recommendedTagValues.includes(trimmedValue as DefaultTag)) {
+      setSelectedCategory(trimmedValue as DefaultTag);
+      setOtherTags((prev) => prev.filter((tag) => tag !== trimmedValue));
+      setInputValue('');
       return;
     }
 
@@ -111,21 +123,14 @@ export function BotTagsDialog({
       return;
     }
 
-    // 선택 가능한 4개 카테고리 이외의 직접 입력은 기타로 분류
-    if (categoryValues.includes(trimmedValue)) {
-      setSelectedCategory(trimmedValue);
-      setOtherTags((prev) => prev.filter((tag) => tag !== trimmedValue));
-    } else {
-      setSelectedCategory(DEFAULT_CATEGORY_PRESET.value);
-      setOtherTags([...otherTags, trimmedValue]);
-    }
-
+    setSelectedCategory(DEFAULT_CATEGORY);
+    setOtherTags((prev) => [...prev, trimmedValue]);
     setInputValue('');
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     if (tagToRemove === selectedCategory) {
-      setSelectedCategory(DEFAULT_CATEGORY_PRESET.value);
+      setSelectedCategory(DEFAULT_CATEGORY);
       return;
     }
     setOtherTags(otherTags.filter((tag) => tag !== tagToRemove));
@@ -159,71 +164,76 @@ export function BotTagsDialog({
             <TagIcon className="h-5 w-5" />
             {t.title}
           </DialogTitle>
-        <DialogDescription>{t.description}</DialogDescription>
-      </DialogHeader>
+          <DialogDescription>{t.description}</DialogDescription>
+        </DialogHeader>
 
-      <div className="space-y-4 py-4">
-        {/* 카테고리 선택 */}
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-gray-800">카테고리 태그</p>
-          <div className="grid grid-cols-2 gap-2">
-            {categoryOptions.map((preset) => {
-              const Icon = getCategoryIcon(preset.value);
-              const isActive = selectedCategory === preset.value;
-              return (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory(preset.value);
-                    setOtherTags((prev) => prev.filter((tag) => tag !== preset.value));
-                  }}
-                  className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
-                    isActive
-                      ? 'border-[#3735c3] bg-[#f4f5ff]'
-                      : 'border-gray-200 bg-white hover:border-[#3735c3]/50'
-                  }`}
-                >
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-sm"
+        <div className="space-y-4 py-4">
+          {/* 카테고리 선택 */}
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-gray-800">추천 태그</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {RECOMMENDED_TAGS.map((option) => {
+                const { Icon } = option;
+                const isActive = selectedCategory === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(option.value);
+                      setOtherTags((prev) => prev.filter((tag) => tag !== option.value));
+                    }}
+                    className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
+                      isActive
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-200 bg-white hover:border-blue-300'
+                    }`}
                     style={{
-                      background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})`,
+                      backgroundColor: isActive ? option.background : undefined,
                     }}
                   >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-gray-900">{preset.label}</p>
-                    <p className="text-[12px] text-gray-500">{preset.description}</p>
-                  </div>
-                </button>
-              );
-            })}
+                    <span
+                      className="flex h-10 w-10 items-center justify-center rounded-lg border text-white shadow-sm"
+                      style={{
+                        backgroundColor: option.background,
+                        color: option.color,
+                        borderColor: `${option.color}30`,
+                      }}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-semibold text-gray-900">{option.label}</p>
+                      <p className="text-[12px] text-gray-500">{option.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500">
+              추천 태그 중 하나를 선택하면 카드 색상과 아이콘이 함께 적용됩니다.
+            </p>
           </div>
-          <p className="text-xs text-gray-500">
-            직접 입력한 태그는 자동으로 "기타" 카테고리로 분류됩니다.
-          </p>
-        </div>
 
-        {/* 태그 입력 */}
-        <div className="flex gap-2">
-          <Input
-            placeholder={t.placeholder}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            maxLength={20}
-            disabled={currentAllTags.length >= 10}
-          />
-          <Button
-            type="button"
-            onClick={handleAddTag}
-            disabled={!inputValue.trim() || currentAllTags.length >= 10}
-            size="sm"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            {t.add}
-          </Button>
+          {/* 태그 입력 */}
+          <div className="flex gap-2">
+            <Input
+              placeholder={t.placeholder}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              maxLength={20}
+              disabled={currentAllTags.length >= 10}
+            />
+            <Button
+              type="button"
+              onClick={handleAddTag}
+              disabled={!inputValue.trim() || currentAllTags.length >= 10}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              {t.add}
+            </Button>
           </div>
 
           {/* 태그 목록 */}

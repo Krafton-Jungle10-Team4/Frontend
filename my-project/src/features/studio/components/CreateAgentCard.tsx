@@ -1,5 +1,5 @@
 import { cn } from '@/shared/components/utils';
-import { Plus, FileText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface CreateAgentCardProps {
   onCreateBlank: () => void;
@@ -10,42 +10,26 @@ export function CreateAgentCard({
   onCreateBlank,
   onCreateFromTemplate,
 }: CreateAgentCardProps) {
+  // keep for compatibility with upstream props; template action handled elsewhere
+  void onCreateFromTemplate;
+
   return (
-    <div
+    <button
+      onClick={onCreateBlank}
       className={cn(
-        'relative bg-white/85 rounded-2xl overflow-hidden border border-white/70',
-        'group flex flex-col shadow-[0_16px_44px_rgba(55,53,195,0.12)] backdrop-blur'
+        'group relative bg-white rounded-lg border border-gray-200 p-4',
+        'transition-all duration-200 cursor-pointer',
+        'hover:border-blue-300 hover:bg-blue-50',
+        'flex flex-col items-center justify-center'
       )}
     >
-      <div className="p-5 flex flex-col gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-500">서비스 만들기</p>
-          <h3 className="font-semibold text-lg text-gray-900">새 봇을 시작하거나 템플릿 복제</h3>
-          <p className="text-sm text-gray-600 mt-1">빈 상태로 만들거나 기존 템플릿을 기반으로 빠르게 시작하세요.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            onClick={onCreateBlank}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#3735c3] hover:bg-indigo-50"
-          >
-            <div className="flex items-center gap-2">
-              <Plus className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
-              <span>새로 시작</span>
-            </div>
-          </button>
-
-          <button
-            onClick={onCreateFromTemplate}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:border-[#3735c3] hover:bg-indigo-50"
-          >
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
-              <span>템플릿</span>
-            </div>
-          </button>
-        </div>
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 mb-3 group-hover:bg-blue-100 transition-colors">
+        <Plus className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
       </div>
-    </div>
+
+      <span className="text-xs font-medium text-gray-500 group-hover:text-blue-600 transition-colors">
+        새 서비스 만들기
+      </span>
+    </button>
   );
 }
