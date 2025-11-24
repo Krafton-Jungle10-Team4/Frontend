@@ -6,6 +6,7 @@ import { NodeSourceHandle, NodeTargetHandle } from './node-handle';
 import BlockIcon from './block-icon';
 import clsx from 'clsx';
 import type { NodePortSchema } from '@shared/types/workflow';
+import { OutputVarList } from '../../variable/OutputVarList';
 import { useWorkflowStore } from '@features/workflow/stores/workflowStore';
 import { BlockEnum } from '@/shared/types/workflow.types';
 import { StatusIndicator } from './StatusIndicator';
@@ -29,13 +30,24 @@ type BaseNodeProps = {
  * - BlockIcon, StatusIcon, NodeHandle 표시
  * - 포트 시스템 지원 (하위 호환)
  */
-const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHeader, suppressDefaultHandles }: BaseNodeProps) => {
+const BaseNode = ({
+  id,
+  data,
+  children,
+  selected,
+  customHeader,
+  disableDefaultHeader,
+  suppressDefaultHandles,
+}: BaseNodeProps) => {
   // 포트 데이터를 메모이제이션하여 참조 안정성 보장
-  const ports = useMemo(() => data.ports as NodePortSchema | undefined, [data.ports]);
+  const ports = useMemo(
+    () => data.ports as NodePortSchema | undefined,
+    [data.ports]
+  );
 
   const botId = useWorkflowStore((state) => state.botId);
-  const hasValidationError = useWorkflowStore(
-    (state) => state.validationErrorNodeIds.includes(id)
+  const hasValidationError = useWorkflowStore((state) =>
+    state.validationErrorNodeIds.includes(id)
   );
   const nodeType = data.type as BlockEnum;
 
@@ -49,7 +61,8 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
     }
     return data.title;
   }, [botId, id, data.title]);
-  const hasInputHandle = nodeType !== BlockEnum.Start && !suppressDefaultHandles;
+  const hasInputHandle =
+    nodeType !== BlockEnum.Start && !suppressDefaultHandles;
   const hasOutputHandle = nodeType !== BlockEnum.End && !suppressDefaultHandles;
   const disableDefaultOutputHandle =
     nodeType === BlockEnum.IfElse || nodeType === BlockEnum.QuestionClassifier;
@@ -126,8 +139,8 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
       </>
 
       {/* 노드 헤더 - 커스텀 헤더 또는 기본 헤더 */}
-      {!disableDefaultHeader && (
-        customHeader || (
+      {!disableDefaultHeader &&
+        (customHeader || (
           <div className="flex items-center rounded-t-2xl px-3 pb-2 pt-3">
             <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
             <div
@@ -143,11 +156,29 @@ const BaseNode = ({ id, data, children, selected, customHeader, disableDefaultHe
               singleRunningStatus={data._singleRunningStatus}
             />
           </div>
-        )
-      )}
+        ))}
 
       {/* 노드 내용 */}
       {children}
+
+      {/* 출력 변수 섹션 (실행 중이거나 완료된 경우) */}
+      {ports &&
+        (data._runningStatus === NodeRunningStatus.Running ||
+          data._runningStatus === NodeRunningStatus.Succeeded ||
+          data._runningStatus === NodeRunningStatus.Failed ||
+          data._runningStatus === NodeRunningStatus.Exception) && (
+          <div>
+            <OutputVarList
+              nodeId={id}
+              showValues={
+                data._runningStatus === NodeRunningStatus.Succeeded ||
+                data._runningStatus === NodeRunningStatus.Failed ||
+                data._runningStatus === NodeRunningStatus.Exception
+              }
+              showEmptyState={false}
+            />
+          </div>
+        )}
     </div>
   );
 };
