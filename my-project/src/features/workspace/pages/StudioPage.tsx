@@ -209,14 +209,9 @@ export function StudioPage() {
                       className={cn(
                         'relative overflow-hidden rounded-2xl border border-white/70 p-2.5',
                         'shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between',
-                        isPrimaryCard
-                          ? 'bg-gradient-to-br from-white via-indigo-50/70 to-white'
-                          : 'bg-white/80'
+                        isPrimaryCard ? 'bg-white' : 'bg-white/80'
                       )}
                     >
-                      {isPrimaryCard && (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
-                      )}
                       <div className="relative space-y-1">
                         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">
                           {card.label}
