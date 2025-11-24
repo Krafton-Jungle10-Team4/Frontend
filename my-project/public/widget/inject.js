@@ -261,7 +261,6 @@
       const iframe = document.createElement('iframe');
       iframe.src = `${this.frontendUrl}/widget/chat/${this.widgetKey}`;
       iframe.style.cssText = 'width: 100%; height: 100%; border: none;';
-      iframe.allow = 'clipboard-write';
 
       iframe.onload = () => {
         // React 컴포넌트 마운트 대기를 위한 지연된 재시도
