@@ -13,8 +13,8 @@ export const DEFAULT_WORKFLOW: { nodes: Node[]; edges: Edge[] } = {
       type: 'custom',
       position: { x: 150, y: 150 },
       data: {
-        title: '입력',
-        desc: '워크플로우 입력',
+        title: '시작',
+        desc: '워크플로우 시작',
         type: BlockEnum.Start,
         ports: clonePortSchema(BlockEnum.Start),
       },

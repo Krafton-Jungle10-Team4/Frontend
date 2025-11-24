@@ -18,7 +18,7 @@ const StartNode = ({ id, data }: NodeProps<StartNodeType>) => {
     <div className="px-3 py-2">
       <div className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5">
         <div className="system-2xs-regular-uppercase text-text-tertiary mb-2">
-          입력값
+          시작값
         </div>
         <div className="space-y-1.5">
           {data.ports.outputs.map((port) => (
