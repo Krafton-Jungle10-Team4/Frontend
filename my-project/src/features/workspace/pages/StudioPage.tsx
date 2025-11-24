@@ -187,12 +187,12 @@ export function StudioPage() {
                   템플릿 기반 서비스를 한곳에서 모아 관리하고 배포하세요.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  {['Agent 생성', '관리', '배포'].map((label) => (
+                  {['생성', '관리', '배포'].map((label) => (
                     <span
                       key={label}
-                      className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-white px-3 py-1 text-[11px] font-semibold text-indigo-700 shadow-sm"
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-800 shadow-sm"
                     >
-                      <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                      <span className="h-2 w-2 rounded-full bg-orange-300" />
                       {label}
                     </span>
                   ))}
@@ -201,23 +201,32 @@ export function StudioPage() {
 
               <div className="space-y-3 self-start w-full">
                 <div className="grid grid-cols-2 gap-3">
-                  {statCards.map((card) => (
+                  {statCards.map((card, index) => {
+                    const isPrimaryCard = index === 0;
+                    return (
                     <div
                       key={card.label}
                       className={cn(
-                        'relative overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-2.5',
-                        'shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between'
+                        'relative overflow-hidden rounded-2xl border border-white/70 p-2.5',
+                        'shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between',
+                        isPrimaryCard
+                          ? 'bg-gradient-to-br from-white via-indigo-50/70 to-white'
+                          : 'bg-white/80'
                       )}
                     >
+                      {isPrimaryCard && (
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
+                      )}
                       <div className="relative space-y-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-500">
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">
                           {card.label}
                         </p>
                         <p className="text-2xl font-bold text-slate-900">{card.value}</p>
-                        <p className="text-xs text-slate-600">{card.hint}</p>
+                        <p className="text-xs text-slate-500">{card.hint}</p>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

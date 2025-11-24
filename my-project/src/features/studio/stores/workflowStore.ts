@@ -198,7 +198,15 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
       const response = await apiClient.get(`${API_ENDPOINTS.STUDIO.WORKFLOWS}?${params.toString()}`);
       const payload = response.data ?? {};
-      const workflows = (payload.data ?? []).map(normalizeWorkflow);
+      const normalized = (payload.data ?? []).map(normalizeWorkflow);
+      const previousWorkflows = get().workflows;
+      const workflows = normalized.map((workflow) => {
+        const prev = previousWorkflows.find((w) => w.id === workflow.id);
+        if (!workflow.lastPublishedAt && prev?.lastPublishedAt) {
+          return { ...workflow, lastPublishedAt: prev.lastPublishedAt };
+        }
+        return workflow;
+      });
       const statsFromApi = payload.stats as Partial<WorkflowStats> | undefined;
       const stats: WorkflowStats = {
         ...mapStatsFromWorkflows(workflows),
@@ -345,6 +353,17 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   publishToMarketplace: async (id: string, config: PublishConfig) => {
     try {
+      set((state) => ({
+        workflows: state.workflows.map((w) =>
+          w.id === id
+            ? {
+                ...w,
+                marketplaceState: 'published',
+                lastPublishedAt: new Date(),
+              }
+            : w
+        ),
+      }));
       await apiClient.post('/api/v1/marketplace/publish', config);
       await get().fetchWorkflows();
     } catch (error) {
@@ -354,6 +373,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   unpublishFromMarketplace: async (id: string) => {
     try {
+      set((state) => ({
+        workflows: state.workflows.map((w) =>
+          w.id === id
+            ? {
+                ...w,
+                marketplaceState: 'unpublished',
+              }
+            : w
+        ),
+      }));
       await apiClient.delete(`/api/v1/marketplace/${id}`);
       await get().fetchWorkflows();
     } catch (error) {

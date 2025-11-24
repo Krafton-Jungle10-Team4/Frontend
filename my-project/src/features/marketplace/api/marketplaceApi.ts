@@ -60,13 +60,15 @@ export interface MarketplaceListResponse {
   total_pages: number;
 }
 
+export type MarketplaceSortOption = 'latest' | 'popular' | 'views';
+
 export interface MarketplaceFilterParams {
   page?: number;
   page_size?: number;
   category?: string;
   tags?: string;
   search?: string;
-  sort_by?: 'latest' | 'popular' | 'rating';
+  sort_by?: MarketplaceSortOption;
 }
 
 /**

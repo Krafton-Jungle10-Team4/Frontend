@@ -16,6 +16,7 @@ import { Globe, Check, AlertCircle } from 'lucide-react';
 import { publishToMarketplace } from '@/features/marketplace/api/marketplaceApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { toast } from 'sonner';
+import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 
 interface MarketplacePublishDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function MarketplacePublishDialog({
 }: MarketplacePublishDialogProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const fetchWorkflows = useWorkflowStore((state) => state.fetchWorkflows);
 
   // 기본값은 agent의 라이브러리 메타데이터 사용
   const [displayName, setDisplayName] = useState(agent.library_name || '');
@@ -58,6 +60,9 @@ export function MarketplacePublishDialog({
         description: description || undefined,
         tags: tags.length > 0 ? tags : undefined,
       });
+
+      // 최신 게시 상태를 카드에 즉시 반영
+      void fetchWorkflows();
 
       setIsSuccess(true);
       toast.success('마켓플레이스 게시 완료', {

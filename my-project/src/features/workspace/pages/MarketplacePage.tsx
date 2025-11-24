@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
 import { MarketplaceSearchBar } from '@/features/marketplace/components/MarketplaceSearchBar';
 import { MarketplaceGrid } from '@/features/marketplace/components/MarketplaceGrid';
-import { getMarketplaceItems, type MarketplaceItem } from '@/features/marketplace/api/marketplaceApi';
+import {
+  getMarketplaceItems,
+  type MarketplaceItem,
+  type MarketplaceSortOption,
+} from '@/features/marketplace/api/marketplaceApi';
 import { useUIStore } from '@shared/stores/uiStore';
-
-type SortOption = 'latest' | 'popular' | 'views';
 
 export function MarketplacePage() {
   const language = useUIStore(state => state.language);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('latest');
+  const [sortBy, setSortBy] = useState<MarketplaceSortOption>('latest');
   const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const activeTagCount = selectedTags.length;
+
+  const handleSortChange = (value: MarketplaceSortOption) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  };
 
   // 마켓플레이스 아이템 불러오기
   useEffect(() => {
@@ -78,7 +85,7 @@ export function MarketplacePage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
                 <div className="relative flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">Live Templates</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">라이브 템플릿</p>
                     <p className="text-2xl font-bold text-slate-900">{items.length}</p>
                     <p className="text-xs text-slate-500">커뮤니티가 공유한 쇼케이스</p>
                   </div>
@@ -94,12 +101,10 @@ export function MarketplacePage() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-3 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-center">
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">태그</p>
-                  <p className="text-xl font-semibold text-slate-900">
-                    {allTags.length || 0}개
-                  </p>
+              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
+                <div className="relative space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">태그</p>
+                  <p className="text-2xl font-bold text-slate-900">{allTags.length || 0}개</p>
                   <p className="text-xs text-slate-500">필터로 원하는 쇼케이스를 바로 찾기</p>
                 </div>
               </div>
@@ -116,7 +121,7 @@ export function MarketplacePage() {
               selectedTags={selectedTags}
               onTagToggle={handleTagToggle}
               sortBy={sortBy}
-              onSortChange={setSortBy}
+              onSortChange={handleSortChange}
             />
           </div>
 

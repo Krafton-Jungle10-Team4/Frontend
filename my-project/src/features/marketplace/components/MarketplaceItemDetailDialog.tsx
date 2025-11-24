@@ -14,23 +14,31 @@ import { getMarketplaceItem, deleteMarketplaceItem, type MarketplaceItem } from 
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/features/auth/stores/authStore';
+import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 
 interface MarketplaceItemDetailDialogProps {
   open: boolean;
   onClose: () => void;
   itemId: string;
+  onLoaded?: (item: MarketplaceItem) => void;
 }
 
 export function MarketplaceItemDetailDialog({
   open,
   onClose,
   itemId,
+  onLoaded,
 }: MarketplaceItemDetailDialogProps) {
   const navigate = useNavigate();
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const currentUser = useAuthStore((state) => state.user);
+  const linkedWorkflow = useWorkflowStore((state) =>
+    item?.workflow_version?.bot_id
+      ? state.workflows.find((w) => w.id === item.workflow_version?.bot_id)
+      : undefined
+  );
   
   // 현재 사용자가 게시자인지 확인
   const isOwner = item?.publisher?.user_id && currentUser?.uuid && item.publisher.user_id === currentUser.uuid;
@@ -99,6 +107,7 @@ export function MarketplaceItemDetailDialog({
           setIsLoading(true);
           const data = await getMarketplaceItem(itemId);
           setItem(data);
+          onLoaded?.(data);
         } catch (error) {
           console.error('아이템 로드 실패:', error);
         } finally {
@@ -109,6 +118,39 @@ export function MarketplaceItemDetailDialog({
       fetchItem();
     }
   }, [open, itemId]);
+
+  useEffect(() => {
+    if (!item || !linkedWorkflow) return;
+
+    const next: Partial<MarketplaceItem> = {};
+
+    if (linkedWorkflow.name && linkedWorkflow.name !== item.display_name) {
+      next.display_name = linkedWorkflow.name;
+    }
+    if (linkedWorkflow.description && linkedWorkflow.description !== item.description) {
+      next.description = linkedWorkflow.description;
+    }
+
+    const workflowTags = linkedWorkflow.tags || [];
+    const hasWorkflowTags = workflowTags.length > 0;
+    const tagsMismatch =
+      hasWorkflowTags &&
+      JSON.stringify(workflowTags) !== JSON.stringify(item.tags || []);
+    if (tagsMismatch) {
+      next.tags = workflowTags;
+    }
+
+    if (linkedWorkflow.deploymentState === 'deployed') {
+      if (!item.is_active) next.is_active = true;
+      if (item.status !== 'published') next.status = 'published' as MarketplaceItem['status'];
+    }
+
+    if (Object.keys(next).length > 0) {
+      const merged = { ...item, ...next };
+      setItem(merged);
+      onLoaded?.(merged);
+    }
+  }, [item, linkedWorkflow, onLoaded]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
