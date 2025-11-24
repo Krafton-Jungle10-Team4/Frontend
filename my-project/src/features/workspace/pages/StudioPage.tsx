@@ -172,39 +172,89 @@ export function StudioPage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-white via-slate-50 to-indigo-50/35 text-slate-900">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(168,85,247,0.14),transparent_36%)]" />
-        <main className="relative w-full flex-1 flex-col gap-5 px-4 md:px-8 py-8">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between px-2">
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-500">Studio</span>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-3xl font-bold text-gray-900">Bot Studio</h1>
-                <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
-                  {filteredWorkflows.length} 템플릿
-                </span>
-              </div>
-              <p className="text-sm text-slate-600">Landing 무드의 밝은 글래스 톤으로 템플릿 기반 봇을 관리하세요.</p>
+      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-white via-slate-50 to-indigo-50/30 text-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(168,85,247,0.12),transparent_36%)]" />
+        <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 bottom-10 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
+        <main className="relative w-full flex-1 flex-col gap-6 px-3 md:px-5 lg:px-6 py-8">
+          <div className="relative w-full px-5 py-6">
+            <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
+              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
+              <div className="absolute -left-10 top-8 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl" />
+              <div className="absolute -right-6 bottom-6 h-28 w-28 rounded-full bg-gradient-to-br from-sky-100 via-white to-transparent blur-2xl" />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleCreateFromTemplate}
-                className="h-10 px-4 rounded-lg border border-indigo-100 bg-white text-[#3735c3] font-semibold shadow-[0_8px_24px_rgba(55,53,195,0.08)] hover:border-[#3735c3] disabled:opacity-60"
-                disabled={isCreatingFromTemplate}
-              >
-                템플릿에서 생성
-              </button>
-              <button
-                onClick={openCreateDialog}
-                className="h-10 px-4 rounded-lg bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff] text-white font-semibold shadow-[0_12px_34px_rgba(55,53,195,0.25)] hover:shadow-[0_14px_40px_rgba(55,53,195,0.32)]"
-              >
-                새 봇 생성
-              </button>
+            <div className="relative grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-center">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-500 shadow-sm">
+                  Studio
+                  <span className="h-1 w-1 rounded-full bg-indigo-400" />
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-3xl font-bold text-gray-900">Bot Studio</h1>
+                  <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
+                    {filteredWorkflows.length} 템플릿
+                  </span>
+                </div>
+                <p className="text-sm text-slate-600">
+                  Landing 무드의 밝은 글래스 톤으로 템플릿 기반 봇을 관리하세요.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-slate-600">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/80 bg-white px-3 py-1 shadow-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#3735c3]" />
+                    검색 · 태그 · 정렬 유지
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 shadow-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                    실시간 통계
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    onClick={handleCreateFromTemplate}
+                    className={cn(
+                      'h-10 rounded-lg border border-indigo-100 bg-white px-4 text-[#3735c3] font-semibold shadow-[0_10px_28px_rgba(55,53,195,0.12)] transition hover:border-[#3735c3]',
+                      'disabled:opacity-60'
+                    )}
+                    disabled={isCreatingFromTemplate}
+                  >
+                    템플릿에서 생성
+                  </button>
+                  <button
+                    onClick={openCreateDialog}
+                    className="h-10 rounded-lg bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff] px-4 text-white font-semibold shadow-[0_14px_38px_rgba(55,53,195,0.28)] transition hover:shadow-[0_16px_44px_rgba(55,53,195,0.32)]"
+                  >
+                    새 봇 생성
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {statCards.map((card) => (
+                    <div
+                      key={card.label}
+                      className={cn(
+                        'relative overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4 shadow-[0_16px_40px_rgba(55,53,195,0.12)]',
+                        'before:absolute before:inset-0 before:bg-gradient-to-br before:from-white before:via-white/40 before:to-transparent'
+                      )}
+                    >
+                      <div className={`absolute inset-0 opacity-40 bg-gradient-to-br ${card.tone}`} />
+                      <div className="relative space-y-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-500">
+                          {card.label}
+                        </p>
+                        <p className="text-2xl font-bold text-slate-900">{card.value}</p>
+                        <p className="text-xs text-slate-600">{card.hint}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/70 bg-white/85 p-4 md:p-5 shadow-[0_14px_40px_rgba(55,53,195,0.12)] backdrop-blur space-y-4">
-            <div className="rounded-xl border border-white/70 bg-white/90 p-4 shadow-inner shadow-indigo-100/70">
+          <div className="relative w-full space-y-4">
+            <div className="relative px-1 md:px-2 lg:px-3 py-3 md:py-4">
               <SearchAndFilters
                 searchValue={filters.search}
                 onSearchChange={(value) => setFilters({ search: value })}
@@ -217,7 +267,8 @@ export function StudioPage() {
               />
             </div>
 
-            <div className="rounded-xl border border-white/70 bg-white/90 p-3 shadow-inner shadow-indigo-100/70">
+            <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-3 md:p-4 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.08),transparent_40%)]" />
               {loading ? (
                 <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
               ) : error ? (
