@@ -3,7 +3,7 @@
  * 봇 태그 추가/편집 다이얼로그
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Plus, Tag as TagIcon } from 'lucide-react';
 import {
   Dialog,
@@ -17,6 +17,11 @@ import { Button } from '@/shared/components/button';
 import { Input } from '@/shared/components/input';
 import { Badge } from '@/shared/components/badge';
 import type { Language } from '@/shared/types';
+import {
+  BOT_CATEGORY_PRESETS,
+  DEFAULT_CATEGORY_PRESET,
+  getCategoryIcon,
+} from '../constants/categoryPresets';
 
 interface BotTagsDialogProps {
   open: boolean;
@@ -35,16 +40,33 @@ export function BotTagsDialog({
   onSave,
   language: _language = 'ko',
 }: BotTagsDialogProps) {
-  const [tags, setTags] = useState<string[]>(currentTags);
+  const categoryOptions = useMemo(
+    () => BOT_CATEGORY_PRESETS.filter((preset) => preset.value !== '기타'),
+    []
+  );
+  const categoryValues = categoryOptions.map((preset) => preset.value);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    DEFAULT_CATEGORY_PRESET.value
+  );
+  const [otherTags, setOtherTags] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setTags(currentTags);
+      const initialCategory =
+        currentTags.find((tag) => categoryValues.includes(tag)) ||
+        DEFAULT_CATEGORY_PRESET.value;
+      const initialOthers = currentTags
+        .filter((tag) => tag !== initialCategory)
+        .filter((tag, idx, arr) => arr.indexOf(tag) === idx);
+
+      setSelectedCategory(initialCategory);
+      setOtherTags(initialOthers);
       setInputValue('');
     }
-  }, [open, currentTags]);
+  }, [open, currentTags, categoryValues]);
 
   const translations = {
     ko: {
@@ -66,22 +88,33 @@ export function BotTagsDialog({
 
     if (!trimmedValue) return;
 
-    if (tags.length >= 10) {
+    if ([selectedCategory, ...otherTags].length >= 10) {
       alert(t.maxTags);
       return;
     }
 
-    if (tags.includes(trimmedValue)) {
+    if ([selectedCategory, ...otherTags].includes(trimmedValue)) {
       alert(t.tagExists);
       return;
     }
 
-    setTags([...tags, trimmedValue]);
+    // 선택 가능한 4개 카테고리 이외의 직접 입력은 기타로 분류
+    if (categoryValues.includes(trimmedValue)) {
+      setSelectedCategory(trimmedValue);
+    } else {
+      setSelectedCategory(DEFAULT_CATEGORY_PRESET.value);
+      setOtherTags([...otherTags, trimmedValue]);
+    }
+
     setInputValue('');
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    if (tagToRemove === selectedCategory) {
+      setSelectedCategory(DEFAULT_CATEGORY_PRESET.value);
+      return;
+    }
+    setOtherTags(otherTags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -94,7 +127,8 @@ export function BotTagsDialog({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave(botId, tags);
+      const combined = [selectedCategory, ...otherTags].slice(0, 10);
+      await onSave(botId, combined);
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save tags:', error);
@@ -111,15 +145,54 @@ export function BotTagsDialog({
             <TagIcon className="h-5 w-5" />
             {t.title}
           </DialogTitle>
-          <DialogDescription>{t.description}</DialogDescription>
-        </DialogHeader>
+        <DialogDescription>{t.description}</DialogDescription>
+      </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* 태그 입력 */}
-          <div className="flex gap-2">
-            <Input
-              placeholder={t.placeholder}
-              value={inputValue}
+      <div className="space-y-4 py-4">
+        {/* 카테고리 선택 */}
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-gray-800">카테고리 태그</p>
+          <div className="grid grid-cols-2 gap-2">
+            {categoryOptions.map((preset) => {
+              const Icon = getCategoryIcon(preset.value);
+              const isActive = selectedCategory === preset.value;
+              return (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() => setSelectedCategory(preset.value)}
+                  className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
+                    isActive
+                      ? 'border-[#3735c3] bg-[#f4f5ff]'
+                      : 'border-gray-200 bg-white hover:border-[#3735c3]/50'
+                  }`}
+                >
+                  <span
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-sm"
+                    style={{
+                      background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})`,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold text-gray-900">{preset.label}</p>
+                    <p className="text-[12px] text-gray-500">{preset.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-gray-500">
+            직접 입력한 태그는 자동으로 "기타" 카테고리로 분류됩니다.
+          </p>
+        </div>
+
+        {/* 태그 입력 */}
+        <div className="flex gap-2">
+          <Input
+            placeholder={t.placeholder}
+            value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               maxLength={20}
@@ -138,9 +211,9 @@ export function BotTagsDialog({
 
           {/* 태그 목록 */}
           <div className="min-h-[100px] p-4 border border-gray-200 rounded-lg">
-            {tags.length > 0 ? (
+            {[selectedCategory, ...otherTags].length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
+                {[selectedCategory, ...otherTags].map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
