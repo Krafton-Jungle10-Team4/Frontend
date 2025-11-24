@@ -1,4 +1,3 @@
-import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, LogOut, CreditCard } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
@@ -10,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
-import { Logo } from '@/shared/components/Logo';
 import { cn } from '@/shared/components/utils';
 
 type Language = 'en' | 'ko';
@@ -24,8 +22,8 @@ interface TopNavigationProps {
   onLogout?: () => Promise<void> | void;
   activeTabLabel?: string;
   onLogoClick?: () => void;
-  navigationTabs?: ReactNode;
   showSidebarToggle?: boolean;
+  contentClassName?: string;
 }
 
 export function TopNavigation({
@@ -37,8 +35,8 @@ export function TopNavigation({
   onLogout,
   activeTabLabel: _activeTabLabel,
   onLogoClick,
-  navigationTabs,
   showSidebarToggle: _showSidebarToggle = true,
+  contentClassName,
 }: TopNavigationProps) {
   const navigate = useNavigate();
   const { isFreePlan, billingStatus } = useBilling();
@@ -70,29 +68,21 @@ export function TopNavigation({
 
   return (
     <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
-      <div className="relative w-full h-full flex items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-3">
+      <div className={cn("relative w-full h-full flex items-center justify-between pl-2 pr-4 md:pl-3 md:pr-6", contentClassName)}>
+        <div className="flex items-center">
           <button
             onClick={onLogoClick ?? onHomeClick}
-            className="cursor-pointer"
+            className="cursor-pointer flex items-center"
           >
-            <div className="flex items-center gap-2">
-              <Logo className="h-7 w-7 text-indigo-600" />
-              <span
-                className="font-bold text-xl bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-                }}
-              >
-                SnapAgent
-              </span>
-            </div>
+            <span
+              className="font-bold text-xl bg-clip-text text-transparent"
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
+              }}
+            >
+              SnapAgent
+            </span>
           </button>
-
-        </div>
-
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full border border-white/70 bg-white/70 shadow-[0_10px_30px_rgba(55,53,195,0.08)] backdrop-blur">
-          {navigationTabs}
         </div>
 
         <div className="flex items-center gap-4">

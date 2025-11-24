@@ -1,5 +1,4 @@
 import { TopNavigation } from '@/widgets/navigation/TopNavigation';
-import { NavigationTabs } from './NavigationTabs';
 
 interface HeaderProps {
   activeTab: 'marketplace' | 'studio' | 'knowledge' | 'library';
@@ -8,6 +7,8 @@ interface HeaderProps {
   userEmail: string;
   onLogout: () => Promise<void> | void;
   onLogoClick: () => void;
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
 }
 
 export function Header({
@@ -17,6 +18,8 @@ export function Header({
   userEmail,
   onLogout,
   onLogoClick,
+  onToggleSidebar,
+  isSidebarOpen = false,
 }: HeaderProps) {
   const tabLabels = {
     marketplace: '마켓플레이스',
@@ -36,13 +39,9 @@ export function Header({
         onLogoClick={onLogoClick}
         onLogout={onLogout}
         activeTabLabel={activeTabLabel}
-        showSidebarToggle={false}
-        navigationTabs={
-          <NavigationTabs
-            activeTab={activeTab}
-            onTabChange={onTabChange}
-          />
-        }
+        showSidebarToggle
+        onToggleSidebar={onToggleSidebar}
+        contentClassName={isSidebarOpen ? 'pl-6 md:pl-8 lg:pl-10' : 'px-5 md:px-8 lg:px-10'}
       />
     </header>
   );
