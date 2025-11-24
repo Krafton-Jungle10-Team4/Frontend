@@ -160,15 +160,6 @@ export function WorkflowCard({
                   <h3 className="text-lg font-bold text-gray-900">
                     {workflow.name}
                   </h3>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onVersionHistory();
-                    }}
-                    className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm transition-colors hover:border-[#3735c3]/40"
-                  >
-                    {formatVersionLabel(workflow.latestVersion)}
-                  </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span
@@ -304,7 +295,7 @@ export function WorkflowCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-start justify-start gap-2 border-t border-white/70 bg-slate-50/80 px-5 py-3">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-white/70 bg-slate-50/80 px-5 py-3">
           <span
             className="inline-flex h-8 w-8 items-center justify-center rounded-full"
             style={{
@@ -315,10 +306,17 @@ export function WorkflowCard({
           </span>
           <div className="flex flex-col leading-tight">
             <span className="text-xs font-semibold text-gray-700">버전 커밋</span>
-            <span className="text-[11px] text-gray-500">
-              {formatVersionLabel(workflow.latestVersion)}
-            </span>
           </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onVersionHistory();
+            }}
+            className="ml-auto inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm transition-colors hover:border-[#3735c3]/40"
+          >
+            {formatVersionLabel(workflow.latestVersion)}
+          </button>
         </div>
       </div>
 
