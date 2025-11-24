@@ -97,8 +97,6 @@ export function WorkflowCard({
 
   const isDeployed = workflow.deploymentState === 'deployed';
   const isMarketplacePublished = workflow.marketplaceState === 'published';
-  const hasPublishedHistory = Boolean(workflow.lastPublishedAt);
-  const showMarketplaceBadge = isMarketplacePublished || hasPublishedHistory;
   const createdTime = getCreatedTimestamp(workflow);
 
   return (
@@ -222,21 +220,9 @@ export function WorkflowCard({
 
       <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {showMarketplaceBadge && (
-            <div
-              className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold shadow-sm border',
-                isMarketplacePublished
-                  ? 'border-indigo-100 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 bg-gray-100 text-gray-400'
-              )}
-            >
-              <Store
-                className={cn(
-                  'h-3.5 w-3.5',
-                  isMarketplacePublished ? 'text-indigo-600' : 'text-gray-400'
-                )}
-              />
+          {isMarketplacePublished && (
+            <div className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-700 shadow-sm">
+              <Store className="h-3.5 w-3.5 text-indigo-600" />
             </div>
           )}
           {isDeployed ? (
