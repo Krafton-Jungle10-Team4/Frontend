@@ -57,18 +57,10 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,rgba(124,128,148,0.12),transparent_32%),radial-gradient(circle_at_86%_8%,rgba(152,156,172,0.1),transparent_30%),radial-gradient(circle_at_62%_72%,rgba(118,122,142,0.1),transparent_36%)]" />
-      <div className="pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-slate-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute -right-12 bottom-12 h-72 w-72 rounded-full bg-slate-300/35 blur-3xl" />
+    <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
       <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
         <div className="relative w-full px-5 py-6">
-          <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
-            <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
-            <div className="absolute -left-10 top-10 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl" />
-            <div className="absolute -right-6 bottom-4 h-28 w-28 rounded-full bg-gradient-to-br from-sky-100 via-white to-transparent blur-2xl" />
-          </div>
-          <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+          <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-3xl font-bold text-gray-900 tracking-tight">MARKETPLACE</span>
@@ -81,8 +73,8 @@ export function MarketplacePage() {
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 self-start w-full">
+              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
                 <div className="relative flex items-center justify-between">
                   <div>
@@ -102,29 +94,13 @@ export function MarketplacePage() {
                 </div>
               </div>
 
-            <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/70" />
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">태그</p>
-                    <p className="text-xl font-semibold text-slate-900">{allTags.length || 0}개</p>
-                    <p className="text-xs text-slate-500">필터로 원하는 쇼케이스를 바로 찾기</p>
-                  </div>
-                  <div className="flex -space-x-2">
-                    {allTags.slice(0, 4).map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex h-8 items-center justify-center rounded-full border border-indigo-100 bg-white px-3 text-[11px] font-semibold text-indigo-600 shadow-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {allTags.length > 4 && (
-                      <span className="inline-flex h-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-3 text-[11px] font-semibold text-slate-700 shadow-sm">
-                        +{allTags.length - 4}
-                      </span>
-                    )}
-                  </div>
+              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-3 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-center">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">태그</p>
+                  <p className="text-xl font-semibold text-slate-900">
+                    {allTags.length || 0}개
+                  </p>
+                  <p className="text-xs text-slate-500">필터로 원하는 쇼케이스를 바로 찾기</p>
                 </div>
               </div>
             </div>
@@ -145,7 +121,6 @@ export function MarketplacePage() {
           </div>
 
           <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-4 md:p-5 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(168,85,247,0.08),transparent_40%)]" />
             <MarketplaceGrid
               items={items}
               loading={isLoading}

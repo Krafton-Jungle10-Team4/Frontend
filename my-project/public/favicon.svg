@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <defs>
+    <linearGradient id="snap_logo_gradient" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5E3AEE" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#7C5EFA" stop-opacity="0.75" />
+    </linearGradient>
+    <filter id="snap_logo_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <path
+    d="M20 2L35.5885 11V29L20 38L4.41154 29V11L20 2Z"
+    stroke="url(#snap_logo_gradient)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <path
+    d="M20 11V17M20 23V29M14.8038 14L20 17M25.1962 14L20 17M14.8038 26L20 23M25.1962 26L20 23"
+    stroke="#5E3AEE"
+    stroke-width="2"
+    stroke-linecap="round"
+    opacity="0.85"
+  />
+
+  <circle cx="20" cy="20" r="3" fill="#5E3AEE" filter="url(#snap_logo_glow)" />
+  <circle cx="20" cy="2" r="1.5" fill="#7C5EFA" />
+  <circle cx="35.5" cy="29" r="1.5" fill="#7C5EFA" />
+  <circle cx="4.5" cy="29" r="1.5" fill="#7C5EFA" />
+</svg>

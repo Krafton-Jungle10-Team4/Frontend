@@ -172,18 +172,10 @@ export function StudioPage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(124,128,148,0.12),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(152,156,172,0.1),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(118,122,142,0.1),transparent_36%)]" />
-        <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 bottom-10 h-72 w-72 rounded-full bg-slate-300/35 blur-3xl" />
+      <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
         <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
           <div className="relative w-full px-5 py-6">
-            <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
-              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
-              <div className="absolute -left-10 top-8 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl" />
-              <div className="absolute -right-6 bottom-6 h-28 w-28 rounded-full bg-gradient-to-br from-sky-100 via-white to-transparent blur-2xl" />
-            </div>
-            <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+            <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl font-bold text-gray-900 tracking-tight">STUDIO</span>
@@ -194,10 +186,20 @@ export function StudioPage() {
                 <p className="text-sm text-slate-600">
                   템플릿 기반 서비스를 한곳에서 모아 관리하고 배포하세요.
                 </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {['Agent 생성', '관리', '배포'].map((label) => (
+                    <span
+                      key={label}
+                      className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-white px-3 py-1 text-[11px] font-semibold text-indigo-700 shadow-sm"
+                    >
+                      <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                      {label}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap justify-end gap-2" />
+              <div className="space-y-3 self-start w-full">
                 <div className="grid grid-cols-2 gap-3">
                   {statCards.map((card) => (
                     <div

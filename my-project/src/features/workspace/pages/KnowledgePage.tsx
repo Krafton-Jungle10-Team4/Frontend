@@ -134,18 +134,10 @@ export function KnowledgePage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(124,128,148,0.12),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(152,156,172,0.1),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(118,122,142,0.1),transparent_36%)]" />
-        <div className="pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 bottom-12 h-72 w-72 rounded-full bg-slate-300/35 blur-3xl" />
+      <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
         <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
           <div className="relative w-full px-5 py-6">
-            <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
-              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
-              <div className="absolute -left-10 top-8 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl" />
-              <div className="absolute -right-6 bottom-6 h-28 w-28 rounded-full bg-gradient-to-br from-sky-100 via-white to-transparent blur-2xl" />
-            </div>
-            <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+            <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl font-bold text-gray-900 tracking-tight">KNOWLEDGE</span>
@@ -158,7 +150,7 @@ export function KnowledgePage() {
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 self-start w-full">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
@@ -195,7 +187,6 @@ export function KnowledgePage() {
             </div>
 
             <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur p-4 md:p-5">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.08),transparent_40%)]" />
               <KnowledgeGrid
                 knowledgeList={sortedKnowledge}
                 loading={loading}
