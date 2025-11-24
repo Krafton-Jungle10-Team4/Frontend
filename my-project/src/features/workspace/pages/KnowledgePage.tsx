@@ -134,11 +134,11 @@ export function KnowledgePage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-white via-slate-50 to-indigo-50/30 text-slate-900">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(168,85,247,0.12),transparent_36%)]" />
-        <div className="pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-indigo-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 bottom-12 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
-        <main className="relative w-full flex-1 flex-col gap-6 px-3 md:px-5 lg:px-6 py-8">
+      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(124,128,148,0.12),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(152,156,172,0.1),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(118,122,142,0.1),transparent_36%)]" />
+        <div className="pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-slate-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 bottom-12 h-72 w-72 rounded-full bg-slate-300/35 blur-3xl" />
+        <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
           <div className="relative w-full px-5 py-6">
             <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
               <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
@@ -171,15 +171,10 @@ export function KnowledgePage() {
 
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2 justify-end text-xs">
-                  {['Notion', 'Google Drive', 'Web'].map((source) => (
-                    <span
-                      key={source}
-                      className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-white px-3 py-1 font-semibold text-slate-700 shadow-[0_10px_28px_rgba(55,53,195,0.12)]"
-                    >
-                      <span className="h-2 w-2 rounded-full bg-[#3735c3]" />
-                      {source}
-                    </span>
-                  ))}
+                  <span className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-white px-3 py-1 font-semibold text-slate-700 shadow-[0_10px_28px_rgba(55,53,195,0.12)]">
+                    <span className="h-2 w-2 rounded-full bg-[#3735c3]" />
+                    Web
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-4 shadow-[0_16px_40px_rgba(55,53,195,0.12)]">
