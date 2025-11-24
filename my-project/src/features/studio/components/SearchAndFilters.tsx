@@ -119,15 +119,6 @@ export function SearchAndFilters({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-        <span className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50/70 px-2.5 py-1 text-[#3735c3]">
-          활성 {stats.running}
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-blue-700">
-          배포 {stats.deployed}
-        </span>
-      </div>
-
       {/* 두 번째 행: 선택된 태그 표시 */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
