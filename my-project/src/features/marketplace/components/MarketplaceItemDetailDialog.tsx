@@ -188,18 +188,16 @@ export function MarketplaceItemDetailDialog({
               {/* 서비스 보기 버튼 및 삭제 버튼 */}
               <div className="flex items-center gap-4">
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleViewAgent();
                   }}
-                  className="flex items-center gap-2 relative overflow-hidden group border-gray-300 transition-transform duration-300 hover:scale-110"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-transform duration-300 hover:scale-105"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-black to-blue-600 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                  <Workflow className="w-4 h-4 relative z-10 group-hover:text-white transition-colors duration-300" />
-                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">서비스 보기</span>
+                  <Workflow className="w-4 h-4" />
+                  <span>서비스 보기</span>
                 </Button>
                 {item.category && (
                   <Badge variant="outline">{item.category}</Badge>

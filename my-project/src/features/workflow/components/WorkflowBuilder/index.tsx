@@ -901,10 +901,7 @@ const WorkflowInner = () => {
               {/* 버전 선택/가져오기 버튼 */}
               <Button
                 onClick={source === 'marketplace' ? handleImportFromMarketplace : handleSelectVersion}
-                className="!text-white"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-transform"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 {source === 'marketplace' ? '이 버전 가져오기' : '이 버전 선택'}
