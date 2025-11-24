@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MarketplaceSearchBar } from '@/features/marketplace/components/MarketplaceSearchBar';
 import { MarketplaceGrid } from '@/features/marketplace/components/MarketplaceGrid';
+import { MarketplaceItemCard } from '@/features/marketplace/components/MarketplaceItemCard';
 import {
   getMarketplaceItems,
   type MarketplaceItem,
@@ -18,15 +19,31 @@ export function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const activeTagCount = selectedTags.length;
+  // keep track of the latest fetch to ignore stale responses
+  const fetchRequestId = useRef(0);
+  const sortedByDownloads = [...items].sort(
+    (a, b) => (b.download_count ?? 0) - (a.download_count ?? 0)
+  );
+  const popularItems = sortedByDownloads.slice(0, 3);
+  const popularIds = new Set(popularItems.map((item) => item.id));
+  const sharedItems = items.filter((item) => !popularIds.has(item.id));
 
   const handleSortChange = (value: MarketplaceSortOption) => {
     setSortBy(value);
     setCurrentPage(1);
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
   // 마켓플레이스 아이템 불러오기
   useEffect(() => {
+    let isActive = true;
+    const requestId = fetchRequestId.current + 1;
+    fetchRequestId.current = requestId;
+
     const fetchItems = async () => {
       try {
         setIsLoading(true);
@@ -37,29 +54,43 @@ export function MarketplacePage() {
           tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
           sort_by: sortBy,
         });
+        if (!isActive || requestId !== fetchRequestId.current) return;
+
         setItems(response.items);
         setTotalPages(response.total_pages);
 
         // 태그 추출
-        const tagSet = new Set<string>();
-        response.items.forEach(item => {
-          item.tags?.forEach(tag => tagSet.add(tag));
+        setAllTags((prev) => {
+          const tagSet = new Set(prev);
+          response.items.forEach(item => {
+            item.tags?.forEach(tag => tagSet.add(tag));
+          });
+          return Array.from(tagSet);
         });
-        setAllTags(Array.from(tagSet));
       } catch (error) {
         console.error('마켓플레이스 아이템 로드 실패:', error);
       } finally {
-        setIsLoading(false);
+        if (isActive && requestId === fetchRequestId.current) {
+          setIsLoading(false);
+        }
       }
     };
 
     void fetchItems();
+
+    return () => {
+      isActive = false;
+    };
   }, [searchQuery, selectedTags, sortBy, currentPage]);
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
+    setSelectedTags(prev => {
+      // single-select: choose the tag or clear if already selected
+      if (prev.length === 1 && prev[0] === tag) {
+        return [];
+      }
+      return [tag];
+    });
     setCurrentPage(1);
   };
 
@@ -87,7 +118,7 @@ export function MarketplacePage() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">라이브 템플릿</p>
                     <p className="text-2xl font-bold text-slate-900">{items.length}</p>
-                    <p className="text-xs text-slate-500">커뮤니티가 공유한 쇼케이스</p>
+                    <p className="text-xs text-slate-500">커뮤니티에 공유된 템플릿</p>
                   </div>
                   <div className="flex items-end gap-1 self-end text-indigo-500">
                     {[68, 82, 74, 96, 88].map((v) => (
@@ -105,7 +136,7 @@ export function MarketplacePage() {
                 <div className="relative space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">태그</p>
                   <p className="text-2xl font-bold text-slate-900">{allTags.length || 0}개</p>
-                  <p className="text-xs text-slate-500">필터로 원하는 쇼케이스를 바로 찾기</p>
+                  <p className="text-xs text-slate-500">필터로 원하는 템플릿을 바로 찾기</p>
                 </div>
               </div>
             </div>
@@ -113,27 +144,53 @@ export function MarketplacePage() {
         </div>
 
         <div className="relative w-full space-y-4">
-          <div className="relative px-1 md:px-2 lg:px-3 py-3 md:py-4">
-            <MarketplaceSearchBar
-              searchValue={searchQuery}
-              onSearchChange={setSearchQuery}
-              tags={allTags}
-              selectedTags={selectedTags}
-              onTagToggle={handleTagToggle}
-              sortBy={sortBy}
-              onSortChange={handleSortChange}
-            />
-          </div>
+          <div className="space-y-8">
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-600">인기 템플릿</p>
+                  <p className="text-lg font-bold text-slate-900">다운로드 TOP 3</p>
+                </div>
+              </div>
+              {isLoading ? (
+                <div className="flex h-32 items-center justify-center text-sm text-amber-700">로딩 중...</div>
+              ) : popularItems.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                  {popularItems.map((item, idx) => (
+                    <MarketplaceItemCard key={item.id} item={item} rank={idx + 1} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-amber-700">표시할 인기 템플릿이 없습니다.</p>
+              )}
+            </section>
 
-          <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-4 md:p-5 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
-            <MarketplaceGrid
-              items={items}
-              loading={isLoading}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              language={language}
-            />
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">공유 템플릿</p>
+                  <p className="text-lg font-bold text-slate-900">라이브 템플릿</p>
+                </div>
+                <MarketplaceSearchBar
+                  searchValue={searchQuery}
+                  onSearchChange={handleSearchChange}
+                  tags={allTags}
+                  selectedTags={selectedTags}
+                  onTagToggle={handleTagToggle}
+                  sortBy={sortBy}
+                  onSortChange={handleSortChange}
+                />
+              </div>
+              <MarketplaceGrid
+                items={sharedItems}
+                loading={isLoading}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                language={language}
+                enableRanking={false}
+              />
+            </section>
           </div>
         </div>
       </main>

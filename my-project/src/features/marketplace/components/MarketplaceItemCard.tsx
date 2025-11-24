@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge } from '@/shared/components/badge';
 import { cn } from '@/shared/components/utils';
-import { Download, Eye, Tag as TagIcon, Clock } from 'lucide-react';
+import { Download, Eye, Tag as TagIcon, Clock, Award, User } from 'lucide-react';
 import {
   getWorkflowIcon,
   getWorkflowIconBackground,
@@ -13,12 +13,13 @@ import type { MarketplaceItem } from '../api/marketplaceApi';
 
 interface MarketplaceItemCardProps {
   item: MarketplaceItem;
-  rank?: number; // 사용하지 않음, 하위 호환성 유지
+  rank?: number; // 1~3이면 다운로드 상위 랭크
 }
 
-export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
+export function MarketplaceItemCard({ item, rank }: MarketplaceItemCardProps) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [itemData, setItemData] = useState<MarketplaceItem>(item);
+  const isRanked = typeof rank === 'number' && rank >= 1 && rank <= 3;
   const linkedWorkflow = useWorkflowStore((state) =>
     item.workflow_version?.bot_id
       ? state.workflows.find((w) => w.id === item.workflow_version?.bot_id)
@@ -76,16 +77,104 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
     setShowDetailDialog(false);
   };
 
+const medalStyle = (rank?: number) => {
+  switch (rank) {
+    case 1:
+      return {
+        bg: '#FFD166',
+        text: 'text-amber-900',
+        shadow: 'shadow-[0_16px_48px_rgba(255,204,112,0.35)] ring-1 ring-amber-200/80',
+        border: 'border-amber-200',
+      };
+    case 2:
+      return {
+        bg: '#D8DBE2',
+        text: 'text-slate-700',
+        shadow: 'shadow-[0_16px_44px_rgba(148,163,184,0.30)] ring-1 ring-slate-200/80',
+        border: 'border-slate-200',
+      };
+    case 3:
+      return {
+        bg: '#e18b3d',
+        text: 'text-orange-900',
+        shadow: 'shadow-[0_16px_44px_rgba(225,139,61,0.35)] ring-1 ring-orange-300/90',
+        border: 'border-orange-300',
+      };
+    default:
+      return null;
+  }
+};
+
+  const medal = medalStyle(rank);
+  const rankLabel = (() => {
+    switch (rank) {
+      case 1:
+        return '1st';
+      case 2:
+        return '2nd';
+      case 3:
+        return '3rd';
+      default:
+        return 'Top';
+    }
+  })();
+  const rankedHover = (() => {
+    switch (rank) {
+      case 1:
+        return {
+          bg: 'hover:bg-amber-50/70',
+          border: 'hover:border-amber-200',
+          shadow: 'hover:shadow-[0_18px_48px_rgba(255,204,112,0.25)]',
+        };
+      case 2:
+        return {
+          bg: 'hover:bg-slate-50/70',
+          border: 'hover:border-slate-200',
+          shadow: 'hover:shadow-[0_18px_48px_rgba(148,163,184,0.25)]',
+        };
+      case 3:
+        return {
+          bg: 'hover:bg-orange-50/70',
+          border: 'hover:border-orange-200',
+          shadow: 'hover:shadow-[0_18px_48px_rgba(242,166,90,0.25)]',
+        };
+      default:
+        return null;
+    }
+  })();
+
   return (
     <>
       <div
         className={cn(
           'group relative bg-white rounded-lg border border-gray-200 p-4',
           'shadow-sm transition-all duration-200 cursor-pointer backdrop-blur',
-          'hover:shadow-md hover:-translate-y-1'
+          isRanked
+            ? [
+                'hover:-translate-y-1.5',
+                rankedHover?.shadow,
+                rankedHover?.border,
+                rankedHover?.bg,
+              ]
+            : 'hover:shadow-md hover:-translate-y-1 hover:bg-indigo-50/40 hover:border-indigo-100',
         )}
         onClick={() => setShowDetailDialog(true)}
       >
+        {medal && (
+          <div
+            className={cn(
+              'absolute top-2 right-2 flex items-center gap-1 text-[10px] font-semibold border rounded-full px-2 py-1 shadow-sm',
+              medal.text,
+              medal.border,
+              medal.shadow
+            )}
+            style={{ backgroundColor: medal.bg }}
+          >
+            <span className="text-[11px] font-bold">{item.rank}</span>
+            <Award className={cn('h-4 w-4', medal.text)} />
+            <span className="uppercase tracking-wide">{rankLabel}</span>
+          </div>
+        )}
         <div className="flex flex-col flex-1 pt-2">
           <div className="flex justify-between items-start mb-2 gap-3">
             <div className="flex items-start gap-3 min-w-0">
@@ -186,8 +275,10 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
             <div className="text-xs text-gray-600 flex items-center gap-1">
               {itemData.publisher?.username ? (
                 <>
-                  <span className="font-medium text-gray-800">작성자:</span>
-                  <span>{itemData.publisher.username}</span>
+                  <User className="h-3.5 w-3.5 text-gray-500" />
+                  <span className="truncate max-w-[110px]" title={itemData.publisher.username}>
+                    {itemData.publisher.username}
+                  </span>
                 </>
               ) : (
                 <span className="text-gray-400">작성자 정보 없음</span>
