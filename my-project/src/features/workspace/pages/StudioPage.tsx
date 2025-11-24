@@ -235,26 +235,23 @@ export function StudioPage() {
               />
             </div>
 
-            <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-3 md:p-4 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.08),transparent_40%)]" />
-              {loading ? (
-                <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
-              ) : error ? (
-                <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600">
-                  <p className="text-sm">오류가 발생했습니다: {error.message}</p>
-                </div>
-              ) : (
-                <WorkflowGrid
-                  workflows={filteredWorkflows}
-                  sortBy={sortBy}
-                  onCreateBlank={openCreateDialog}
-                  onCreateFromTemplate={handleCreateFromTemplate}
-                  onOpenWorkflow={handleOpenWorkflow}
-                  onNavigateDeployment={handleNavigateDeployment}
-                  onEditTags={handleEditTags}
-                />
-              )}
-            </div>
+            {loading ? (
+              <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
+            ) : error ? (
+              <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600">
+                <p className="text-sm">오류가 발생했습니다: {error.message}</p>
+              </div>
+            ) : (
+              <WorkflowGrid
+                workflows={filteredWorkflows}
+                sortBy={sortBy}
+                onCreateBlank={openCreateDialog}
+                onCreateFromTemplate={handleCreateFromTemplate}
+                onOpenWorkflow={handleOpenWorkflow}
+                onNavigateDeployment={handleNavigateDeployment}
+                onEditTags={handleEditTags}
+              />
+            )}
           </div>
         </main>
       </div>
