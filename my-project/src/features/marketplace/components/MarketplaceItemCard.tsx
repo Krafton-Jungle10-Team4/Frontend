@@ -123,27 +123,48 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
             </p>
           )}
 
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          <div className="flex flex-wrap gap-1.5 mb-3 justify-end">
             {itemData.tags && itemData.tags.length > 0 ? (
               <>
                 {itemData.tags.slice(0, 3).map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
-                    className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700"
+                    className="text-[11px] px-2 py-0.5 h-5 rounded-full cursor-default"
+                    style={{
+                      background: getWorkflowIconBackground([tag]),
+                      color: getWorkflowIconColor([tag]),
+                      border: `1px solid ${getWorkflowIconColor([tag])}33`,
+                    }}
                   >
                     <TagIcon className="h-3 w-3 mr-1" />
                     {tag}
                   </Badge>
                 ))}
                 {itemData.tags.length > 3 && (
-                  <Badge variant="secondary" className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700">
+                  <Badge
+                    variant="secondary"
+                    className="text-[11px] px-2 py-0.5 h-5 rounded-full cursor-default"
+                    style={{
+                      background: getWorkflowIconBackground(itemData.tags),
+                      color: getWorkflowIconColor(itemData.tags),
+                      border: `1px solid ${getWorkflowIconColor(itemData.tags)}33`,
+                    }}
+                  >
                     +{itemData.tags.length - 3}
                   </Badge>
                 )}
               </>
             ) : (
-              <Badge variant="secondary" className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700">
+              <Badge
+                variant="secondary"
+                className="text-[11px] px-2 py-0.5 h-5 rounded-full cursor-default"
+                style={{
+                  background: getWorkflowIconBackground([]),
+                  color: getWorkflowIconColor([]),
+                  border: `1px solid ${getWorkflowIconColor([])}33`,
+                }}
+              >
                 <TagIcon className="h-3 w-3 mr-1" />
                 태그 없음
               </Badge>
