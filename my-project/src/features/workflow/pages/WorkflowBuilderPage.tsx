@@ -234,6 +234,7 @@ export const WorkflowBuilderPage = () => {
           onLogout={handleLogout}
           currentPage={botName}
           showSidebarToggle={false}
+          showInlineLogo
         />
 
         {/* Content */}

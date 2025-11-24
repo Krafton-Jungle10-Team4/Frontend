@@ -610,6 +610,7 @@ export function BillingSettingsPage() {
           userEmail={userEmail}
           onHomeClick={() => navigate('/workspace/studio')}
           onLogout={handleLogout}
+          showInlineLogo
         />
         <div className="flex-1 overflow-auto">
           {renderContent()}

@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut, CreditCard } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Settings, LogOut, CreditCard, ChevronRight } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
 import { cn } from '@/shared/components/utils';
+import { Logo } from '@/shared/components/Logo';
 
 type Language = 'en' | 'ko';
 
@@ -24,6 +25,7 @@ interface TopNavigationProps {
   onLogoClick?: () => void;
   showSidebarToggle?: boolean;
   contentClassName?: string;
+  showInlineLogo?: boolean;
 }
 
 export function TopNavigation({
@@ -37,8 +39,10 @@ export function TopNavigation({
   onLogoClick,
   showSidebarToggle: _showSidebarToggle = true,
   contentClassName,
+  showInlineLogo = false,
 }: TopNavigationProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isFreePlan, billingStatus } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -66,14 +70,38 @@ export function TopNavigation({
   } as const;
   const planDotClass = planDotStyle[planId as 'free' | 'pro' | 'enterprise'] ?? planDotStyle.free;
 
+  const workspaceRoot = '/workspace/studio';
+  const breadcrumbMap = [
+    { label: '워크스페이스', path: workspaceRoot },
+    { label: '스튜디오', path: '/workspace/studio' },
+    { label: '마켓플레이스', path: '/workspace/marketplace' },
+    { label: '지식 관리', path: '/workspace/knowledge' },
+    { label: '결제 설정', path: '/billing-settings' },
+  ] as const;
+
+  const currentSection =
+    breadcrumbMap.find(
+      (item) =>
+        item.path !== workspaceRoot &&
+        location.pathname.toLowerCase().startsWith(item.path.toLowerCase())
+    ) ?? breadcrumbMap[1];
+
+  const breadcrumbs = [
+    breadcrumbMap[0],
+    currentSection,
+  ];
+
   return (
     <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
       <div className={cn("relative w-full h-full flex items-center justify-between pl-2 pr-4 md:pl-3 md:pr-6", contentClassName)}>
-        <div className="flex items-center">
+        <div className="flex items-center gap-3 overflow-hidden">
           <button
             onClick={onLogoClick ?? onHomeClick}
-            className="cursor-pointer flex items-center"
+            className="cursor-pointer flex items-center gap-2"
           >
+            {showInlineLogo && (
+              <Logo className="h-8 w-8 text-[#5f5bff]" aria-label="SnapAgent Logo" />
+            )}
             <span
               className="font-bold text-xl bg-clip-text text-transparent"
               style={{
@@ -83,6 +111,25 @@ export function TopNavigation({
               SnapAgent
             </span>
           </button>
+
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            {breadcrumbs.map((crumb, idx) => (
+              <div key={crumb.path} className="flex items-center gap-1">
+                {idx > 0 && <ChevronRight size={14} className="text-gray-400" />}
+                <button
+                  onClick={() => navigate(crumb.path)}
+                  className={cn(
+                    'rounded px-2 py-1 transition-colors',
+                    idx === breadcrumbs.length - 1
+                      ? 'bg-gray-100 text-gray-700'
+                      : 'hover:bg-gray-100 hover:text-gray-700'
+                  )}
+                >
+                  {crumb.label}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-4">

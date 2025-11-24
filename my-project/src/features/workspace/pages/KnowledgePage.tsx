@@ -151,7 +151,7 @@ export function KnowledgePage() {
                   Knowledge
                   <span className="h-1 w-1 rounded-full bg-indigo-400" />
                 </p>
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">Knowledge Base</h1>
+                <h1 className="text-3xl font-bold text-gray-900 leading-tight">지식 관리</h1>
                 <p className="text-sm text-slate-600">
                   Landing 톤의 밝은 글래스 스타일로 문서를 관리하고 검색하세요.
                 </p>
