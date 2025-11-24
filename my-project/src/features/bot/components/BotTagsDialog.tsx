@@ -44,7 +44,10 @@ export function BotTagsDialog({
     () => BOT_CATEGORY_PRESETS.filter((preset) => preset.value !== '기타'),
     []
   );
-  const categoryValues = categoryOptions.map((preset) => preset.value);
+  const categoryValues = useMemo(
+    () => categoryOptions.map((preset) => preset.value),
+    [categoryOptions]
+  );
 
   const [selectedCategory, setSelectedCategory] = useState<string>(
     DEFAULT_CATEGORY_PRESET.value
@@ -83,17 +86,27 @@ export function BotTagsDialog({
 
   const t = translations.ko;
 
+  const currentAllTags = [selectedCategory, ...otherTags];
+
   const handleAddTag = () => {
     const trimmedValue = inputValue.trim();
 
     if (!trimmedValue) return;
 
-    if ([selectedCategory, ...otherTags].length >= 10) {
+    // 입력으로 카테고리 변경
+    if (categoryValues.includes(trimmedValue)) {
+      setSelectedCategory(trimmedValue);
+      setOtherTags((prev) => prev.filter((tag) => tag !== trimmedValue));
+      setInputValue('');
+      return;
+    }
+
+    if (currentAllTags.length >= 10) {
       alert(t.maxTags);
       return;
     }
 
-    if ([selectedCategory, ...otherTags].includes(trimmedValue)) {
+    if (currentAllTags.includes(trimmedValue)) {
       alert(t.tagExists);
       return;
     }
@@ -101,6 +114,7 @@ export function BotTagsDialog({
     // 선택 가능한 4개 카테고리 이외의 직접 입력은 기타로 분류
     if (categoryValues.includes(trimmedValue)) {
       setSelectedCategory(trimmedValue);
+      setOtherTags((prev) => prev.filter((tag) => tag !== trimmedValue));
     } else {
       setSelectedCategory(DEFAULT_CATEGORY_PRESET.value);
       setOtherTags([...otherTags, trimmedValue]);
@@ -160,7 +174,10 @@ export function BotTagsDialog({
                 <button
                   key={preset.value}
                   type="button"
-                  onClick={() => setSelectedCategory(preset.value)}
+                  onClick={() => {
+                    setSelectedCategory(preset.value);
+                    setOtherTags((prev) => prev.filter((tag) => tag !== preset.value));
+                  }}
                   className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
                     isActive
                       ? 'border-[#3735c3] bg-[#f4f5ff]'
@@ -193,27 +210,27 @@ export function BotTagsDialog({
           <Input
             placeholder={t.placeholder}
             value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              maxLength={20}
-              disabled={tags.length >= 10}
-            />
-            <Button
-              type="button"
-              onClick={handleAddTag}
-              disabled={!inputValue.trim() || tags.length >= 10}
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              {t.add}
-            </Button>
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            maxLength={20}
+            disabled={currentAllTags.length >= 10}
+          />
+          <Button
+            type="button"
+            onClick={handleAddTag}
+            disabled={!inputValue.trim() || currentAllTags.length >= 10}
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            {t.add}
+          </Button>
           </div>
 
           {/* 태그 목록 */}
           <div className="min-h-[100px] p-4 border border-gray-200 rounded-lg">
-            {[selectedCategory, ...otherTags].length > 0 ? (
+            {currentAllTags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {[selectedCategory, ...otherTags].map((tag) => (
+                {currentAllTags.map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
@@ -237,7 +254,7 @@ export function BotTagsDialog({
             )}
           </div>
 
-          {tags.length >= 10 && (
+          {currentAllTags.length >= 10 && (
             <p className="text-xs text-amber-600">{t.maxTags}</p>
           )}
         </div>

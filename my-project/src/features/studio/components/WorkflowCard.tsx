@@ -47,17 +47,27 @@ const formatVersionLabel = (version?: string) => {
   return version.startsWith('v') ? version : `v${version}`;
 };
 
-const formatRelativeTime = (date?: Date) => {
-  if (!date) return '정보 없음';
-  const diffSeconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-  const days = Math.floor(diffSeconds / 86400);
-  const hours = Math.floor((diffSeconds % 86400) / 3600);
-  const minutes = Math.floor((diffSeconds % 3600) / 60);
+const getImprovementLabel = (version?: string) => {
+  if (!version) return null;
+  const cleaned = version.replace(/^v/i, '');
+  const [majorStr, minorStr] = cleaned.split('.');
+  const major = Number.parseInt(majorStr || '0', 10);
+  const minor = Number.parseInt(minorStr || '0', 10);
 
-  if (days > 0) return `${days}일 전`;
-  if (hours > 0) return `${hours}시간 전`;
-  if (minutes > 0) return `${minutes}분 전`;
-  return '방금 전';
+  if (Number.isNaN(major) || Number.isNaN(minor) || minor <= 0) {
+    return null;
+  }
+
+  const ordinalMap: Record<number, string> = {
+    1: '첫번째',
+    2: '두번째',
+    3: '세번째',
+    4: '네번째',
+    5: '다섯번째',
+  };
+
+  const ordinal = ordinalMap[minor] || `${minor}번째`;
+  return `${ordinal} 개선안`;
 };
 
 export function WorkflowCard({
@@ -94,13 +104,15 @@ export function WorkflowCard({
   };
 
   const isDeployed = workflow.deploymentState === 'deployed';
+  const improvementLabel = getImprovementLabel(workflow.latestVersion);
   const deploymentLabel =
     workflow.deploymentState === 'deployed'
       ? '배포됨'
-      : workflow.deploymentState === 'deploying'
-        ? '배포 중'
-        : '초안';
-  const versionCommitLabel = formatRelativeTime(workflow.updatedAt);
+      : improvementLabel
+        ? improvementLabel
+        : workflow.deploymentState === 'deploying'
+          ? '배포 중'
+          : '초안';
 
   const deploymentStyles =
     workflow.deploymentState === 'deployed'
@@ -312,7 +324,7 @@ export function WorkflowCard({
             <div className="flex flex-col leading-tight">
               <span className="text-xs font-semibold text-gray-700">버전 커밋</span>
               <span className="text-[11px] text-gray-500">
-                {formatVersionLabel(workflow.latestVersion)} · {versionCommitLabel}
+                {formatVersionLabel(workflow.latestVersion)}
               </span>
             </div>
           </div>
