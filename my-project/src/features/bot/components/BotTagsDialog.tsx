@@ -57,6 +57,7 @@ const RECOMMENDED_TAGS = DEFAULT_TAGS.map((tag) => ({
 
 const DEFAULT_CATEGORY: DefaultTag =
   (DEFAULT_TAGS.find((tag) => tag === '기타') as DefaultTag | undefined) || DEFAULT_TAGS[0];
+const TAG_ICON_SIZE = 20;
 
 interface BotTagsDialogProps {
   open: boolean;
@@ -193,14 +194,18 @@ export function BotTagsDialog({
                     }}
                   >
                     <span
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border text-white shadow-sm"
+                      className="flex h-10 w-10 min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border text-white shadow-sm shrink-0"
                       style={{
                         backgroundColor: option.background,
                         color: option.color,
                         borderColor: `${option.color}30`,
                       }}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon
+                        size={TAG_ICON_SIZE}
+                        strokeWidth={2}
+                        className="shrink-0"
+                      />
                     </span>
                     <div className="space-y-0.5">
                       <p className="text-sm font-semibold text-gray-900">{option.label}</p>

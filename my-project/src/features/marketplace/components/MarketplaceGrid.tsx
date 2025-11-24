@@ -18,6 +18,7 @@ interface MarketplaceGridProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   language?: Language;
+  enableRanking?: boolean;
 }
 
 export function MarketplaceGrid({
@@ -27,6 +28,7 @@ export function MarketplaceGrid({
   totalPages,
   onPageChange,
   language: _language = 'ko',
+  enableRanking = true,
 }: MarketplaceGridProps) {
   if (loading) {
     return (
@@ -50,9 +52,22 @@ export function MarketplaceGrid({
     <div>
       {/* 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        {items.map(item => (
-          <MarketplaceItemCard key={item.id} item={item} />
-        ))}
+        {(() => {
+          if (!enableRanking) {
+            return items.map((item) => <MarketplaceItemCard key={item.id} item={item} />);
+          }
+
+          const topDownloadIds = [...items]
+            .sort((a, b) => (b.download_count ?? 0) - (a.download_count ?? 0))
+            .slice(0, 3)
+            .map((item) => item.id);
+
+          return items.map((item) => {
+            const rankIndex = topDownloadIds.indexOf(item.id);
+            const rank = rankIndex === -1 ? undefined : rankIndex + 1;
+            return <MarketplaceItemCard key={item.id} item={item} rank={rank} />;
+          });
+        })()}
       </div>
 
       {/* Pagination */}
