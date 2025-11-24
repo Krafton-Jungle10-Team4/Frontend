@@ -64,7 +64,7 @@ export function ApiReferenceDialog({ botId: _botId }: ApiReferenceDialogProps) {
   };
 
   const configExample = `// 위젯 설정 조회
-fetch('https://api.snapagent.shop/api/v1/widget/config/${widgetKey || '{widget_key}'}', {
+fetch('https://api.snapagent.store/api/v1/widget/config/${widgetKey || '{widget_key}'}', {
   method: 'GET',
   headers: {
     'Origin': 'https://your-domain.com'
@@ -76,7 +76,7 @@ fetch('https://api.snapagent.shop/api/v1/widget/config/${widgetKey || '{widget_k
   });`;
 
   const sessionExample = `// 세션 생성
-fetch('https://api.snapagent.shop/api/v1/widget/sessions', {
+fetch('https://api.snapagent.store/api/v1/widget/sessions', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ fetch('https://api.snapagent.shop/api/v1/widget/sessions', {
   });`;
 
   const chatExample = `// 채팅 메시지 전송
-fetch('https://api.snapagent.shop/api/v1/widget/chat', {
+fetch('https://api.snapagent.store/api/v1/widget/chat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

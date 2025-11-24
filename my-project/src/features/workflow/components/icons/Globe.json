@@ -1,0 +1,52 @@
+{
+  "icon": {
+    "type": "element",
+    "isRootNode": true,
+    "name": "svg",
+    "attributes": {
+      "width": "16",
+      "height": "16",
+      "viewBox": "0 0 24 24",
+      "fill": "none",
+      "xmlns": "http://www.w3.org/2000/svg"
+    },
+    "children": [
+      {
+        "type": "element",
+        "name": "circle",
+        "attributes": {
+          "cx": "12",
+          "cy": "12",
+          "r": "10",
+          "stroke": "currentColor",
+          "stroke-width": "2",
+          "fill": "none"
+        },
+        "children": []
+      },
+      {
+        "type": "element",
+        "name": "path",
+        "attributes": {
+          "d": "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+          "stroke": "currentColor",
+          "stroke-width": "2",
+          "fill": "none"
+        },
+        "children": []
+      },
+      {
+        "type": "element",
+        "name": "path",
+        "attributes": {
+          "d": "M2 12h20",
+          "stroke": "currentColor",
+          "stroke-width": "2",
+          "stroke-linecap": "round"
+        },
+        "children": []
+      }
+    ]
+  },
+  "name": "Globe"
+}

@@ -4,7 +4,7 @@
 
 // SnapAgent API Base URL - 환경변수에서 가져오기
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://api.snapagent.shop';
+  import.meta.env.VITE_API_URL || 'https://api.snapagent.store';
 export const API_TIMEOUT = 30000; // 30초
 
 // 공개 API Base URL (X-API-Key 인증)

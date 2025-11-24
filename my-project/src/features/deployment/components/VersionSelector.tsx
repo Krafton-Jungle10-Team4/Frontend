@@ -29,6 +29,7 @@ import { deploymentApi } from '../api/deploymentApi';
 import { toast } from 'sonner';
 import type { WorkflowVersionSummary } from '@/features/workflow/types/api.types';
 import { VersionHistoryModal } from './VersionHistoryModal';
+import { useDeploymentStore, selectWidgetConfig } from '../stores/deploymentStore';
 
 interface VersionSelectorProps {
   botId: string;
@@ -56,6 +57,7 @@ export function VersionSelector({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const widgetConfig = useDeploymentStore(selectWidgetConfig);
 
   // 게시된 버전 목록 조회
   useEffect(() => {
@@ -135,17 +137,10 @@ export function VersionSelector({
     try {
       setIsDeploying(true);
 
-      const defaultWidgetConfig = {
-        theme: 'light' as const,
-        position: 'bottom-right' as const,
-        auto_open: false,
-        primary_color: '#0066FF',
-      };
-
       await deploymentApi.createOrUpdate(botId, {
         workflow_version_id: selectedVersionId,
         status: 'published',
-        widget_config: defaultWidgetConfig,
+        widget_config: widgetConfig,
       });
 
       toast.success('배포 성공', {

@@ -11,9 +11,10 @@ interface APIKeySectionProps {
   botId: string;
   apiKeys: ApiKey[];
   isLoading: boolean;
+  onApiKeyCreated?: (key: string) => void;
 }
 
-export function APIKeySection({ botId, apiKeys, isLoading }: APIKeySectionProps) {
+export function APIKeySection({ botId, apiKeys, isLoading, onApiKeyCreated }: APIKeySectionProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
@@ -48,6 +49,7 @@ export function APIKeySection({ botId, apiKeys, isLoading }: APIKeySectionProps)
         onCreated={(plainKey) => {
           setCreatedKey(plainKey);
           setShowCreateDialog(false);
+          onApiKeyCreated?.(plainKey);
         }}
       />
 

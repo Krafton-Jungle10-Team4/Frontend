@@ -40,6 +40,7 @@ export const transformToBackend = (
         id: node.id,
         type: node.data.type,
         position: node.position,
+        ...(node.data.port_bindings && { port_bindings: node.data.port_bindings }),
         data: {
           title: node.data.title,
           desc: node.data.desc || '',
@@ -156,6 +157,27 @@ export const transformToBackend = (
             channel: (node.data as any).channel || '',
             use_blocks: (node.data as any).use_blocks || false,
             integration_id: (node.data as any).integration_id || undefined,
+          }),
+
+          // HTTP 노드 변환
+          ...(node.data.type === BlockEnum.Http && {
+            url: (node.data as any).url || '',
+            method: (node.data as any).method || 'GET',
+            headers: (node.data as any).headers || [],
+            query_params: (node.data as any).query_params || [],
+            body: (node.data as any).body || '',
+            timeout: (node.data as any).timeout ?? 30,
+          }),
+
+          // Template Transform 노드 변환
+          ...(node.data.type === BlockEnum.TemplateTransform && {
+            template: (node.data as any).template || '',
+            variables: (node.data as any).variables || {},
+          }),
+
+          // START 노드의 ports 데이터 보존
+          ...(node.data.type === BlockEnum.Start && node.data.ports && {
+            ports: node.data.ports,
           }),
         },
         ports: serializedPorts,
@@ -290,6 +312,7 @@ export const transformFromBackend = (
       const portsSource =
         node.ports || ((node.data as any).ports as BackendNode['ports'] | undefined);
       const deserializedPorts = deserializePorts(portsSource);
+      const portBindings = node.port_bindings || ((node.data as any).port_bindings);
 
       return {
         id: node.id,
@@ -300,6 +323,7 @@ export const transformFromBackend = (
           title: node.data.title,
           desc: node.data.desc,
           ports: deserializedPorts,
+          ...(portBindings && { port_bindings: portBindings }),
           variable_mappings: deserializeVariableMappings(node.variable_mappings),
 
           ...(node.type === 'imported-workflow' && {
@@ -414,6 +438,22 @@ export const transformFromBackend = (
             channel: node.data.channel || '',
             use_blocks: node.data.use_blocks || false,
             integration_id: node.data.integration_id || undefined,
+          }),
+
+          // HTTP 노드 역변환
+          ...(node.type === 'http' && {
+            url: node.data.url || '',
+            method: node.data.method || 'GET',
+            headers: node.data.headers || [],
+            query_params: node.data.query_params || [],
+            body: node.data.body || '',
+            timeout: node.data.timeout ?? 30,
+          }),
+
+          // Template Transform 노드 역변환
+          ...(node.type === 'template-transform' && {
+            template: node.data.template || '',
+            variables: node.data.variables || {},
           }),
         },
       };

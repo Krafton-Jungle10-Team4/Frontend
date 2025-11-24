@@ -15,6 +15,7 @@ import {
 } from '../stores/deploymentStore.ts';
 import { EmbedWebsiteDialog } from '../components/EmbedWebsiteDialog.tsx';
 import { ApiReferenceDialog } from '../components/ApiReferenceDialog.tsx';
+import { WorkflowApiReferenceDialog } from '../components/WorkflowApiReferenceDialog.tsx';
 import { IntegrationsPanel } from '@/features/integrations';
 import { VersionSelector } from '../components/VersionSelector.tsx';
 import { useApiKeyStore } from '../stores/apiKeyStore.ts';
@@ -41,6 +42,8 @@ export function DeploymentPage() {
   const { apiKeys, isLoading: isApiKeysLoading, fetchApiKeys } = useApiKeyStore();
   const [activeTab, setActiveTab] = useState<TabType>('deployment');
   const [botName, setBotName] = useState<string>('Agent');
+  const [showWorkflowApiDialog, setShowWorkflowApiDialog] = useState(false);
+  const [lastCreatedApiKey, setLastCreatedApiKey] = useState<string | null>(null);
 
   // 워크플로우에서 선택된 버전 ID 가져오기
   const selectedVersionIdFromState = (location.state as { selectedVersionId?: string })?.selectedVersionId;
@@ -260,7 +263,7 @@ export function DeploymentPage() {
                 {deployment ? (
                   <Button
                     variant="outline"
-                    onClick={openApiDialog}
+                    onClick={() => setShowWorkflowApiDialog(true)}
                     className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
                     style={{
                       backgroundImage: 'none',
@@ -302,7 +305,12 @@ export function DeploymentPage() {
             {/* 좌측 컬럼 */}
             <div className="space-y-6">
               <APIEndpointSection />
-              <APIKeySection botId={botId!} apiKeys={apiKeys} isLoading={isApiKeysLoading} />
+              <APIKeySection
+                botId={botId!}
+                apiKeys={apiKeys}
+                isLoading={isApiKeysLoading}
+                onApiKeyCreated={setLastCreatedApiKey}
+              />
             </div>
 
             {/* 우측 컬럼 */}
@@ -321,6 +329,13 @@ export function DeploymentPage() {
 
         <EmbedWebsiteDialog />
         <ApiReferenceDialog />
+        <WorkflowApiReferenceDialog
+          open={showWorkflowApiDialog}
+          onClose={() => setShowWorkflowApiDialog(false)}
+          botId={botId!}
+          apiKeys={apiKeys}
+          plaintextApiKey={lastCreatedApiKey}
+        />
       </div>
     </div>
   );

@@ -8,15 +8,25 @@ import { memo } from 'react';
  */
 const TemplateTransformNode = ({ data }: NodeProps<TemplateTransformNodeType>) => {
   return (
-    <div className="space-y-1">
+    <div className="px-3 py-2 space-y-2">
       {data.template && (
-        <div className="text-xs text-muted-foreground line-clamp-2">
-          템플릿: {data.template}
+        <div className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5">
+          <div className="system-2xs-regular-uppercase text-text-tertiary">
+            템플릿
+          </div>
+          <pre className="system-xs-medium text-text-primary mt-1 whitespace-pre-wrap break-words leading-relaxed font-mono">
+            {data.template}
+          </pre>
         </div>
       )}
       {data.outputFormat && (
-        <div className="text-xs text-muted-foreground">
-          형식: {data.outputFormat}
+        <div className="rounded-md bg-workflow-block-parma-bg px-2.5 py-1.5">
+          <div className="system-2xs-regular-uppercase text-text-tertiary">
+            출력 형식
+          </div>
+          <div className="system-xs-medium text-text-primary mt-1">
+            {data.outputFormat}
+          </div>
         </div>
       )}
     </div>

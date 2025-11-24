@@ -23,6 +23,7 @@ const iconComponents: Record<string, React.LazyExoticComponent<FC<React.SVGProps
   'tavily-search': lazy(() => import('../icons/Search')),
   mcp: lazy(() => import('../icons/Mcp')),
   slack: lazy(() => import('../icons/Slack')),
+  http: lazy(() => import('../icons/Globe')),
 };
 
 // 사이즈 매핑

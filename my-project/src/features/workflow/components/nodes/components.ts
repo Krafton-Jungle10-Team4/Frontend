@@ -16,6 +16,7 @@ import AssignerNode from './assigner/node';
 import TavilySearchNode from './tavily-search/node';
 import { ImportedWorkflowNode } from './imported-workflow';
 import { SlackNode } from './slack';
+import { HttpNode } from './http';
 
 // Panel 컴포넌트 (설정 UI)
 import { StartPanel } from './start/panel';
@@ -32,6 +33,7 @@ import { AssignerPanel } from './assigner/panel';
 import { TavilySearchPanel } from './tavily-search/panel';
 import { ImportedWorkflowPanel } from './imported-workflow';
 import { SlackPanel } from './slack';
+import { HttpPanel } from './http';
 
 /**
  * 노드 타입 → 캔버스 컴포넌트 매핑
@@ -52,7 +54,7 @@ export const NodeComponentMap: Record<BlockEnum, ComponentType<any>> = {
   [BlockEnum.TavilySearch]: TavilySearchNode,
   [BlockEnum.ImportedWorkflow]: ImportedWorkflowNode,
   [BlockEnum.Slack]: SlackNode,
-  [BlockEnum.Http]: (() => null) as any,
+  [BlockEnum.Http]: HttpNode,
   [BlockEnum.Code]: (() => null) as any,
   [BlockEnum.KnowledgeBase]: (() => null) as any,
 };
@@ -75,4 +77,5 @@ export const PanelComponentMap: Partial<Record<BlockEnum, ComponentType<any>>> =
   [BlockEnum.TavilySearch]: TavilySearchPanel,
   [BlockEnum.ImportedWorkflow]: ImportedWorkflowPanel,
   [BlockEnum.Slack]: SlackPanel,
+  [BlockEnum.Http]: HttpPanel,
 };

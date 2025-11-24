@@ -45,7 +45,7 @@ export function SlackCallbackPage() {
 
           // 백엔드 OAuth 콜백 엔드포인트로 브라우저를 직접 리다이렉트
           // 환경변수에서 백엔드 URL을 가져오거나, 로컬 개발 환경에서는 localhost:8001 사용
-          // 프로덕션: VITE_API_URL이 AWS Secrets Manager에서 주입됨 (예: https://api.snapagent.shop)
+          // 프로덕션: VITE_API_URL이 AWS Secrets Manager에서 주입됨 (예: https://api.snapagent.store)
           // 로컬: VITE_API_URL이 없으면 http://localhost:8001 사용
           const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
           window.location.href = `${backendUrl}/api/v1/slack/oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;

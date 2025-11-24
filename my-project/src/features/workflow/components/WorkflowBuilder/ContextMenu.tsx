@@ -24,6 +24,7 @@ const ICON_MAP: Record<string, string> = {
   message: '💬', // Answer 노드용
   template: '📝', // Template Transform 노드용
   search: '🔍', // Tavily Search 노드용
+  globe: '🌐', // HTTP 노드용
   [IF_ELSE_ICON]: '🔀', // IF-ELSE 노드용
   [VARIABLE_ASSIGNER_ICON]: '🧮',
   [ASSIGNER_ICON]: '⚙️', // Assigner 노드용
@@ -43,6 +44,7 @@ const FALLBACK_NODE_TYPES: NodeTypeResponse[] = [
   cloneAnswerNodeType(),
   { type: 'template-transform', label: 'Template Transform', icon: 'template', max_instances: -1, configurable: true },
   { type: 'tavily-search', label: 'Tavily Search', icon: 'search', max_instances: -1, configurable: true },
+  { type: 'http', label: 'HTTP Request', icon: 'globe', max_instances: -1, configurable: true },
   cloneIfElseNodeType(),
   cloneVariableAssignerNodeType(),
   cloneAssignerNodeType(),

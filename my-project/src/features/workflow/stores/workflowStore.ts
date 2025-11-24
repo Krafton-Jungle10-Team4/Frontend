@@ -703,6 +703,118 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
       ports = generateQuestionClassifierPortSchema(classes, vision);
     }
 
+    // 각 노드 타입별 필수 필드 보존을 위한 데이터 준비
+    let nodeSpecificData: Record<string, any> = {};
+
+    // Start 노드: ports와 port_bindings를 함께 보존
+    if (nodeType === BlockEnum.Start) {
+      console.log('[normalizeWorkflowGraph] START node - BEFORE processing:', {
+        'node.data.ports': node.data.ports,
+        'node.data.port_bindings': node.data.port_bindings,
+        'ports variable (from cloneNodePortSchema)': ports,
+        'ports output count': node.data.ports?.outputs?.length || 0,
+        'port_bindings keys': Object.keys(node.data.port_bindings || {})
+      });
+
+      nodeSpecificData = {
+        // ports를 명시적으로 포함하여 사용자가 추가한 포트 보존
+        ports: node.data.ports,
+        port_bindings: node.data.port_bindings || {},
+        title: node.data.title,
+        desc: node.data.desc,
+      };
+
+      console.log('[normalizeWorkflowGraph] START node - AFTER processing:', {
+        'nodeSpecificData.ports': nodeSpecificData.ports,
+        'nodeSpecificData.port_bindings': nodeSpecificData.port_bindings,
+        'nodeSpecificData ports output count': nodeSpecificData.ports?.outputs?.length || 0,
+        'nodeSpecificData port_bindings keys': Object.keys(nodeSpecificData.port_bindings || {})
+      });
+    }
+
+    // LLM 노드: AI 모델 및 프롬프트 설정 보존
+    if (nodeType === BlockEnum.LLM) {
+      nodeSpecificData = {
+        provider: (node.data as any).provider,
+        model: (node.data as any).model,
+        prompt: (node.data as any).prompt,
+        temperature: (node.data as any).temperature,
+        maxTokens: (node.data as any).maxTokens,
+      };
+    }
+
+    // Knowledge Retrieval 노드: 데이터셋 및 검색 설정 보존
+    if (nodeType === BlockEnum.KnowledgeRetrieval) {
+      nodeSpecificData = {
+        dataset: (node.data as any).dataset,
+        retrievalMode: (node.data as any).retrievalMode,
+        topK: (node.data as any).topK,
+        documentIds: (node.data as any).documentIds || [],
+      };
+    }
+
+    // MCP 노드: 제공자 및 액션 설정 보존
+    if (nodeType === BlockEnum.MCP) {
+      nodeSpecificData = {
+        provider_id: (node.data as any).provider_id,
+        action: (node.data as any).action,
+        parameters: (node.data as any).parameters || {},
+      };
+    }
+
+    // HTTP 노드: HTTP 요청 설정 보존
+    if (nodeType === BlockEnum.Http) {
+      nodeSpecificData = {
+        url: (node.data as any).url || '',
+        method: (node.data as any).method || 'GET',
+        headers: (node.data as any).headers || [],
+        query_params: (node.data as any).query_params || [],
+        body: (node.data as any).body || '',
+        timeout: (node.data as any).timeout ?? 30,
+      };
+    }
+
+    // Tavily Search 노드: 검색 설정 보존
+    if (nodeType === BlockEnum.TavilySearch) {
+      nodeSpecificData = {
+        search_depth: (node.data as any).search_depth || 'basic',
+        topic: (node.data as any).topic || 'general',
+        max_results: (node.data as any).max_results || 5,
+        include_domains: (node.data as any).include_domains || [],
+        exclude_domains: (node.data as any).exclude_domains || [],
+        time_range: (node.data as any).time_range || null,
+        start_date: (node.data as any).start_date || null,
+        end_date: (node.data as any).end_date || null,
+        include_answer: (node.data as any).include_answer || false,
+        include_raw_content: (node.data as any).include_raw_content || false,
+      };
+    }
+
+    // Answer 노드: 템플릿 및 설명 보존
+    if (nodeType === BlockEnum.Answer) {
+      nodeSpecificData = {
+        template: (node.data as any).template || '',
+        description: (node.data as any).description || '',
+      };
+    }
+
+    // Slack 노드: Slack 설정 보존
+    if (nodeType === BlockEnum.Slack) {
+      nodeSpecificData = {
+        channel: (node.data as any).channel || '',
+        use_blocks: (node.data as any).use_blocks || false,
+        integration_id: (node.data as any).integration_id || undefined,
+      };
+    }
+
+    // Template Transform 노드: 템플릿 및 변수 보존
+    if (nodeType === BlockEnum.TemplateTransform) {
+      nodeSpecificData = {
+        template: (node.data as any).template || '',
+        variables: (node.data as any).variables || {},
+      };
+    }
+
     const normalizedMappings = normalizeVariableMappingsForNode(
       nodeType,
       (assignerData?.variable_mappings ??
@@ -716,7 +828,9 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
       data: {
         ...node.data,
         ...(assignerData || {}),
-        ports,
+        ...nodeSpecificData,  // 노드별 특수 필드 명시적 보존 (Start 노드의 경우 ports 포함)
+        // nodeSpecificData에 ports가 없는 경우에만 기본 ports 사용
+        ...(nodeSpecificData.ports ? {} : { ports }),
         variable_mappings: normalizedMappings,
       },
     };
@@ -726,6 +840,16 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     }
     if (normalizedClassifierClasses) {
       nextData.data.classes = normalizedClassifierClasses;
+    }
+
+    if (nodeType === BlockEnum.Start) {
+      console.log('[normalizeWorkflowGraph] START node - FINAL result:', {
+        'nextData.data.ports': nextData.data.ports,
+        'nextData.data.port_bindings': nextData.data.port_bindings,
+        'final ports output count': nextData.data.ports?.outputs?.length || 0,
+        'final port_bindings keys': Object.keys(nextData.data.port_bindings || {}),
+        'final port_bindings values': nextData.data.port_bindings
+      });
     }
 
     return nextData;
@@ -1298,13 +1422,50 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         conversationVariables,
       } = get();
       
-      // DEBUG: Slack 노드 데이터 확인
+      // DEBUG: 노드 데이터 확인 (normalize 전)
       const slackNode = nodes.find(n => n.data?.type === 'slack');
       if (slackNode) {
         console.log('[workflowStore] Slack node before normalize:', {
           id: slackNode.id,
           dataKeys: Object.keys(slackNode.data || {}),
           data: slackNode.data
+        });
+      }
+
+      const startNode = nodes.find(n => n.data?.type === 'start');
+      if (startNode) {
+        console.log('[DEBUG] START node before normalize:', {
+          id: startNode.id,
+          ports: startNode.data.ports,
+          port_bindings: startNode.data.port_bindings,
+          dataKeys: Object.keys(startNode.data || {}),
+          fullData: startNode.data
+        });
+      }
+
+      const httpNode = nodes.find(n => n.data?.type === 'http');
+      if (httpNode) {
+        console.log('[DEBUG] HTTP node before normalize:', {
+          id: httpNode.id,
+          url: httpNode.data.url,
+          method: httpNode.data.method,
+          headers: httpNode.data.headers,
+          query_params: httpNode.data.query_params,
+          timeout: httpNode.data.timeout,
+          body: httpNode.data.body,
+          dataKeys: Object.keys(httpNode.data || {}),
+          fullData: httpNode.data
+        });
+      }
+
+      const templateNode = nodes.find(n => n.data?.type === 'template-transform');
+      if (templateNode) {
+        console.log('[DEBUG] Template Transform node before normalize:', {
+          id: templateNode.id,
+          template: templateNode.data.template,
+          variables: templateNode.data.variables,
+          dataKeys: Object.keys(templateNode.data || {}),
+          fullData: templateNode.data
         });
       }
 
@@ -1332,13 +1493,50 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
       const normalizedGraph = normalizeWorkflowGraph(nodes, edges);
       
-      // DEBUG: Slack 노드 데이터 확인 (normalize 후)
+      // DEBUG: 노드 데이터 확인 (normalize 후)
       const normalizedSlackNode = normalizedGraph.nodes.find(n => n.data?.type === 'slack');
       if (normalizedSlackNode) {
         console.log('[workflowStore] Slack node after normalize:', {
           id: normalizedSlackNode.id,
           dataKeys: Object.keys(normalizedSlackNode.data || {}),
           data: normalizedSlackNode.data
+        });
+      }
+
+      const normalizedStartNode = normalizedGraph.nodes.find(n => n.data?.type === 'start');
+      if (normalizedStartNode) {
+        console.log('[DEBUG] START node after normalize:', {
+          id: normalizedStartNode.id,
+          ports: normalizedStartNode.data.ports,
+          port_bindings: normalizedStartNode.data.port_bindings,
+          dataKeys: Object.keys(normalizedStartNode.data || {}),
+          fullData: normalizedStartNode.data
+        });
+      }
+
+      const normalizedHttpNode = normalizedGraph.nodes.find(n => n.data?.type === 'http');
+      if (normalizedHttpNode) {
+        console.log('[DEBUG] HTTP node after normalize:', {
+          id: normalizedHttpNode.id,
+          url: normalizedHttpNode.data.url,
+          method: normalizedHttpNode.data.method,
+          headers: normalizedHttpNode.data.headers,
+          query_params: normalizedHttpNode.data.query_params,
+          timeout: normalizedHttpNode.data.timeout,
+          body: normalizedHttpNode.data.body,
+          dataKeys: Object.keys(normalizedHttpNode.data || {}),
+          fullData: normalizedHttpNode.data
+        });
+      }
+
+      const normalizedTemplateNode = normalizedGraph.nodes.find(n => n.data?.type === 'template-transform');
+      if (normalizedTemplateNode) {
+        console.log('[DEBUG] Template Transform node after normalize:', {
+          id: normalizedTemplateNode.id,
+          template: normalizedTemplateNode.data.template,
+          variables: normalizedTemplateNode.data.variables,
+          dataKeys: Object.keys(normalizedTemplateNode.data || {}),
+          fullData: normalizedTemplateNode.data
         });
       }
       

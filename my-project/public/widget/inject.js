@@ -5,7 +5,7 @@
  * <script
  *   src="https://your-domain.com/widget/inject.js"
  *   data-widget-key="wk_xxx"
- *   data-api-base="https://api.snapagent.shop"
+ *   data-api-base="https://api.snapagent.store"
  * ></script>
  */
 (function() {
@@ -413,7 +413,7 @@
 
     if (!apiBaseUrl) {
       console.error('[RAG Widget] Missing data-api-base attribute');
-      console.error('[RAG Widget] Usage: <script src="..." data-widget-key="wk_xxx" data-api-base="https://api.snapagent.shop">');
+      console.error('[RAG Widget] Usage: <script src="..." data-widget-key="wk_xxx" data-api-base="https://api.snapagent.store">');
       return;
     }
 

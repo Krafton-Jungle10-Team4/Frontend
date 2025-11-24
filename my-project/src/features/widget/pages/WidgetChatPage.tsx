@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { Loader2, AlertCircle, Send } from 'lucide-react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Loader2, AlertCircle, Send, ShoppingBag, Maximize2, Bot } from 'lucide-react';
 import { Alert, AlertDescription } from '@shared/components/alert';
 import { widgetApi } from '../api/widgetApi';
 import { API_BASE_URL } from '@shared/constants/apiEndpoints';
@@ -26,6 +26,8 @@ import type { Source } from '@/shared/types/api.types';
  */
 export function WidgetChatPage() {
   const { widgetKey } = useParams<{ widgetKey: string }>();
+  const [searchParams] = useSearchParams();
+  const isPreviewMode = searchParams.get('preview') === 'true';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [config, setConfig] = useState<WidgetConfigResponse | null>(null);
@@ -33,6 +35,7 @@ export function WidgetChatPage() {
   const [messages, setMessages] = useState<WidgetMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chat' | 'notice'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingBufferRef = useRef('');
@@ -129,9 +132,39 @@ export function WidgetChatPage() {
    *
    * 보안: origin 검증을 통해 신뢰할 수 있는 부모에서 온 메시지만 처리
    */
-  const handleParentMessage = useCallback((event: MessageEvent<WidgetSessionMessage>) => {
+  const handleParentMessage = useCallback((event: MessageEvent<any>) => {
+    console.log('[WidgetChatPage] Received postMessage:', {
+      type: event.data?.type,
+      origin: event.origin,
+      allowedOrigin: allowedOrigin,
+      referrer: document.referrer
+    });
+
+    // Preview 모드: UPDATE_WIDGET_CONFIG 메시지 처리
+    if (isPreviewMode && event.data?.type === 'UPDATE_WIDGET_CONFIG') {
+      const newConfig = event.data.config;
+      console.log('[WidgetChatPage] Preview config updated:', newConfig);
+
+      // Config 업데이트
+      setConfig((prev) => ({
+        ...prev!,
+        config: {
+          ...prev!.config,
+          ...newConfig,
+        },
+      }));
+
+      // 테마 적용
+      applyTheme(newConfig);
+      return;
+    }
+
     // Origin 검증: 부모 도메인이 확인된 경우에만 체크
-    if (allowedOrigin && event.origin !== allowedOrigin) {
+    // 개발 모드: localhost origins는 항상 허용
+    const isLocalhost = event.origin.includes('localhost') || event.origin.includes('127.0.0.1');
+    const shouldValidateOrigin = allowedOrigin && !isLocalhost;
+
+    if (shouldValidateOrigin && event.origin !== allowedOrigin) {
       console.warn(
         '[WidgetChatPage] Rejected message from untrusted origin:',
         event.origin,
@@ -143,6 +176,7 @@ export function WidgetChatPage() {
 
     // 메시지 타입 검증
     if (event.data?.type !== 'WIDGET_SESSION') {
+      console.log('[WidgetChatPage] Ignoring non-WIDGET_SESSION message:', event.data?.type);
       return;
     }
 
@@ -181,6 +215,40 @@ export function WidgetChatPage() {
 
     console.log('[WidgetChatPage] Session received and validated from parent');
   }, [widgetKey, allowedOrigin]);
+
+  /**
+   * Preview 모드에서 초기 config 로드
+   */
+  useEffect(() => {
+    if (isPreviewMode && widgetKey) {
+      // Preview 모드에서는 API로 기본 config 로드
+      widgetApi.getConfig(widgetKey).then((configData) => {
+        setConfig(configData);
+        applyTheme(configData.config);
+        setSessionReady(true);
+        setLoading(false);
+
+        // Welcome 메시지 추가
+        if (configData.config.welcome_message) {
+          setMessages([
+            {
+              id: 'welcome',
+              role: 'assistant',
+              content: configData.config.welcome_message,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+        }
+
+        // 부모에게 초기화 완료 알림
+        window.parent.postMessage({ type: 'PREVIEW_READY' }, '*');
+      }).catch((err) => {
+        console.error('[WidgetChatPage] Failed to load config:', err);
+        setError('설정을 불러올 수 없습니다');
+        setLoading(false);
+      });
+    }
+  }, [isPreviewMode, widgetKey]);
 
   /**
    * postMessage 리스너 등록 및 정리
@@ -347,6 +415,29 @@ export function WidgetChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // 🔧 Hook을 early return 전에 호출 (React Hooks 규칙)
+  const primaryColor = config?.config.primary_color || '#0066FF';
+  const position = config?.config.position || 'bottom-right';
+
+  // 위치에 따른 클래스 계산
+  const containerClasses = useMemo(() => {
+    const baseClasses = 'flex flex-col bg-gray-50';
+
+    if (!isPreviewMode) {
+      return `${baseClasses} h-screen`;
+    }
+
+    const previewBaseClasses = `${baseClasses} fixed w-[400px] h-[600px] shadow-2xl rounded-lg overflow-hidden`;
+    const positionMap = {
+      'bottom-right': 'bottom-4 right-4',
+      'bottom-left': 'bottom-4 left-4',
+      'top-right': 'top-4 right-4',
+      'top-left': 'top-4 left-4',
+    };
+
+    return `${previewBaseClasses} ${positionMap[position as keyof typeof positionMap] || positionMap['bottom-right']}`;
+  }, [isPreviewMode, position]);
+
   if (loading) {
     return (
       <div
@@ -372,29 +463,66 @@ export function WidgetChatPage() {
     );
   }
 
-  const primaryColor = config?.config.primary_color || '#0066FF';
-
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className={containerClasses}>
       <header
-        className="px-4 py-3 border-b text-white shadow-sm"
+        className="px-4 py-4 text-white shadow-sm"
         style={{ background: primaryColor }}
         role="banner"
         aria-label="서비스 헤더"
       >
-        <div className="flex items-center gap-3">
-          {config?.config.avatar_url && (
-            <img
-              src={config.config.avatar_url}
-              alt={`${config?.config.bot_name || '서비스'} 아바타`}
-              className="w-8 h-8 rounded-full"
-            />
-          )}
-          <h1 className="font-semibold text-lg">
-            {config?.config.bot_name || '서비스'}
-          </h1>
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h1 className="font-bold text-lg leading-tight">
+                {config?.config.bot_name || '서비스'}
+              </h1>
+              <p className="text-sm opacity-90 mt-0.5">무엇을 물어보세요!</p>
+            </div>
+          </div>
+          <button
+            className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+            aria-label="전체화면"
+          >
+            <Maximize2 className="w-5 h-5" />
+          </button>
         </div>
       </header>
+
+      {/* 탭 네비게이션 */}
+      <div className="bg-white border-b">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              activeTab === 'chat'
+                ? 'text-gray-900 border-b-2'
+                : 'text-gray-500'
+            }`}
+            style={{
+              borderColor: activeTab === 'chat' ? primaryColor : 'transparent',
+            }}
+          >
+            문의해주세요
+          </button>
+          <button
+            onClick={() => setActiveTab('notice')}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              activeTab === 'notice'
+                ? 'text-gray-900 border-b-2'
+                : 'text-gray-500'
+            }`}
+            style={{
+              borderColor: activeTab === 'notice' ? primaryColor : 'transparent',
+            }}
+          >
+            공지사항 내역
+          </button>
+        </div>
+      </div>
 
       <main
         className="flex-1 overflow-y-auto p-4 space-y-4"
@@ -402,7 +530,20 @@ export function WidgetChatPage() {
         aria-live="polite"
         aria-label="채팅 메시지"
       >
-        {messages.map((msg) => (
+        {activeTab === 'notice' ? (
+          <div className="flex flex-col items-center justify-center h-full text-center p-6">
+            <Bot className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-sm">공지사항이 없습니다</p>
+          </div>
+        ) : messages.length === 1 && messages[0].id === 'welcome' ? (
+          <div className="flex flex-col items-center justify-center h-full text-center p-6">
+            <Bot className="w-20 h-20 text-gray-300 mb-4" />
+            <p className="text-gray-600 whitespace-pre-wrap">
+              {messages[0].content}
+            </p>
+          </div>
+        ) : (
+          messages.map((msg) => (
           <article
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -447,8 +588,9 @@ export function WidgetChatPage() {
               </p>
             </div>
           </article>
-        ))}
-        {config?.config.show_typing_indicator && sending && (
+          ))
+        )}
+        {config?.config.show_typing_indicator && sending && activeTab === 'chat' && (
           <div className="flex justify-start" role="status" aria-live="polite">
             <div className="bg-white rounded-lg p-3 shadow-sm border">
               <p className="text-sm text-gray-600">입력 중...</p>
@@ -458,36 +600,46 @@ export function WidgetChatPage() {
         <div ref={messagesEndRef} />
       </main>
 
-      <footer className="p-4 border-t bg-white">
-        <form onSubmit={sendMessage} className="flex gap-2" aria-label="메시지 입력 폼">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50"
-            placeholder={
-              config?.config.placeholder_text || '메시지를 입력하세요...'
-            }
-            disabled={sending}
-            aria-label="메시지 입력"
-            id="chat-input"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || sending}
-            className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-            style={{ background: primaryColor }}
-            aria-label={sending ? '메시지 전송 중' : '메시지 전송'}
-          >
-            {sending ? (
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-            ) : (
-              <Send className="h-5 w-5" aria-hidden="true" />
-            )}
-          </button>
-        </form>
-      </footer>
+      {activeTab === 'chat' && (
+        <footer className="p-4 border-t bg-white">
+          <div className="mb-2">
+            <label htmlFor="chat-input" className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <span className="text-gray-900">질문입력</span>
+            </label>
+          </div>
+          <form onSubmit={sendMessage} className="flex gap-2" aria-label="메시지 입력 폼">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 bg-gray-50"
+              placeholder={
+                config?.config.placeholder_text || '메시지를 입력하세요...'
+              }
+              disabled={sending}
+              aria-label="메시지 입력"
+              id="chat-input"
+              style={{
+                '--tw-ring-color': primaryColor,
+              } as React.CSSProperties}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || sending}
+              className="p-3 rounded-lg text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90"
+              style={{ background: primaryColor }}
+              aria-label={sending ? '메시지 전송 중' : '메시지 전송'}
+            >
+              {sending ? (
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+              ) : (
+                <Send className="h-5 w-5" aria-hidden="true" />
+              )}
+            </button>
+          </form>
+        </footer>
+      )}
     </div>
   );
 }

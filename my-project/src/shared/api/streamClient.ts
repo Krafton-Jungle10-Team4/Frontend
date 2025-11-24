@@ -28,7 +28,7 @@ interface StreamRequestOptions {
  *
  * @example
  * await streamRequest({
- *   url: 'https://api.snapagent.shop/api/v1/chat/stream',
+ *   url: 'https://api.snapagent.store/api/v1/chat/stream',
  *   body: { message: '안녕하세요', bot_id: 'bot_123' },
  *   callbacks: {
  *     onChunk: (chunk) => console.log(chunk),
