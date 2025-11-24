@@ -43,13 +43,13 @@ export function WorkspaceLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f7f8fa]">
+    <div className="flex h-screen bg-[#f1f2f5]">
       <WorkspaceSidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}
         isOpen={isSidebarOpen}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-auto">
         <Header
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -60,7 +60,7 @@ export function WorkspaceLayout() {
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isSidebarOpen={isSidebarOpen}
         />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
           <Outlet />
         </div>
       </div>
