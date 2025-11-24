@@ -248,10 +248,7 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
               <Button
                 type="submit"
                 disabled={isPublishing}
-                className="!text-white hover:scale-[1.05] transition-transform"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #000000, #3735c3)',
-                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.05] transition-transform"
               >
                 {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isPublishing ? '커밋 중...' : '버전 커밋'}
