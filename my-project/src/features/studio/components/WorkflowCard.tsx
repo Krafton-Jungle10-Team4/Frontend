@@ -87,7 +87,6 @@ export function WorkflowCard({
   const categoryLabel = categoryPreset.label || '기타';
   const CategoryIcon = getCategoryIcon(primaryTag);
   const secondaryTags = workflow.tags?.slice(1) ?? [];
-  const cardAccent = `radial-gradient(circle at 20% 18%, ${withAlpha(categoryPreset.primary, 0.14)}, transparent 36%), radial-gradient(circle at 88% 10%, ${withAlpha(categoryPreset.secondary, 0.12)}, transparent 40%)`;
 
   // keep unused handler prop for future actions
   void onDeploy;
@@ -138,18 +137,12 @@ export function WorkflowCard({
   return (
     <div
       className={cn(
-        'relative bg-white/80 rounded-2xl overflow-hidden backdrop-blur-md',
-        'shadow-[0_15px_50px_rgba(55,53,195,0.08)] hover:shadow-[0_22px_64px_rgba(55,53,195,0.18)] hover:-translate-y-2 transition-all duration-300',
-        'cursor-pointer group flex flex-col border border-white/70'
+        'relative bg-white rounded-2xl overflow-hidden',
+        'shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_36px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300',
+        'cursor-pointer group flex flex-col border border-gray-100'
       )}
       onClick={handleCardClick}
     >
-      <div
-        className="absolute inset-0 opacity-90"
-        style={{ backgroundImage: cardAccent }}
-        aria-hidden
-      />
-
       <div className="relative flex flex-col h-full">
         <div className="flex flex-col gap-4 px-5 pt-5 pb-3">
           <div className="flex items-start justify-between gap-3">
