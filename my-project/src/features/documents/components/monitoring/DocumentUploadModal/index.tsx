@@ -16,11 +16,13 @@ import { toast } from 'sonner';
 interface DocumentUploadModalProps {
   open: boolean;
   onClose: () => void;
+  onUploadComplete?: () => void;
 }
 
 export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   open,
   onClose,
+  onUploadComplete,
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -38,9 +40,10 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
       // Upload files sequentially
       for (const file of files) {
         await uploadDocumentAsync(file);
-        toast.success(`${file.name} 업로드가 시작되었습니다`);
+        toast.success(`${file.name} 업로드가 완료되었습니다.`);
       }
 
+      onUploadComplete?.();
       onClose();
       setFiles([]);
     } catch (error) {
