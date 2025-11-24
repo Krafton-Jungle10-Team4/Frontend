@@ -96,6 +96,9 @@ export function WorkflowCard({
   };
 
   const isDeployed = workflow.deploymentState === 'deployed';
+  const isMarketplacePublished = workflow.marketplaceState === 'published';
+  const hasPublishedHistory = Boolean(workflow.lastPublishedAt);
+  const showMarketplaceBadge = isMarketplacePublished || hasPublishedHistory;
   const createdTime = getCreatedTimestamp(workflow);
 
   return (
@@ -107,6 +110,7 @@ export function WorkflowCard({
       )}
       onClick={handleCardClick}
     >
+
       <div className="flex justify-between items-start mb-2 gap-2">
         <div className="flex items-start gap-3 min-w-0">
           {(() => {
@@ -204,8 +208,37 @@ export function WorkflowCard({
         {workflow.description || '설명이 없습니다.'}
       </p>
 
+      <div className="flex justify-end items-center mb-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onVersionHistory();
+          }}
+          className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors text-gray-600 bg-gray-50 hover:bg-gray-100"
+        >
+          {formatVersionLabel(workflow.latestVersion)}
+        </button>
+      </div>
+
       <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {showMarketplaceBadge && (
+            <div
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold shadow-sm border',
+                isMarketplacePublished
+                  ? 'border-indigo-100 bg-indigo-50 text-indigo-700'
+                  : 'border-gray-200 bg-gray-100 text-gray-400'
+              )}
+            >
+              <Store
+                className={cn(
+                  'h-3.5 w-3.5',
+                  isMarketplacePublished ? 'text-indigo-600' : 'text-gray-400'
+                )}
+              />
+            </div>
+          )}
           {isDeployed ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50">
               <span className="relative flex h-1.5 w-1.5">
@@ -220,21 +253,6 @@ export function WorkflowCard({
               <RocketIcon className="h-3 w-3 text-gray-400" />
             </span>
           )}
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onVersionHistory();
-            }}
-            className={cn(
-              'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
-              isDeployed
-                ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
-                : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
-            )}
-          >
-            {formatVersionLabel(workflow.latestVersion)}
-          </button>
         </div>
 
         <div className="flex items-center gap-1">
@@ -244,7 +262,12 @@ export function WorkflowCard({
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="text-[10px] px-1.5 py-0.5 rounded cursor-pointer bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  className="text-[10px] px-1.5 py-0.5 rounded cursor-pointer hover:brightness-95"
+                  style={{
+                    background: getWorkflowIconBackground([tag]),
+                    color: getWorkflowIconColor([tag]),
+                    borderColor: getWorkflowIconColor([tag]) + '33',
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditTags(workflow.id, workflow.tags || []);
@@ -256,7 +279,12 @@ export function WorkflowCard({
               {workflow.tags.length > 2 && (
                 <Badge
                   variant="secondary"
-                  className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700"
+                  className="text-[10px] px-1.5 py-0.5 rounded"
+                  style={{
+                    background: getWorkflowIconBackground(workflow.tags),
+                    color: getWorkflowIconColor(workflow.tags),
+                    borderColor: getWorkflowIconColor(workflow.tags) + '33',
+                  }}
                 >
                   +{workflow.tags.length - 2}
                 </Badge>

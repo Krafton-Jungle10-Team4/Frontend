@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/shared/components/badge';
-import { Download, Eye, Tag as TagIcon } from 'lucide-react';
-import type { MarketplaceItem } from '../api/marketplaceApi';
+import { cn } from '@/shared/components/utils';
+import { Download, Eye, Tag as TagIcon, Clock } from 'lucide-react';
+import {
+  getWorkflowIcon,
+  getWorkflowIconBackground,
+  getWorkflowIconColor,
+} from '@/features/studio/constants/tagIcons';
 import { MarketplaceItemDetailDialog } from './MarketplaceItemDetailDialog';
+import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
+import type { MarketplaceItem } from '../api/marketplaceApi';
 
 interface MarketplaceItemCardProps {
   item: MarketplaceItem;
@@ -11,6 +18,12 @@ interface MarketplaceItemCardProps {
 
 export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [itemData, setItemData] = useState<MarketplaceItem>(item);
+  const linkedWorkflow = useWorkflowStore((state) =>
+    item.workflow_version?.bot_id
+      ? state.workflows.find((w) => w.id === item.workflow_version?.bot_id)
+      : undefined
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -28,35 +41,92 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
     return num.toString();
   };
 
+  useEffect(() => {
+    setItemData(item);
+  }, [item]);
+
+  useEffect(() => {
+    if (!linkedWorkflow) return;
+
+    const next: Partial<MarketplaceItem> = {};
+
+    if (linkedWorkflow.name && linkedWorkflow.name !== itemData.display_name) {
+      next.display_name = linkedWorkflow.name;
+    }
+
+    if (linkedWorkflow.description && linkedWorkflow.description !== itemData.description) {
+      next.description = linkedWorkflow.description;
+    }
+
+    const workflowTags = linkedWorkflow.tags || [];
+    const hasWorkflowTags = workflowTags.length > 0;
+    const tagsMismatch =
+      hasWorkflowTags &&
+      JSON.stringify(workflowTags) !== JSON.stringify(itemData.tags || []);
+    if (tagsMismatch) {
+      next.tags = workflowTags;
+    }
+
+    if (Object.keys(next).length > 0) {
+      setItemData((prev) => ({ ...prev, ...next }));
+    }
+  }, [linkedWorkflow, itemData.display_name, itemData.description, itemData.tags, itemData.is_active, itemData.status]);
+
+  const handleCloseDetail = () => {
+    setShowDetailDialog(false);
+  };
+
   return (
     <>
       <div
-        className="relative bg-white/80 border border-white/70 rounded-2xl overflow-hidden shadow-[0_15px_50px_rgba(55,53,195,0.08)] hover:shadow-[0_20px_60px_rgba(55,53,195,0.16)] hover:-translate-y-2 transition-all duration-300 cursor-pointer group h-[200px] flex flex-col backdrop-blur-xl"
+        className={cn(
+          'group relative bg-white rounded-lg border border-gray-200 p-4',
+          'shadow-sm transition-all duration-200 cursor-pointer backdrop-blur',
+          'hover:shadow-md hover:-translate-y-1'
+        )}
         onClick={() => setShowDetailDialog(true)}
       >
-        {/* 상단 바 */}
-        <div
-          className="h-1.5 bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff]"
-        />
+        <div className="flex flex-col flex-1 pt-2">
+          <div className="flex justify-between items-start mb-2 gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              {(() => {
+                const IconComponent = getWorkflowIcon(itemData.tags);
+                const iconBg = getWorkflowIconBackground(itemData.tags);
+                const iconColor = getWorkflowIconColor(itemData.tags);
+                return (
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border"
+                    style={{
+                      background: iconBg,
+                      borderColor: iconColor + '30',
+                    }}
+                  >
+                    <IconComponent className="w-5 h-5" style={{ color: iconColor }} />
+                  </div>
+                );
+              })()}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-bold leading-tight text-gray-900 line-clamp-1">
+                  {itemData.display_name}
+                </h3>
+                <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
+                  <Clock className="h-3.5 w-3.5 text-gray-400" />
+                  <span> {formatDate(itemData.updated_at || itemData.published_at)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div className="px-5 py-4 flex flex-col flex-1">
-          {/* 봇 이름 */}
-          <h3 className="font-bold text-lg text-gray-900 line-clamp-1 mb-2">
-            {item.display_name}
-          </h3>
-
-          {/* 설명 */}
-          {item.description && (
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-              {item.description.replace(/\s*서비스\s*$/, '')}
+          {itemData.description && (
+            <p className="text-xs text-gray-600 line-clamp-2 mb-3 mt-1">
+              {itemData.description.replace(/\s*서비스\s*$/, '')}
             </p>
           )}
 
-          {/* 태그 */}
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {item.tags && item.tags.length > 0 ? (
+            {itemData.tags && itemData.tags.length > 0 ? (
               <>
-                {item.tags.slice(0, 3).map((tag) => (
+                {itemData.tags.slice(0, 3).map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
@@ -66,9 +136,9 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
                     {tag}
                   </Badge>
                 ))}
-                {item.tags.length > 3 && (
+                {itemData.tags.length > 3 && (
                   <Badge variant="secondary" className="text-[11px] px-2 py-0.5 h-5 rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700">
-                    +{item.tags.length - 3}
+                    +{itemData.tags.length - 3}
                   </Badge>
                 )}
               </>
@@ -80,52 +150,38 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
             )}
           </div>
 
-          {/* 게시자 및 통계 */}
-          <div className="flex items-center justify-between mt-auto">
-            {/* 게시자 */}
+          <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-xs text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <Download className="w-3.5 h-3.5 text-[#3735c3]" />
+                <span> {formatNumber(itemData.download_count)}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-[#3735c3]" />
+                <span> {formatNumber(itemData.view_count)}</span>
+              </div>
+            </div>
+
             <div className="text-xs text-gray-600 flex items-center gap-1">
-              {item.publisher?.username ? (
+              {itemData.publisher?.username ? (
                 <>
                   <span className="font-medium text-gray-800">작성자:</span>
-                  <span>{item.publisher.username}</span>
+                  <span>{itemData.publisher.username}</span>
                 </>
               ) : (
                 <span className="text-gray-400">작성자 정보 없음</span>
               )}
             </div>
-
-            {/* 통계 */}
-            <div className="flex items-center gap-3 text-xs text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <Download className="w-3.5 h-3.5 text-[#3735c3]" />
-                <span>{formatNumber(item.download_count)}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-[#3735c3]" />
-                <span>{formatNumber(item.view_count)}</span>
-              </div>
-            </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-[11px] text-gray-500">
-            <span>업데이트 {formatDate(item.updated_at || item.published_at)}</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDetailDialog(true);
-              }}
-              className="inline-flex items-center gap-1 rounded-full bg-[#3735c3]/10 px-3 py-1 text-xs font-semibold text-[#3735c3] transition hover:bg-[#3735c3]/15 hover:shadow-[0_10px_24px_rgba(55,53,195,0.18)]"
-            >
-              자세히 보기
-            </button>
-          </div>
         </div>
       </div>
 
       <MarketplaceItemDetailDialog
         open={showDetailDialog}
-        onClose={() => setShowDetailDialog(false)}
+        onClose={handleCloseDetail}
         itemId={item.id}
+        onLoaded={(latest) => setItemData(latest)}
       />
     </>
   );
