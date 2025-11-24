@@ -227,9 +227,33 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       const updatedWorkflow = normalizeWorkflow(updatedData);
 
       set((state) => {
+        const prev = state.workflows.find((workflow) => workflow.id === id);
+        const hasLatestVersion =
+          updatedData && Object.prototype.hasOwnProperty.call(updatedData, 'latestVersion');
+        const hasLatestVersionId =
+          updatedData && Object.prototype.hasOwnProperty.call(updatedData, 'latestVersionId');
+        const merged = prev
+          ? ({
+              ...prev,
+              ...updatedWorkflow,
+              latestVersion: hasLatestVersion
+                ? updatedWorkflow.latestVersion || prev.latestVersion
+                : prev.latestVersion,
+              latestVersionId: hasLatestVersionId
+                ? updatedWorkflow.latestVersionId ?? prev.latestVersionId
+                : prev.latestVersionId,
+              deploymentState: updatedWorkflow.deploymentState || prev.deploymentState,
+              tags: (updatedWorkflow.tags ?? prev.tags) || [],
+              updatedAt: updatedWorkflow.updatedAt || prev.updatedAt,
+              createdAt: updatedWorkflow.createdAt || prev.createdAt,
+              versions: prev.versions,
+              metrics: updatedWorkflow.metrics ?? prev.metrics,
+            } as Workflow)
+          : updatedWorkflow;
+
         // 워크플로우 업데이트
         const workflows = state.workflows.map((workflow) =>
-          workflow.id === id ? updatedWorkflow : workflow
+          workflow.id === id ? merged : workflow
         );
 
         // 현재 sortBy에 따라 정렬
