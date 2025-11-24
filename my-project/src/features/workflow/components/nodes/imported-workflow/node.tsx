@@ -3,9 +3,12 @@
  */
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { type NodeProps, useUpdateNodeInternals } from '@xyflow/react';
+import {
+  Handle,
+  Position,
+} from '@xyflow/react';
 import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import BlockIcon from '../_base/block-icon';
-import { NodeSourceHandle, NodeTargetHandle } from '../_base/node-handle';
 import { Button } from '@/shared/components/button';
 import { cn } from '@/shared/utils/cn';
 import type { ImportedWorkflowNodeData } from '../../../types/import-node.types';
@@ -14,7 +17,10 @@ import { ExpandedView } from './ExpandedView';
 import { StatusIndicator } from '../_base/StatusIndicator';
 import { IMPORTED_NODE_SIZE } from '../../../constants/templateDefaults';
 import { BlockEnum, NodeRunningStatus } from '@/shared/types/workflow.types';
-import { calculateTemplateGraphBounds, TEMPLATE_HEADER_OFFSET } from '../../../utils/templateBounds';
+import {
+  calculateTemplateGraphBounds,
+  TEMPLATE_HEADER_OFFSET,
+} from '../../../utils/templateBounds';
 import { isNodeInTemplate } from '../../../utils/templateImporter';
 import { useWorkflowStore } from '../../../stores/workflowStore';
 
@@ -40,7 +46,8 @@ const estimateNodeBounds = (node: any) => {
 const rectsOverlap = (
   a: { left: number; right: number; top: number; bottom: number },
   b: { left: number; right: number; top: number; bottom: number }
-) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+) =>
+  a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
 export const ImportedWorkflowNode = memo(
   ({ id, data, selected, xPos, yPos }: NodeProps<ImportedWorkflowNodeData>) => {
@@ -66,20 +73,32 @@ export const ImportedWorkflowNode = memo(
     });
 
     // 중복 포트 제거 헬퍼 함수
-    const uniquePorts = useCallback((ports: any[], type: 'input' | 'output') => {
-      console.log(`[ImportedWorkflowNode] Before uniquePorts (${type}):`, ports);
-      const seen = new Set<string>();
-      const result = ports.filter(port => {
-        if (seen.has(port.name)) {
-          console.log(`[ImportedWorkflowNode] Duplicate ${type} port detected:`, port.name);
-          return false;
-        }
-        seen.add(port.name);
-        return true;
-      });
-      console.log(`[ImportedWorkflowNode] After uniquePorts (${type}):`, result);
-      return result;
-    }, []);
+    const uniquePorts = useCallback(
+      (ports: any[], type: 'input' | 'output') => {
+        console.log(
+          `[ImportedWorkflowNode] Before uniquePorts (${type}):`,
+          ports
+        );
+        const seen = new Set<string>();
+        const result = ports.filter((port) => {
+          if (seen.has(port.name)) {
+            console.log(
+              `[ImportedWorkflowNode] Duplicate ${type} port detected:`,
+              port.name
+            );
+            return false;
+          }
+          seen.add(port.name);
+          return true;
+        });
+        console.log(
+          `[ImportedWorkflowNode] After uniquePorts (${type}):`,
+          result
+        );
+        return result;
+      },
+      []
+    );
 
     // BaseNode 패턴: 대표 포트 선택 (required 우선, 없으면 첫 번째)
     const pickPortName = useCallback((portList?: any[]) => {
@@ -91,13 +110,19 @@ export const ImportedWorkflowNode = memo(
     // 대표 입력/출력 포트 선택 (1개의 Handle만 렌더링하기 위함)
     const defaultInputHandleId = useMemo(() => {
       const portName = pickPortName(data.ports?.inputs);
-      console.log('[ImportedWorkflowNode] Selected input port:', portName || 'input');
+      console.log(
+        '[ImportedWorkflowNode] Selected input port:',
+        portName || 'input'
+      );
       return portName || 'input';
     }, [pickPortName, data.ports?.inputs]);
 
     const defaultOutputHandleId = useMemo(() => {
       const portName = pickPortName(data.ports?.outputs);
-      console.log('[ImportedWorkflowNode] Selected output port:', portName || 'output');
+      console.log(
+        '[ImportedWorkflowNode] Selected output port:',
+        portName || 'output'
+      );
       return portName || 'output';
     }, [pickPortName, data.ports?.outputs]);
 
@@ -152,7 +177,8 @@ export const ImportedWorkflowNode = memo(
       }
 
       // 확장: 영역 확장분을 계산하여 겹치는 노드를 밀어냄
-      const expandedHeight = size.minHeight ?? IMPORTED_NODE_SIZE.expanded.minHeight;
+      const expandedHeight =
+        size.minHeight ?? IMPORTED_NODE_SIZE.expanded.minHeight;
       const collapsedHeight = IMPORTED_NODE_SIZE.collapsed.minHeight;
 
       const collapsedBounds = {
@@ -258,31 +284,35 @@ export const ImportedWorkflowNode = memo(
         });
         updateNodeInternals(id);
       } else {
-        console.warn('[ImportedWorkflowNode] Skipping updateNodeInternals - invalid internal_graph:', {
-          nodeId: id,
-          isExpanded,
-          hasInternalGraph: !!data.internal_graph,
-          hasNodes: !!data.internal_graph?.nodes,
-          hasEdges: !!data.internal_graph?.edges,
-          isNodesArray: Array.isArray(data.internal_graph?.nodes),
-          isEdgesArray: Array.isArray(data.internal_graph?.edges),
-        });
+        console.warn(
+          '[ImportedWorkflowNode] Skipping updateNodeInternals - invalid internal_graph:',
+          {
+            nodeId: id,
+            isExpanded,
+            hasInternalGraph: !!data.internal_graph,
+            hasNodes: !!data.internal_graph?.nodes,
+            hasEdges: !!data.internal_graph?.edges,
+            isNodesArray: Array.isArray(data.internal_graph?.nodes),
+            isEdgesArray: Array.isArray(data.internal_graph?.edges),
+          }
+        );
       }
     }, [id, data.ports, isExpanded, updateNodeInternals, data.internal_graph]);
 
     // 실행 상태에 따른 테두리 색상 계산
-    const { showRunningBorder, showSuccessBorder, showFailedBorder } = useMemo(() => {
-      return {
-        showRunningBorder:
-          data._runningStatus === NodeRunningStatus.Running && !selected,
-        showSuccessBorder:
-          data._runningStatus === NodeRunningStatus.Succeeded && !selected,
-        showFailedBorder:
-          (data._runningStatus === NodeRunningStatus.Failed ||
-            data._runningStatus === NodeRunningStatus.Exception) &&
-          !selected,
-      };
-    }, [data._runningStatus, selected]);
+    const { showRunningBorder, showSuccessBorder, showFailedBorder } =
+      useMemo(() => {
+        return {
+          showRunningBorder:
+            data._runningStatus === NodeRunningStatus.Running && !selected,
+          showSuccessBorder:
+            data._runningStatus === NodeRunningStatus.Succeeded && !selected,
+          showFailedBorder:
+            (data._runningStatus === NodeRunningStatus.Failed ||
+              data._runningStatus === NodeRunningStatus.Exception) &&
+            !selected,
+        };
+      }, [data._runningStatus, selected]);
 
     return (
       <div
@@ -307,12 +337,18 @@ export const ImportedWorkflowNode = memo(
         }}
       >
         {/* Header */}
-        <div className={cn(
-          "flex items-center p-3 bg-muted/50 rounded-t-lg",
-          !isExpanded && "border-b"
-        )}>
+        <div
+          className={cn(
+            'flex items-center p-3 bg-muted/50 rounded-t-lg',
+            !isExpanded && 'border-b'
+          )}
+        >
           {/* Node Icon - 다른 노드들과 동일한 패턴 */}
-          <BlockIcon className="mr-2 shrink-0" type={BlockEnum.TemplateTransform} size="md" />
+          <BlockIcon
+            className="mr-2 shrink-0"
+            type={BlockEnum.TemplateTransform}
+            size="md"
+          />
 
           {/* Title and Version */}
           <div className="flex-1 min-w-0 mr-2">
@@ -348,20 +384,29 @@ export const ImportedWorkflowNode = memo(
         {/* Content */}
         <div className="p-3">
           {isExpanded ? (
-            <ExpandedView
-              nodeId={id}
-              internalGraph={data.internal_graph}
-            />
+            <ExpandedView nodeId={id} internalGraph={data.internal_graph} />
           ) : (
             <CollapsedView ports={data.ports} description={data.desc} />
           )}
         </div>
 
-        {/* Input Handle - BaseNode 패턴 */}
-        <NodeTargetHandle data={data} handleId={defaultInputHandleId} />
+        {/* Input Handle - BaseNode 패턴: 1개만 렌더링 */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id={defaultInputHandleId}
+          className="!bg-blue-500 !border-2 !border-white !w-3 !h-3"
+          style={{ top: '50%', transform: 'translateY(-50%)' }}
+        />
 
-        {/* Output Handle - BaseNode 패턴 */}
-        <NodeSourceHandle data={data} handleId={defaultOutputHandleId} />
+        {/* Output Handle - BaseNode 패턴: 1개만 렌더링 */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          id={defaultOutputHandleId}
+          className="!bg-green-500 !border-2 !border-white !w-3 !h-3"
+          style={{ top: '50%', transform: 'translateY(-50%)' }}
+        />
       </div>
     );
   }
