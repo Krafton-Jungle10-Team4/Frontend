@@ -62,6 +62,12 @@ const formatVersionLabel = (version?: string) => {
   return version.startsWith('v') ? version : `v${version}`;
 };
 
+const getCreatedTimestamp = (workflow: Workflow) =>
+  (workflow as any).createdAt ||
+  (workflow as any).created_at ||
+  (workflow as any).updated_at ||
+  workflow.updatedAt;
+
 export function WorkflowCard({
   workflow,
   onEdit,
@@ -90,6 +96,7 @@ export function WorkflowCard({
   };
 
   const isDeployed = workflow.deploymentState === 'deployed';
+  const createdTime = getCreatedTimestamp(workflow);
 
   return (
     <div
@@ -131,7 +138,7 @@ export function WorkflowCard({
               {workflow.name}
             </h3>
             <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
-              <span>{formatRelativeTime(workflow.updatedAt)}</span>
+              <span>{formatRelativeTime(createdTime)}</span>
             </div>
           </div>
         </div>

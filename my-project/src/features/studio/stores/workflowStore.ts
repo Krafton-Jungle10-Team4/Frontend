@@ -107,6 +107,20 @@ const mapStatsFromWorkflows = (workflows: Workflow[]): WorkflowStats => ({
   deployed: workflows.filter((w) => w.deploymentState === 'deployed').length,
 });
 
+const parseDate = (value: any): Date => {
+  if (!value) return new Date();
+
+  let dateString = typeof value === 'string' ? value : String(value);
+  if (dateString.endsWith('+00:00Z')) {
+    dateString = dateString.replace('+00:00Z', 'Z');
+  } else if (dateString.match(/[+-]\d{2}:\d{2}Z$/)) {
+    dateString = dateString.slice(0, -1);
+  }
+
+  const parsed = new Date(dateString);
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
 const normalizeWorkflow = (item: any): Workflow => ({
   id: item.id,
   name: item.name,
@@ -114,22 +128,22 @@ const normalizeWorkflow = (item: any): Workflow => ({
   category: (item.category as Workflow['category']) ?? 'workflow',
   status: mapWorkflowStatus(item.status),
   tags: item.tags ?? [],
-  latestVersion: item.latestVersion ?? 'v0.0',
-  latestVersionId: item.latestVersionId ?? undefined,
+  latestVersion: item.latestVersion ?? item.latest_version ?? 'v0.0',
+  latestVersionId: item.latestVersionId ?? item.latest_version_id ?? undefined,
   versions: [],
-  previousVersionCount: item.previousVersionCount ?? 0,
-  deploymentState: mapDeploymentState(item.deploymentState),
-  deploymentUrl: item.deploymentUrl ?? undefined,
-  lastDeployedAt: item.lastDeployedAt
-    ? new Date(item.lastDeployedAt)
+  previousVersionCount: item.previousVersionCount ?? item.previous_version_count ?? 0,
+  deploymentState: mapDeploymentState(item.deploymentState ?? item.deployment_state),
+  deploymentUrl: item.deploymentUrl ?? item.deployment_url ?? undefined,
+  lastDeployedAt: item.lastDeployedAt || item.last_deployed_at
+    ? parseDate(item.lastDeployedAt ?? item.last_deployed_at)
     : undefined,
-  marketplaceState: mapMarketplaceState(item.marketplaceState),
-  lastPublishedAt: item.lastPublishedAt
-    ? new Date(item.lastPublishedAt)
+  marketplaceState: mapMarketplaceState(item.marketplaceState ?? item.marketplace_state),
+  lastPublishedAt: item.lastPublishedAt || item.last_published_at
+    ? parseDate(item.lastPublishedAt ?? item.last_published_at)
     : undefined,
-  createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-  updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-  createdBy: item.createdBy?.toString() ?? '',
+  createdAt: parseDate(item.createdAt ?? item.created_at),
+  updatedAt: parseDate(item.updatedAt ?? item.updated_at),
+  createdBy: item.createdBy?.toString() ?? item.created_by?.toString() ?? '',
   metrics: undefined,
 });
 
