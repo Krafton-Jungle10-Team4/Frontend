@@ -9,10 +9,11 @@ import {
 } from '@/shared/components/dialog';
 import { Badge } from '@/shared/components/badge';
 import { Button } from '@/shared/components/button';
-import { Download, Eye, ThumbsUp, Calendar, User, Workflow } from 'lucide-react';
-import { getMarketplaceItem, type MarketplaceItem } from '../api/marketplaceApi';
+import { Download, Eye, ThumbsUp, Calendar, User, Workflow, Trash2 } from 'lucide-react';
+import { getMarketplaceItem, deleteMarketplaceItem, type MarketplaceItem } from '../api/marketplaceApi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/features/auth/stores/authStore';
 
 interface MarketplaceItemDetailDialogProps {
   open: boolean;
@@ -28,6 +29,11 @@ export function MarketplaceItemDetailDialog({
   const navigate = useNavigate();
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const currentUser = useAuthStore((state) => state.user);
+  
+  // 현재 사용자가 게시자인지 확인
+  const isOwner = item?.publisher?.user_id && currentUser?.uuid && item.publisher.user_id === currentUser.uuid;
 
   const handleViewAgent = () => {
     if (item?.workflow_version?.bot_id && item?.workflow_version?.id) {
@@ -56,6 +62,33 @@ export function MarketplaceItemDetailDialog({
     } catch (error) {
       console.error('워크플로우 가져오기 실패:', error);
       toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!item) return;
+
+    if (!confirm('정말로 이 마켓플레이스 아이템을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    const toastId = toast.loading('삭제 중...');
+
+    try {
+      await deleteMarketplaceItem(item.id);
+      toast.success('마켓플레이스 아이템이 삭제되었습니다.', { id: toastId });
+      onClose();
+      // 페이지 새로고침을 위해 window.location.reload() 대신 부모 컴포넌트에서 새로고침하도록 함
+      window.location.reload();
+    } catch (error: any) {
+      console.error('삭제 실패:', error);
+      toast.error(
+        error.response?.data?.detail || '삭제에 실패했습니다.',
+        { id: toastId }
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -110,7 +143,7 @@ export function MarketplaceItemDetailDialog({
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* 서비스 보기 버튼 */}
+              {/* 서비스 보기 버튼 및 삭제 버튼 */}
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
@@ -128,6 +161,22 @@ export function MarketplaceItemDetailDialog({
                 </Button>
                 {item.category && (
                   <Badge variant="outline">{item.category}</Badge>
+                )}
+                {isOwner && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
+                    disabled={isDeleting}
+                    className="flex items-center gap-2 ml-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>{isDeleting ? '삭제 중...' : '삭제'}</span>
+                  </Button>
                 )}
               </div>
 

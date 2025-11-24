@@ -15,6 +15,7 @@ export enum UserRole {
  */
 export interface User {
   id: number;
+  uuid: string;
   email: string;
   name: string | null;
   profile_image: string | null;
@@ -28,6 +29,7 @@ export interface User {
 export const mapUserResponseToUser = (response: UserResponse): User => {
   return {
     id: response.id,
+    uuid: response.uuid,
     email: response.email,
     name: response.name,
     profile_image: response.profile_image,

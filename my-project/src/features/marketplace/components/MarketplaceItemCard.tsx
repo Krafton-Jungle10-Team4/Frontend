@@ -84,9 +84,14 @@ export function MarketplaceItemCard({ item }: MarketplaceItemCardProps) {
           {/* 게시자 및 통계 */}
           <div className="flex items-center justify-between mt-auto">
             {/* 게시자 */}
-            <div className="text-xs text-muted-foreground">
-              {item.publisher?.username && (
-                <span>{item.publisher.username}</span>
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              {item.publisher?.username ? (
+                <>
+                  <span className="font-medium text-gray-700">작성자:</span>
+                  <span>{item.publisher.username}</span>
+                </>
+              ) : (
+                <span className="text-gray-400">작성자 정보 없음</span>
               )}
             </div>
 

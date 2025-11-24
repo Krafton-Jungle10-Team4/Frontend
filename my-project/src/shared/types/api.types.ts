@@ -9,6 +9,7 @@ import type { BackendWorkflow } from './workflowTransform.types';
 // ============================================
 export interface UserResponse {
   id: number;
+  uuid: string;
   email: string;
   name: string | null;
   profile_image: string | null;
