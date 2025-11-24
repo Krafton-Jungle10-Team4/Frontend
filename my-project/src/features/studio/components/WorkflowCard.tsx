@@ -1,5 +1,5 @@
 import { cn } from '@/shared/components/utils';
-import { MoreVertical, Pencil, Trash2, Plus, Tag as TagIcon, Rocket, Store, GitCommit } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, Plus, Rocket, Store, RocketIcon } from 'lucide-react';
 import type { Workflow } from '@/shared/types/workflow';
 import { Badge } from '@/shared/components/badge';
 import {
@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/shared/components/alert-dialog';
 import { useState } from 'react';
-import { getCategoryIcon, getCategoryPreset } from '@/features/bot/constants/categoryPresets';
+import { getWorkflowIcon, getWorkflowIconBackground, getWorkflowIconColor } from '@/features/studio/constants/tagIcons';
 
 interface WorkflowCardProps {
   workflow: Workflow;
@@ -34,40 +34,32 @@ interface WorkflowCardProps {
   onEditTags?: (workflowId: string, currentTags: string[]) => void;
 }
 
-const withAlpha = (hex: string, alpha: number) => {
-  const normalized = Math.round(Math.min(Math.max(alpha, 0), 1) * 255)
-    .toString(16)
-    .padStart(2, '0');
-  const cleaned = hex.replace('#', '');
-  return `#${cleaned}${normalized}`;
-};
+function formatRelativeTime(date: Date | string | undefined | null): string {
+  if (!date) return '-';
+
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) return '-';
+
+  const now = new Date();
+  const diffMs = now.getTime() - parsedDate.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes < 1) return '방금 전';
+  if (diffMinutes < 60) return `${diffMinutes}분 전`;
+  if (diffHours < 24) return `${diffHours}시간 전`;
+  if (diffDays < 7) return `${diffDays}일 전`;
+
+  return parsedDate.toLocaleDateString('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
 
 const formatVersionLabel = (version?: string) => {
   if (!version) return 'v0.0';
   return version.startsWith('v') ? version : `v${version}`;
-};
-
-const getImprovementLabel = (version?: string) => {
-  if (!version) return null;
-  const cleaned = version.replace(/^v/i, '');
-  const [majorStr, minorStr] = cleaned.split('.');
-  const major = Number.parseInt(majorStr || '0', 10);
-  const minor = Number.parseInt(minorStr || '0', 10);
-
-  if (Number.isNaN(major) || Number.isNaN(minor) || minor <= 0) {
-    return null;
-  }
-
-  const ordinalMap: Record<number, string> = {
-    1: '첫번째',
-    2: '두번째',
-    3: '세번째',
-    4: '네번째',
-    5: '다섯번째',
-  };
-
-  const ordinal = ordinalMap[minor] || `${minor}번째`;
-  return `${ordinal} 개선안`;
 };
 
 export function WorkflowCard({
@@ -82,11 +74,6 @@ export function WorkflowCard({
   onEditTags,
 }: WorkflowCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const primaryTag = workflow.tags?.[0];
-  const categoryPreset = getCategoryPreset(primaryTag);
-  const categoryLabel = categoryPreset.label || '기타';
-  const CategoryIcon = getCategoryIcon(primaryTag);
-  const secondaryTags = workflow.tags?.slice(1) ?? [];
 
   // keep unused handler prop for future actions
   void onDeploy;
@@ -103,220 +90,183 @@ export function WorkflowCard({
   };
 
   const isDeployed = workflow.deploymentState === 'deployed';
-  const improvementLabel = getImprovementLabel(workflow.latestVersion);
-  const deploymentLabel =
-    workflow.deploymentState === 'deployed'
-      ? '배포됨'
-      : improvementLabel
-        ? improvementLabel
-        : workflow.deploymentState === 'deploying'
-          ? '배포 중'
-          : '초안';
-
-  const deploymentStyles =
-    workflow.deploymentState === 'deployed'
-      ? {
-          bg: '#000000',
-          text: '#ffffff',
-        }
-      : workflow.deploymentState === 'deploying'
-        ? {
-            bg: '#fff7ed',
-            text: '#f97316',
-          }
-        : workflow.deploymentState === 'error'
-          ? {
-              bg: '#fef2f2',
-              text: '#ef4444',
-            }
-          : {
-              bg: '#f8fafc',
-              text: '#334155',
-            };
 
   return (
     <div
       className={cn(
-        'relative bg-white rounded-2xl overflow-hidden',
-        'shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_36px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300',
-        'cursor-pointer group flex flex-col border border-gray-100'
+        'group relative bg-white rounded-lg border border-gray-200 p-4',
+        'shadow-sm transition-all duration-200 cursor-pointer',
+        'hover:shadow-md hover:-translate-y-1'
       )}
       onClick={handleCardClick}
     >
-      <div className="relative flex flex-col h-full">
-        <div className="flex flex-col gap-4 px-5 pt-5 pb-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-1 items-start gap-3">
+      <div className="flex justify-between items-start mb-2 gap-2">
+        <div className="flex items-start gap-3 min-w-0">
+          {(() => {
+            const IconComponent = getWorkflowIcon(workflow.tags);
+            return (
               <div
-                className="flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ring-1 ring-white/70"
+                className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border"
                 style={{
-                  background: `linear-gradient(135deg, ${categoryPreset.primary}, ${categoryPreset.secondary})`,
+                  background: getWorkflowIconBackground(workflow.tags),
+                  borderColor: getWorkflowIconColor(workflow.tags) + '30'
                 }}
               >
-                <CategoryIcon className="h-6 w-6 text-white drop-shadow-sm" />
+                <IconComponent
+                  className="w-6 h-6"
+                  style={{ color: getWorkflowIconColor(workflow.tags) }}
+                />
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {workflow.name}
-                  </h3>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm"
-                    style={{
-                      backgroundColor: withAlpha(categoryPreset.primary, 0.12),
-                      color: categoryPreset.primary,
-                    }}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {categoryLabel}
-                  </span>
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm"
-                    style={{
-                      backgroundColor: deploymentStyles.bg,
-                      color: deploymentStyles.text,
-                    }}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {deploymentLabel}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-2 transition rounded-full hover:bg-white/70 hover:shadow"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <MoreVertical className="h-4 w-4 text-studio-text-muted" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdate();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  서비스 수정
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateDeployment?.();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Rocket className="h-4 w-4 mr-2" />
-                  배포 관리
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onPublish();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Store className="h-4 w-4 mr-2" />
-                  마켓플레이스에 게시
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDeleteDialog(true);
-                  }}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  서비스 삭제
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {workflow.description && (
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {workflow.description}
-            </p>
-          )}
-
-          {onEditTags && (
-            <div className="flex flex-wrap gap-2">
-              {workflow.tags && workflow.tags.length > 0 ? (
-                <>
-                  <Badge
-                    key={`${workflow.id}-primary-tag`}
-                    variant="secondary"
-                    className="text-[11px] px-2 py-0.5 h-6 cursor-pointer rounded-full border border-transparent bg-white/80 text-gray-700 shadow-sm hover:border-[#3735c3]/50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditTags(workflow.id, workflow.tags || []);
-                    }}
-                  >
-                    <TagIcon className="h-3 w-3 mr-1 text-gray-500" />
-                    {primaryTag || '기타'}
-                  </Badge>
-                  {secondaryTags.map((tag) => (
-                    <Badge
-                      key={`${workflow.id}-${tag}`}
-                      variant="secondary"
-                      className="text-[11px] px-2 py-0.5 h-6 cursor-pointer rounded-full border border-indigo-100 bg-indigo-50/70 text-indigo-700 hover:border-[#3735c3]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditTags(workflow.id, workflow.tags || []);
-                      }}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditTags(workflow.id, []);
-                  }}
-                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-gray-500 border border-dashed border-gray-300 rounded hover:border-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <Plus className="h-2.5 w-2.5" />
-                  태그 추가
-                </button>
+            );
+          })()}
+          <div className="min-w-0 flex-1">
+            <h3
+              className={cn(
+                'text-sm font-bold leading-tight transition-colors line-clamp-1',
+                isDeployed
+                  ? 'text-gray-900 group-hover:text-gray-700'
+                  : 'text-gray-700'
               )}
+            >
+              {workflow.name}
+            </h3>
+            <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
+              <span>{formatRelativeTime(workflow.updatedAt)}</span>
             </div>
-          )}
+          </div>
         </div>
 
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-white/70 bg-slate-50/80 px-5 py-3">
-          <span
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-            style={{
-              backgroundColor: withAlpha(categoryPreset.muted, 0.6),
-            }}
-          >
-            <GitCommit className="h-4 w-4 text-gray-600" />
-          </span>
-          <div className="flex flex-col leading-tight">
-            <span className="text-xs font-semibold text-gray-700">버전 커밋</span>
-          </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors -mr-1 -mt-1 opacity-0 group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdate();
+              }}
+              className="cursor-pointer"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              서비스 수정
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateDeployment?.();
+              }}
+              className="cursor-pointer"
+            >
+              <Rocket className="h-4 w-4 mr-2" />
+              배포 관리
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onPublish();
+              }}
+              className="cursor-pointer"
+            >
+              <Store className="h-4 w-4 mr-2" />
+              마켓플레이스에 게시
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteDialog(true);
+              }}
+              className="cursor-pointer text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              서비스 삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <p className="text-xs text-gray-500 line-clamp-2 mb-3 min-h-[32px]">
+        {workflow.description || '설명이 없습니다.'}
+      </p>
+
+      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          {isDeployed ? (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              <RocketIcon className="h-3 w-3 text-emerald-600" />
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+              <RocketIcon className="h-3 w-3 text-gray-400" />
+            </span>
+          )}
 
           <button
             onClick={(e) => {
               e.stopPropagation();
               onVersionHistory();
             }}
-            className="ml-auto inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm transition-colors hover:border-[#3735c3]/40"
+            className={cn(
+              'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
+              isDeployed
+                ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
+            )}
           >
             {formatVersionLabel(workflow.latestVersion)}
           </button>
+        </div>
+
+        <div className="flex items-center gap-1">
+          {onEditTags && workflow.tags && workflow.tags.length > 0 ? (
+            <>
+              {workflow.tags.slice(0, 2).map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0.5 rounded cursor-pointer bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditTags(workflow.id, workflow.tags || []);
+                  }}
+                >
+                  {tag}
+                </Badge>
+              ))}
+              {workflow.tags.length > 2 && (
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700"
+                >
+                  +{workflow.tags.length - 2}
+                </Badge>
+              )}
+            </>
+          ) : onEditTags ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditTags(workflow.id, []);
+              }}
+              className="flex items-center space-x-1 text-[10px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              <span>태그 추가</span>
+            </button>
+          ) : null}
         </div>
       </div>
 
