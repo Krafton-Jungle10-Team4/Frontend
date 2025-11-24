@@ -39,7 +39,7 @@ export function MyBotsSidebar() {
                 onClick={() => handleBotClick(bot.id)}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg hover:bg-white/80 hover:shadow-sm transition-all text-left group"
               >
-                <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-md bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-sm">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <span className="truncate text-gray-700 font-medium group-hover:text-gray-900">

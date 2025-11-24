@@ -42,7 +42,7 @@ export function KnowledgeCard({
       className="group relative overflow-hidden transition-all duration-300 hover:shadow-[0_20px_60px_rgba(55,53,195,0.16)] hover:-translate-y-2 cursor-pointer h-[190px] bg-white/80 border border-white/70 backdrop-blur-md shadow-[0_15px_50px_rgba(55,53,195,0.08)] gap-0"
       onClick={onClick}
     >
-      <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff]" />
+      <div className="absolute inset-x-0 top-0 h-1.5 bg-[#5f5bff]" />
       <div className="p-5 h-full flex flex-col">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">

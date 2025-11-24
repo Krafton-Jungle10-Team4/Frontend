@@ -112,8 +112,7 @@ export function MarketplacePage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 self-start w-full">
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
+              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
                 <div className="relative flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">라이브 템플릿</p>
@@ -124,7 +123,7 @@ export function MarketplacePage() {
                     {[68, 82, 74, 96, 88].map((v) => (
                       <span
                         key={v}
-                        className="inline-block w-2 rounded-full bg-gradient-to-b from-indigo-400 to-indigo-600"
+                        className="inline-block w-2 rounded-full bg-indigo-500"
                         style={{ height: `${v * 0.6}px` }}
                       />
                     ))}
