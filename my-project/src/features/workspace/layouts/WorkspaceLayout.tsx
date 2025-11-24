@@ -3,9 +3,12 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/stores/authStore';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Header } from '../components/Header';
+import { WorkspaceSidebar } from '../components/WorkspaceSidebar';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
+import { useState } from 'react';
 
 export function WorkspaceLayout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
@@ -40,17 +43,26 @@ export function WorkspaceLayout() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <Header
+    <div className="flex h-screen bg-[#f7f8fa]">
+      <WorkspaceSidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        userName={user?.name || 'User'}
-        userEmail={user?.email || ''}
-        onLogout={handleLogout}
-        onLogoClick={() => navigate('/landing')}
+        isOpen={isSidebarOpen}
       />
-      <div className="flex-1 overflow-hidden">
-        <Outlet />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          userName={user?.name || 'User'}
+          userEmail={user?.email || ''}
+          onLogout={handleLogout}
+          onLogoClick={() => navigate('/landing')}
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          isSidebarOpen={isSidebarOpen}
+        />
+        <div className="flex-1 overflow-hidden">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

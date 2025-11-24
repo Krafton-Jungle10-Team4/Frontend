@@ -15,7 +15,6 @@ import { useUIStore } from '@/shared/stores/uiStore';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { useAsyncDocumentStore } from '@/features/documents/stores/documentStore.async';
 import { DocumentStatus } from '@/features/documents/types/document.types';
-import { NavigationTabs } from '@/features/workspace/components/NavigationTabs';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
 import { useSlackStore } from '@/features/integrations/stores/slackStore';
 
@@ -227,7 +226,6 @@ export const WorkflowBuilderPage = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
         <TopNavigation
-          onToggleSidebar={() => {}}
           userName={userName}
           userEmail={userEmail}
           onHomeClick={() => navigate('/workspace/studio')}
@@ -236,13 +234,6 @@ export const WorkflowBuilderPage = () => {
           onLogout={handleLogout}
           currentPage={botName}
           showSidebarToggle={false}
-          navigationTabs={
-            <NavigationTabs
-              activeTab={workspaceActiveTab}
-              onTabChange={handleWorkspaceTabChange}
-              language={language}
-            />
-          }
         />
 
         {/* Content */}
