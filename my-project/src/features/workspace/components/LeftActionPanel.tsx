@@ -50,7 +50,7 @@ export function LeftActionPanel({
           className="w-full justify-start gap-2 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
         >
           <RiAddLine className="h-4 w-4" />
-          빈 상태로 시작
+          새로 시작
         </Button>
 
         <Button
@@ -59,7 +59,7 @@ export function LeftActionPanel({
           className="w-full justify-start gap-2 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
         >
           <RiFileTextLine className="h-4 w-4" />
-          템플릿에서 시작
+          템플릿
         </Button>
       </div>
     );

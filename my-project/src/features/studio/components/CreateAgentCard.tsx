@@ -31,7 +31,7 @@ export function CreateAgentCard({
           >
             <div className="flex items-center gap-2">
               <Plus className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
-              <span>빈 상태로 시작</span>
+              <span>새로 시작</span>
             </div>
           </button>
 
@@ -41,7 +41,7 @@ export function CreateAgentCard({
           >
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 flex-shrink-0 text-[#3735c3]" />
-              <span>템플릿에서 시작</span>
+              <span>템플릿</span>
             </div>
           </button>
         </div>
