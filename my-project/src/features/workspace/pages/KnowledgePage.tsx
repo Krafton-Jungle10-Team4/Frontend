@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { KnowledgeSearchBar } from '@/features/knowledge/components/KnowledgeSearchBar';
 import { KnowledgeGrid } from '@/features/knowledge/components/KnowledgeGrid';
 import type { Knowledge } from '@/data/mockKnowledge';
@@ -18,54 +18,54 @@ export function KnowledgePage() {
   const [error, setError] = useState<string | null>(null);
   const activeTagCount = selectedTags.length;
 
+  const fetchDocuments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await documentsApi.listDocuments({
+        status: 'done', // 완료된 문서만 조회
+        limit: 100,
+        offset: 0,
+      });
+
+      // Document를 Knowledge 형식으로 변환
+      const knowledgeList: Knowledge[] = response.documents.map((doc) => {
+        const tags = [doc.status];
+        if (doc.file_extension) {
+          tags.push(doc.file_extension.toUpperCase());
+        }
+
+        return {
+          id: doc.document_id,
+          user_id: '', // Document API에는 user_id가 없음
+          name: doc.original_filename,
+          description: `${doc.file_extension.toUpperCase()} 파일 (${(doc.file_size / 1024).toFixed(2)} KB)`,
+          tags,
+          document_count: 1,
+          documents: [doc],
+          created_at: doc.created_at,
+          updated_at: doc.updated_at || doc.created_at,
+        };
+      });
+
+      setKnowledgeList(knowledgeList);
+
+      // 태그 목록 추출 (상태 / 파일 확장자)
+      const tagSet = new Set<string>();
+      knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
+      setAllTags(Array.from(tagSet));
+    } catch (err) {
+      console.error('Failed to fetch documents:', err);
+      setError('문서 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // 문서 목록 조회 (Document API 사용)
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await documentsApi.listDocuments({
-          status: 'done', // 완료된 문서만 조회
-          limit: 100,
-          offset: 0,
-        });
-
-        // Document를 Knowledge 형식으로 변환
-        const knowledgeList: Knowledge[] = response.documents.map((doc) => {
-          const tags = [doc.status];
-          if (doc.file_extension) {
-            tags.push(doc.file_extension.toUpperCase());
-          }
-
-          return {
-            id: doc.document_id,
-            user_id: '', // Document API에는 user_id가 없음
-            name: doc.original_filename,
-            description: `${doc.file_extension.toUpperCase()} 파일 (${(doc.file_size / 1024).toFixed(2)} KB)`,
-            tags,
-            document_count: 1,
-            documents: [doc],
-            created_at: doc.created_at,
-            updated_at: doc.updated_at || doc.created_at,
-          };
-        });
-
-        setKnowledgeList(knowledgeList);
-
-        // 태그 목록 추출 (상태 / 파일 확장자)
-        const tagSet = new Set<string>();
-        knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
-        setAllTags(Array.from(tagSet));
-      } catch (err) {
-        console.error('Failed to fetch documents:', err);
-        setError('문서 목록을 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDocuments();
-  }, [searchQuery, selectedTags, language]);
+  }, [fetchDocuments, searchQuery, selectedTags, language]);
 
   const filteredKnowledge = useMemo(() => {
     return knowledgeList.filter((knowledge) => {
@@ -108,6 +108,10 @@ export function KnowledgePage() {
 
   const handleImportFromFile = () => {
     setUploadModalOpen(true);
+  };
+
+  const handleUploadComplete = () => {
+    void fetchDocuments();
   };
 
   const handleKnowledgeClick = (knowledgeId: string) => {
@@ -185,7 +189,7 @@ export function KnowledgePage() {
               />
             </div>
 
-            <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur p-4 md:p-5">
+            <div className="relative overflow-hidden rounded-3xl p-4 md:p-5">
               <KnowledgeGrid
                 knowledgeList={sortedKnowledge}
                 loading={loading}
@@ -203,6 +207,7 @@ export function KnowledgePage() {
       <DocumentUploadModal
         open={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
+        onUploadComplete={handleUploadComplete}
       />
     </>
   );

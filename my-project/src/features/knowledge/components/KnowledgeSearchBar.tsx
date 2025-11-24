@@ -1,15 +1,20 @@
 import { useState } from 'react';
-import { Search, Tag as TagIcon, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@shared/components/button';
+import { Search, Tag as TagIcon, X, Clock } from 'lucide-react';
+import { Badge } from '@shared/components/badge';
+import { cn } from '@shared/components/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
   DropdownMenuSeparator,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
 } from '@shared/components/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@shared/components/tooltip';
 
 interface KnowledgeSearchBarProps {
   searchValue: string;
@@ -36,83 +41,110 @@ export function KnowledgeSearchBar({
   onSortChange,
 }: KnowledgeSearchBarProps) {
   const [tagSearchQuery, setTagSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   const getTagButtonLabel = () => {
     if (selectedTags.length === 0) return '모든 태그';
     return `태그 (${selectedTags.length})`;
   };
 
+  const getNextSort = (current: 'name' | 'date'): 'name' | 'date' =>
+    current === 'date' ? 'name' : 'date';
+
   const filteredTags = tags.filter(tag =>
     tag.toLowerCase().includes(tagSearchQuery.toLowerCase())
   );
 
+  const hasSelectedTags = selectedTags.length > 0;
+  const hasSearchValue = searchValue.length > 0;
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div className="relative w-full max-w-xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="지식 검색..."
-            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-10 pr-4 text-sm text-gray-800 placeholder:text-slate-500 shadow-[0_6px_18px_rgba(55,53,195,0.08)] focus:border-indigo-400 focus:outline-none"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowFilters((prev) => !prev)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_6px_18px_rgba(55,53,195,0.08)] transition hover:border-indigo-300 hover:text-indigo-700"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            필터 · 정렬
-            <ChevronDown className={`h-3 w-3 transition ${showFilters ? 'rotate-180' : ''}`} />
-          </button>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] text-slate-600">
-            정렬 {SORT_OPTIONS[sortBy]}
-          </span>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] text-slate-600">
-            태그 {selectedTags.length > 0 ? `${selectedTags.length}개` : '전체'}
-          </span>
-        </div>
-      </div>
+      <div className="flex items-center gap-2 justify-end">
+        <div className="flex items-center gap-1">
+          <div className="relative flex items-center">
+            <div
+              className={cn(
+                'flex items-center overflow-hidden transition-all duration-300 ease-out',
+                isSearchExpanded ? 'w-72' : 'w-9'
+              )}
+            >
+              {isSearchExpanded ? (
+                <div className="relative w-full">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    onBlur={() => {
+                      if (!searchValue) {
+                        setIsSearchExpanded(false);
+                      }
+                    }}
+                    placeholder="지식 검색..."
+                    className="w-full h-9 pl-8 pr-9 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      onSearchChange('');
+                      setIsSearchExpanded(false);
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label="검색 초기화"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setIsSearchExpanded(true)}
+                        className={cn(
+                          'flex items-center justify-center w-9 h-9 rounded-lg transition-colors',
+                          hasSearchValue
+                            ? 'text-gray-700'
+                            : 'text-gray-400 hover:text-gray-500'
+                        )}
+                        aria-label="검색"
+                      >
+                        <Search className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>검색</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+          </div>
 
-      {showFilters && (
-        <div className="rounded-xl border border-slate-100 bg-white/90 p-3 shadow-[0_10px_30px_rgba(55,53,195,0.08)]">
-          <div className="flex flex-wrap items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="gap-1.5 h-10 px-3 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 hover:text-indigo-700"
-                >
-                  <span>{SORT_OPTIONS[sortBy]}</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuRadioGroup value={sortBy} onValueChange={(val) => onSortChange(val as 'name' | 'date')}>
-                  <DropdownMenuRadioItem value="date">최근 업데이트순</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="name">이름순</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <TooltipProvider delayDuration={300}>
             <DropdownMenu onOpenChange={(open) => !open && setTagSearchQuery('')}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="gap-1.5 h-10 px-3 text-sm font-medium text-gray-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 hover:text-indigo-700"
-                >
-                  <TagIcon className="h-3.5 w-3.5" />
-                  <span>{getTagButtonLabel()}</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {/* 태그 검색 */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className={cn(
+                        'flex items-center justify-center w-9 h-9 rounded-lg transition-colors',
+                        hasSelectedTags
+                          ? 'text-gray-700 bg-white border border-slate-200 shadow-sm'
+                          : 'text-gray-400 hover:text-gray-500'
+                      )}
+                      aria-label={getTagButtonLabel()}
+                    >
+                      <TagIcon className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{getTagButtonLabel()}</p>
+                </TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
@@ -121,28 +153,65 @@ export function KnowledgeSearchBar({
                       value={tagSearchQuery}
                       onChange={(e) => setTagSearchQuery(e.target.value)}
                       placeholder="태그 검색..."
-                      className="w-full h-9 pl-8 pr-3 text-xs bg-white border border-slate-200 rounded-lg text-gray-700 placeholder:text-gray-500 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#3735c3]/20 focus:border-[#3735c3] transition"
+                      className="w-full h-8 pl-8 pr-3 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
+                      autoFocus
                     />
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                {/* 태그 목록 */}
-                {filteredTags.length > 0 ? (
-                  filteredTags.map((tag) => (
-                    <DropdownMenuCheckboxItem
-                      key={tag}
-                      checked={selectedTags.includes(tag)}
-                      onCheckedChange={() => onTagToggle(tag)}
-                    >
-                      {tag}
-                    </DropdownMenuCheckboxItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1.5 text-xs text-gray-500">검색 결과가 없습니다</div>
-                )}
+                <div className="max-h-[320px] overflow-y-auto">
+                  {tags.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
+                  ) : filteredTags.length > 0 ? (
+                    filteredTags.map((tag) => (
+                      <DropdownMenuCheckboxItem
+                        key={tag}
+                        checked={selectedTags.includes(tag)}
+                        onCheckedChange={() => onTagToggle(tag)}
+                      >
+                        {tag}
+                      </DropdownMenuCheckboxItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-gray-500">검색 결과 없음</div>
+                  )}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </TooltipProvider>
+
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  aria-label={`정렬: ${SORT_OPTIONS[sortBy]}`}
+                  onClick={() => onSortChange(getNextSort(sortBy))}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
+                >
+                  <Clock className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{SORT_OPTIONS[sortBy]}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer transition-colors"
+              onClick={() => onTagToggle(tag)}
+            >
+              <span>{tag}</span>
+              <X className="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+            </Badge>
+          ))}
         </div>
       )}
     </div>

@@ -192,7 +192,7 @@ export function StudioPage() {
                       key={label}
                       className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-800 shadow-sm"
                     >
-                      <span className="h-2 w-2 rounded-full bg-orange-300" />
+                      <span className="h-2 w-2 rounded-full bg-orange-500" />
                       {label}
                     </span>
                   ))}
