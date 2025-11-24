@@ -415,6 +415,11 @@ function QuestionClassifierPanelContent({
       </Box>
       <OutputVars title="출력 변수" defaultCollapsed={false}>
         <VarItem
+          name="query"
+          type={PortType.STRING}
+          description="입력된 원본 질문 (pass-through)"
+        />
+        <VarItem
           name="classification"
           type={PortType.STRING}
           description="선택된 클래스 이름"

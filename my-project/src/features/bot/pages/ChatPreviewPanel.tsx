@@ -278,32 +278,37 @@ export function ChatPreviewPanel({
       });
     }
 
-    // 노드가 완료되면 해당 노드에서 나가는 엣지도 업데이트 (Dify 스타일: 실행 경로 추적)
-    const outgoingEdges = edges.filter((edge) => edge.source === event.node_id);
-    if (outgoingEdges.length > 0) {
+    // 노드 이벤트 발생 시 들어오는 엣지를 활성화 (Dify 스타일: 실제 실행 경로 추적)
+    // 이 방식은 백엔드에서 실제로 실행된 노드만 이벤트를 보내므로,
+    // 선택되지 않은 분기의 노드는 이벤트가 오지 않아 해당 경로가 활성화되지 않음
+    if (event.status === 'running' || event.status === 'completed') {
       const edgeStatusMap: Record<string, NodeRunningStatus> = {
-        'completed': NodeRunningStatus.Succeeded, // 초록색
-        'running': NodeRunningStatus.Running,    // 파란색
-        'failed': NodeRunningStatus.Failed,      // 빨간색
+        'running': NodeRunningStatus.Running,    // 파란색 (실행 중)
+        'completed': NodeRunningStatus.Succeeded, // 초록색 (완료)
       };
-      
+
       const edgeStatus = edgeStatusMap[event.status];
       if (edgeStatus) {
-        setEdges((currentEdges) =>
-          currentEdges.map((edge) => {
-            if (edge.source === event.node_id) {
-              const currentData = edge.data as CommonEdgeType | undefined;
-              return {
-                ...edge,
-                data: {
-                  ...currentData,
-                  _sourceRunningStatus: edgeStatus,
-                } as CommonEdgeType,
-              };
-            }
-            return edge;
-          })
-        );
+        // 현재 노드로 들어오는 엣지를 활성화
+        const incomingEdges = edges.filter((edge) => edge.target === event.node_id);
+
+        if (incomingEdges.length > 0) {
+          setEdges((currentEdges) =>
+            currentEdges.map((edge) => {
+              if (edge.target === event.node_id) {
+                const currentData = edge.data as CommonEdgeType | undefined;
+                return {
+                  ...edge,
+                  data: {
+                    ...currentData,
+                    _sourceRunningStatus: edgeStatus,
+                  } as CommonEdgeType,
+                };
+              }
+              return edge;
+            })
+          );
+        }
       }
     }
   };
