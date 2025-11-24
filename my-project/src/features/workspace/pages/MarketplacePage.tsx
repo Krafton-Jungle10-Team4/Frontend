@@ -68,37 +68,21 @@ export function MarketplacePage() {
             <div className="absolute -left-10 top-10 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 via-white to-transparent blur-3xl" />
             <div className="absolute -right-6 bottom-4 h-28 w-28 rounded-full bg-gradient-to-br from-sky-100 via-white to-transparent blur-2xl" />
           </div>
-          <div className="relative grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-center">
-            <div className="space-y-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-500 shadow-sm">
-                Marketplace
-                <span className="h-1 w-1 rounded-full bg-indigo-400" />
-              </span>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-3xl font-bold text-gray-900">마켓플레이스</h1>
+          <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl font-bold text-gray-900 tracking-tight">MARKETPLACE</span>
                 <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
                   {items.length} 템플릿
                 </span>
               </div>
               <p className="text-sm text-slate-600">
-                커뮤니티 템플릿을 둘러보고 적용하세요. 검색과 태그로 원하는 쇼케이스를 빠르게 찾을 수 있습니다.
+                커뮤니티 템플릿을 둘러보고 적용하세요.
               </p>
-              <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-slate-600">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/80 bg-white px-3 py-1 shadow-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#3735c3]" />
-                  최신순 · 인기순 · 조회순
-                </span>
-                {activeTagCount > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-indigo-700 shadow-sm">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                    선택된 태그 {activeTagCount}개
-                  </span>
-                )}
-              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-4 shadow-[0_16px_40px_rgba(55,53,195,0.12)]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br from-white via-indigo-50/70 to-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_40%)]" />
                 <div className="relative flex items-center justify-between">
                   <div>
@@ -118,7 +102,7 @@ export function MarketplacePage() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-4 shadow-[0_16px_40px_rgba(55,53,195,0.12)]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/70" />
                 <div className="relative flex items-center justify-between">
                   <div>
