@@ -75,7 +75,7 @@ export function MarketplacePage() {
                 <span className="h-1 w-1 rounded-full bg-indigo-400" />
               </span>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-3xl font-bold text-gray-900">마켓플레이스 커뮤니티</h1>
+                <h1 className="text-3xl font-bold text-gray-900">마켓플레이스</h1>
                 <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
                   {items.length} 템플릿
                 </span>

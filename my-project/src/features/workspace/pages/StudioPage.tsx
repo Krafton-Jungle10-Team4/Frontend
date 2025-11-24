@@ -172,7 +172,7 @@ export function StudioPage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900 overflow-auto">
+      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#f7f8fa] via-[#eef0f4] to-[#e8eaee] text-slate-900">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(124,128,148,0.12),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(152,156,172,0.1),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(118,122,142,0.1),transparent_36%)]" />
         <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-slate-200/40 blur-3xl" />
         <div className="pointer-events-none absolute -right-10 bottom-10 h-72 w-72 rounded-full bg-slate-300/35 blur-3xl" />
@@ -190,7 +190,6 @@ export function StudioPage() {
                   <span className="h-1 w-1 rounded-full bg-indigo-400" />
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-3xl font-bold text-gray-900">Bot Studio</h1>
                   <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
                     {filteredWorkflows.length} 템플릿
                   </span>
@@ -211,24 +210,7 @@ export function StudioPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex flex-wrap justify-end gap-2">
-                  <button
-                    onClick={handleCreateFromTemplate}
-                    className={cn(
-                      'h-10 rounded-lg border border-indigo-100 bg-white px-4 text-[#3735c3] font-semibold shadow-[0_10px_28px_rgba(55,53,195,0.12)] transition hover:border-[#3735c3]',
-                      'disabled:opacity-60'
-                    )}
-                    disabled={isCreatingFromTemplate}
-                  >
-                    템플릿에서 생성
-                  </button>
-                  <button
-                    onClick={openCreateDialog}
-                    className="h-10 rounded-lg bg-gradient-to-r from-[#3735c3] via-[#5f5bff] to-[#7ac8ff] px-4 text-white font-semibold shadow-[0_14px_38px_rgba(55,53,195,0.28)] transition hover:shadow-[0_16px_44px_rgba(55,53,195,0.32)]"
-                  >
-                    새 봇 생성
-                  </button>
-                </div>
+                <div className="flex flex-wrap justify-end gap-2" />
                 <div className="grid grid-cols-2 gap-3">
                   {statCards.map((card) => (
                     <div
@@ -252,7 +234,7 @@ export function StudioPage() {
             </div>
           </div>
 
-          <div className="relative w-full space-y-4 overflow-visible">
+          <div className="relative w-full space-y-4">
             <div className="relative px-1 md:px-2 lg:px-3 py-3 md:py-4">
               <SearchAndFilters
                 searchValue={filters.search}
@@ -266,7 +248,7 @@ export function StudioPage() {
               />
             </div>
 
-            <div className="relative overflow-auto rounded-3xl border border-white/70 bg-white/90 p-3 md:p-4 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
+            <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-3 md:p-4 shadow-[0_18px_48px_rgba(55,53,195,0.15)] backdrop-blur">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.08),transparent_40%)]" />
               {loading ? (
                 <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>

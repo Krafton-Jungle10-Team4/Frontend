@@ -116,8 +116,8 @@ export function WorkflowCard({
   const deploymentStyles =
     workflow.deploymentState === 'deployed'
       ? {
-          bg: withAlpha(categoryPreset.primary, 0.12),
-          text: categoryPreset.primary,
+          bg: '#000000',
+          text: '#ffffff',
         }
       : workflow.deploymentState === 'deploying'
         ? {
@@ -304,33 +304,21 @@ export function WorkflowCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between border-t border-white/70 bg-slate-50/80 px-5 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: withAlpha(categoryPreset.muted, 0.6),
-              }}
-            >
-              <GitCommit className="h-4 w-4 text-gray-600" />
-            </span>
-            <div className="flex flex-col leading-tight">
-              <span className="text-xs font-semibold text-gray-700">버전 커밋</span>
-              <span className="text-[11px] text-gray-500">
-                {formatVersionLabel(workflow.latestVersion)}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
+        <div className="mt-auto flex items-start justify-start gap-2 border-t border-white/70 bg-slate-50/80 px-5 py-3">
+          <span
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: withAlpha(categoryPreset.muted, 0.6),
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-transparent bg-black px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition hover:bg-[#111111]"
           >
-            사용하기
-          </button>
+            <GitCommit className="h-4 w-4 text-gray-600" />
+          </span>
+          <div className="flex flex-col leading-tight">
+            <span className="text-xs font-semibold text-gray-700">버전 커밋</span>
+            <span className="text-[11px] text-gray-500">
+              {formatVersionLabel(workflow.latestVersion)}
+            </span>
+          </div>
         </div>
       </div>
 
