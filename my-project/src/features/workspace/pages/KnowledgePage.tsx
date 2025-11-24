@@ -133,57 +133,53 @@ export function KnowledgePage() {
 
   return (
     <>
-      <div className="flex flex-col h-[calc(100vh-56px)]">
-        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 via-white to-indigo-50/40">
-          <div className="mx-auto max-w-7xl px-6 pt-10 pb-12 space-y-8">
-            <div className="rounded-3xl border border-white/70 bg-white/80 backdrop-blur-xl shadow-[0_18px_60px_rgba(55,53,195,0.12)] px-6 py-6 lg:px-8 lg:py-7 space-y-4">
-              <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3735c3]">Knowledge</p>
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">Knowledge Base</h1>
-                <p className="text-gray-600">연결된 소스의 문서를 한 곳에서 정리하고 관리하세요.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {['Notion', 'Google Drive', 'Web'].map((source) => (
-                  <span
-                    key={source}
-                    className="inline-flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1 text-xs font-semibold text-[#3735c3] shadow-sm"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-[#3735c3]" />
-                    {source}
-                  </span>
-                ))}
-              </div>
+      <div className="relative min-h-[calc(100vh-56px)] bg-gradient-to-b from-white via-slate-50 to-indigo-50/35 text-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_5%,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(168,85,247,0.14),transparent_36%)]" />
+        <main className="relative w-full flex-1 flex-col gap-6 px-4 md:px-8 py-8">
+          <div className="flex flex-wrap items-center gap-3 px-2">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-500">Knowledge</p>
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">Knowledge Base</h1>
+              <p className="text-sm text-slate-600">Landing 톤의 밝은 글래스 스타일로 문서를 관리하고 검색하세요.</p>
             </div>
-
-            <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-              <div className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-xl shadow-[0_16px_50px_rgba(55,53,195,0.1)] p-5">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">필터 & 정렬</h3>
-                  <p className="text-sm text-gray-600">소스, 태그, 상태별로 필요한 지식을 빠르게 찾아보세요.</p>
-                </div>
-                <KnowledgeSearchBar
-                  searchValue={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  tags={allTags}
-                  selectedTags={selectedTags}
-                  onTagToggle={handleTagClick}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                />
-              </div>
-
-              <div className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-xl shadow-[0_16px_50px_rgba(55,53,195,0.1)] p-5">
-                <KnowledgeGrid
-                  knowledgeList={sortedKnowledge}
-                  loading={loading}
-                  error={error}
-                  language={language}
-                  onImportFromFile={handleImportFromFile}
-                  onKnowledgeClick={handleKnowledgeClick}
-                  onDeleteKnowledge={handleDeleteKnowledge}
-                />
-              </div>
+            <div className="flex flex-wrap items-center gap-2 ml-auto text-xs">
+              {['Notion', 'Google Drive', 'Web'].map((source) => (
+                <span
+                  key={source}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-700"
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#3735c3]" />
+                  {source}
+                </span>
+              ))}
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-700">
+                총 {sortedKnowledge.length}개
+              </span>
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/70 bg-white/85 shadow-[0_14px_40px_rgba(55,53,195,0.12)] backdrop-blur px-4 py-4">
+            <KnowledgeSearchBar
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              tags={allTags}
+              selectedTags={selectedTags}
+              onTagToggle={handleTagClick}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
+          </div>
+
+          <div className="rounded-2xl border border-white/70 bg-white/85 shadow-[0_14px_40px_rgba(55,53,195,0.12)] backdrop-blur p-4 md:p-5">
+            <KnowledgeGrid
+              knowledgeList={sortedKnowledge}
+              loading={loading}
+              error={error}
+              language={language}
+              onImportFromFile={handleImportFromFile}
+              onKnowledgeClick={handleKnowledgeClick}
+              onDeleteKnowledge={handleDeleteKnowledge}
+            />
           </div>
         </main>
       </div>
