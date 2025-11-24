@@ -92,8 +92,7 @@ export function TopNavigation({
   ];
 
   return (
-        <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
-
+    <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
       <div className={cn("relative w-full h-full flex items-center justify-between pl-2 pr-4 md:pl-3 md:pr-6", contentClassName)}>
         <div className="flex items-center gap-3 overflow-hidden">
           <button
