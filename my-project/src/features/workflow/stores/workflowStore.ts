@@ -735,83 +735,83 @@ const normalizeWorkflowGraph = (nodes: Node[], edges: Edge[]) => {
     // LLM 노드: AI 모델 및 프롬프트 설정 보존
     if (nodeType === BlockEnum.LLM) {
       nodeSpecificData = {
-        provider: (node.data as any).provider,
-        model: (node.data as any).model,
-        prompt: (node.data as any).prompt,
-        temperature: (node.data as any).temperature,
-        maxTokens: (node.data as any).maxTokens,
+        ...((node.data as any).provider !== undefined && { provider: (node.data as any).provider }),
+        ...((node.data as any).model !== undefined && { model: (node.data as any).model }),
+        ...((node.data as any).prompt !== undefined && { prompt: (node.data as any).prompt }),
+        ...((node.data as any).temperature !== undefined && { temperature: (node.data as any).temperature }),
+        ...((node.data as any).maxTokens !== undefined && { maxTokens: (node.data as any).maxTokens }),
       };
     }
 
     // Knowledge Retrieval 노드: 데이터셋 및 검색 설정 보존
     if (nodeType === BlockEnum.KnowledgeRetrieval) {
       nodeSpecificData = {
-        dataset: (node.data as any).dataset,
-        retrievalMode: (node.data as any).retrievalMode,
-        topK: (node.data as any).topK,
-        documentIds: (node.data as any).documentIds || [],
+        ...((node.data as any).dataset !== undefined && { dataset: (node.data as any).dataset }),
+        ...((node.data as any).retrievalMode !== undefined && { retrievalMode: (node.data as any).retrievalMode }),
+        ...((node.data as any).topK !== undefined && { topK: (node.data as any).topK }),
+        ...((node.data as any).documentIds !== undefined && { documentIds: (node.data as any).documentIds || [] }),
       };
     }
 
     // MCP 노드: 제공자 및 액션 설정 보존
     if (nodeType === BlockEnum.MCP) {
       nodeSpecificData = {
-        provider_id: (node.data as any).provider_id,
-        action: (node.data as any).action,
-        parameters: (node.data as any).parameters || {},
+        ...((node.data as any).provider_id !== undefined && { provider_id: (node.data as any).provider_id }),
+        ...((node.data as any).action !== undefined && { action: (node.data as any).action }),
+        ...((node.data as any).parameters !== undefined && { parameters: (node.data as any).parameters || {} }),
       };
     }
 
     // HTTP 노드: HTTP 요청 설정 보존
     if (nodeType === BlockEnum.Http) {
       nodeSpecificData = {
-        url: (node.data as any).url || '',
-        method: (node.data as any).method || 'GET',
-        headers: (node.data as any).headers || [],
-        query_params: (node.data as any).query_params || [],
-        body: (node.data as any).body || '',
-        timeout: (node.data as any).timeout ?? 30,
+        ...((node.data as any).url !== undefined && { url: (node.data as any).url || '' }),
+        ...((node.data as any).method !== undefined && { method: (node.data as any).method || 'GET' }),
+        ...((node.data as any).headers !== undefined && { headers: (node.data as any).headers || [] }),
+        ...((node.data as any).query_params !== undefined && { query_params: (node.data as any).query_params || [] }),
+        ...((node.data as any).body !== undefined && { body: (node.data as any).body || '' }),
+        ...((node.data as any).timeout !== undefined && { timeout: (node.data as any).timeout ?? 30 }),
       };
     }
 
     // Tavily Search 노드: 검색 설정 보존
     if (nodeType === BlockEnum.TavilySearch) {
       nodeSpecificData = {
-        search_depth: (node.data as any).search_depth || 'basic',
-        topic: (node.data as any).topic || 'general',
-        max_results: (node.data as any).max_results || 5,
-        include_domains: (node.data as any).include_domains || [],
-        exclude_domains: (node.data as any).exclude_domains || [],
-        time_range: (node.data as any).time_range || null,
-        start_date: (node.data as any).start_date || null,
-        end_date: (node.data as any).end_date || null,
-        include_answer: (node.data as any).include_answer || false,
-        include_raw_content: (node.data as any).include_raw_content || false,
+        ...((node.data as any).search_depth !== undefined && { search_depth: (node.data as any).search_depth || 'basic' }),
+        ...((node.data as any).topic !== undefined && { topic: (node.data as any).topic || 'general' }),
+        ...((node.data as any).max_results !== undefined && { max_results: (node.data as any).max_results || 5 }),
+        ...((node.data as any).include_domains !== undefined && { include_domains: (node.data as any).include_domains || [] }),
+        ...((node.data as any).exclude_domains !== undefined && { exclude_domains: (node.data as any).exclude_domains || [] }),
+        ...((node.data as any).time_range !== undefined && { time_range: (node.data as any).time_range || null }),
+        ...((node.data as any).start_date !== undefined && { start_date: (node.data as any).start_date || null }),
+        ...((node.data as any).end_date !== undefined && { end_date: (node.data as any).end_date || null }),
+        ...((node.data as any).include_answer !== undefined && { include_answer: (node.data as any).include_answer || false }),
+        ...((node.data as any).include_raw_content !== undefined && { include_raw_content: (node.data as any).include_raw_content || false }),
       };
     }
 
     // Answer 노드: 템플릿 및 설명 보존
     if (nodeType === BlockEnum.Answer) {
       nodeSpecificData = {
-        template: (node.data as any).template || '',
-        description: (node.data as any).description || '',
+        ...((node.data as any).template !== undefined && { template: (node.data as any).template || '' }),
+        ...((node.data as any).description !== undefined && { description: (node.data as any).description || '' }),
       };
     }
 
     // Slack 노드: Slack 설정 보존
     if (nodeType === BlockEnum.Slack) {
       nodeSpecificData = {
-        channel: (node.data as any).channel || '',
-        use_blocks: (node.data as any).use_blocks || false,
-        integration_id: (node.data as any).integration_id || undefined,
+        ...((node.data as any).channel !== undefined && { channel: (node.data as any).channel || '' }),
+        ...((node.data as any).use_blocks !== undefined && { use_blocks: (node.data as any).use_blocks || false }),
+        ...((node.data as any).integration_id !== undefined && { integration_id: (node.data as any).integration_id }),
       };
     }
 
     // Template Transform 노드: 템플릿 및 변수 보존
     if (nodeType === BlockEnum.TemplateTransform) {
       nodeSpecificData = {
-        template: (node.data as any).template || '',
-        variables: (node.data as any).variables || {},
+        ...((node.data as any).template !== undefined && { template: (node.data as any).template || '' }),
+        ...((node.data as any).variables !== undefined && { variables: (node.data as any).variables || {} }),
       };
     }
 
