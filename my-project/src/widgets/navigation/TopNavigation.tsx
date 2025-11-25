@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Settings, LogOut, CreditCard, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Settings, LogOut, CreditCard, Search, ChevronDown } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
@@ -11,40 +11,38 @@ import {
 } from '@/shared/components/dropdown-menu';
 import { cn } from '@/shared/components/utils';
 import { Logo } from '@/shared/components/Logo';
+import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 
-type Language = 'en' | 'ko';
+type WorkspaceTab = 'marketplace' | 'studio' | 'knowledge' | 'library';
 
 interface TopNavigationProps {
   userName?: string;
   userEmail?: string;
   onHomeClick?: () => void;
-  language?: Language;
-  onLanguageChange?: (lang: Language) => void;
   onLogout?: () => Promise<void> | void;
-  activeTabLabel?: string;
   onLogoClick?: () => void;
-  showSidebarToggle?: boolean;
   contentClassName?: string;
-  showInlineLogo?: boolean;
+  activeTab?: WorkspaceTab;
+  onTabChange?: (tab: WorkspaceTab) => void;
 }
 
 export function TopNavigation({
   userName = 'User',
   userEmail = '',
   onHomeClick,
-  language: _language = 'ko',
-  onLanguageChange: _onLanguageChange = () => undefined,
   onLogout,
-  activeTabLabel: _activeTabLabel,
   onLogoClick,
-  showSidebarToggle: _showSidebarToggle = true,
   contentClassName,
-  showInlineLogo = false,
+  activeTab = 'studio',
+  onTabChange,
 }: TopNavigationProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { isFreePlan, billingStatus } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
+
+  // Global search state from workflow store
+  const searchValue = useWorkflowStore((state) => state.filters.search);
+  const setFilters = useWorkflowStore((state) => state.setFilters);
 
   const t = {
     billing: '결제 및 사용량',
@@ -63,45 +61,29 @@ export function TopNavigation({
   } as const;
 
   const planClass = planBadgeStyle[planId as 'free' | 'pro' | 'enterprise'] ?? planBadgeStyle.free;
-  const planDotStyle = {
-    free: 'bg-slate-400/80',
-    pro: 'bg-white/80',
-    enterprise: 'bg-amber-600/80',
-  } as const;
-  const planDotClass = planDotStyle[planId as 'free' | 'pro' | 'enterprise'] ?? planDotStyle.free;
 
-  const workspaceRoot = '/workspace/studio';
-  const breadcrumbMap = [
-    { label: '워크스페이스', path: workspaceRoot },
-    { label: '스튜디오', path: '/workspace/studio' },
-    { label: '마켓플레이스', path: '/workspace/marketplace' },
-    { label: '지식 관리', path: '/workspace/knowledge' },
-    { label: '결제 설정', path: '/billing-settings' },
-  ] as const;
-
-  const currentSection =
-    breadcrumbMap.find(
-      (item) =>
-        item.path !== workspaceRoot &&
-        location.pathname.toLowerCase().startsWith(item.path.toLowerCase())
-    ) ?? breadcrumbMap[1];
-
-  const breadcrumbs = [
-    breadcrumbMap[0],
-    currentSection,
+  // Tab navigation items
+  const tabs: { id: WorkspaceTab; label: string }[] = [
+    { id: 'studio', label: '스튜디오' },
+    { id: 'marketplace', label: '마켓플레이스' },
+    { id: 'knowledge', label: '지식 관리' },
   ];
 
+  const handleTabClick = (tab: WorkspaceTab) => {
+    onTabChange?.(tab);
+  };
+
   return (
-    <div className="h-16 border-b border-white/60 bg-white/70 backdrop-blur-md shadow-[0_12px_40px_rgba(55,53,195,0.12)]">
-      <div className={cn("relative w-full h-full flex items-center justify-between pl-2 pr-4 md:pl-3 md:pr-6", contentClassName)}>
-        <div className="flex items-center gap-3 overflow-hidden">
+    <div className="h-16 border-b border-gray-200 bg-white sticky top-0 z-50">
+      <div className={cn("relative w-full h-full flex items-center justify-between", contentClassName)}>
+        {/* Left: Logo + Navigation Tabs */}
+        <div className="flex items-center gap-8">
+          {/* Logo */}
           <button
             onClick={onLogoClick ?? onHomeClick}
             className="cursor-pointer flex items-center gap-2"
           >
-            {showInlineLogo && (
-              <Logo className="h-8 w-8 text-[#5f5bff]" aria-label="SnapAgent Logo" />
-            )}
+            <Logo className="h-8 w-8 text-[#5f5bff]" aria-label="SnapAgent Logo" />
             <span
               className="font-bold text-xl bg-clip-text text-transparent"
               style={{
@@ -112,106 +94,96 @@ export function TopNavigation({
             </span>
           </button>
 
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            {breadcrumbs.map((crumb, idx) => (
-              <div key={crumb.path} className="flex items-center gap-1">
-                {idx > 0 && <ChevronRight size={14} className="text-gray-400" />}
-                <button
-                  onClick={() => navigate(crumb.path)}
-                  className={cn(
-                    'rounded px-2 py-1 transition-colors',
-                    idx === breadcrumbs.length - 1
-                      ? 'bg-gray-100 text-gray-700'
-                      : 'hover:bg-gray-100 hover:text-gray-700'
-                  )}
-                >
-                  {crumb.label}
-                </button>
-              </div>
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabClick(tab.id)}
+                className={cn(
+                  'px-3 py-1.5 text-xs rounded-md transition-colors',
+                  activeTab === tab.id
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                )}
+              >
+                {tab.label}
+              </button>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div
-            className={cn(
-              'inline-flex items-center justify-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 border shadow-sm backdrop-blur',
-              planClass
-            )}
-            aria-label={`현재 플랜: ${planName}`}
-          >
-            <span className={cn('inline-block h-2.5 w-2.5 rounded-full shadow-sm', planDotClass)} />
-            {planName}
+        {/* Right: Search + Plan + User */}
+        <div className="flex items-center gap-3">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => setFilters({ search: e.target.value })}
+              placeholder="Search..."
+              className="pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-64"
+            />
           </div>
+
+          {/* Plan Badge */}
+          <div className={cn('px-3 py-1.5 rounded-md text-xs', planClass)}>
+            {planName} Plan
+          </div>
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus:outline-none transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 rounded-full px-2 py-1 hover:bg-white/70">
-                <Avatar className="size-9">
-                  <AvatarFallback className="bg-[#3735c3] text-white">
+              <button className="flex items-center gap-1 pl-2 pr-1 py-1 hover:bg-gray-100 rounded-md transition-colors">
+                <Avatar className="w-7 h-7">
+                  <AvatarFallback className="bg-indigo-600 text-white text-sm">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium text-gray-800">{userName}</span>
+                <ChevronDown className="w-4 h-4 text-gray-600" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-0 rounded-2xl border border-white/70 shadow-[0_20px_60px_rgba(55,53,195,0.18)] backdrop-blur">
-              <div className="p-4 border-b border-indigo-50 bg-gradient-to-r from-white via-white to-indigo-50/50">
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-9">
-                    <AvatarFallback className="bg-[#3735c3] text-white">
+            <DropdownMenuContent align="end" className="w-56 p-0 rounded-lg border border-gray-200 shadow-lg">
+              <div className="p-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Avatar className="w-7 h-7">
+                    <AvatarFallback className="bg-indigo-600 text-white text-xs">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm">{userName}</p>
-                    <p className="text-xs text-gray-500">{userEmail}</p>
+                    <p className="text-xs font-medium">{userName}</p>
+                    <p className="text-[10px] text-gray-500">{userEmail}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="py-2">
+              <div className="py-1">
                 <DropdownMenuItem
-                  className="px-4 py-2 cursor-pointer hover:bg-indigo-50/80"
+                  className="px-2.5 py-1.5 cursor-pointer hover:bg-gray-50"
                   onClick={() => navigate('/billing-settings')}
                 >
-                  <CreditCard size={16} className="mr-3 text-[#3735c3]" />
-                  <span className="text-sm">{t.billing}</span>
+                  <CreditCard size={14} className="mr-2 text-gray-600" />
+                  <span className="text-xs">{t.billing}</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="px-4 py-2 cursor-pointer hover:bg-indigo-50/80">
-                  <Settings size={16} className="mr-3 text-[#3735c3]" />
-                  <span className="text-sm">{t.accountSettings}</span>
+                <DropdownMenuItem className="px-2.5 py-1.5 cursor-pointer hover:bg-gray-50">
+                  <Settings size={14} className="mr-2 text-gray-600" />
+                  <span className="text-xs">{t.accountSettings}</span>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                  <Link2 size={16} className="mr-3 text-gray-600" />
-                  <span className="text-sm">{t.linkSocialAccounts}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                  <KeyRound size={16} className="mr-3 text-gray-600" />
-                  <span className="text-sm">{t.changePassword}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                  <Bug size={16} className="mr-3 text-gray-600" />
-                  <span className="text-sm">{t.reportBug}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-                  <Palette size={16} className="mr-3 text-gray-600" />
-                  <span className="text-sm">{t.appearance}</span>
-                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 {onLogout && (
-                <DropdownMenuItem
-                  className="px-4 py-2 cursor-pointer text-red-600 focus:text-red-600"
-                  onClick={() => {
-                    void onLogout();
-                  }}
-                >
-                  <LogOut size={16} className="mr-3 text-gray-500" />
-                  <span className="text-sm">{t.signOut}</span>
-                </DropdownMenuItem>
-              )}
-            </div>
-          </DropdownMenuContent>
+                  <DropdownMenuItem
+                    className="px-2.5 py-1.5 cursor-pointer text-red-600 focus:text-red-600 hover:bg-gray-50"
+                    onClick={() => {
+                      void onLogout();
+                    }}
+                  >
+                    <LogOut size={14} className="mr-2" />
+                    <span className="text-xs">{t.signOut}</span>
+                  </DropdownMenuItem>
+                )}
+              </div>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
