@@ -191,7 +191,7 @@ const medalStyle = (rank?: number) => {
                 );
               })()}
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-bold leading-tight text-gray-900 line-clamp-1">
+                <h3 className="text-lg font-bold leading-tight text-gray-900 line-clamp-1">
                   {itemData.display_name}
                 </h3>
                 <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">

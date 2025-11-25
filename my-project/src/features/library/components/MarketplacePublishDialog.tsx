@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/button';
 import { Input } from '@/shared/components/input';
 import { Textarea } from '@/shared/components/textarea';
 import { Label } from '@/shared/components/label';
+import { Badge } from '@/shared/components/badge';
 import { Globe, Check, AlertCircle } from 'lucide-react';
 import { publishToMarketplace } from '@/features/marketplace/api/marketplaceApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';

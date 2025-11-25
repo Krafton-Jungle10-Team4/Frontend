@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import { MarketplaceSearchBar } from '@/features/marketplace/components/MarketplaceSearchBar';
 import { MarketplaceGrid } from '@/features/marketplace/components/MarketplaceGrid';
 import { MarketplaceItemCard } from '@/features/marketplace/components/MarketplaceItemCard';
@@ -11,14 +11,6 @@ import {
 import { useUIStore } from '@shared/stores/uiStore';
 import { cn } from '@/shared/components/utils';
 
-type CategoryFilter = 'all' | 'popular' | 'recent';
-
-const categoryFilters: { id: CategoryFilter; label: string }[] = [
-  { id: 'all', label: '모두' },
-  { id: 'popular', label: '인기' },
-  { id: 'recent', label: '최신' },
-];
-
 export function MarketplacePage() {
   const language = useUIStore(state => state.language);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -29,7 +21,6 @@ export function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   // keep track of the latest fetch to ignore stale responses
   const fetchRequestId = useRef(0);
 
@@ -40,7 +31,7 @@ export function MarketplacePage() {
       .slice(0, 3);
   }, [items]);
 
-  // 필터링된 아이템 (인기 템플릿 제외)
+  // 필터링된 아이템 (인기 템플릿 제외, 최신순 정렬)
   const filteredItems = useMemo(() => {
     const popularIds = new Set(popularItems.map((item) => item.id));
     let result = items.filter((item) => !popularIds.has(item.id));
@@ -52,16 +43,13 @@ export function MarketplacePage() {
       );
     }
 
-    if (categoryFilter === 'popular') {
-      result = [...result].sort((a, b) => (b.download_count ?? 0) - (a.download_count ?? 0));
-    } else if (categoryFilter === 'recent') {
-      result = [...result].sort((a, b) =>
-        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
-      );
-    }
+    // 항상 최신순 정렬
+    result = [...result].sort((a, b) =>
+      new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+    );
 
     return result;
-  }, [items, popularItems, categoryFilter, selectedTags]);
+  }, [items, popularItems, selectedTags]);
 
   const handleSortChange = (value: MarketplaceSortOption) => {
     setSortBy(value);
@@ -147,6 +135,7 @@ export function MarketplacePage() {
       {/* 인기 템플릿 섹션 */}
       <section className="mb-8">
         <div className="flex items-center gap-2 mb-4">
+          <Trophy className="w-5 h-5 text-yellow-500" />
           <h2 className="text-lg font-semibold text-gray-900">인기 템플릿</h2>
           <span className="text-xs text-gray-500">TOP 3</span>
         </div>
@@ -163,23 +152,11 @@ export function MarketplacePage() {
         )}
       </section>
 
-      {/* Filters + Search */}
+      {/* Header + Search */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          {categoryFilters.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setCategoryFilter(f.id)}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-sm transition-colors',
-                categoryFilter === f.id
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
+          <Sparkles className="w-5 h-5 text-blue-500" />
+          <h2 className="text-lg font-semibold text-gray-900">모든 템플릿</h2>
         </div>
         <MarketplaceSearchBar
           searchValue={searchQuery}

@@ -47,8 +47,13 @@ export function usePublishActions(botId: string) {
         throw new Error('발행할 Draft가 없습니다');
       }
 
-      toast.success('게시 성공', {
-        description: `${publishedVersion.version} 버전이 라이브러리에 게시되었습니다.`,
+      toast.success('버전 커밋 성공', {
+        description: `${publishedVersion.version} 버전이 성공적으로 커밋되었습니다.`,
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       // 3. 발행된 버전 ID 저장 및 배포 확인 모달 오픈

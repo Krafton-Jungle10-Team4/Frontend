@@ -131,7 +131,7 @@ export function WorkflowCard({
           <div className="min-w-0 flex-1">
             <h3
               className={cn(
-                'text-sm font-bold leading-tight transition-colors line-clamp-1',
+                'text-base font-bold leading-tight transition-colors line-clamp-1',
                 isDeployed
                   ? 'text-gray-900 group-hover:text-gray-700'
                   : 'text-gray-700'

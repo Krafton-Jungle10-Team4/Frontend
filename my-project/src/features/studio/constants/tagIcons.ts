@@ -1,5 +1,4 @@
 import {
-  Headphones,
   Megaphone,
   BarChart3,
   FileText,
@@ -21,7 +20,7 @@ export type DefaultTag = (typeof DEFAULT_TAGS)[number];
 export const TAG_ICON_MAP: Record<DefaultTag, LucideIcon> = {
   고객지원: Bot,
   마케팅: Megaphone,
-  데이터분석: Headphones,
+  데이터분석: BarChart3,
   문서작성: FileText,
   기타: Folder,
 };

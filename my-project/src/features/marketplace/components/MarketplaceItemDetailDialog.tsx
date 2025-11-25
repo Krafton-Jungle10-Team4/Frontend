@@ -194,10 +194,11 @@ export function MarketplaceItemDetailDialog({
                     e.stopPropagation();
                     handleViewAgent();
                   }}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-transform duration-300 hover:scale-105"
+                  className="relative flex items-center gap-2 !text-white !bg-blue-700 !border-blue-700 overflow-hidden group hover:scale-105 transition-transform duration-300"
                 >
-                  <Workflow className="w-4 h-4" />
-                  <span>자세히 보기</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                  <Workflow className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">자세히 보기</span>
                 </Button>
                 {item.category && (
                   <Badge variant="outline">{item.category}</Badge>
