@@ -197,7 +197,7 @@ export function MarketplaceItemDetailDialog({
                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-transform duration-300 hover:scale-105"
                 >
                   <Workflow className="w-4 h-4" />
-                  <span>서비스 보기</span>
+                  <span>자세히 보기</span>
                 </Button>
                 {item.category && (
                   <Badge variant="outline">{item.category}</Badge>

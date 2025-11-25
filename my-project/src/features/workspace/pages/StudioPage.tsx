@@ -7,6 +7,7 @@ import { selectFilteredAndSortedWorkflows } from '@/features/studio/stores/selec
 import { useBotCreateDialog } from '@/features/bot/hooks/useBotCreateDialog';
 import { BotCreateDialog } from '@/features/bot/components/BotCreateDialog';
 import { BotTagsDialog } from '@/features/bot/components/BotTagsDialog';
+import { DeploymentModal } from '@/features/deployment/components/DeploymentModal';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { toast } from 'sonner';
 import { cn } from '@/shared/components/utils';
@@ -69,6 +70,10 @@ export function StudioPage() {
   const [editingWorkflowTags, setEditingWorkflowTags] = useState<string[]>([]);
 
 
+  // 배포 관리 모달 상태
+  const [isDeploymentModalOpen, setIsDeploymentModalOpen] = useState(false);
+  const [selectedBotIdForDeployment, setSelectedBotIdForDeployment] = useState<string>('');
+
   useEffect(() => {
     void fetchWorkflows();
   }, [fetchWorkflows]);
@@ -126,7 +131,8 @@ export function StudioPage() {
   };
 
   const handleNavigateDeployment = (workflowId: string) => {
-    navigate(`/workspace/deployment/${workflowId}`);
+    setSelectedBotIdForDeployment(workflowId);
+    setIsDeploymentModalOpen(true);
   };
 
   const handleEditTags = (workflowId: string, currentTags: string[]) => {
@@ -371,6 +377,12 @@ export function StudioPage() {
         currentTags={editingWorkflowTags}
         onSave={handleSaveTags}
         language={language}
+      />
+
+      <DeploymentModal
+        open={isDeploymentModalOpen}
+        onOpenChange={setIsDeploymentModalOpen}
+        botId={selectedBotIdForDeployment}
       />
     </>
   );

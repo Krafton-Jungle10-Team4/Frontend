@@ -48,9 +48,53 @@ export function WorkflowGrid({
     agent?: LibraryAgentVersion;
   }>({ open: false });
 
-  const handlePublish = (workflow: Workflow) => {
-    setCurrentWorkflowForPublish(workflow);
-    setVersionSelectorDialog(true);
+  const handlePublish = async (workflow: Workflow) => {
+    try {
+      setCurrentWorkflowForPublish(workflow);
+
+      // 최신 게시 버전 조회
+      const publishedVersions = await workflowApi.listWorkflowVersions(workflow.id, {
+        status: 'published',
+      });
+
+      if (publishedVersions.length === 0) {
+        toast.error('게시할 버전이 없습니다', {
+          description: '먼저 워크플로우를 커밋하여 버전을 생성하세요.',
+        });
+        return;
+      }
+
+      // 최신 버전(첫 번째)
+      const latestVersion = publishedVersions[0];
+
+      // 버전 상세 정보 조회
+      const versionDetail = await workflowApi.getWorkflowVersionDetail(workflow.id, latestVersion.id);
+
+      // LibraryAgentVersion 형태로 변환
+      const agentVersion: LibraryAgentVersion = {
+        id: latestVersion.id,
+        bot_id: workflow.id,
+        version: versionDetail.version || '1.0',
+        status: 'published',
+        created_at: versionDetail.created_at || new Date().toISOString(),
+        updated_at: versionDetail.updated_at || new Date().toISOString(),
+        library_name: workflow.name,
+        library_description: workflow.description,
+        library_category: workflow.category,
+        library_tags: workflow.tags || [],
+        library_visibility: 'public',
+        is_in_library: false,
+        library_published_at: new Date().toISOString(),
+        node_count: versionDetail.node_count || 0,
+        edge_count: versionDetail.edge_count || 0,
+      };
+
+      // 바로 MarketplacePublishDialog 열기
+      setPublishDialog({ open: true, agent: agentVersion });
+    } catch (error) {
+      console.error('버전 정보 조회 실패:', error);
+      toast.error('버전 정보를 가져오는데 실패했습니다.');
+    }
   };
 
   const handleVersionSelected = async (botId: string, versionId: string, botName: string) => {

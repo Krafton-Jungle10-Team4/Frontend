@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import type { WorkflowVersionSummary } from '@/features/workflow/types/api.types';
 import { VersionHistoryModal } from './VersionHistoryModal';
 import { useDeploymentStore, selectWidgetConfig } from '../stores/deploymentStore';
+import { VersionBadge } from '@/features/workflow/components/VersionBadge';
 
 interface VersionSelectorProps {
   botId: string;
@@ -240,28 +241,28 @@ export function VersionSelector({
       {selectedVersion && (
         <div className="flex-1 space-y-6">
           {/* 상단: 배포됨/미배포 + 봇 이름 + 버전 (배포된 경우에만) */}
-          <div className="flex items-center gap-3">
+          <div className="space-y-3">
             {currentVersionId ? (
-              <Badge variant="default" className="px-4 py-1.5 text-base bg-green-100 text-green-700 border-green-200 font-semibold">
+              <Badge variant="default" className="px-4 py-1.5 text-sm bg-green-100 text-green-700 border-green-200 font-semibold">
                 배포됨
               </Badge>
             ) : (
-              <Badge variant="default" className="px-4 py-1.5 text-base bg-gray-100 text-gray-700 border-gray-200 font-semibold">
+              <Badge variant="default" className="px-4 py-1.5 text-sm bg-gray-100 text-gray-700 border-gray-200 font-semibold">
                 미배포
               </Badge>
             )}
-            {botName && (
-              <h3 className="text-xl font-bold text-gray-900">{botName}</h3>
-            )}
-            {currentVersionId && (
-              <Badge variant="outline" className="px-3 py-1 text-sm border-none bg-gray-100">
-                {selectedVersion.version}
-              </Badge>
-            )}
+            <div className="flex items-center gap-3">
+              {botName && (
+                <h3 className="text-xl font-bold text-gray-900">{botName}</h3>
+              )}
+              {currentVersionId && (
+                <VersionBadge version={selectedVersion.version} />
+              )}
+            </div>
           </div>
 
           {/* 구분선 */}
-          <div className="border-t border-gray-200 mx-4" />
+          <div className="border-t border-gray-200" />
 
           {/* 버전 선택 (미배포인 경우에만 표시) */}
           {!currentVersionId && (
@@ -318,12 +319,12 @@ export function VersionSelector({
               <dd className="flex items-center gap-2">
                 <button
                   onClick={handleCopyWidgetKey}
-                  className="p-1.5 hover:bg-blue-50 rounded-md transition-colors"
+                  className="p-1.5 hover:bg-blue-50 rounded-md transition-colors flex-shrink-0"
                   title="복사"
                 >
                   <Copy className="w-4 h-4 text-gray-600 hover:text-blue-600" />
                 </button>
-                <code className="font-mono text-xs text-gray-700 bg-gray-100 px-3 py-2 rounded-md flex-1">
+                <code className="font-mono text-xs text-gray-700 bg-gray-100 px-3 py-2 rounded-md flex-1 truncate">
                   {widgetKey}
                 </code>
               </dd>
@@ -341,11 +342,14 @@ export function VersionSelector({
               </dd>
             </div>
           )}
+
+          {/* 여백 추가 - 오른쪽 배포 방식 탭과 높이 맞춤 */}
+          <div className="flex-1" />
         </div>
       )}
 
       {/* 배포 버튼 */}
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-end gap-3 mt-6">
         {currentVersionId ? (
           <>
             <Button
