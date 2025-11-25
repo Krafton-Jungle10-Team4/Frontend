@@ -111,7 +111,7 @@ export function BotVersionSelectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[80vh]">
+      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
             {step === 'bot' ? '서비스' : '버전 선택'}
@@ -137,38 +137,36 @@ export function BotVersionSelectorDialog({
                 </p>
               </div>
             ) : (
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-2">
-                  {bots.map((bot) => (
-                    <button
-                      key={bot.id}
-                      onClick={() => handleBotSelect(bot)}
-                      className={cn(
-                        'w-full flex items-center justify-between p-4 rounded-lg border',
-                        'hover:bg-accent hover:border-accent-foreground/20 transition-colors',
-                        'text-left group'
-                      )}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-sm truncate">
-                            {bot.name}
-                          </h3>
-                          <Badge variant={bot.status === 'active' ? 'success' : 'default'}>
-                            {bot.status === 'active' ? '활성' : '비활성'}
-                          </Badge>
-                        </div>
-                        {bot.description && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {bot.description}
-                          </p>
-                        )}
+              <div className="space-y-2">
+                {bots.map((bot) => (
+                  <button
+                    key={bot.id}
+                    onClick={() => handleBotSelect(bot)}
+                    className={cn(
+                      'w-full flex items-center justify-between p-4 rounded-lg border',
+                      'hover:bg-accent hover:border-accent-foreground/20 transition-colors',
+                      'text-left group'
+                    )}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-sm truncate">
+                          {bot.name}
+                        </h3>
+                        <Badge variant={bot.status === 'active' ? 'success' : 'default'}>
+                          {bot.status === 'active' ? '활성' : '비활성'}
+                        </Badge>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-2" />
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
+                      {bot.description && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {bot.description}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-2" />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         ) : (
@@ -185,41 +183,39 @@ export function BotVersionSelectorDialog({
                 </p>
               </div>
             ) : (
-              <ScrollArea className="max-h-[450px] pr-4">
-                <div className="space-y-2">
-                  {versions.map((version) => (
-                    <button
-                      key={version.id}
-                      onClick={() => handleVersionSelect(version)}
-                      className={cn(
-                        'w-full flex items-center justify-between p-4 border transition-colors text-left',
-                        selectedVersion?.id === version.id
-                          ? 'bg-green-50 border-2 border-green-500'
-                          : 'border-gray-200 hover:bg-accent'
-                      )}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-sm">
-                            버전 {version.version}
-                          </h3>
-                          <Badge variant="outline">
-                            {version.status === 'published' ? '발행됨' : version.status}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(version.created_at).toLocaleString('ko-KR')}
-                        </p>
-                        {version.description && (
-                          <p className="text-xs text-muted-foreground mt-1 truncate">
-                            {version.description}
-                          </p>
-                        )}
+              <div className="space-y-2">
+                {versions.map((version) => (
+                  <button
+                    key={version.id}
+                    onClick={() => handleVersionSelect(version)}
+                    className={cn(
+                      'w-full flex items-center justify-between p-4 border transition-colors text-left',
+                      selectedVersion?.id === version.id
+                        ? 'bg-green-50 border-2 border-green-500'
+                        : 'border-gray-200 hover:bg-accent'
+                    )}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-sm">
+                          버전 {version.version}
+                        </h3>
+                        <Badge variant="outline">
+                          {version.status === 'published' ? '발행됨' : version.status}
+                        </Badge>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(version.created_at).toLocaleString('ko-KR')}
+                      </p>
+                      {version.description && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
+                          {version.description}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
