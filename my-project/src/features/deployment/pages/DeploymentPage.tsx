@@ -16,16 +16,11 @@ import {
 import { EmbedWebsiteDialog } from '../components/EmbedWebsiteDialog.tsx';
 import { ApiReferenceDialog } from '../components/ApiReferenceDialog.tsx';
 import { WorkflowApiReferenceDialog } from '../components/WorkflowApiReferenceDialog.tsx';
-import { IntegrationsPanel } from '@/features/integrations';
 import { VersionSelector } from '../components/VersionSelector.tsx';
 import { useApiKeyStore } from '../stores/apiKeyStore.ts';
-import { APIEndpointSection } from '../components/APIEndpointSection.tsx';
-import { APIKeySection } from '../components/APIKeySection.tsx';
-import { CodeExamplesSection } from '../components/CodeExamplesSection.tsx';
-import { APITestSection } from '../components/APITestSection.tsx';
 import { botApi } from '@/features/bot/api/botApi';
 
-type TabType = 'deployment' | 'api' | 'slack';
+type TabType = 'deployment';
 
 export function DeploymentPage() {
   const { botId } = useParams<{ botId: string }>();
@@ -39,8 +34,7 @@ export function DeploymentPage() {
   const openEmbedDialog = useDeploymentStore((state) => state.openEmbedDialog);
   const openApiDialog = useDeploymentStore((state) => state.openApiDialog);
 
-  const { apiKeys, isLoading: isApiKeysLoading, fetchApiKeys } = useApiKeyStore();
-  const [activeTab, setActiveTab] = useState<TabType>('deployment');
+  const { apiKeys, fetchApiKeys } = useApiKeyStore();
   const [botName, setBotName] = useState<string>('Agent');
   const [showWorkflowApiDialog, setShowWorkflowApiDialog] = useState(false);
   const [lastCreatedApiKey, setLastCreatedApiKey] = useState<string | null>(null);
@@ -117,12 +111,6 @@ export function DeploymentPage() {
   }
 
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'deployment', label: '배포 현황' },
-    { id: 'api', label: 'API 설정' },
-    { id: 'slack', label: 'Slack 연동' },
-  ];
-
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[90%] p-8 space-y-6">
@@ -139,193 +127,142 @@ export function DeploymentPage() {
 
         <div className="space-y-4">
           <h1 className="text-3xl font-bold">배포 관리</h1>
-
-          {/* 탭 네비게이션 */}
-          <div className="border-b border-gray-200">
-            <div className="flex gap-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
-                    activeTab === tab.id
-                      ? 'text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* 탭별 콘텐츠 */}
-        {activeTab === 'deployment' && (
-          <div className="grid grid-cols-2 gap-6">
-            {/* 좌측 컬럼 - 배포할 버전 선택 */}
-            <section className="rounded-lg border p-6 space-y-3 bg-white transition-all duration-200">
-              <VersionSelector
-                botId={botId!}
-                currentVersionId={deploymentInfo.currentVersionId}
-                preSelectedVersionId={selectedVersionIdFromState}
-                widgetKey={deploymentInfo.widgetKey}
-                allowedDomains={deploymentInfo.allowedDomains}
-                botName={deploymentInfo.botName}
-                onDeploySuccess={() => {
-                  fetchDeployment(botId!);
-                }}
-              />
-            </section>
+        <div className="grid grid-cols-2 gap-6">
+          {/* 좌측 컬럼 - 배포할 버전 선택 */}
+          <section className="rounded-lg border p-6 space-y-3 bg-white transition-all duration-200">
+            <VersionSelector
+              botId={botId!}
+              currentVersionId={deploymentInfo.currentVersionId}
+              preSelectedVersionId={selectedVersionIdFromState}
+              widgetKey={deploymentInfo.widgetKey}
+              allowedDomains={deploymentInfo.allowedDomains}
+              botName={deploymentInfo.botName}
+              onDeploySuccess={() => {
+                fetchDeployment(botId!);
+              }}
+            />
+          </section>
 
-            {/* 우측 컬럼 - 배포 방식 */}
-            <section className="rounded-lg border p-6 space-y-4 bg-white transition-all duration-200">
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold">배포 방식</h2>
-                <p className="text-sm text-muted-foreground">
-                  서비스를 배포할 방식을 선택하세요
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                {canRunApp ? (
-                  <Button
-                    variant="outline"
-                    onClick={handleRunApp}
-                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
-                    style={{
-                      backgroundImage: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundImage = 'none';
-                    }}
-                  >
-                    <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">앱 실행</span>
-                    <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">별도 창에서 앱을 실행합니다</span>
-                  </Button>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex w-full">
-                        <Button
-                          variant="outline"
-                          disabled
-                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
-                        >
-                          <span className="text-base font-semibold">앱 실행</span>
-                          <span className="text-xs text-muted-foreground">별도 창에서 앱을 실행합니다</span>
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>{runAppDisabledReason}</TooltipContent>
-                  </Tooltip>
-                )}
-                {deployment ? (
-                  <Button
-                    variant="outline"
-                    onClick={openEmbedDialog}
-                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
-                    style={{
-                      backgroundImage: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundImage = 'none';
-                    }}
-                  >
-                    <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">사이트에 삽입</span>
-                    <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">웹사이트에 임베드할 코드를 생성합니다</span>
-                  </Button>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex w-full">
-                        <Button
-                          variant="outline"
-                          disabled
-                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
-                        >
-                          <span className="text-base font-semibold">사이트에 삽입</span>
-                          <span className="text-xs text-muted-foreground">웹사이트에 임베드할 코드를 생성합니다</span>
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>배포 후 사용 가능합니다</TooltipContent>
-                  </Tooltip>
-                )}
-                {deployment ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowWorkflowApiDialog(true)}
-                    className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
-                    style={{
-                      backgroundImage: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundImage = 'none';
-                    }}
-                  >
-                    <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">API 참조</span>
-                    <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">API 엔드포인트 정보를 확인합니다</span>
-                  </Button>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex w-full">
-                        <Button
-                          variant="outline"
-                          disabled
-                          className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
-                        >
-                          <span className="text-base font-semibold">API 참조</span>
-                          <span className="text-xs text-muted-foreground">API 엔드포인트 정보를 확인합니다</span>
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>배포 후 사용 가능합니다</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activeTab === 'api' && (
-          <div className="grid grid-cols-2 gap-6">
-            {/* 좌측 컬럼 */}
-            <div className="space-y-6">
-              <APIEndpointSection />
-              <APIKeySection
-                botId={botId!}
-                apiKeys={apiKeys}
-                isLoading={isApiKeysLoading}
-                onApiKeyCreated={setLastCreatedApiKey}
-              />
+          {/* 우측 컬럼 - 배포 방식 */}
+          <section className="rounded-lg border p-6 space-y-4 bg-white transition-all duration-200">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">배포 방식</h2>
+              <p className="text-sm text-muted-foreground">
+                서비스를 배포할 방식을 선택하세요
+              </p>
             </div>
-
-            {/* 우측 컬럼 */}
-            <div className="space-y-6">
-              <CodeExamplesSection botId={botId!} apiKeys={apiKeys} />
-              <APITestSection botId={botId!} apiKeys={apiKeys} />
+            <div className="grid grid-cols-1 gap-3">
+              {canRunApp ? (
+                <Button
+                  variant="outline"
+                  onClick={handleRunApp}
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  style={{
+                    backgroundImage: 'none',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundImage = 'none';
+                  }}
+                >
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">앱 실행</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">별도 창에서 앱을 실행합니다</span>
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex w-full">
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                      >
+                        <span className="text-base font-semibold">앱 실행</span>
+                        <span className="text-xs text-muted-foreground">별도 창에서 앱을 실행합니다</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>{runAppDisabledReason}</TooltipContent>
+                </Tooltip>
+              )}
+              {deployment ? (
+                <Button
+                  variant="outline"
+                  onClick={openEmbedDialog}
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  style={{
+                    backgroundImage: 'none',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundImage = 'none';
+                  }}
+                >
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">사이트에 삽입</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">웹사이트에 임베드할 코드를 생성합니다</span>
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex w-full">
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                      >
+                        <span className="text-base font-semibold">사이트에 삽입</span>
+                        <span className="text-xs text-muted-foreground">웹사이트에 임베드할 코드를 생성합니다</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>배포 후 사용 가능합니다</TooltipContent>
+                </Tooltip>
+              )}
+              {deployment ? (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowWorkflowApiDialog(true)}
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  style={{
+                    backgroundImage: 'none',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundImage = 'none';
+                  }}
+                >
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">API 참조</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">API 엔드포인트 정보를 확인합니다</span>
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex w-full">
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
+                      >
+                        <span className="text-base font-semibold">API 참조</span>
+                        <span className="text-xs text-muted-foreground">API 엔드포인트 정보를 확인합니다</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>배포 후 사용 가능합니다</TooltipContent>
+                </Tooltip>
+              )}
             </div>
-          </div>
-        )}
+          </section>
+        </div>
 
-        {activeTab === 'slack' && (
-          <div className="rounded-lg border p-6 bg-white transition-all duration-200">
-            <IntegrationsPanel botId={botId} />
-          </div>
-        )}
 
         <EmbedWebsiteDialog />
         <ApiReferenceDialog />
