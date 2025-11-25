@@ -69,9 +69,9 @@ export const IF_ELSE_NODE_TYPE: NodeTypeResponse = {
 
 export const QUESTION_CLASSIFIER_NODE_TYPE: NodeTypeResponse = {
   type: BlockEnum.QuestionClassifier,
-  label: 'Question Classifier',
+  label: '질문 분류기',
   icon: QUESTION_CLASSIFIER_ICON,
-  description: 'Classify questions into predefined categories using AI',
+  description: '질문 분류 노드',
   max_instances: -1,
   configurable: true,
   default_data: {

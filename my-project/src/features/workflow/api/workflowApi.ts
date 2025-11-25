@@ -42,6 +42,10 @@ const DEFAULT_WORKFLOW_VARIABLES = {
   conversation_variables: {},
 };
 
+const NODE_TYPE_LABELS: Record<string, string> = {
+  'question-classifier': '질문 분류기',
+};
+
 const NODE_TYPE_DESCRIPTIONS: Record<string, string> = {
   start: '워크플로우의 시작점',
   end: '워크플로우의 종료점',
@@ -325,7 +329,7 @@ const mapNodeTypeResponse = (raw: any): NodeTypeResponse => {
 
   return {
     type: raw.type,
-    label: raw.label ?? raw.name ?? raw.type,
+    label: NODE_TYPE_LABELS[raw.type] ?? raw.label ?? raw.name ?? raw.type,
     icon: raw.icon ?? raw.type,
     category: raw.category,
     description: raw.description || NODE_TYPE_DESCRIPTIONS[raw.type] || '',
