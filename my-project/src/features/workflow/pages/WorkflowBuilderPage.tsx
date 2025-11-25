@@ -229,12 +229,10 @@ export const WorkflowBuilderPage = () => {
           userName={userName}
           userEmail={userEmail}
           onHomeClick={() => navigate('/workspace/studio')}
-          language={language}
-          onLanguageChange={setLanguage}
           onLogout={handleLogout}
-          currentPage={botName}
-          showSidebarToggle={false}
-          showInlineLogo
+          contentClassName="px-20"
+          activeTab={workspaceActiveTab}
+          onTabChange={handleWorkspaceTabChange}
         />
 
         {/* Content */}
