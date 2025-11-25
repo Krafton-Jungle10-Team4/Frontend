@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, Search, Tag as TagIcon, X } from 'lucide-react';
+import { Search, Tag as TagIcon, X } from 'lucide-react';
 import { Badge } from '@shared/components/badge';
 import { cn } from '@shared/components/utils';
 import {
@@ -27,11 +27,6 @@ interface MarketplaceSearchBarProps {
   onSortChange: (sortBy: MarketplaceSortOption) => void;
 }
 
-const SORT_OPTIONS: Record<MarketplaceSortOption, string> = {
-  latest: '최근 등록순',
-  popular: '다운로드 순',
-  views: '조회수 순',
-};
 
 export function MarketplaceSearchBar({
   searchValue,
@@ -44,12 +39,6 @@ export function MarketplaceSearchBar({
 }: MarketplaceSearchBarProps) {
   const [tagSearchQuery, setTagSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const getNextSort = (current: MarketplaceSortOption): MarketplaceSortOption => {
-    const sequence: MarketplaceSortOption[] = ['latest', 'popular', 'views'];
-    const currentIndex = sequence.indexOf(current);
-    const nextIndex = currentIndex === -1 || currentIndex === sequence.length - 1 ? 0 : currentIndex + 1;
-    return sequence[nextIndex];
-  };
 
   const getTagButtonLabel = () => {
     if (selectedTags.length === 0) return '모든 태그';
@@ -186,23 +175,6 @@ export function MarketplaceSearchBar({
             </DropdownMenu>
           </TooltipProvider>
 
-          {/* 정렬 아이콘 (순환) */}
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  aria-label={`정렬: ${SORT_OPTIONS[sortBy]}`}
-                  onClick={() => onSortChange(getNextSort(sortBy))}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
-                >
-                  <Clock className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{SORT_OPTIONS[sortBy]}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       </div>
 
