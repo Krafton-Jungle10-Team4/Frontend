@@ -3,12 +3,9 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/stores/authStore';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Header } from '../components/Header';
-import { WorkspaceSidebar } from '../components/WorkspaceSidebar';
 import { useWorkspaceStore } from '@/shared/stores/workspaceStore';
-import { useState } from 'react';
 
 export function WorkspaceLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
@@ -43,12 +40,7 @@ export function WorkspaceLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f1f2f5] overflow-x-hidden">
-      <WorkspaceSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isOpen={isSidebarOpen}
-      />
+    <div className="flex h-screen bg-[#f8f9fb] overflow-x-hidden">
       <div className="flex-1 flex flex-col overflow-auto overflow-x-hidden">
         <Header
           activeTab={activeTab}
@@ -57,8 +49,6 @@ export function WorkspaceLayout() {
           userEmail={user?.email || ''}
           onLogout={handleLogout}
           onLogoClick={() => navigate('/landing')}
-          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-          isSidebarOpen={isSidebarOpen}
         />
         <div className="flex-1 overflow-auto overflow-x-hidden">
           <Outlet />

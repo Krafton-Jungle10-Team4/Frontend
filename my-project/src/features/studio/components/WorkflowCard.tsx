@@ -104,7 +104,7 @@ export function WorkflowCard({
       className={cn(
         'group relative bg-white rounded-lg border border-gray-200 p-4',
         'shadow-sm transition-all duration-200 cursor-pointer',
-        'hover:shadow-md hover:-translate-y-1'
+        'hover:border-gray-300 hover:shadow-sm'
       )}
       onClick={handleCardClick}
     >

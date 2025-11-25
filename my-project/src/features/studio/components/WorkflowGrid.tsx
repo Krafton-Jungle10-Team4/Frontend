@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { WorkflowCard } from './WorkflowCard';
-import { CreateAgentCard } from './CreateAgentCard';
 import { VersionHistoryModal } from '@/features/deployment/components/VersionHistoryModal';
 import { StudioDeploymentOptionsDialog } from './StudioDeploymentOptionsDialog';
 import { EditWorkflowDialog } from './EditWorkflowDialog';
@@ -16,8 +15,6 @@ import { toast } from 'sonner';
 interface WorkflowGridProps {
   workflows: Workflow[];
   sortBy: SortOption;
-  onCreateBlank: () => void;
-  onCreateFromTemplate: () => void;
   onOpenWorkflow: (workflowId: string) => void;
   onNavigateDeployment?: (workflowId: string) => void;
   onEditTags?: (workflowId: string, currentTags: string[]) => void;
@@ -26,8 +23,6 @@ interface WorkflowGridProps {
 export function WorkflowGrid({
   workflows,
   sortBy,
-  onCreateBlank,
-  onCreateFromTemplate,
   onOpenWorkflow,
   onNavigateDeployment,
   onEditTags,
@@ -143,12 +138,7 @@ export function WorkflowGrid({
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        <CreateAgentCard
-          onCreateBlank={onCreateBlank}
-          onCreateFromTemplate={onCreateFromTemplate}
-        />
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {sortedWorkflows.map((workflow) => (
             <WorkflowCard
               key={workflow.id}

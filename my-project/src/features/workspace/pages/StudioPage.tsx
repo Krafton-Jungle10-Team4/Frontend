@@ -1,22 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SearchAndFilters } from '@/features/studio/components/SearchAndFilters';
+import { Plus, ChevronRight } from 'lucide-react';
 import { WorkflowGrid } from '@/features/studio/components/WorkflowGrid';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 import {
   selectFilteredAndSortedWorkflows,
-  selectAvailableTags,
   selectWorkflowStats,
 } from '@/features/studio/stores/selectors';
 import { useBotCreateDialog } from '@/features/bot/hooks/useBotCreateDialog';
 import { BotCreateDialog } from '@/features/bot/components/BotCreateDialog';
 import { BotTagsDialog } from '@/features/bot/components/BotTagsDialog';
-import { BotVersionSelectorDialog } from '@/features/studio/components/BotVersionSelectorDialog';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { toast } from 'sonner';
-import { botApi } from '@/features/bot/api/botApi';
-import { workflowApi } from '@/features/workflow/api/workflowApi';
 import { cn } from '@/shared/components/utils';
+
+type StatusFilter = 'all' | 'deployed' | 'draft';
+
+const statusFilters: { id: StatusFilter; label: string }[] = [
+  { id: 'all', label: '모두' },
+  { id: 'deployed', label: '배포됨' },
+  { id: 'draft', label: '진행중' },
+];
 
 export function StudioPage() {
   const navigate = useNavigate();
@@ -25,11 +29,8 @@ export function StudioPage() {
   const error = useWorkflowStore((state) => state.error);
   const filters = useWorkflowStore((state) => state.filters);
   const sortBy = useWorkflowStore((state) => state.sortBy);
-  const setFilters = useWorkflowStore((state) => state.setFilters);
-  const setSortBy = useWorkflowStore((state) => state.setSortBy);
   const fetchWorkflows = useWorkflowStore((state) => state.fetchWorkflows);
   const updateWorkflow = useWorkflowStore((state) => state.updateWorkflow);
-  const availableTags = useWorkflowStore((state) => state.availableTags);
   const stats = useWorkflowStore((state) => state.stats);
   const language = useUIStore((state) => state.language);
   const {
@@ -40,30 +41,32 @@ export function StudioPage() {
     createBot,
   } = useBotCreateDialog();
 
+  // 상태 필터
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
   // 태그 편집 다이얼로그 상태
   const [isTagsDialogOpen, setIsTagsDialogOpen] = useState(false);
   const [editingWorkflowId, setEditingWorkflowId] = useState<string>('');
   const [editingWorkflowTags, setEditingWorkflowTags] = useState<string[]>([]);
 
-  // 봇 버전 선택 다이얼로그 상태
-  const [isVersionSelectorOpen, setIsVersionSelectorOpen] = useState(false);
-  const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
 
   useEffect(() => {
     void fetchWorkflows();
   }, [fetchWorkflows]);
 
-  const filteredWorkflows = useMemo(
-    () => selectFilteredAndSortedWorkflows(workflows, filters, sortBy),
-    [workflows, filters, sortBy]
-  );
+  const filteredWorkflows = useMemo(() => {
+    let result = selectFilteredAndSortedWorkflows(workflows, filters, sortBy);
 
-  const sidebarTags = useMemo(() => {
-    if (availableTags.length > 0) {
-      return availableTags;
+    // 상태 필터 적용 (deploymentState 기준)
+    if (statusFilter === 'deployed') {
+      result = result.filter((w) => w.deploymentState === 'deployed');
+    } else if (statusFilter === 'draft') {
+      result = result.filter((w) => w.deploymentState !== 'deployed');
     }
-    return selectAvailableTags(workflows);
-  }, [availableTags, workflows]);
+
+    return result;
+  }, [workflows, filters, sortBy, statusFilter]);
+
 
   const workflowStats = useMemo(() => {
     const hasApiStats =
@@ -75,60 +78,7 @@ export function StudioPage() {
     return hasApiStats ? stats : selectWorkflowStats(workflows);
   }, [stats, workflows]);
 
-  const handleTagToggle = (tag: string) => {
-    const nextTags = filters.tags.includes(tag)
-      ? filters.tags.filter((t) => t !== tag)
-      : [...filters.tags, tag];
-    setFilters({ tags: nextTags });
-  };
 
-  const handleCreateFromTemplate = () => {
-    setIsVersionSelectorOpen(true);
-  };
-
-  const handleVersionSelect = async (botId: string, versionId: string, botName: string) => {
-    setIsCreatingFromTemplate(true);
-    try {
-      const versionDetail = await workflowApi.getWorkflowVersionDetail(botId, versionId);
-
-      // 1. 새 봇 생성 (빈 워크플로우로)
-      const newBot = await botApi.create({
-        name: `${botName} 복사본`,
-        description: `${botName}을 기반으로 생성됨`,
-        category: 'workflow',
-        workflow: {
-          nodes: [],
-          edges: [],
-        },
-      });
-
-      // 2. BotWorkflowVersion draft 생성 (템플릿 워크플로우 복사)
-      if (versionDetail.graph) {
-        await workflowApi.upsertDraftWorkflow(
-          newBot.id,
-          versionDetail.graph.nodes || [],
-          versionDetail.graph.edges || [],
-          {
-            environment_variables: versionDetail.environment_variables || {},
-            conversation_variables: versionDetail.conversation_variables || {},
-          }
-        );
-      }
-
-      toast.success('템플릿에서 새 서비스를 생성했습니다.');
-
-      await fetchWorkflows();
-
-      navigate(`/bot/${newBot.id}/workflow`, {
-        state: { botName: `${botName} 복사본` }
-      });
-    } catch (error) {
-      console.error('Failed to create bot from template:', error);
-      toast.error('템플릿에서 서비스 생성에 실패했습니다.');
-    } finally {
-      setIsCreatingFromTemplate(false);
-    }
-  };
 
   const handleOpenWorkflow = (workflowId: string) => {
     navigate(`/bot/${workflowId}/workflow`);
@@ -156,110 +106,80 @@ export function StudioPage() {
   };
 
   const statCards = [
-    {
-      label: '전체 봇',
-      value: workflowStats.total || filteredWorkflows.length,
-      tone: 'from-[#3735c3] to-[#5f5bff]',
-      hint: '등록된 봇 수',
-    },
-    {
-      label: '배포 완료',
-      value: workflowStats.deployed,
-      tone: 'from-[#5f5bff] to-[#3735c3]',
-      hint: '프로덕션 배포 상태',
-    },
+    { label: '총 서비스', value: workflowStats.total || filteredWorkflows.length },
+    { label: '배포 완료', value: workflowStats.deployed || 0 },
+    { label: '진행 중인 서비스', value: (workflowStats.total || filteredWorkflows.length) - (workflowStats.deployed || 0) },
   ];
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
-        <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
-          <div className="relative w-full px-5 py-6">
-            <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-gray-900 tracking-tight">STUDIO</span>
-                  <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
-                    {filteredWorkflows.length} 템플릿
-                  </span>
-                </div>
-                <p className="text-sm text-slate-600">
-                  템플릿 기반 서비스를 한곳에서 모아 관리하고 배포하세요.
-                </p>
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  {['생성', '관리', '배포'].map((label) => (
-                    <span
-                      key={label}
-                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-800 shadow-sm"
-                    >
-                      <span className="h-2 w-2 rounded-full bg-orange-500" />
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              </div>
+      <div className="px-20 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <span>Home</span>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-gray-900">Studio</span>
+        </div>
 
-              <div className="space-y-3 self-start w-full">
-                <div className="grid grid-cols-2 gap-3">
-                  {statCards.map((card, index) => {
-                    const isPrimaryCard = index === 0;
-                    return (
-                    <div
-                      key={card.label}
-                      className={cn(
-                        'relative overflow-hidden rounded-2xl border border-white/70 p-2.5',
-                        'shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between',
-                        isPrimaryCard ? 'bg-white' : 'bg-white/80'
-                      )}
-                    >
-                      <div className="relative space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">
-                          {card.label}
-                        </p>
-                        <p className="text-2xl font-bold text-slate-900">{card.value}</p>
-                        <p className="text-xs text-slate-500">{card.hint}</p>
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl mb-2">Studio</h1>
+            <p className="text-gray-600 text-sm">템플릿 기반 서비스를 한곳에서 모아 관리하고 배포해보세요.</p>
           </div>
+          <button
+            onClick={openCreateDialog}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            새 서비스
+          </button>
+        </div>
 
-          <div className="relative w-full space-y-4">
-            <div className="relative px-1 md:px-2 lg:px-3 py-3 md:py-4">
-              <SearchAndFilters
-                searchValue={filters.search}
-                onSearchChange={(value) => setFilters({ search: value })}
-                tags={sidebarTags}
-                selectedTags={filters.tags}
-                onTagToggle={handleTagToggle}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                stats={workflowStats}
-              />
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {statCards.map((stat) => (
+            <div key={stat.label} className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
+              <div className="text-2xl">{stat.value}</div>
             </div>
+          ))}
+        </div>
 
-            {loading ? (
-              <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
-            ) : error ? (
-              <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600">
-                <p className="text-sm">오류가 발생했습니다: {error.message}</p>
-              </div>
-            ) : (
-              <WorkflowGrid
-                workflows={filteredWorkflows}
-                sortBy={sortBy}
-                onCreateBlank={openCreateDialog}
-                onCreateFromTemplate={handleCreateFromTemplate}
-                onOpenWorkflow={handleOpenWorkflow}
-                onNavigateDeployment={handleNavigateDeployment}
-                onEditTags={handleEditTags}
-              />
-            )}
+        {/* Filters */}
+        <div className="flex items-center gap-2 mb-6">
+          {statusFilters.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setStatusFilter(f.id)}
+              className={cn(
+                'px-3 py-1.5 rounded-md text-sm transition-colors',
+                statusFilter === f.id
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Workflow Grid */}
+        {loading ? (
+          <div className="flex h-64 items-center justify-center text-slate-600">로딩 중...</div>
+        ) : error ? (
+          <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600">
+            <p className="text-sm">오류가 발생했습니다: {error.message}</p>
           </div>
-        </main>
+        ) : (
+          <WorkflowGrid
+            workflows={filteredWorkflows}
+            sortBy={sortBy}
+            onOpenWorkflow={handleOpenWorkflow}
+            onNavigateDeployment={handleNavigateDeployment}
+            onEditTags={handleEditTags}
+          />
+        )}
       </div>
 
       <BotCreateDialog
@@ -277,12 +197,6 @@ export function StudioPage() {
         currentTags={editingWorkflowTags}
         onSave={handleSaveTags}
         language={language}
-      />
-
-      <BotVersionSelectorDialog
-        open={isVersionSelectorOpen}
-        onOpenChange={setIsVersionSelectorOpen}
-        onSelect={handleVersionSelect}
       />
     </>
   );
