@@ -158,19 +158,22 @@ export function DeploymentPage() {
                 <Button
                   variant="outline"
                   onClick={handleRunApp}
-                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03] relative overflow-hidden"
                   style={{
-                    backgroundImage: 'none',
+                    backgroundImage: 'linear-gradient(90deg, #000000, #2563eb)',
+                    backgroundSize: '200% 100%',
+                    backgroundPosition: '100% 0',
+                    transition: 'background-position 0.5s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                    e.currentTarget.style.backgroundPosition = '0% 0';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundImage = 'none';
+                    e.currentTarget.style.backgroundPosition = '100% 0';
                   }}
                 >
-                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">앱 실행</span>
-                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">별도 창에서 앱을 실행합니다</span>
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors relative z-10">앱 실행</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors relative z-10">별도 창에서 앱을 실행합니다</span>
                 </Button>
               ) : (
                 <Tooltip>
@@ -193,19 +196,22 @@ export function DeploymentPage() {
                 <Button
                   variant="outline"
                   onClick={openEmbedDialog}
-                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03] relative overflow-hidden"
                   style={{
-                    backgroundImage: 'none',
+                    backgroundImage: 'linear-gradient(90deg, #000000, #2563eb)',
+                    backgroundSize: '200% 100%',
+                    backgroundPosition: '100% 0',
+                    transition: 'background-position 0.5s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                    e.currentTarget.style.backgroundPosition = '0% 0';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundImage = 'none';
+                    e.currentTarget.style.backgroundPosition = '100% 0';
                   }}
                 >
-                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">사이트에 삽입</span>
-                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">웹사이트에 임베드할 코드를 생성합니다</span>
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors relative z-10">사이트에 삽입</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors relative z-10">웹사이트에 임베드할 코드를 생성합니다</span>
                 </Button>
               ) : (
                 <Tooltip>
@@ -228,19 +234,22 @@ export function DeploymentPage() {
                 <Button
                   variant="outline"
                   onClick={() => setShowWorkflowApiDialog(true)}
-                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03]"
+                  className="group rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 border-gray-300 hover:border-[#2563eb] transition-all hover:scale-[1.03] relative overflow-hidden"
                   style={{
-                    backgroundImage: 'none',
+                    backgroundImage: 'linear-gradient(90deg, #000000, #2563eb)',
+                    backgroundSize: '200% 100%',
+                    backgroundPosition: '100% 0',
+                    transition: 'background-position 0.5s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundImage = 'linear-gradient(90deg, #2563eb, #2563eb)';
+                    e.currentTarget.style.backgroundPosition = '0% 0';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundImage = 'none';
+                    e.currentTarget.style.backgroundPosition = '100% 0';
                   }}
                 >
-                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">API 참조</span>
-                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">API 엔드포인트 정보를 확인합니다</span>
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors relative z-10">API 참조</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors relative z-10">API 엔드포인트 정보를 확인합니다</span>
                 </Button>
               ) : (
                 <Tooltip>
@@ -264,7 +273,7 @@ export function DeploymentPage() {
         </div>
 
 
-        <EmbedWebsiteDialog />
+        <EmbedWebsiteDialog botId={botId} />
         <ApiReferenceDialog />
         <WorkflowApiReferenceDialog
           open={showWorkflowApiDialog}

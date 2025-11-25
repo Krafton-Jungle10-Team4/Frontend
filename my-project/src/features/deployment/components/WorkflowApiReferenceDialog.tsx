@@ -42,14 +42,17 @@ function CodeEditor({ code, language: _language, onCopy, isCopied }: CodeEditorP
     setEditedCode(e.target.value);
   };
 
+  const lineCount = editedCode.split('\n').length;
+
   return (
     <div className="relative">
-      <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+      <div className="bg-gray-50 border border-gray-300 rounded-lg overflow-hidden">
         <textarea
           ref={textareaRef}
           value={editedCode}
           onChange={handleTextareaChange}
-          className="w-full min-h-[300px] p-4 text-[13px] leading-relaxed font-normal resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={lineCount}
+          className="w-full p-4 text-[13px] leading-relaxed font-normal resize-none bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           style={{
             fontFamily:
               'JetBrains Mono, Fira Code, SF Mono, Roboto Mono, Menlo, Monaco, Courier New, monospace',
@@ -213,113 +216,80 @@ console.log(data.outputs);`,
 
         {/* 콘텐츠 */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-          {/* Base URL 섹션 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Base URL</CardTitle>
-              <CardDescription>
-                API 요청의 기본 엔드포인트입니다
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono">
-                  {PUBLIC_API_BASE_URL}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCopy(PUBLIC_API_BASE_URL, 'base-url')}
-                  className="shrink-0"
-                >
-                  {copiedItem === 'base-url' ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1" />
-                      복사됨
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      복사
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* API 키 생성 버튼 */}
-          <div className="flex justify-center">
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              style={{ backgroundColor: '#2563eb' }}
-              className="hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03]"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              새 API 키 생성
-            </Button>
-          </div>
-
           {/* API 키 섹션 */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">API 키</CardTitle>
-              <CardDescription>
-                {generatedApiKey
-                  ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
-                  : plaintextApiKey
-                  ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
-                  : hasRealApiKey
-                  ? '워크플로우를 실행하기 위한 인증 키입니다'
-                  : '위 버튼을 클릭하여 API 키를 생성하세요'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono break-all">
-                  {displayApiKey}
-                </code>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1.5">
+                  <CardTitle className="text-base">API 키</CardTitle>
+                  <CardDescription>
+                    {generatedApiKey
+                      ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
+                      : plaintextApiKey
+                      ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
+                      : hasRealApiKey
+                      ? '워크플로우를 실행하기 위한 인증 키입니다'
+                      : 'API 키를 생성해주세요'}
+                  </CardDescription>
+                </div>
                 <Button
-                  variant="outline"
+                  onClick={() => setShowCreateDialog(true)}
                   size="sm"
-                  onClick={() => handleCopy(displayApiKey, 'api-key')}
-                  disabled={!hasRealApiKey}
-                  className="shrink-0"
+                  style={{ backgroundColor: '#2563eb' }}
+                  className="hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03] shrink-0"
                 >
-                  {copiedItem === 'api-key' ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1" />
-                      복사됨
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      복사
-                    </>
-                  )}
+                  <Plus className="mr-2 h-4 w-4" />
+                  새 API 키 생성
                 </Button>
               </div>
-
-              {!hasRealApiKey && (
-                <div className="mt-3 rounded-lg border border-yellow-400 bg-yellow-50 p-3">
+            </CardHeader>
+            <CardContent>
+              {!hasRealApiKey ? (
+                <div className="rounded-lg border border-yellow-400 bg-yellow-50 p-4">
                   <p className="text-sm text-gray-700 flex items-center gap-2">
                     <span>⚠️</span>
                     <span>
-                      활성화된 API 키가 없습니다. 위의 "새 API 키 생성" 버튼을 클릭하세요.
+                      활성화된 API 키가 없습니다. "새 API 키 생성" 버튼을 클릭하여 API 키를 생성하세요.
                     </span>
                   </p>
                 </div>
-              )}
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2 bg-gray-100 rounded-md text-xs font-mono break-all text-gray-700">
+                      {displayApiKey}
+                    </code>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopy(displayApiKey, 'api-key')}
+                      className="shrink-0"
+                    >
+                      {copiedItem === 'api-key' ? (
+                        <>
+                          <Check className="h-4 w-4 mr-1" />
+                          복사됨
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-1" />
+                          복사
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
-              {(generatedApiKey || plaintextApiKey) && (
-                <div className="mt-3 rounded-lg border border-green-400 bg-green-50 p-3">
-                  <p className="text-sm text-gray-700 flex items-center gap-2">
-                    <span>✅</span>
-                    <span>
-                      전체 API 키가 표시됩니다. 이 키는 다시 확인할 수 없으니 안전한 곳에 보관하세요.
-                    </span>
-                  </p>
-                </div>
+                  {(generatedApiKey || plaintextApiKey) && (
+                    <div className="mt-3 rounded-lg border border-green-400 bg-green-50 p-3">
+                      <p className="text-sm text-gray-700 flex items-center gap-2">
+                        <span>✅</span>
+                        <span>
+                          전체 API 키가 표시됩니다. 이 키는 다시 확인할 수 없으니 안전한 곳에 보관하세요.
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -334,28 +304,28 @@ console.log(data.outputs);`,
             </CardHeader>
             <CardContent className="space-y-4">
               <Tabs value={selectedLanguage} onValueChange={(val) => setSelectedLanguage(val as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 gap-2">
+                <TabsList className="inline-flex h-auto bg-transparent p-0 gap-1">
                   <TabsTrigger
                     value="curl"
-                    className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100"
+                    className="rounded-md px-4 py-2 transition-all duration-200 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=inactive]:text-gray-600 hover:text-gray-900"
                   >
                     cURL
                   </TabsTrigger>
                   <TabsTrigger
                     value="python"
-                    className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100"
+                    className="rounded-md px-4 py-2 transition-all duration-200 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=inactive]:text-gray-600 hover:text-gray-900"
                   >
                     Python
                   </TabsTrigger>
                   <TabsTrigger
                     value="javascript"
-                    className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100"
+                    className="rounded-md px-4 py-2 transition-all duration-200 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=inactive]:text-gray-600 hover:text-gray-900"
                   >
                     JavaScript
                   </TabsTrigger>
                   <TabsTrigger
                     value="typescript"
-                    className="rounded-md transition-all duration-200 hover:scale-[1.05] data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-sm bg-gray-100"
+                    className="rounded-md px-4 py-2 transition-all duration-200 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=inactive]:text-gray-600 hover:text-gray-900"
                   >
                     TypeScript
                   </TabsTrigger>

@@ -12,7 +12,7 @@
 export interface WidgetConfig {
   // 테마 설정
   theme?: 'light' | 'dark' | 'auto'; // 기본값: "light"
-  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'; // 기본값: "bottom-right"
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'bottom-center'; // 기본값: "bottom-right"
 
   // 자동 열기 설정
   auto_open?: boolean; // 기본값: false

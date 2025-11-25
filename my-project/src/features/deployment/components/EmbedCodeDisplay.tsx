@@ -53,10 +53,10 @@ export function EmbedCodeDisplay({
   const syntaxStyle = theme === 'dark' ? vscDarkPlus : vs;
 
   return (
-    <div className="relative rounded-lg border bg-muted/40 overflow-hidden">
+    <div className="relative rounded-lg border bg-gray-100 overflow-hidden">
       {/* 헤더: 언어 표시 + 복사 버튼 */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/20">
-        <span className="text-xs font-mono text-muted-foreground uppercase">
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-200">
+        <span className="text-xs font-mono text-gray-600 uppercase">
           {language}
         </span>
         <Button
@@ -80,7 +80,7 @@ export function EmbedCodeDisplay({
       </div>
 
       {/* 코드 블록 */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto bg-gray-50">
         <SyntaxHighlighter
           language={language}
           style={syntaxStyle}
