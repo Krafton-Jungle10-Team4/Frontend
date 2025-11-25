@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@shared/components/button';
 import { usePublishActions } from '../../hooks/usePublishActions';
 import { LibrarySaveDialog } from '../dialogs/LibrarySaveDialog';
@@ -15,6 +16,7 @@ interface PublishDropdownProps {
 }
 
 export function PublishDropdown({ botId }: PublishDropdownProps) {
+  const navigate = useNavigate();
   const { publishUpdate } = usePublishActions(botId);
 
   const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
@@ -40,6 +42,11 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
     setIsLibraryDialogOpen(true);
   };
 
+  // 커밋 성공 시 배포 관리 페이지로 이동
+  const handlePublishSuccess = () => {
+    navigate(`/workspace/deployment/${botId}`);
+  };
+
   return (
     <>
       <Button
@@ -58,6 +65,7 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
         onPublish={publishUpdate}
         defaultBotName={botName}
         botId={botId}
+        onSuccess={handlePublishSuccess}
       />
     </>
   );

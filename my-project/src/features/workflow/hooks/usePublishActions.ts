@@ -44,7 +44,7 @@ export function usePublishActions(botId: string) {
 
       if (!publishedVersion) {
         toast.error('발행할 Draft가 없습니다');
-        return;
+        throw new Error('발행할 Draft가 없습니다');
       }
 
       toast.success('게시 성공', {
@@ -60,6 +60,7 @@ export function usePublishActions(botId: string) {
       toast.error('게시 실패', {
         description: error.message || '게시 중 오류가 발생했습니다.',
       });
+      throw error;
     }
   }, [botId, saveWorkflow, publishWorkflow]);
 
