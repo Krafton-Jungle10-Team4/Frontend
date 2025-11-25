@@ -45,6 +45,13 @@ export function MarketplacePage() {
     const popularIds = new Set(popularItems.map((item) => item.id));
     let result = items.filter((item) => !popularIds.has(item.id));
 
+    // 태그 필터링
+    if (selectedTags.length > 0) {
+      result = result.filter((item) =>
+        selectedTags.some((tag) => item.tags?.includes(tag))
+      );
+    }
+
     if (categoryFilter === 'popular') {
       result = [...result].sort((a, b) => (b.download_count ?? 0) - (a.download_count ?? 0));
     } else if (categoryFilter === 'recent') {
@@ -54,7 +61,7 @@ export function MarketplacePage() {
     }
 
     return result;
-  }, [items, popularItems, categoryFilter]);
+  }, [items, popularItems, categoryFilter, selectedTags]);
 
   const handleSortChange = (value: MarketplaceSortOption) => {
     setSortBy(value);
@@ -113,11 +120,11 @@ export function MarketplacePage() {
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev => {
-      // single-select: choose the tag or clear if already selected
-      if (prev.length === 1 && prev[0] === tag) {
-        return [];
+      // multi-select: toggle tag on/off
+      if (prev.includes(tag)) {
+        return prev.filter((t) => t !== tag);
       }
-      return [tag];
+      return [...prev, tag];
     });
     setCurrentPage(1);
   };

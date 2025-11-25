@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut, CreditCard, Search, ChevronDown } from 'lucide-react';
+import { Settings, LogOut, CreditCard, ChevronDown } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
@@ -11,7 +11,6 @@ import {
 } from '@/shared/components/dropdown-menu';
 import { cn } from '@/shared/components/utils';
 import { Logo } from '@/shared/components/Logo';
-import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
 
 type WorkspaceTab = 'marketplace' | 'studio' | 'knowledge' | 'library';
 
@@ -39,10 +38,6 @@ export function TopNavigation({
   const navigate = useNavigate();
   const { isFreePlan, billingStatus } = useBilling();
   const userInitial = userName.charAt(0).toUpperCase();
-
-  // Global search state from workflow store
-  const searchValue = useWorkflowStore((state) => state.filters.search);
-  const setFilters = useWorkflowStore((state) => state.setFilters);
 
   const t = {
     billing: '결제 및 사용량',
@@ -113,20 +108,8 @@ export function TopNavigation({
           </div>
         </div>
 
-        {/* Right: Search + Plan + User */}
+        {/* Right: Plan + User */}
         <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(e) => setFilters({ search: e.target.value })}
-              placeholder="Search..."
-              className="pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-64"
-            />
-          </div>
-
           {/* Plan Badge */}
           <div className={cn('px-3 py-1.5 rounded-md text-xs', planClass)}>
             {planName} Plan
