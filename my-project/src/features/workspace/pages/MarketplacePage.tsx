@@ -140,8 +140,8 @@ export function MarketplacePage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl mb-2">Marketplace</h1>
-        <p className="text-gray-600 text-sm">커뮤니티 템플릿을 둘러보고 적용하세요.</p>
+        <h1 className="text-4xl font-bold mb-2">Marketplace</h1>
+        <p className="text-gray-600 text-base">커뮤니티 템플릿을 둘러보고 적용하세요.</p>
       </div>
 
       {/* 인기 템플릿 섹션 */}

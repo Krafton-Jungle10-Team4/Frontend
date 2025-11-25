@@ -38,14 +38,11 @@ interface BotCreateDialogProps {
 const translations = {
   ko: {
     title: '새 서비스 만들기',
-    description: '서비스의 이름과 설명을 입력하세요',
     nameLabel: '서비스 이름',
     namePlaceholder: '예: 고객 지원 도우미',
     descriptionLabel: '설명 (선택사항)',
     descriptionPlaceholder: '이 봇의 목적은 무엇인가요?',
     categoryLabel: '카테고리 태그',
-    categoryHelper:
-      '추천 태그(고객지원·마케팅·데이터분석·문서작성·기타) 중 하나를 고르면 카드 아이콘과 색상이 함께 설정됩니다.',
     cancel: '취소',
     create: '생성하기',
     creating: '생성 중...',
@@ -61,14 +58,20 @@ const TAG_DESCRIPTIONS: Record<DefaultTag, string> = {
   기타: '범용 태그로 자유롭게 활용',
 };
 
-const TAG_OPTIONS = DEFAULT_TAGS.map((tag) => ({
-  value: tag,
-  label: tag,
-  description: TAG_DESCRIPTIONS[tag],
-  background: TAG_BACKGROUND_MAP[tag],
-  color: TAG_ICON_COLOR_MAP[tag],
-  Icon: TAG_ICON_MAP[tag],
-}));
+const TAG_OPTIONS = DEFAULT_TAGS
+  .filter((tag) => tag !== '마케팅')
+  .sort((a, b) => {
+    const order = ['고객지원', '데이터분석', '문서작성', '기타'];
+    return order.indexOf(a) - order.indexOf(b);
+  })
+  .map((tag) => ({
+    value: tag,
+    label: tag,
+    description: TAG_DESCRIPTIONS[tag],
+    background: TAG_BACKGROUND_MAP[tag],
+    color: TAG_ICON_COLOR_MAP[tag],
+    Icon: TAG_ICON_MAP[tag],
+  }));
 
 const DEFAULT_SELECTED_TAG: DefaultTag =
   TAG_OPTIONS.find((option) => option.value === '기타')?.value ?? TAG_OPTIONS[0].value;
@@ -138,7 +141,6 @@ function BotCreateForm({
     <DialogContent className="max-w-lg">
       <DialogHeader>
         <DialogTitle>{t.title}</DialogTitle>
-        <DialogDescription>{t.description}</DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4 py-4">
@@ -174,12 +176,7 @@ function BotCreateForm({
         </div>
 
         <div className="space-y-3">
-          <div className="space-y-1">
-            <Label htmlFor="bot-category">{t.categoryLabel}</Label>
-            <p className="text-xs text-muted-foreground">
-              {t.categoryHelper}
-            </p>
-          </div>
+          <Label htmlFor="bot-category">{t.categoryLabel}</Label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {TAG_OPTIONS.map((option) => {
@@ -192,7 +189,7 @@ function BotCreateForm({
                   onClick={() => setSelectedTag(option.value)}
                   disabled={isCreating}
                   className={cn(
-                    'flex items-start gap-3 rounded-xl border p-3 text-left transition-all',
+                    'flex items-start gap-3 rounded-xl border p-3 text-left transition-all min-h-[100px]',
                     'hover:border-blue-400/60 hover:shadow-md',
                     isActive
                       ? 'border-blue-500 bg-white shadow-sm'
@@ -231,25 +228,6 @@ function BotCreateForm({
               );
             })}
           </div>
-
-          <div className="flex items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-[12px] text-gray-600">
-            <span
-              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-white"
-              style={{
-                backgroundColor: selectedOption.background,
-                color: selectedOption.color,
-                border: `1px solid ${selectedOption.color}30`,
-              }}
-            >
-              <SelectedIcon className="h-4 w-4 drop-shadow-sm" />
-            </span>
-            <div className="flex flex-col">
-              <span className="font-semibold text-gray-800">{selectedOption.label}</span>
-              <span className="text-[11px] text-gray-500">
-                이 태그가 카드 색상과 아이콘을 결정합니다.
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -262,9 +240,10 @@ function BotCreateForm({
             void handleSubmit();
           }}
           disabled={!botName.trim() || isCreating}
-          className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300"
+          className="relative bg-blue-700 text-white disabled:bg-gray-300 overflow-hidden group hover:scale-105 transition-transform duration-300"
         >
-          {isCreating ? t.creating : t.create}
+          <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+          <span className="relative z-10">{isCreating ? t.creating : t.create}</span>
         </Button>
       </DialogFooter>
     </DialogContent>

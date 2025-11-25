@@ -26,12 +26,12 @@ import {
   TooltipTrigger,
 } from '@/shared/components/tooltip';
 
-type StatusFilter = 'all' | 'deployed' | 'draft';
+type StatusFilter = 'all' | 'deployed' | 'published';
 
 const statusFilters: { id: StatusFilter; label: string }[] = [
   { id: 'all', label: '모두' },
   { id: 'deployed', label: '배포됨' },
-  { id: 'draft', label: '진행중' },
+  { id: 'published', label: '게시됨' },
 ];
 
 export function StudioPage() {
@@ -98,11 +98,11 @@ export function StudioPage() {
   const filteredWorkflows = useMemo(() => {
     let result = selectFilteredAndSortedWorkflows(workflows, filters, sortBy);
 
-    // 상태 필터 적용 (deploymentState 기준)
+    // 상태 필터 적용
     if (statusFilter === 'deployed') {
       result = result.filter((w) => w.deploymentState === 'deployed');
-    } else if (statusFilter === 'draft') {
-      result = result.filter((w) => w.deploymentState !== 'deployed');
+    } else if (statusFilter === 'published') {
+      result = result.filter((w) => w.marketplaceState === 'published');
     }
 
     // 태그 필터 적용
@@ -165,30 +165,31 @@ export function StudioPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl mb-2">Studio</h1>
-            <p className="text-gray-600 text-sm">템플릿 기반 서비스를 한곳에서 모아 관리하고 배포해보세요.</p>
+            <h1 className="text-4xl font-bold mb-2">Studio</h1>
+            <p className="text-gray-600 text-base">템플릿 기반 서비스를 한곳에서 모아 관리하고 배포해보세요.</p>
           </div>
           <button
             onClick={openCreateDialog}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+            className="relative flex items-center gap-2 px-4 py-2 bg-blue-700 text-white rounded-md overflow-hidden group hover:scale-105 transition-transform duration-300 text-sm"
           >
-            <Plus className="w-4 h-4" />
-            새 서비스
+            <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+            <Plus className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">새 서비스</span>
           </button>
         </div>
 
         {/* Filters + Tag Filter */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {statusFilters.map((f) => (
               <button
                 key={f.id}
                 onClick={() => setStatusFilter(f.id)}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-sm transition-colors',
+                  'px-3 py-1.5 text-xs rounded-md transition-colors',
                   statusFilter === f.id
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 )}
               >
                 {f.label}

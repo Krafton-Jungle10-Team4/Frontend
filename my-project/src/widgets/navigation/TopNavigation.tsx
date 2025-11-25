@@ -119,7 +119,7 @@ export function TopNavigation({
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1 pl-2 pr-1 py-1 hover:bg-gray-100 rounded-md transition-colors">
                 <Avatar className="w-7 h-7">
-                  <AvatarFallback className="bg-indigo-600 text-white text-sm">
+                  <AvatarFallback className="bg-blue-700 text-white text-sm">
                     {userInitial}
                   </AvatarFallback>
                 </Avatar>
@@ -130,7 +130,7 @@ export function TopNavigation({
               <div className="p-2.5 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <Avatar className="w-7 h-7">
-                    <AvatarFallback className="bg-indigo-600 text-white text-xs">
+                    <AvatarFallback className="bg-blue-700 text-white text-xs">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>

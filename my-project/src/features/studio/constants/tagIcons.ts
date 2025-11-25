@@ -19,25 +19,25 @@ export const DEFAULT_TAGS = [
 export type DefaultTag = (typeof DEFAULT_TAGS)[number];
 
 export const TAG_ICON_MAP: Record<DefaultTag, LucideIcon> = {
-  고객지원: Headphones,
+  고객지원: Bot,
   마케팅: Megaphone,
-  데이터분석: BarChart3,
+  데이터분석: Headphones,
   문서작성: FileText,
   기타: Folder,
 };
 
 export const TAG_BACKGROUND_MAP: Record<DefaultTag, string> = {
-  고객지원: '#CCFBF1',
+  고객지원: '#DBEAFE',
   마케팅: '#EDE9FE',
-  데이터분석: '#DBEAFE',
+  데이터분석: '#CCFBF1',
   문서작성: '#FEF3C7',
   기타: '#F3F4F6',
 };
 
 export const TAG_ICON_COLOR_MAP: Record<DefaultTag, string> = {
-  고객지원: '#0D9488',
+  고객지원: '#2563EB',
   마케팅: '#7C3AED',
-  데이터분석: '#2563EB',
+  데이터분석: '#0D9488',
   문서작성: '#D97706',
   기타: '#6B7280',
 };

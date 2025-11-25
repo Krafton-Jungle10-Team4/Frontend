@@ -54,20 +54,21 @@ export function PublishDropdown({ botId }: PublishDropdownProps) {
   return (
     <Button
       variant="outline"
-      className="!text-white !bg-blue-600 hover:!bg-blue-700 !border-blue-600 hover:!border-blue-700 transition-all duration-300 hover:scale-105"
+      className="relative !text-white !bg-blue-700 !border-blue-700 overflow-hidden group hover:scale-105 transition-transform duration-300"
       onClick={handlePublishClick}
       disabled={isPublishing}
     >
+      <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
       {isPublishing ? (
-        <>
+        <span className="relative z-10 flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
           커밋 중...
-        </>
+        </span>
       ) : (
-        <>
+        <span className="relative z-10 flex items-center gap-2">
           <GitCommit className="w-4 h-4" />
           버전 커밋
-        </>
+        </span>
       )}
     </Button>
   );
