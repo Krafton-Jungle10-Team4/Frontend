@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronRight } from 'lucide-react';
 import { WorkflowGrid } from '@/features/studio/components/WorkflowGrid';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
-import {
-  selectFilteredAndSortedWorkflows,
-  selectWorkflowStats,
-} from '@/features/studio/stores/selectors';
+import { selectFilteredAndSortedWorkflows } from '@/features/studio/stores/selectors';
 import { useBotCreateDialog } from '@/features/bot/hooks/useBotCreateDialog';
 import { BotCreateDialog } from '@/features/bot/components/BotCreateDialog';
 import { BotTagsDialog } from '@/features/bot/components/BotTagsDialog';
@@ -31,7 +28,6 @@ export function StudioPage() {
   const sortBy = useWorkflowStore((state) => state.sortBy);
   const fetchWorkflows = useWorkflowStore((state) => state.fetchWorkflows);
   const updateWorkflow = useWorkflowStore((state) => state.updateWorkflow);
-  const stats = useWorkflowStore((state) => state.stats);
   const language = useUIStore((state) => state.language);
   const {
     isOpen: isCreateDialogOpen,
@@ -68,17 +64,6 @@ export function StudioPage() {
   }, [workflows, filters, sortBy, statusFilter]);
 
 
-  const workflowStats = useMemo(() => {
-    const hasApiStats =
-      stats.total !== 0 ||
-      stats.running !== 0 ||
-      stats.stopped !== 0 ||
-      stats.error !== 0 ||
-      stats.pending !== 0;
-    return hasApiStats ? stats : selectWorkflowStats(workflows);
-  }, [stats, workflows]);
-
-
 
   const handleOpenWorkflow = (workflowId: string) => {
     navigate(`/bot/${workflowId}/workflow`);
@@ -105,12 +90,6 @@ export function StudioPage() {
     }
   };
 
-  const statCards = [
-    { label: '총 서비스', value: workflowStats.total || filteredWorkflows.length },
-    { label: '배포 완료', value: workflowStats.deployed || 0 },
-    { label: '진행 중인 서비스', value: (workflowStats.total || filteredWorkflows.length) - (workflowStats.deployed || 0) },
-  ];
-
   return (
     <>
       <div className="px-20 py-8">
@@ -122,10 +101,28 @@ export function StudioPage() {
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl mb-2">Studio</h1>
-            <p className="text-gray-600 text-sm">템플릿 기반 서비스를 한곳에서 모아 관리하고 배포해보세요.</p>
+        <div className="mb-8">
+          <h1 className="text-2xl mb-2">Studio</h1>
+          <p className="text-gray-600 text-sm">템플릿 기반 서비스를 한곳에서 모아 관리하고 배포해보세요.</p>
+        </div>
+
+        {/* Filters + New Service Button */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            {statusFilters.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setStatusFilter(f.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-sm transition-colors',
+                  statusFilter === f.id
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
           <button
             onClick={openCreateDialog}
@@ -134,34 +131,6 @@ export function StudioPage() {
             <Plus className="w-4 h-4" />
             새 서비스
           </button>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {statCards.map((stat) => (
-            <div key={stat.label} className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
-              <div className="text-2xl">{stat.value}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filters */}
-        <div className="flex items-center gap-2 mb-6">
-          {statusFilters.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setStatusFilter(f.id)}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-sm transition-colors',
-                statusFilter === f.id
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
         </div>
 
         {/* Workflow Grid */}
