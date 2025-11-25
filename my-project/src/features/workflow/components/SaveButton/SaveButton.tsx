@@ -35,7 +35,14 @@ export const SaveButton = () => {
 
       // 2. 저장
       await saveWorkflow(botId);
-      toast.success('워크플로우가 저장되었습니다');
+      toast.success('서비스가 저장되었습니다', {
+        description: '서비스를 성공적으로 저장했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
     } catch (error) {
       toast.error(getErrorMessage(error));
       console.error('Save failed:', error);

@@ -131,6 +131,11 @@ export function usePublishActions(botId: string) {
 
       toast.success('배포 완료', {
         description: 'Widget Key가 생성되었습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       return newDeployment.widget_key;

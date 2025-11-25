@@ -55,7 +55,14 @@ export function MarketplacePublisher({ workflowId }: MarketplacePublisherProps) 
     setLoading(true);
     try {
       await publishToMarketplace(publishConfig);
-      toast.success('마켓플레이스에 게시되었습니다');
+      toast.success('마켓플레이스에 게시되었습니다', {
+        description: '서비스가 성공적으로 게시되었습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
     } catch (error: any) {
       toast.error('게시 실패: ' + (error.message || '알 수 없는 오류'));
     } finally {

@@ -104,6 +104,11 @@ export function LibraryDeployDialog({
 
       toast.success('배포 성공', {
         description: `${agent.library_name} ${agent.version}이(가) 성공적으로 배포되었습니다.`,
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       onDeploySuccess?.();

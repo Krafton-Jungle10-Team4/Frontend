@@ -50,7 +50,12 @@ export function DeployConfirmDialog({
       });
 
       toast.success('배포 성공', {
-        description: '워크플로우가 성공적으로 배포되었습니다.',
+        description: '서비스가 성공적으로 배포되었습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       onDeploySuccess?.();

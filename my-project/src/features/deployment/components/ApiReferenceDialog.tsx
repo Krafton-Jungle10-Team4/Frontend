@@ -52,7 +52,14 @@ export function ApiReferenceDialog({ botId: _botId }: ApiReferenceDialogProps) {
     try {
       await navigator.clipboard.writeText(widgetKey);
       setIsCopied(true);
-      toast.success('Widget Key가 복사되었습니다');
+      toast.success('Widget Key가 복사되었습니다', {
+        description: 'Widget Key를 성공적으로 복사했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
 
       setTimeout(() => {
         setIsCopied(false);

@@ -147,6 +147,11 @@ export function VersionSelector({
       toast.success('배포 성공', {
         id: `deployment-success-${botId}`,
         description: 'Widget Key가 생성되었습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       onDeploySuccess?.();
@@ -170,6 +175,11 @@ export function VersionSelector({
       toast.success('배포 삭제 완료', {
         id: `deployment-delete-success-${botId}`,
         description: '배포가 성공적으로 삭제되었습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
       });
 
       setShowDeleteDialog(false);

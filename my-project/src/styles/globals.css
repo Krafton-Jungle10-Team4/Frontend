@@ -3443,3 +3443,25 @@ html {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* Toast 성공 알림 - 초록색 스타일 */
+.toast-success-green {
+  color: #059669 !important;
+}
+
+.toast-success-green [data-title] {
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+.toast-success-green [data-description] {
+  color: #047857 !important;
+}
+
+.toast-success-green [data-icon] {
+  color: #10B981 !important;
+}
+
+.toast-success-green svg {
+  color: #10B981 !important;
+}

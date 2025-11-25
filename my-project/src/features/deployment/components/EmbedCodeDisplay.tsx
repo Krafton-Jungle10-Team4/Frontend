@@ -34,7 +34,14 @@ export function EmbedCodeDisplay({
     try {
       await navigator.clipboard.writeText(code);
       setIsCopied(true);
-      toast.success('코드가 클립보드에 복사되었습니다');
+      toast.success('코드가 클립보드에 복사되었습니다', {
+        description: '예시 코드를 성공적으로 복사했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
 
       // onCopy 콜백 실행
       onCopy?.();

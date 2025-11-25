@@ -122,7 +122,14 @@ export function WorkflowApiReferenceDialog({
     try {
       await navigator.clipboard.writeText(text);
       setCopiedItem(itemName);
-      toast.success('복사되었습니다');
+      toast.success('복사되었습니다', {
+        description: '예시 코드를 성공적으로 복사했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
 
       setTimeout(() => {
         setCopiedItem(null);
@@ -454,7 +461,14 @@ console.log(data.outputs);`,
         onCreated={(plainKey) => {
           setGeneratedApiKey(plainKey);
           setShowCreateDialog(false);
-          toast.success('API 키가 생성되었습니다. 코드 예제에 자동으로 반영되었습니다.');
+          toast.success('API 키가 생성되었습니다', {
+            description: 'API 키가 코드 예제에 자동으로 반영되었습니다.',
+            className: 'toast-success-green',
+            style: {
+              border: '1px solid #10B981',
+              backgroundColor: '#F7FEF9',
+            },
+          });
         }}
       />
     </Dialog>

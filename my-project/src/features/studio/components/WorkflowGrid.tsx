@@ -162,21 +162,35 @@ export function WorkflowGrid({
         name: data.name,
         description: data.description,
       });
-      toast.success('워크플로우가 수정되었습니다.');
+      toast.success('서비스가 수정되었습니다', {
+        description: '서비스 정보를 성공적으로 수정했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
       await fetchWorkflows();
     } catch (error) {
-      console.error('워크플로우 수정 실패:', error);
-      toast.error('워크플로우 수정에 실패했습니다.');
+      console.error('서비스 수정 실패:', error);
+      toast.error('서비스 수정에 실패했습니다.');
     }
   };
 
   const handleDelete = async (workflow: Workflow) => {
     try {
       await deleteWorkflow(workflow.id);
-      toast.success('워크플로우가 삭제되었습니다.');
+      toast.success('서비스가 삭제되었습니다', {
+        description: '서비스를 성공적으로 삭제했습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
     } catch (error) {
-      console.error('워크플로우 삭제 실패:', error);
-      toast.error('워크플로우 삭제에 실패했습니다.');
+      console.error('서비스 삭제 실패:', error);
+      toast.error('서비스 삭제에 실패했습니다.');
     }
   };
 

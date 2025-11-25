@@ -59,7 +59,15 @@ export function MarketplaceItemDetailDialog({
       const { importMarketplaceWorkflow } = await import('../api/marketplaceApi');
       const result = await importMarketplaceWorkflow(item.id);
 
-      toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
+      toast.success('서비스를 내 스튜디오로 가져왔습니다', {
+        id: toastId,
+        description: '서비스를 성공적으로 가져왔습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
 
       onClose();
 
@@ -68,8 +76,8 @@ export function MarketplaceItemDetailDialog({
         state: { botName: result.bot_name }
       });
     } catch (error) {
-      console.error('워크플로우 가져오기 실패:', error);
-      toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
+      console.error('서비스 가져오기 실패:', error);
+      toast.error('서비스 가져오기에 실패했습니다.', { id: toastId });
     }
   };
 

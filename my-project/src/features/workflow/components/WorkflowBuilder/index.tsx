@@ -186,13 +186,21 @@ const WorkflowInner = () => {
       const { importMarketplaceWorkflow } = await import('@/features/marketplace/api/marketplaceApi');
       const result = await importMarketplaceWorkflow(marketplaceItemId);
 
-      toast.success('워크플로우를 내 스튜디오로 가져왔습니다.', { id: toastId });
+      toast.success('서비스를 내 스튜디오로 가져왔습니다', {
+        id: toastId,
+        description: '서비스를 성공적으로 가져왔습니다.',
+        className: 'toast-success-green',
+        style: {
+          border: '1px solid #10B981',
+          backgroundColor: '#F7FEF9',
+        },
+      });
 
       // 스튜디오 페이지로 이동
       navigate('/workspace/studio');
     } catch (error) {
       console.error('[WorkflowBuilder] Failed to import workflow:', error);
-      toast.error('워크플로우 가져오기에 실패했습니다.', { id: toastId });
+      toast.error('서비스 가져오기에 실패했습니다.', { id: toastId });
     }
   }, [searchParams, navigate]);
 
