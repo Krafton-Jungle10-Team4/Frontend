@@ -63,60 +63,11 @@ export function KnowledgePage() {
         };
       });
 
-      // 디버깅용 목업 데이터 추가
-      const mockKnowledge: Knowledge[] = [
-        {
-          id: 'mock-1',
-          user_id: 'user-1',
-          name: '제품 매뉴얼 가이드',
-          description: '제품 사용 방법과 주요 기능에 대한 상세 설명 문서입니다. 초보자도 쉽게 따라할 수 있습니다.',
-          tags: ['매뉴얼', 'PDF', '제품'],
-          document_count: 5,
-          documents: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'mock-2',
-          user_id: 'user-1',
-          name: 'API 레퍼런스 문서',
-          description: 'REST API 엔드포인트와 사용 예시를 포함한 개발자용 참조 문서입니다.',
-          tags: ['API', 'TXT'],
-          document_count: 3,
-          documents: [],
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          updated_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 'mock-3',
-          user_id: 'user-1',
-          name: '고객 FAQ 모음',
-          description: '자주 묻는 질문과 답변을 정리한 문서입니다.',
-          tags: ['FAQ', 'PDF', '고객지원', '문의'],
-          document_count: 12,
-          documents: [],
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          updated_at: new Date(Date.now() - 172800000).toISOString(),
-        },
-        {
-          id: 'mock-4',
-          user_id: 'user-1',
-          name: '내부 정책 문서',
-          description: '',
-          tags: [],
-          document_count: 1,
-          documents: [],
-          created_at: new Date(Date.now() - 259200000).toISOString(),
-          updated_at: new Date(Date.now() - 259200000).toISOString(),
-        },
-      ];
-
-      const combinedList = [...mockKnowledge, ...knowledgeList];
-      setKnowledgeList(combinedList);
+      setKnowledgeList(knowledgeList);
 
       // 태그 목록 추출 (상태 / 파일 확장자)
       const tagSet = new Set<string>();
-      combinedList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
+      knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
       setAllTags(Array.from(tagSet));
     } catch (err) {
       console.error('Failed to fetch documents:', err);
