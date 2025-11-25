@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { MarketplaceSearchBar } from '@/features/marketplace/components/MarketplaceSearchBar';
 import { MarketplaceGrid } from '@/features/marketplace/components/MarketplaceGrid';
 import { MarketplaceItemCard } from '@/features/marketplace/components/MarketplaceItemCard';
@@ -8,6 +9,15 @@ import {
   type MarketplaceSortOption,
 } from '@/features/marketplace/api/marketplaceApi';
 import { useUIStore } from '@shared/stores/uiStore';
+import { cn } from '@/shared/components/utils';
+
+type CategoryFilter = 'all' | 'popular' | 'recent';
+
+const categoryFilters: { id: CategoryFilter; label: string }[] = [
+  { id: 'all', label: '모두' },
+  { id: 'popular', label: '인기' },
+  { id: 'recent', label: '최신' },
+];
 
 export function MarketplacePage() {
   const language = useUIStore(state => state.language);
@@ -19,14 +29,32 @@ export function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   // keep track of the latest fetch to ignore stale responses
   const fetchRequestId = useRef(0);
-  const sortedByDownloads = [...items].sort(
-    (a, b) => (b.download_count ?? 0) - (a.download_count ?? 0)
-  );
-  const popularItems = sortedByDownloads.slice(0, 3);
-  const popularIds = new Set(popularItems.map((item) => item.id));
-  const sharedItems = items.filter((item) => !popularIds.has(item.id));
+
+  // 인기 템플릿 (다운로드 TOP 3)
+  const popularItems = useMemo(() => {
+    return [...items]
+      .sort((a, b) => (b.download_count ?? 0) - (a.download_count ?? 0))
+      .slice(0, 3);
+  }, [items]);
+
+  // 필터링된 아이템 (인기 템플릿 제외)
+  const filteredItems = useMemo(() => {
+    const popularIds = new Set(popularItems.map((item) => item.id));
+    let result = items.filter((item) => !popularIds.has(item.id));
+
+    if (categoryFilter === 'popular') {
+      result = [...result].sort((a, b) => (b.download_count ?? 0) - (a.download_count ?? 0));
+    } else if (categoryFilter === 'recent') {
+      result = [...result].sort((a, b) =>
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
+    }
+
+    return result;
+  }, [items, popularItems, categoryFilter]);
 
   const handleSortChange = (value: MarketplaceSortOption) => {
     setSortBy(value);
@@ -95,104 +123,78 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
-      <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
-        <div className="relative w-full px-5 py-6">
-          <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-gray-900 tracking-tight">MARKETPLACE</span>
-                <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
-                  {items.length} 템플릿
-                </span>
-              </div>
-              <p className="text-sm text-slate-600">
-                커뮤니티 템플릿을 둘러보고 적용하세요.
-              </p>
-            </div>
+    <div className="px-20 py-8">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <span>Home</span>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-gray-900">Marketplace</span>
+      </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 self-start w-full">
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">라이브 템플릿</p>
-                    <p className="text-2xl font-bold text-slate-900">{items.length}</p>
-                    <p className="text-xs text-slate-500">커뮤니티에 공유된 템플릿</p>
-                  </div>
-                  <div className="flex items-end gap-1 self-end text-indigo-500">
-                    {[68, 82, 74, 96, 88].map((v) => (
-                      <span
-                        key={v}
-                        className="inline-block w-2 rounded-full bg-indigo-500"
-                        style={{ height: `${v * 0.6}px` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl mb-2">Marketplace</h1>
+        <p className="text-gray-600 text-sm">커뮤니티 템플릿을 둘러보고 적용하세요.</p>
+      </div>
 
-              <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                <div className="relative space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">태그</p>
-                  <p className="text-2xl font-bold text-slate-900">{allTags.length || 0}개</p>
-                  <p className="text-xs text-slate-500">필터로 원하는 템플릿을 바로 찾기</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* 인기 템플릿 섹션 */}
+      <section className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">인기 템플릿</h2>
+          <span className="text-xs text-gray-500">TOP 3</span>
         </div>
+        {isLoading ? (
+          <div className="flex h-32 items-center justify-center text-sm text-gray-600">로딩 중...</div>
+        ) : popularItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {popularItems.map((item, idx) => (
+              <MarketplaceItemCard key={item.id} item={item} rank={idx + 1} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">표시할 인기 템플릿이 없습니다.</p>
+        )}
+      </section>
 
-        <div className="relative w-full space-y-4">
-          <div className="space-y-8">
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-600">인기 템플릿</p>
-                  <p className="text-lg font-bold text-slate-900">다운로드 TOP 3</p>
-                </div>
-              </div>
-              {isLoading ? (
-                <div className="flex h-32 items-center justify-center text-sm text-amber-700">로딩 중...</div>
-              ) : popularItems.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                  {popularItems.map((item, idx) => (
-                    <MarketplaceItemCard key={item.id} item={item} rank={idx + 1} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-amber-700">표시할 인기 템플릿이 없습니다.</p>
+      {/* Filters + Search */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          {categoryFilters.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setCategoryFilter(f.id)}
+              className={cn(
+                'px-3 py-1.5 rounded-md text-sm transition-colors',
+                categoryFilter === f.id
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
               )}
-            </section>
-
-            <section className="space-y-3">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">공유 템플릿</p>
-                  <p className="text-lg font-bold text-slate-900">라이브 템플릿</p>
-                </div>
-                <MarketplaceSearchBar
-                  searchValue={searchQuery}
-                  onSearchChange={handleSearchChange}
-                  tags={allTags}
-                  selectedTags={selectedTags}
-                  onTagToggle={handleTagToggle}
-                  sortBy={sortBy}
-                  onSortChange={handleSortChange}
-                />
-              </div>
-              <MarketplaceGrid
-                items={sharedItems}
-                loading={isLoading}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                language={language}
-                enableRanking={false}
-              />
-            </section>
-          </div>
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
-      </main>
+        <MarketplaceSearchBar
+          searchValue={searchQuery}
+          onSearchChange={handleSearchChange}
+          tags={allTags}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+        />
+      </div>
+
+      {/* Marketplace Grid */}
+      <MarketplaceGrid
+        items={filteredItems}
+        loading={isLoading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        language={language}
+        enableRanking={false}
+      />
     </div>
   );
 }

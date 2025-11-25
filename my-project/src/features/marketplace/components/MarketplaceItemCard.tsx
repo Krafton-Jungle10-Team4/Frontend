@@ -83,21 +83,18 @@ const medalStyle = (rank?: number) => {
       return {
         bg: '#FFD166',
         text: 'text-amber-900',
-        shadow: 'shadow-[0_16px_48px_rgba(255,204,112,0.35)] ring-1 ring-amber-200/80',
         border: 'border-amber-200',
       };
     case 2:
       return {
         bg: '#D8DBE2',
         text: 'text-slate-700',
-        shadow: 'shadow-[0_16px_44px_rgba(148,163,184,0.30)] ring-1 ring-slate-200/80',
         border: 'border-slate-200',
       };
     case 3:
       return {
         bg: '#e18b3d',
         text: 'text-orange-900',
-        shadow: 'shadow-[0_16px_44px_rgba(225,139,61,0.35)] ring-1 ring-orange-300/90',
         border: 'border-orange-300',
       };
     default:
@@ -163,10 +160,9 @@ const medalStyle = (rank?: number) => {
         {medal && (
           <div
             className={cn(
-              'absolute top-2 right-2 flex items-center gap-1 text-[10px] font-semibold border rounded-full px-2 py-1 shadow-sm',
+              'absolute top-2 right-2 flex items-center gap-1 text-[10px] font-semibold border rounded-full px-2 py-1',
               medal.text,
-              medal.border,
-              medal.shadow
+              medal.border
             )}
             style={{ backgroundColor: medal.bg }}
           >
@@ -206,11 +202,9 @@ const medalStyle = (rank?: number) => {
             </div>
           </div>
 
-          {itemData.description && (
-            <p className="text-xs text-gray-600 line-clamp-2 mb-3 mt-1">
-              {itemData.description.replace(/\s*서비스\s*$/, '')}
-            </p>
-          )}
+          <p className="text-xs text-gray-600 line-clamp-2 mb-3 mt-1 min-h-[32px]">
+            {itemData.description ? itemData.description.replace(/\s*서비스\s*$/, '') : '설명이 없습니다.'}
+          </p>
 
           <div className="flex flex-wrap gap-1.5 mb-3 justify-end">
             {itemData.tags && itemData.tags.length > 0 ? (
