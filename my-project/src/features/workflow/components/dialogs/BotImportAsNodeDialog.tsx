@@ -35,10 +35,9 @@ export function BotImportAsNodeDialog({
   const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
   const [expandedBotId, setExpandedBotId] = useState<string | null>(null);
   const [versionsMap, setVersionsMap] = useState<Record<string, WorkflowVersionSummary[]>>({});
-  const [selectedVersion, setSelectedVersion] = useState<WorkflowVersionSummary | null>(null);
   const [isLoadingBots, setIsLoadingBots] = useState(false);
   const [loadingVersionsMap, setLoadingVersionsMap] = useState<Record<string, boolean>>({});
-  const [isImporting, setIsImporting] = useState(false);
+  const [importingVersionId, setImportingVersionId] = useState<string | null>(null);
   const addNode = useWorkflowStore((state) => state.addNode);
 
   useEffect(() => {
@@ -46,10 +45,10 @@ export function BotImportAsNodeDialog({
       loadBots();
     } else {
       setSelectedBot(null);
-      setSelectedVersion(null);
       setExpandedBotId(null);
       setVersionsMap({});
       setLoadingVersionsMap({});
+      setImportingVersionId(null);
     }
   }, [open]);
 
@@ -93,34 +92,21 @@ export function BotImportAsNodeDialog({
       // 이미 확장된 봇 클릭 시 닫기
       setExpandedBotId(null);
       setSelectedBot(null);
-      setSelectedVersion(null);
     } else {
       // 새로운 봇 선택
       setExpandedBotId(bot.id);
       setSelectedBot(bot);
-      setSelectedVersion(null);
       await loadVersions(bot.id);
     }
   };
 
-  const handleVersionSelect = (version: WorkflowVersionSummary) => {
-    setSelectedVersion(version);
-  };
-
-  const handleImportAsNode = async () => {
-    if (!selectedBot || !selectedVersion) {
-      toast.error('선택 오류', {
-        description: '서비스과 버전을 모두 선택해주세요.',
-      });
-      return;
-    }
-
+  const handleVersionClick = async (bot: Bot, version: WorkflowVersionSummary) => {
     try {
-      setIsImporting(true);
+      setImportingVersionId(version.id);
 
       const versionDetail = await workflowApi.getWorkflowVersionDetail(
-        selectedBot.id,
-        selectedVersion.id
+        bot.id,
+        version.id
       );
 
       // PortDefinition 배열 형태로 input_schema와 output_schema 생성
@@ -162,10 +148,10 @@ export function BotImportAsNodeDialog({
       ];
 
       const agentData = {
-        id: selectedVersion.id,
-        library_name: selectedBot.name,
-        library_description: selectedBot.description || '',
-        version: selectedVersion.version.toString(),
+        id: version.id,
+        library_name: bot.name,
+        library_description: bot.description || '',
+        version: version.version.toString(),
         graph: versionDetail.graph,
         input_schema,
         output_schema,
@@ -181,7 +167,7 @@ export function BotImportAsNodeDialog({
       addNode(newNode);
 
       toast.success('노드 추가 완료', {
-        description: `${selectedBot.name} (v${selectedVersion.version})이(가) 캔버스에 추가되었습니다.`,
+        description: `${bot.name} (v${version.version})이(가) 캔버스에 추가되었습니다.`,
       });
 
       onImportSuccess?.();
@@ -192,7 +178,7 @@ export function BotImportAsNodeDialog({
         description: '노드 추가 중 오류가 발생했습니다.',
       });
     } finally {
-      setIsImporting(false);
+      setImportingVersionId(null);
     }
   };
 
@@ -288,47 +274,59 @@ export function BotImportAsNodeDialog({
                               "p-2 space-y-1",
                               versions.length > 3 && "max-h-[240px] overflow-y-auto"
                             )}>
-                              {versions.map((version) => (
-                                <button
-                                  key={version.id}
-                                  onClick={() => handleVersionSelect(version)}
-                                  className={cn(
-                                    'w-full flex items-center justify-between p-3 rounded-md border',
-                                    'transition-all duration-200 text-left',
-                                    selectedVersion?.id === version.id
-                                      ? 'bg-green-50/50 border-green-400 dark:bg-green-500/10 dark:border-green-500/50'
-                                      : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50'
-                                  )}
-                                >
-                                  <div className="flex-1 min-w-0 overflow-hidden">
-                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                      <h4 className="font-medium text-xs">
-                                        버전 {version.version}
-                                      </h4>
-                                      <Badge variant="outline" className="text-xs flex-shrink-0">
-                                        발행됨
-                                      </Badge>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      {new Date(version.created_at).toLocaleString('ko-KR')}
-                                    </p>
-                                    {version.description && (
-                                      <p
-                                        className="text-xs text-muted-foreground mt-1 overflow-hidden"
-                                        style={{
-                                          display: '-webkit-box',
-                                          WebkitLineClamp: 2,
-                                          WebkitBoxOrient: 'vertical',
-                                          wordBreak: 'break-word',
-                                          overflowWrap: 'break-word'
-                                        }}
-                                      >
-                                        {version.description}
-                                      </p>
+                              {versions.map((version) => {
+                                const isImporting = importingVersionId === version.id;
+                                return (
+                                  <button
+                                    key={version.id}
+                                    onClick={() => handleVersionClick(bot, version)}
+                                    disabled={isImporting}
+                                    className={cn(
+                                      'w-full flex items-center justify-between p-3 rounded-md border',
+                                      'transition-all duration-200 text-left',
+                                      isImporting
+                                        ? 'bg-blue-50/50 border-blue-400 dark:bg-blue-500/10 dark:border-blue-500/50 cursor-wait'
+                                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 hover:border-blue-300 dark:hover:border-blue-600'
                                     )}
-                                  </div>
-                                </button>
-                              ))}
+                                  >
+                                    <div className="flex-1 min-w-0 overflow-hidden">
+                                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <h4 className="font-medium text-xs">
+                                          버전 {version.version}
+                                        </h4>
+                                        <Badge variant="outline" className="text-xs flex-shrink-0">
+                                          발행됨
+                                        </Badge>
+                                        {isImporting && (
+                                          <Badge variant="default" className="text-xs flex-shrink-0 bg-blue-600">
+                                            가져오는 중...
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {new Date(version.created_at).toLocaleString('ko-KR')}
+                                      </p>
+                                      {version.description && (
+                                        <p
+                                          className="text-xs text-muted-foreground mt-1 overflow-hidden"
+                                          style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'break-word'
+                                          }}
+                                        >
+                                          {version.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {isImporting && (
+                                      <Loader2 className="h-4 w-4 animate-spin text-blue-600 flex-shrink-0 ml-2" />
+                                    )}
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -343,21 +341,7 @@ export function BotImportAsNodeDialog({
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            취소
-          </Button>
-          <Button
-            onClick={handleImportAsNode}
-            disabled={!selectedVersion || isImporting}
-            className="!bg-blue-600 hover:!bg-blue-700 !text-white transition-all duration-300 hover:scale-105"
-          >
-            {isImporting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                추가 중...
-              </>
-            ) : (
-              '노드로 가져오기'
-            )}
+            닫기
           </Button>
         </DialogFooter>
       </DialogContent>
