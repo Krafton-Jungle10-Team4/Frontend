@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Loader2, AlertCircle, Send, ShoppingBag, Maximize2, Bot } from 'lucide-react';
+import { Loader2, AlertCircle, Send, X, Bot } from 'lucide-react';
 import { Alert, AlertDescription } from '@shared/components/alert';
 import { widgetApi } from '../api/widgetApi';
 import { API_BASE_URL } from '@shared/constants/apiEndpoints';
@@ -35,7 +35,6 @@ export function WidgetChatPage() {
   const [messages, setMessages] = useState<WidgetMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [activeTab, setActiveTab] = useState<'chat' | 'notice'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingBufferRef = useRef('');
@@ -464,86 +463,77 @@ export function WidgetChatPage() {
   }
 
   return (
-    <div className={containerClasses}>
-      <header
-        className="px-4 py-4 text-white shadow-sm"
-        style={{ background: primaryColor }}
+    <>
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e5e7eb;
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #d1d5db;
+        }
+      `}</style>
+      <div className={containerClasses}>
+        <header
+        className="px-4 py-3 bg-white border-b border-gray-200 shadow-sm"
         role="banner"
         aria-label="서비스 헤더"
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3 flex-1">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <ShoppingBag className="w-6 h-6" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <div
+              className="p-2.5 rounded-2xl flex-shrink-0"
+              style={{ background: `${primaryColor}15` }}
+            >
+              <Bot className="w-6 h-6" style={{ color: primaryColor }} />
             </div>
             <div className="flex-1">
-              <h1 className="font-bold text-lg leading-tight">
+              <h1 className="font-semibold text-base text-gray-900 leading-tight">
                 {config?.config.bot_name || '서비스'}
               </h1>
-              <p className="text-sm opacity-90 mt-0.5">무엇을 물어보세요!</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span className="text-xs text-gray-500">온라인</span>
+              </div>
             </div>
           </div>
           <button
-            className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
-            aria-label="전체화면"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+            aria-label="닫기"
+            onClick={() => {
+              window.parent.postMessage({ type: 'CLOSE_WIDGET' }, '*');
+            }}
           >
-            <Maximize2 className="w-5 h-5" />
+            <X className="w-4 h-4 text-gray-600" />
           </button>
         </div>
       </header>
 
-      {/* 탭 네비게이션 */}
-      <div className="bg-white border-b">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'chat'
-                ? 'text-gray-900 border-b-2'
-                : 'text-gray-500'
-            }`}
-            style={{
-              borderColor: activeTab === 'chat' ? primaryColor : 'transparent',
-            }}
-          >
-            문의해주세요
-          </button>
-          <button
-            onClick={() => setActiveTab('notice')}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'notice'
-                ? 'text-gray-900 border-b-2'
-                : 'text-gray-500'
-            }`}
-            style={{
-              borderColor: activeTab === 'notice' ? primaryColor : 'transparent',
-            }}
-          >
-            공지사항 내역
-          </button>
-        </div>
-      </div>
-
       <main
-        className="flex-1 overflow-y-auto p-4 space-y-4"
+        className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
         role="log"
         aria-live="polite"
         aria-label="채팅 메시지"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#e5e7eb transparent',
+        } as React.CSSProperties}
       >
-        {activeTab === 'notice' ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6">
-            <Bot className="w-16 h-16 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-sm">공지사항이 없습니다</p>
-          </div>
-        ) : messages.length === 1 && messages[0].id === 'welcome' ? (
+        {messages.filter(msg => msg.id !== 'welcome').length === 0 && messages.find(msg => msg.id === 'welcome') ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             <Bot className="w-20 h-20 text-gray-300 mb-4" />
             <p className="text-gray-600 whitespace-pre-wrap">
-              {messages[0].content}
+              {messages.find(msg => msg.id === 'welcome')?.content}
             </p>
           </div>
         ) : (
-          messages.map((msg) => (
+          messages.filter(msg => msg.id !== 'welcome').map((msg) => (
           <article
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -590,24 +580,11 @@ export function WidgetChatPage() {
           </article>
           ))
         )}
-        {config?.config.show_typing_indicator && sending && activeTab === 'chat' && (
-          <div className="flex justify-start" role="status" aria-live="polite">
-            <div className="bg-white rounded-lg p-3 shadow-sm border">
-              <p className="text-sm text-gray-600">입력 중...</p>
-            </div>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </main>
 
-      {activeTab === 'chat' && (
-        <footer className="p-4 border-t bg-white">
-          <div className="mb-2">
-            <label htmlFor="chat-input" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <span className="text-gray-900">질문입력</span>
-            </label>
-          </div>
-          <form onSubmit={sendMessage} className="flex gap-2" aria-label="메시지 입력 폼">
+      <footer className="p-4 border-t bg-white">
+        <form onSubmit={sendMessage} className="flex gap-2" aria-label="메시지 입력 폼">
             <input
               ref={inputRef}
               type="text"
@@ -638,9 +615,9 @@ export function WidgetChatPage() {
               )}
             </button>
           </form>
-        </footer>
-      )}
-    </div>
+      </footer>
+      </div>
+    </>
   );
 }
 

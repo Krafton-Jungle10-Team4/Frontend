@@ -75,7 +75,7 @@ export function EmbedWebsiteDialog({ botId }: EmbedWebsiteDialogProps) {
             <DialogHeader className="mb-4">
               <DialogTitle>임베드 위젯 배포</DialogTitle>
               <DialogDescription>
-                챗봇의 스타일과 동작을 설정하세요
+                웹사이트에 임베드 코드를 붙여넣으면 챗봇 토글이 생성됩니다
               </DialogDescription>
             </DialogHeader>
 
@@ -89,7 +89,7 @@ export function EmbedWebsiteDialog({ botId }: EmbedWebsiteDialogProps) {
             <DialogHeader className="mb-4">
               <DialogTitle>임베드 코드</DialogTitle>
               <DialogDescription>
-                코드를 복사하여 웹사이트에 붙여넣으세요
+                코드를 복사하여 웹사이트의 head 태그 안에 붙여넣으세요
               </DialogDescription>
             </DialogHeader>
 

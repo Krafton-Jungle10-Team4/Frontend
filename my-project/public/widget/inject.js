@@ -232,32 +232,6 @@
         overflow: hidden;
       `;
 
-      const closeBtn = document.createElement('div');
-      closeBtn.innerHTML = '×';
-      closeBtn.style.cssText = `
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: rgba(0,0,0,0.1);
-        color: #333;
-        font-size: 24px;
-        line-height: 32px;
-        text-align: center;
-        cursor: pointer;
-        z-index: 1;
-        transition: background 0.2s;
-      `;
-      closeBtn.onmouseover = () => {
-        closeBtn.style.background = 'rgba(0,0,0,0.2)';
-      };
-      closeBtn.onmouseout = () => {
-        closeBtn.style.background = 'rgba(0,0,0,0.1)';
-      };
-      closeBtn.onclick = () => this.closeChat();
-
       const iframe = document.createElement('iframe');
       iframe.src = `${this.frontendUrl}/widget/chat/${this.widgetKey}`;
       iframe.style.cssText = 'width: 100%; height: 100%; border: none;';
@@ -269,7 +243,6 @@
         setTimeout(() => this.sendSessionToIframe(), 500);
       };
 
-      container.appendChild(closeBtn);
       container.appendChild(iframe);
       document.body.appendChild(container);
 
@@ -373,6 +346,12 @@
     attachEvents: function() {
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && this.isOpen) {
+          this.closeChat();
+        }
+      });
+
+      window.addEventListener('message', (event) => {
+        if (event.data?.type === 'CLOSE_WIDGET') {
           this.closeChat();
         }
       });
