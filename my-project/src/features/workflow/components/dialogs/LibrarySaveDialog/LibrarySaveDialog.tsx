@@ -37,6 +37,7 @@ interface LibrarySaveDialogProps {
   isPublishing?: boolean;
   defaultBotName?: string;
   botId: string;
+  onSuccess?: () => void;
 }
 
 interface FormData {
@@ -47,7 +48,7 @@ interface FormData {
 }
 
 export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
-  ({ open, onOpenChange, onPublish, isPublishing = false, defaultBotName = '', botId }) => {
+  ({ open, onOpenChange, onPublish, isPublishing = false, defaultBotName = '', botId, onSuccess }) => {
     const {
       register,
       handleSubmit,
@@ -141,6 +142,9 @@ export const LibrarySaveDialog = memo<LibrarySaveDialogProps>(
         setTags([]);
         setTagInput('');
         onOpenChange(false);
+
+        // 성공 콜백 호출 (네비게이션 등)
+        onSuccess?.();
       } catch (error) {
         console.error('Failed to publish workflow:', error);
       }
