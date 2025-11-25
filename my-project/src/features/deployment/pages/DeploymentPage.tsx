@@ -248,7 +248,7 @@ export function DeploymentPage() {
                     e.currentTarget.style.backgroundPosition = '100% 0';
                   }}
                 >
-                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors relative z-10">API 참조</span>
+                  <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors relative z-10">REST API</span>
                   <span className="text-xs text-muted-foreground group-hover:text-white transition-colors relative z-10">API 엔드포인트 정보를 확인합니다</span>
                 </Button>
               ) : (
@@ -260,7 +260,7 @@ export function DeploymentPage() {
                         disabled
                         className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
                       >
-                        <span className="text-base font-semibold">API 참조</span>
+                        <span className="text-base font-semibold">REST API</span>
                         <span className="text-xs text-muted-foreground">API 엔드포인트 정보를 확인합니다</span>
                       </Button>
                     </span>

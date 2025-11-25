@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from '@shared/components/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/card';
 import { Button } from '@shared/components/button';
 import { Copy, Check, Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -214,9 +213,9 @@ console.log(data.outputs);`,
         {/* 헤더 */}
         <div className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle>API 참조</DialogTitle>
+            <DialogTitle>API 참조 배포</DialogTitle>
             <DialogDescription>
-              워크플로우 API 엔드포인트 및 사용 예제
+              API 키를 생성하고 코드에서 다양하게 활용해보세요
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -224,33 +223,55 @@ console.log(data.outputs);`,
         {/* 콘텐츠 */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {/* API 키 섹션 */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <CardTitle className="text-base">API 키</CardTitle>
-                  <CardDescription>
-                    {generatedApiKey
-                      ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
-                      : plaintextApiKey
-                      ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
-                      : hasRealApiKey
-                      ? '워크플로우를 실행하기 위한 인증 키입니다'
-                      : 'API 키를 생성해주세요'}
-                  </CardDescription>
-                </div>
-                <Button
-                  onClick={() => setShowCreateDialog(true)}
-                  size="sm"
-                  style={{ backgroundColor: '#2563eb' }}
-                  className="hover:bg-[#1d4ed8] text-white transition-all duration-200 hover:scale-[1.03] shrink-0"
-                >
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1.5">
+                <h3 className="text-base font-semibold">API 키</h3>
+                <p className="text-sm text-muted-foreground">
+                  {generatedApiKey
+                    ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
+                    : plaintextApiKey
+                    ? '방금 생성된 API 키입니다 (전체 키가 표시됩니다)'
+                    : hasRealApiKey
+                    ? '워크플로우를 실행하기 위한 인증 키입니다'
+                    : 'API 키를 생성해주세요'}
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowCreateDialog(true)}
+                size="default"
+                className="relative overflow-hidden text-white transition-all duration-200 hover:scale-[1.03] shrink-0 border-0"
+                style={{
+                  backgroundColor: '#2563eb',
+                }}
+                onMouseEnter={(e) => {
+                  const overlay = e.currentTarget.querySelector('.gradient-overlay') as HTMLElement;
+                  if (overlay) {
+                    overlay.style.transform = 'translateX(0)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  const overlay = e.currentTarget.querySelector('.gradient-overlay') as HTMLElement;
+                  if (overlay) {
+                    overlay.style.transform = 'translateX(-100%)';
+                  }
+                }}
+              >
+                <div
+                  className="gradient-overlay absolute inset-0"
+                  style={{
+                    backgroundImage: 'linear-gradient(90deg, #000000 0%, #2563eb 100%)',
+                    transform: 'translateX(-100%)',
+                    transition: 'transform 0.5s ease-out',
+                  }}
+                />
+                <span className="relative z-10 flex items-center">
                   <Plus className="mr-2 h-4 w-4" />
                   새 API 키 생성
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
+                </span>
+              </Button>
+            </div>
+            <div>
               {!hasRealApiKey ? (
                 <div className="rounded-lg border border-yellow-400 bg-yellow-50 p-4">
                   <p className="text-sm text-gray-700 flex items-center gap-2">
@@ -298,18 +319,18 @@ console.log(data.outputs);`,
                   )}
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* 코드 예제 섹션 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">코드 예제</CardTitle>
-              <CardDescription>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold">코드 예제</h3>
+              <p className="text-sm text-muted-foreground mt-1">
                 다양한 언어로 API를 호출하는 방법을 확인하세요
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </p>
+            </div>
+            <div className="space-y-4">
               <Tabs value={selectedLanguage} onValueChange={(val) => setSelectedLanguage(val as any)} className="w-full">
                 <TabsList className="inline-flex h-auto bg-transparent p-0 gap-1">
                   <TabsTrigger
@@ -369,18 +390,18 @@ console.log(data.outputs);`,
                   </p>
                 </div>
               ) : null}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* 워크플로우 실행 엔드포인트 정보 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">워크플로우 실행</CardTitle>
-              <CardDescription>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold">워크플로우 실행</h3>
+              <p className="text-sm text-muted-foreground mt-1">
                 POST {PUBLIC_API_BASE_URL}/workflows/run
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+              </p>
+            </div>
+            <div className="space-y-3 text-sm">
               <div>
                 <h4 className="font-semibold mb-2">요청 헤더</h4>
                 <ul className="space-y-1 text-muted-foreground">
@@ -406,19 +427,19 @@ console.log(data.outputs);`,
                   <li>• <code>usage</code>: 토큰 사용량 정보</li>
                 </ul>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Rate Limit 정보 */}
           {hasRealApiKey && activeApiKey && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Rate Limit</CardTitle>
-                <CardDescription>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-semibold">Rate Limit</h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   현재 API 키의 사용 제한
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
+                </p>
+              </div>
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">분당 요청 제한:</span>
                   <span className="font-medium">{activeApiKey.rate_limit || 60}/분</span>
@@ -435,8 +456,8 @@ console.log(data.outputs);`,
                     </span>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
 

@@ -140,7 +140,7 @@ fetch('https://api.snapagent.store/api/v1/widget/chat', {
       <DialogContent className="w-[90vw] max-w-[90vw] sm:w-[80vw] sm:max-w-[80vw] lg:w-[70vw] lg:max-w-[70vw] xl:w-[60vw] xl:max-w-[60vw] max-h-[90vh] flex flex-col p-0">
         <div className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle>API 참조</DialogTitle>
+            <DialogTitle>API 참조 배포</DialogTitle>
             <DialogDescription>
             서비스 위젯 API 사용 방법 및 엔드포인트 정보
             </DialogDescription>

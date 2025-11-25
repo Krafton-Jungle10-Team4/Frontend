@@ -230,8 +230,8 @@ export function DeploymentModal({ open, onOpenChange, botId }: DeploymentModalPr
                           e.currentTarget.style.backgroundImage = 'none';
                         }}
                       >
-                        <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">API 참조</span>
-                        <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">API 엔드포인트 정보를 확인합니다</span>
+                        <span className="text-base font-semibold text-gray-700 group-hover:text-white transition-colors">REST API</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">API 키를 발급받고 엔드포인트 정보를 확인합니다</span>
                       </Button>
                     ) : (
                       <Tooltip>
@@ -243,7 +243,7 @@ export function DeploymentModal({ open, onOpenChange, botId }: DeploymentModalPr
                               className="w-full rounded-lg h-auto py-4 flex flex-col items-center gap-2 border-2 opacity-70"
                             >
                               <span className="text-base font-semibold">API 참조</span>
-                              <span className="text-xs text-muted-foreground">API 엔드포인트 정보를 확인합니다</span>
+                              <span className="text-xs text-muted-foreground">API 키를 생성하고 활용 가능한 코드를 생성합니다</span>
                             </Button>
                           </span>
                         </TooltipTrigger>
