@@ -1,22 +1,37 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { KnowledgeSearchBar } from '@/features/knowledge/components/KnowledgeSearchBar';
+import { ChevronRight, Plus, Search, Tag as TagIcon, X } from 'lucide-react';
 import { KnowledgeGrid } from '@/features/knowledge/components/KnowledgeGrid';
 import type { Knowledge } from '@/data/mockKnowledge';
 import { useUIStore } from '@shared/stores/uiStore';
 import { DocumentUploadModal } from '@/features/documents/components/monitoring/DocumentUploadModal';
 import { documentsApi } from '@/features/documents/api/documentsApi';
+import { cn } from '@/shared/components/utils';
+import { Badge } from '@/shared/components/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+} from '@/shared/components/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/shared/components/tooltip';
 
 export function KnowledgePage() {
   const { language } = useUIStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'name' | 'date'>('date');
+  const [tagSearchQuery, setTagSearchQuery] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [knowledgeList, setKnowledgeList] = useState<Knowledge[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const activeTagCount = selectedTags.length;
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -48,11 +63,60 @@ export function KnowledgePage() {
         };
       });
 
-      setKnowledgeList(knowledgeList);
+      // 디버깅용 목업 데이터 추가
+      const mockKnowledge: Knowledge[] = [
+        {
+          id: 'mock-1',
+          user_id: 'user-1',
+          name: '제품 매뉴얼 가이드',
+          description: '제품 사용 방법과 주요 기능에 대한 상세 설명 문서입니다. 초보자도 쉽게 따라할 수 있습니다.',
+          tags: ['매뉴얼', 'PDF', '제품'],
+          document_count: 5,
+          documents: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'mock-2',
+          user_id: 'user-1',
+          name: 'API 레퍼런스 문서',
+          description: 'REST API 엔드포인트와 사용 예시를 포함한 개발자용 참조 문서입니다.',
+          tags: ['API', 'TXT'],
+          document_count: 3,
+          documents: [],
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          updated_at: new Date(Date.now() - 86400000).toISOString(),
+        },
+        {
+          id: 'mock-3',
+          user_id: 'user-1',
+          name: '고객 FAQ 모음',
+          description: '자주 묻는 질문과 답변을 정리한 문서입니다.',
+          tags: ['FAQ', 'PDF', '고객지원', '문의'],
+          document_count: 12,
+          documents: [],
+          created_at: new Date(Date.now() - 172800000).toISOString(),
+          updated_at: new Date(Date.now() - 172800000).toISOString(),
+        },
+        {
+          id: 'mock-4',
+          user_id: 'user-1',
+          name: '내부 정책 문서',
+          description: '',
+          tags: [],
+          document_count: 1,
+          documents: [],
+          created_at: new Date(Date.now() - 259200000).toISOString(),
+          updated_at: new Date(Date.now() - 259200000).toISOString(),
+        },
+      ];
+
+      const combinedList = [...mockKnowledge, ...knowledgeList];
+      setKnowledgeList(combinedList);
 
       // 태그 목록 추출 (상태 / 파일 확장자)
       const tagSet = new Set<string>();
-      knowledgeList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
+      combinedList.forEach((k) => k.tags.forEach((tag) => tagSet.add(tag)));
       setAllTags(Array.from(tagSet));
     } catch (err) {
       console.error('Failed to fetch documents:', err);
@@ -90,15 +154,18 @@ export function KnowledgePage() {
 
   const sortedKnowledge = useMemo(() => {
     const sorted = [...filteredKnowledge];
-    if (sortBy === 'name') {
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-    } else {
-      sorted.sort((a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      );
-    }
+    sorted.sort((a, b) =>
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
     return sorted;
-  }, [filteredKnowledge, sortBy]);
+  }, [filteredKnowledge]);
+
+  const filteredTags = useMemo(() => {
+    if (!tagSearchQuery) return allTags;
+    return allTags.filter((tag) =>
+      tag.toLowerCase().includes(tagSearchQuery.toLowerCase())
+    );
+  }, [allTags, tagSearchQuery]);
 
   const handleTagClick = (tag: string) => {
     setSelectedTags((prev) =>
@@ -138,69 +205,192 @@ export function KnowledgePage() {
 
   return (
     <>
-      <div className="relative min-h-[calc(100vh-56px)] bg-[#f7f8fa] text-slate-900">
-        <main className="relative w-full flex-1 flex-col gap-6 px-5 md:px-8 lg:px-10 py-8">
-          <div className="relative w-full px-5 py-6">
-            <div className="relative grid gap-6 items-start lg:items-start lg:grid-cols-[1.4fr_1fr]">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-gray-900 tracking-tight">KNOWLEDGE</span>
-                  <span className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
-                    {sortedKnowledge.length} 문서
-                  </span>
-                </div>
-                <p className="text-sm text-slate-600">
-                  업로드된 지식을 한곳에서 관리하고 빠르게 검색하세요.
-                </p>
-              </div>
+      <div className="px-20 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <span>Home</span>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-gray-900">Knowledge</span>
+        </div>
 
-              <div className="space-y-3 self-start w-full">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                    <div className="relative space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">문서</p>
-                      <p className="text-2xl font-bold text-slate-900">{sortedKnowledge.length}</p>
-                      <p className="text-xs text-slate-500">업로드된 완료 문서</p>
-                    </div>
-                  </div>
-                  <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2.5 shadow-[0_8px_20px_rgba(55,53,195,0.12)] min-h-[96px] flex flex-col justify-between">
-                    <div className="relative space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-500">태그</p>
-                      <p className="text-2xl font-bold text-slate-900">{allTags.length || 0}개</p>
-                      <p className="text-xs text-slate-500">상태 / 확장자 기반 필터</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl mb-2">Knowledge</h1>
+            <p className="text-gray-600 text-sm">업로드된 지식을 한곳에서 관리하고 빠르게 검색하세요.</p>
+          </div>
+          <button
+            onClick={handleImportFromFile}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            새 문서
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <button
+              className="px-3 py-1.5 rounded-md text-sm transition-colors bg-gray-900 text-white"
+            >
+              모두
+            </button>
           </div>
 
-          <div className="relative w-full space-y-4">
-            <div className="relative px-1 md:px-2 lg:px-3 py-3 md:py-4">
-              <KnowledgeSearchBar
-                searchValue={searchQuery}
-                onSearchChange={setSearchQuery}
-                tags={allTags}
-                selectedTags={selectedTags}
-                onTagToggle={handleTagClick}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-              />
+          {/* Tag Filter + Search */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 justify-end">
+              <div className="flex items-center gap-1">
+                {/* 검색 토글 */}
+                <div className="relative flex items-center">
+                  <div
+                    className={cn(
+                      'flex items-center overflow-hidden transition-all duration-300 ease-out',
+                      isSearchExpanded ? 'w-72' : 'w-8'
+                    )}
+                  >
+                    {isSearchExpanded ? (
+                      <div className="relative w-full">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onBlur={() => {
+                            if (!searchQuery) {
+                              setIsSearchExpanded(false);
+                            }
+                          }}
+                          placeholder="문서 검색..."
+                          className="w-full h-8 pl-8 pr-8 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setIsSearchExpanded(false);
+                          }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <TooltipProvider delayDuration={300}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setIsSearchExpanded(true)}
+                              className={cn(
+                                'flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
+                                searchQuery.length > 0
+                                  ? 'text-gray-700'
+                                  : 'text-gray-400 hover:text-gray-500'
+                              )}
+                            >
+                              <Search className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            <p>검색</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                </div>
+
+                {/* 태그 필터 드롭다운 */}
+                <TooltipProvider delayDuration={300}>
+                  <DropdownMenu onOpenChange={(open) => !open && setTagSearchQuery('')}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className={cn(
+                              'flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
+                              selectedTags.length > 0
+                                ? 'text-gray-700'
+                                : 'text-gray-400 hover:text-gray-500'
+                            )}
+                          >
+                            <TagIcon className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>{selectedTags.length > 0 ? `태그 (${selectedTags.length})` : '모든 태그'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <DropdownMenuContent align="end" className="w-56">
+                      {/* 태그 검색 */}
+                      <div className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+                          <input
+                            type="text"
+                            value={tagSearchQuery}
+                            onChange={(e) => setTagSearchQuery(e.target.value)}
+                            placeholder="태그 검색..."
+                            className="w-full h-8 pl-8 pr-3 text-xs bg-gray-200 border border-transparent rounded-lg text-gray-700 placeholder:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-0 focus:bg-gray-50 focus:border-gray-400"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      {/* 태그 목록 */}
+                      <div className="max-h-[320px] overflow-y-auto">
+                        {allTags.length === 0 ? (
+                          <div className="px-2 py-1.5 text-sm text-gray-500">태그 없음</div>
+                        ) : filteredTags.length > 0 ? (
+                          filteredTags.map((tag) => (
+                            <DropdownMenuCheckboxItem
+                              key={tag}
+                              checked={selectedTags.includes(tag)}
+                              onCheckedChange={() => handleTagClick(tag)}
+                            >
+                              {tag}
+                            </DropdownMenuCheckboxItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-gray-500">검색 결과 없음</div>
+                        )}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TooltipProvider>
+              </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-3xl p-4 md:p-5">
-              <KnowledgeGrid
-                knowledgeList={sortedKnowledge}
-                loading={loading}
-                error={error}
-                language={language}
-                onImportFromFile={handleImportFromFile}
-                onKnowledgeClick={handleKnowledgeClick}
-                onDeleteKnowledge={handleDeleteKnowledge}
-              />
-            </div>
+            {/* 선택된 태그 */}
+            {selectedTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-end">
+                {selectedTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="group flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer transition-colors"
+                    onClick={() => handleTagClick(tag)}
+                  >
+                    <span>{tag}</span>
+                    <X className="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
-        </main>
+        </div>
+
+        {/* Knowledge Grid */}
+        <KnowledgeGrid
+          knowledgeList={sortedKnowledge}
+          loading={loading}
+          error={error}
+          language={language}
+          onKnowledgeClick={handleKnowledgeClick}
+          onDeleteKnowledge={handleDeleteKnowledge}
+        />
       </div>
 
       <DocumentUploadModal
