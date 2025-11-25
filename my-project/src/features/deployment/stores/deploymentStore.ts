@@ -61,7 +61,7 @@ const initialWidgetConfig: WidgetConfig = {
   position: 'bottom-right',
   auto_open: false,
   auto_open_delay: 5000,
-  welcome_message: '우리 커뮤니티에 존재하는\nAI가 확실하게 답변해 드립니다!',
+  welcome_message: '무엇이든 편하게 물어보세요😊',
   placeholder_text: '예: 이번 주말 데이트 룩 추천해줘, 30대 휴가를 함께해줘',
   primary_color: '#FF8B7B',
   bot_name: 'AI쇼핑 어시스턴트',
