@@ -50,7 +50,6 @@ export function DeploymentModal({ open, onOpenChange, botId }: DeploymentModalPr
   const [botName, setBotName] = useState<string>('Agent');
   const [showWorkflowApiDialog, setShowWorkflowApiDialog] = useState(false);
   const [lastCreatedApiKey, setLastCreatedApiKey] = useState<string | null>(null);
-  const [isAutoDeploying, setIsAutoDeploying] = useState(false);
 
   const selectedVersionIdFromState = (location.state as { selectedVersionId?: string })?.selectedVersionId;
 
@@ -72,54 +71,6 @@ export function DeploymentModal({ open, onOpenChange, botId }: DeploymentModalPr
     };
   }, [botId, fetchDeployment, fetchApiKeys, reset, open]);
 
-  useEffect(() => {
-    const autoDeployLatestVersion = async () => {
-      if (!open || !botId || deployment || isLoading || isAutoDeploying) {
-        return;
-      }
-
-      try {
-        setIsAutoDeploying(true);
-
-        const publishedVersions = await workflowApi.listWorkflowVersions(botId, {
-          status: 'published',
-        });
-
-        if (publishedVersions.length === 0) {
-          toast.error('게시된 버전이 없습니다', {
-            id: `no-published-version-${botId}`,
-            description: '워크플로우 빌더에서 "버전 커밋" 버튼을 클릭하여 버전을 생성하세요.',
-          });
-          return;
-        }
-
-        const latestVersion = publishedVersions[0];
-
-        await deploymentApi.createOrUpdate(botId, {
-          workflow_version_id: latestVersion.id,
-          status: 'published',
-          widget_config: widgetConfig,
-        });
-
-        toast.success('최신 버전으로 자동 배포되었습니다', {
-          id: `auto-deployment-success-${botId}`,
-          description: `버전 ${latestVersion.version}이(가) 배포되었습니다.`,
-        });
-
-        await fetchDeployment(botId);
-      } catch (error: any) {
-        console.error('Auto deployment error:', error);
-        toast.error('자동 배포 실패', {
-          id: `auto-deployment-error-${botId}`,
-          description: error.response?.data?.message || '배포 중 오류가 발생했습니다.',
-        });
-      } finally {
-        setIsAutoDeploying(false);
-      }
-    };
-
-    autoDeployLatestVersion();
-  }, [open, botId, deployment, isLoading, widgetConfig, fetchDeployment, isAutoDeploying]);
 
   const canRunApp =
     deployment?.status === 'published' && Boolean(deployment?.widget_key);
@@ -155,12 +106,12 @@ export function DeploymentModal({ open, onOpenChange, botId }: DeploymentModalPr
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto pr-1">
-            {isLoading || isAutoDeploying ? (
+            {isLoading ? (
               <div className="flex items-center justify-center min-h-[400px]">
                 <div className="flex flex-col items-center gap-3">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    {isAutoDeploying ? '최신 버전으로 배포 중...' : '배포 정보를 불러오는 중...'}
+                    배포 정보를 불러오는 중...
                   </p>
                 </div>
               </div>

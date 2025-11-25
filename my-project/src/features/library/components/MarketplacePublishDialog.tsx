@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,12 +10,12 @@ import { Button } from '@/shared/components/button';
 import { Input } from '@/shared/components/input';
 import { Textarea } from '@/shared/components/textarea';
 import { Label } from '@/shared/components/label';
-import { Badge } from '@/shared/components/badge';
 import { Globe, Check, AlertCircle } from 'lucide-react';
 import { publishToMarketplace } from '@/features/marketplace/api/marketplaceApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { toast } from 'sonner';
 import { useWorkflowStore } from '@/features/studio/stores/workflowStore';
+import { VersionBadge } from '@/features/workflow/components/VersionBadge';
 
 interface MarketplacePublishDialogProps {
   open: boolean;
@@ -85,15 +84,12 @@ export function MarketplacePublishDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:w-[50vw] sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="w-[90vw] sm:w-[45vw] sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
             마켓플레이스에 게시
           </DialogTitle>
-          <DialogDescription>
-            이 워크플로우를 전체 공개 마켓플레이스에 게시합니다. 모든 서비스 사용자가 검색하고 가져올 수 있습니다.
-          </DialogDescription>
         </DialogHeader>
 
         {isSuccess ? (
@@ -120,12 +116,10 @@ export function MarketplacePublishDialog({
               </div>
             </div>
 
-            {/* 워크플로우 정보 */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">워크플로우 버전:</span>
-                <Badge variant="outline" >{agent.version}</Badge>
-              </div>
+            {/* 워크플로우 버전 */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">워크플로우 버전</span>
+              <VersionBadge version={agent.version} />
             </div>
 
             {/* 표시 이름 */}
@@ -207,18 +201,20 @@ export function MarketplacePublishDialog({
             <Button
               onClick={handlePublish}
               disabled={isPublishing}
-              className="bg-blue-600 text-white hover:bg-blue-700"
+              variant="outline"
+              className="relative !text-white !bg-blue-700 !border-blue-700 overflow-hidden group hover:scale-105 transition-transform duration-300"
             >
+              <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
               {isPublishing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   게시 중...
-                </>
+                </span>
               ) : (
-                <>
-                  <Globe className="w-4 h-4 mr-2" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
                   마켓플레이스에 게시
-                </>
+                </span>
               )}
             </Button>
           </DialogFooter>
