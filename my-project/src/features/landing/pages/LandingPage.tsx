@@ -246,7 +246,7 @@ export function LandingPage() {
               </p>
               <div className="cta-row">
                 <button className="cta-btn" onClick={handleStartFree} disabled={isLoading}>
-                  무료로 시작하기 (Start Free)
+                  무료로 시작하기
                 </button>
                 <button className="ghost-btn subtle" onClick={handleScrollToShowcase}>
                   제품 구조 살펴보기
@@ -300,7 +300,7 @@ export function LandingPage() {
               <p className="eyebrow">Product Showcase</p>
               <h2>시각적 파이프라인, 그대로 프로덕션에 띄우세요.</h2>
               <p className="section-desc">
-                SnapShot 워크플로우 이미지를 그대로 임베드한 프로덕트 프레임. 빛을 머금은 유리 테두리와 추상 노드 장식이 엔터프라이즈 감성을 더합니다.
+                스튜디오에서 만든 워크플로우를 그대로 담은 프로덕트 프레임. 투명한 글라스 테두리와 노드 모션으로 엔터프라이즈 무드를 강조했습니다.
               </p>
             </div>
 
@@ -308,7 +308,7 @@ export function LandingPage() {
               <div className="frame-glow" />
               <div className="frame-header">
                 <div className="grain" />
-                <div className="breadcrumbs">snapagent.app / pipelines / builder</div>
+                <div className="breadcrumbs">snapagent.store / pipelines / studio</div>
                 <div className="status-dot" />
               </div>
               <div className="frame-body">
@@ -344,7 +344,7 @@ export function LandingPage() {
               <div className="feature-card large">
                 <div className="aurora" />
                 <div className="feature-title">Visual Node Editor</div>
-                <p className="feature-desc">직관적인 드래그 앤 드롭.</p>
+                <p className="feature-desc">직관적인 드래그 앤 드롭</p>
                 <div className="feature-visual sphere">
                   <div className="glass-sphere" />
                   <div className="micro-caption">노드 연동 상태 자동 저장</div>
@@ -356,13 +356,13 @@ export function LandingPage() {
 
               <div className="feature-card">
                 <div className="feature-title">Instant Deploy</div>
-                <p className="feature-desc">버튼 클릭 한 번으로 서버 생성.</p>
+                <p className="feature-desc">버튼 한 번으로 바로 배포</p>
                 <StatusBadge />
               </div>
 
               <div className="feature-card">
                 <div className="feature-title">Real-time Monitoring</div>
-                <p className="feature-desc">토큰 사용량 실시간 확인.</p>
+                <p className="feature-desc">토큰 사용량 실시간 확인</p>
                 <MiniGraph />
               </div>
             </div>
@@ -474,7 +474,7 @@ export function LandingPage() {
                   <div className="status-dot-small" />
                 </div>
                 <div className="benefit-title">코드 없이 즉시 배포</div>
-                <p className="benefit-desc">클릭 한 번으로 FastAPI 서버가 생성됩니다.</p>
+                <p className="benefit-desc">클릭 한 번이면 백엔드까지 자동 배포됩니다.</p>
               </div>
               <div className="benefit-card">
                 <div className="benefit-visual plugs">
@@ -538,12 +538,12 @@ export function LandingPage() {
                 <p className="eyebrow light">Ready to build</p>
                 <h2>지금 바로 시작하세요</h2>
                 <p className="section-desc light">
-                  신용카드 없이 바로 실험하고, 팀이 합류하면 즉시 확장하세요. © 2025 SnapAgent.
+                  결제 없이 바로 실험하고, 팀이 합류하면 즉시 확장하세요. © 2025 SnapAgent.
                 </p>
               </div>
               <div className="cta-row">
                 <button className="cta-btn strong" onClick={handleStartFree} disabled={isLoading}>
-                  Start Free
+                  시작하기
                 </button>
                 <button className="ghost-btn dark">엔터프라이즈 상담</button>
               </div>
