@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut, CreditCard, ChevronDown } from 'lucide-react';
+import { LogOut, CreditCard, ChevronDown } from 'lucide-react';
 import { useBilling } from '@/features/billing/hooks/useBilling';
 import { Avatar, AvatarFallback } from '@/shared/components/avatar';
 import {
@@ -23,6 +23,7 @@ interface TopNavigationProps {
   contentClassName?: string;
   activeTab?: WorkspaceTab;
   onTabChange?: (tab: WorkspaceTab) => void;
+  showWorkspaceTabs?: boolean;
 }
 
 export function TopNavigation({
@@ -34,6 +35,7 @@ export function TopNavigation({
   contentClassName,
   activeTab = 'studio',
   onTabChange,
+  showWorkspaceTabs = true,
 }: TopNavigationProps) {
   const navigate = useNavigate();
   const { isFreePlan, billingStatus } = useBilling();
@@ -41,7 +43,6 @@ export function TopNavigation({
 
   const t = {
     billing: '결제 및 사용량',
-    accountSettings: '계정 설정',
     signOut: '로그아웃',
   };
 
@@ -90,30 +91,39 @@ export function TopNavigation({
           </button>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id)}
-                className={cn(
-                  'px-3 py-1.5 text-xs rounded-md transition-colors',
-                  activeTab === tab.id
-                    ? 'bg-gray-100 text-gray-900 font-medium'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {showWorkspaceTabs && (
+            <div className="flex items-center gap-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabClick(tab.id)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-md transition-colors',
+                    activeTab === tab.id
+                      ? 'bg-gray-100 text-gray-900 font-medium'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right: Plan + User */}
         <div className="flex items-center gap-3">
           {/* Plan Badge */}
-          <div className={cn('px-3 py-1.5 rounded-md text-xs', planClass)}>
+          <button
+            type="button"
+            onClick={() => navigate('/billing-settings')}
+            className={cn(
+              'px-3 py-1.5 rounded-md text-xs transition hover:brightness-95 active:translate-y-[1px]',
+              planClass
+            )}
+          >
             {planName} Plan
-          </div>
+          </button>
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -148,10 +158,6 @@ export function TopNavigation({
                 >
                   <CreditCard size={14} className="mr-2 text-gray-600" />
                   <span className="text-xs">{t.billing}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="px-2.5 py-1.5 cursor-pointer hover:bg-gray-50">
-                  <Settings size={14} className="mr-2 text-gray-600" />
-                  <span className="text-xs">{t.accountSettings}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {onLogout && (

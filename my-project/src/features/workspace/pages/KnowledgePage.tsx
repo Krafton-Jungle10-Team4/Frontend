@@ -165,10 +165,10 @@ export function KnowledgePage() {
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl mb-2">Knowledge</h1>
-            <p className="text-gray-600 text-sm">업로드된 지식을 한곳에서 관리하고 빠르게 검색하세요.</p>
+            <h1 className="text-4xl font-bold mb-2">Knowledge</h1>
+            <p className="text-gray-600 text-base">업로드된 지식을 한곳에서 관리하고 빠르게 검색하세요.</p>
           </div>
           <button
             onClick={handleImportFromFile}
