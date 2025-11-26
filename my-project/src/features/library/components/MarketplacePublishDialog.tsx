@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import { Input } from '@/shared/components/input';
 import { Textarea } from '@/shared/components/textarea';
 import { Label } from '@/shared/components/label';
 import { Badge } from '@/shared/components/badge';
-import { Globe, Check, AlertCircle } from 'lucide-react';
+import { Globe, AlertCircle } from 'lucide-react';
 import { publishToMarketplace } from '@/features/marketplace/api/marketplaceApi';
 import type { LibraryAgentVersion } from '@/features/workflow/types/workflow.types';
 import { toast } from 'sonner';
@@ -29,8 +30,8 @@ export function MarketplacePublishDialog({
   onOpenChange,
   agent,
 }: MarketplacePublishDialogProps) {
+  const navigate = useNavigate();
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const fetchWorkflows = useWorkflowStore((state) => state.fetchWorkflows);
 
   // 기본값은 agent의 라이브러리 메타데이터 사용
@@ -64,15 +65,12 @@ export function MarketplacePublishDialog({
       // 최신 게시 상태를 카드에 즉시 반영
       void fetchWorkflows();
 
-      setIsSuccess(true);
       toast.success('마켓플레이스 게시 완료', {
         description: '이제 모든 사용자가 이 서비스를 검색하고 가져올 수 있습니다.',
       });
 
-      setTimeout(() => {
-        onOpenChange(false);
-        setIsSuccess(false);
-      }, 2000);
+      onOpenChange(false);
+      navigate('/workspace/marketplace');
     } catch (error: any) {
       console.error('마켓플레이스 게시 실패:', error);
       toast.error('게시 실패', {
@@ -93,18 +91,7 @@ export function MarketplacePublishDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {isSuccess ? (
-          <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <Check className="w-10 h-10 text-green-600" />
-            </div>
-            <p className="text-lg font-semibold text-green-600">게시 완료!</p>
-            <p className="text-sm text-muted-foreground">
-              탐색 탭에서 확인할 수 있습니다.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4">
             {/* 경고 안내 */}
             <div className="flex items-start gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
@@ -191,11 +178,9 @@ export function MarketplacePublishDialog({
                 </div>
               )}
             </div>
-          </div>
-        )}
+        </div>
 
-        {!isSuccess && (
-          <DialogFooter>
+        <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPublishing}>
               취소
             </Button>
@@ -218,8 +203,7 @@ export function MarketplacePublishDialog({
                 </span>
               )}
             </Button>
-          </DialogFooter>
-        )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
