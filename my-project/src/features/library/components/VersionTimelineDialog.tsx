@@ -57,8 +57,8 @@ export function VersionTimelineDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>버전 타임라인: {agent.library_name}</DialogTitle>
         </DialogHeader>
 
@@ -68,7 +68,7 @@ export function VersionTimelineDialog({
             <span className="ml-2">로딩 중...</span>
           </div>
         ) : (
-          <div className="space-y-4 max-h-[500px] overflow-y-auto">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-2">
             {versions.map((version) => (
               <div
                 key={version.id}

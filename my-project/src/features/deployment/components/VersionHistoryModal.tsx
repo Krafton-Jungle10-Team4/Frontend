@@ -88,7 +88,7 @@ export function VersionHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {botName} - 버전 히스토리
@@ -112,9 +112,9 @@ export function VersionHistoryModal({
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 flex-1 overflow-hidden flex flex-col">
             {currentVersion && (
-              <div className="space-y-3">
+              <div className="space-y-3 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">현재 기본 버전:</span>
                   <Badge className="bg-blue-600 text-white px-3 py-1 font-semibold">
@@ -127,7 +127,7 @@ export function VersionHistoryModal({
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-3 overflow-y-auto flex-1 pr-2">
               {versions.map((version) => {
                 const isCurrentVersion = version.id === currentVersionId;
                 const isSelected = version.id === selectedVersionId;
@@ -191,7 +191,7 @@ export function VersionHistoryModal({
             </div>
 
             {/* 확인 버튼 */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t flex-shrink-0">
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}

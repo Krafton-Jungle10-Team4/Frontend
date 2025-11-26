@@ -18,7 +18,7 @@ export const ImportedWorkflowPanel = memo(
   const { selectNode } = useWorkflowStore();
 
   return (
-    <div className="space-y-4 p-4 relative">
+    <div className="space-y-4 p-4 relative opacity-100">
       {/* 닫기 버튼 */}
       <Button
         variant="ghost"
@@ -32,10 +32,10 @@ export const ImportedWorkflowPanel = memo(
 
       {/* Read-Only Banner */}
       <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
-        <Lock className="w-5 h-5 text-muted-foreground" />
+        <Lock className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         <div className="flex-1">
-          <p className="text-sm font-medium">읽기 전용 라이브러리 서비스</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">읽기 전용 라이브러리 서비스</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
             라이브러리에서 가져온 서비스는 이 자리에서 편집할 수 없습니다.
           </p>
         </div>

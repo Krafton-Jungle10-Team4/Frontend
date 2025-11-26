@@ -85,8 +85,8 @@ export function VersionHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>버전 히스토리</DialogTitle>
         </DialogHeader>
 
@@ -95,14 +95,15 @@ export function VersionHistoryModal({
             <Loader2 className="h-8 w-8 animate-spin text-studio-primary" />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
             {versions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
                 버전 히스토리가 없습니다
               </p>
             ) : (
               <>
-                {versions.map((version) => (
+                <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+                  {versions.map((version) => (
                   <div
                     key={version.id}
                     className="border border-gray-200 rounded-sharp p-4"
@@ -170,11 +171,12 @@ export function VersionHistoryModal({
                     </div>
                   </div>
                 ))}
+                </div>
 
                 <Button
                   variant="default"
                   onClick={handleSetupABTest}
-                  className="w-full"
+                  className="w-full flex-shrink-0"
                 >
                   A/B 테스트 설정
                 </Button>
