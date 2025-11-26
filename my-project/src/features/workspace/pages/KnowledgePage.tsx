@@ -165,30 +165,23 @@ export function KnowledgePage() {
         </div>
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Knowledge</h1>
             <p className="text-gray-600 text-base">업로드된 지식을 한곳에서 관리하고 빠르게 검색하세요.</p>
           </div>
           <button
             onClick={handleImportFromFile}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+            className="relative flex items-center gap-2 px-4 py-2 bg-blue-700 text-white rounded-md overflow-hidden group hover:scale-105 transition-transform duration-300 text-sm"
           >
-            <Plus className="w-4 h-4" />
-            새 문서
+            <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-blue-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+            <Plus className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">새 문서</span>
           </button>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button
-              className="px-3 py-1.5 rounded-md text-sm transition-colors bg-gray-900 text-white"
-            >
-              모두
-            </button>
-          </div>
-
+        <div className="flex items-center justify-end mb-6">
           {/* Tag Filter + Search */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-end">
