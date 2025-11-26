@@ -754,6 +754,32 @@ const WorkflowInner = () => {
         );
       }
 
+      // LLM 노드 생성 시 provider 기본값 설정 (모델명 기반 추론)
+      if (nodeType.type === BlockEnum.LLM) {
+        if (!defaultData.provider && defaultData.model) {
+          // 모델명으로부터 provider 추론
+          const modelStr = typeof defaultData.model === 'string' 
+            ? defaultData.model.toLowerCase() 
+            : (defaultData.model as any)?.name?.toLowerCase() || '';
+          
+          if (modelStr.startsWith('anthropic.claude') || modelStr.includes('amazon.titan')) {
+            defaultData.provider = 'bedrock';
+          } else if (modelStr.startsWith('gpt') || modelStr.startsWith('o1') || modelStr.startsWith('o3')) {
+            defaultData.provider = 'openai';
+          } else if (modelStr.startsWith('claude')) {
+            defaultData.provider = 'anthropic';
+          } else if (modelStr.includes('gemini')) {
+            defaultData.provider = 'google';
+          } else {
+            // 기본값: bedrock (프로덕션 환경)
+            defaultData.provider = 'bedrock';
+          }
+        } else if (!defaultData.provider) {
+          // provider와 model이 모두 없으면 기본값 설정
+          defaultData.provider = 'bedrock';
+        }
+      }
+
       const newNode: Node = {
         id: generateReadableNodeId(nodeType.type as BlockEnum, nodes),
         type: 'custom',

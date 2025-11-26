@@ -51,12 +51,19 @@ export const transformToBackend = (
             provider:
               (node.data as any).provider ||
               extractProviderSlug((node.data as any).model) ||
-              'openai',
-            model:
-              (node.data as any).model?.name ||
-              (typeof (node.data as any).model === 'string'
-                ? (node.data as any).model
-                : 'gpt-4o-mini'),
+              'bedrock',
+            model: (() => {
+              // 프론트엔드에서 model 필드는 문자열(모델 ID)로 저장됨
+              // LLMModelSelect에서 modelConfig.name이 실제 모델 ID이므로 그대로 사용
+              const modelValue = (node.data as any).model;
+              if (typeof modelValue === 'string' && modelValue) {
+                return modelValue; // 이미 모델 ID 문자열
+              }
+              if (modelValue && typeof modelValue === 'object' && 'name' in modelValue) {
+                return modelValue.name; // ModelConfig 객체에서 name 추출
+              }
+              return 'anthropic.claude-3-haiku-20240307-v1:0'; // 기본값: bedrock 모델
+            })(),
             prompt_template: (() => {
               const prompt = (node.data as any).prompt || '';
               if (!prompt) return prompt;
