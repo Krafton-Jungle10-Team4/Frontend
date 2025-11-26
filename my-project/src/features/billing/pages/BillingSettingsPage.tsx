@@ -1,7 +1,7 @@
 // @SnapShot/Frontend/my-project/src/features/billing/pages/BillingSettingsPage.tsx
 
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useBilling } from '../hooks/useBilling';
 import { useBillingStore } from '@/shared/stores/billingStore';
@@ -15,8 +15,55 @@ import { costApi, type DailyCostSummary, type ModelUsageBreakdown } from '../api
 import { UsageChart } from '@/shared/components/usage/UsageChart';
 import { AlertTriangle, CalendarDays, CheckCircle2, CreditCard, Zap, BarChart3, Cpu, Sparkles } from 'lucide-react';
 
+type ModelPricing = {
+  inputPer1K: number;
+  outputPer1K: number;
+};
+
+const MODEL_COST_TABLE: Record<string, ModelPricing> = {
+  'openai:gpt-4o': { inputPer1K: 0.005, outputPer1K: 0.015 },
+  'openai:gpt-4o-mini': { inputPer1K: 0.00015, outputPer1K: 0.0006 },
+  'openai:gpt-3.5-turbo': { inputPer1K: 0.0005, outputPer1K: 0.0015 },
+  'openai:gpt-4-turbo': { inputPer1K: 0.01, outputPer1K: 0.03 },
+  'anthropic:claude-3-haiku': { inputPer1K: 0.00025, outputPer1K: 0.00125 },
+  'anthropic:claude-3-sonnet': { inputPer1K: 0.003, outputPer1K: 0.015 },
+  'anthropic:claude-3-opus': { inputPer1K: 0.015, outputPer1K: 0.075 },
+  'google:gemini-1.5-flash': { inputPer1K: 0.00035, outputPer1K: 0.0007 },
+  'google:gemini-1.5-pro': { inputPer1K: 0.0035, outputPer1K: 0.0105 },
+};
+
+const DEFAULT_MODEL_PRICING: ModelPricing = { inputPer1K: 0.002, outputPer1K: 0.002 };
+const DEFAULT_COST_PER_TOKEN =
+  ((DEFAULT_MODEL_PRICING.inputPer1K + DEFAULT_MODEL_PRICING.outputPer1K) / 2) / 1000;
+
+const normalizeModelKey = (provider?: string, modelName?: string) =>
+  `${(provider || 'openai').toLowerCase()}:${(modelName || '').toLowerCase()}`;
+
+const getModelPricing = (provider?: string, modelName?: string): ModelPricing => {
+  const normalizedKey = normalizeModelKey(provider, modelName);
+  const modelOnlyKey = (modelName || '').toLowerCase();
+  return MODEL_COST_TABLE[normalizedKey] ?? MODEL_COST_TABLE[modelOnlyKey] ?? DEFAULT_MODEL_PRICING;
+};
+
+const calculateModelCost = (model: ModelUsageBreakdown): number => {
+  const pricing = getModelPricing(model.provider, model.modelName);
+  const inputCost = (model.totalInputTokens / 1000) * pricing.inputPer1K;
+  const outputCost = (model.totalOutputTokens / 1000) * pricing.outputPer1K;
+  const estimated = inputCost + outputCost;
+  return model.totalCost > 0 ? model.totalCost : estimated;
+};
+
+const formatCost = (value: number) => {
+  const safeValue = Number.isFinite(value) ? value : 0;
+  if (safeValue >= 1) return safeValue.toFixed(2);
+  if (safeValue >= 0.01) return safeValue.toFixed(2);
+  if (safeValue >= 0.001) return safeValue.toFixed(4);
+  return safeValue.toFixed(6);
+};
+
 export function BillingSettingsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { billingStatus, isLoading, error } = useBilling();
   const upgradePlan = useBillingStore((state) => state.upgradePlan);
   
@@ -59,6 +106,16 @@ export function BillingSettingsPage() {
 
     void loadDetails();
   }, [billingStatus]);
+
+  // 해시(#daily-usage)로 진입 시 해당 섹션으로 스크롤
+  useEffect(() => {
+    if (location.hash === '#daily-usage' && !isLoadingDetails) {
+      const target = document.getElementById('daily-usage');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [location.hash, isLoadingDetails]);
 
   const handleCancelSubscription = () => {
     upgradePlan('free');
@@ -129,19 +186,66 @@ export function BillingSettingsPage() {
 
     const { current_plan, usage, billing_cycle } = billingStatus;
     const botUsage = billingStatus.bot_usage ?? [];
-    const sortedBotUsage = [...botUsage].sort(
-      (a, b) => b.total_cost - a.total_cost
+    const modelCostDetails = modelBreakdown.map((model) => ({
+      ...model,
+      computedCost: calculateModelCost(model),
+    }));
+
+    const totalModelTokens = modelCostDetails.reduce(
+      (sum, model) => sum + model.totalInputTokens + model.totalOutputTokens,
+      0
     );
+    const totalModelCost = modelCostDetails.reduce(
+      (sum, model) => sum + model.computedCost,
+      0
+    );
+    const blendedCostPerToken =
+      totalModelTokens > 0
+        ? totalModelCost / totalModelTokens
+        : DEFAULT_COST_PER_TOKEN;
+
+    const computedMonthlyCost =
+      totalModelCost > 0 ? totalModelCost : usage.monthly_cost;
+    const computedCreditRemaining = Math.max(
+      usage.total_credit - computedMonthlyCost,
+      0
+    );
+
+    const botUsageWithCosts = botUsage.map((bot) => {
+      const existingCost = bot.total_cost ?? 0;
+      const estimatedCost =
+        bot.total_tokens > 0 ? bot.total_tokens * blendedCostPerToken : 0;
+      return {
+        ...bot,
+        computedCost: existingCost > 0 ? existingCost : estimatedCost,
+      };
+    });
+
+    const sortedBotUsage = [...botUsageWithCosts].sort(
+      (a, b) => b.computedCost - a.computedCost
+    );
+    const averageServiceCost =
+      sortedBotUsage.length > 0
+        ? sortedBotUsage.reduce((sum, bot) => sum + bot.computedCost, 0) /
+          sortedBotUsage.length
+        : 0;
     const isFreePlan = current_plan.plan_id === 'free';
     const planDetails = mockPlans.find((plan) => plan.plan_id === current_plan.plan_id);
     const creditUsagePercentage =
       usage.total_credit > 0
-        ? Math.min((usage.monthly_cost / usage.total_credit) * 100, 100)
+        ? Math.min((computedMonthlyCost / usage.total_credit) * 100, 100)
         : 0;
     const additionalCharge = Math.max(
-      usage.monthly_cost - usage.total_credit,
+      computedMonthlyCost - usage.total_credit,
       0
     );
+    const dailyCostsWithFallback = dailyCosts.map((day) => ({
+      ...day,
+      totalCost:
+        day.totalCost && day.totalCost > 0
+          ? day.totalCost
+          : day.totalTokens * blendedCostPerToken,
+    }));
     const canPayOutstanding = additionalCharge > 0;
 
     const handlePayOutstanding = () => {
@@ -193,7 +297,7 @@ export function BillingSettingsPage() {
               <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
                 <p className="text-xs uppercase text-white/70">이번 달 사용</p>
                 <p className="text-2xl font-semibold">
-                  ${usage.monthly_cost.toFixed(2)}
+                  ${formatCost(computedMonthlyCost)}
                 </p>
                 <span className="text-xs text-white/70">
                   총 ${usage.total_credit.toFixed(2)}
@@ -202,7 +306,7 @@ export function BillingSettingsPage() {
               <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
                 <p className="text-xs uppercase text-white/70">남은 크레딧</p>
                 <p className="text-2xl font-semibold">
-                  ${usage.credit_remaining.toFixed(2)}
+                  ${formatCost(computedCreditRemaining)}
                 </p>
                 <span className="text-xs text-white/70">
                   업그레이드 시 자동 충전
@@ -290,10 +394,10 @@ export function BillingSettingsPage() {
                 <div>
                   <div className="flex items-center justify-between text-sm text-slate-600">
                     <span>
-                      사용: ${usage.monthly_cost.toFixed(2)}
+                      사용: ${formatCost(computedMonthlyCost)}
                     </span>
                     <span>
-                      남음: ${usage.credit_remaining.toFixed(2)}
+                      남음: ${formatCost(computedCreditRemaining)}
                     </span>
                   </div>
                   <Progress value={creditUsagePercentage} className="mt-3 h-2" />
@@ -373,33 +477,35 @@ export function BillingSettingsPage() {
           </div>
 
           {/* 일별 비용 차트 */}
-          {isLoadingDetails ? (
-            <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
-              <CardContent className="flex h-[350px] items-center justify-center">
-                <p className="text-sm text-slate-500">
-                  차트 데이터를 불러오는 중...
-                </p>
-              </CardContent>
-            </Card>
-          ) : dailyCosts.length === 0 ? (
-            <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
-              <CardContent className="flex h-[350px] items-center justify-center">
-                <p className="text-sm text-slate-500">
-                  선택한 기간에 사용량 데이터가 없습니다.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <UsageChart
-              data={dailyCosts.map((item) => ({
-                date: item.date,
-                requests: item.requestCount,
-                tokens: item.totalTokens,
-                cost: item.totalCost,
-              }))}
-              title="일별 사용량 추이"
-            />
-          )}
+          <div id="daily-usage" className="scroll-mt-24">
+            {isLoadingDetails ? (
+              <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
+                <CardContent className="flex h-[350px] items-center justify-center">
+                  <p className="text-sm text-slate-500">
+                    차트 데이터를 불러오는 중...
+                  </p>
+                </CardContent>
+              </Card>
+            ) : dailyCosts.length === 0 ? (
+              <Card className="rounded-2xl border border-indigo-50/80 bg-white/90 shadow-md shadow-indigo-50/70 backdrop-blur-sm">
+                <CardContent className="flex h-[350px] items-center justify-center">
+                  <p className="text-sm text-slate-500">
+                    선택한 기간에 사용량 데이터가 없습니다.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <UsageChart
+                data={dailyCostsWithFallback.map((item) => ({
+                  date: item.date,
+                  requests: item.requestCount,
+                  tokens: item.totalTokens,
+                  cost: item.totalCost,
+                }))}
+                title="일별 사용량 추이"
+              />
+            )}
+          </div>
 
           {/* 상세 통계 카드 */}
           {billingStatus && (
@@ -462,9 +568,7 @@ export function BillingSettingsPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-slate-900">
-                    ${sortedBotUsage.length > 0
-                      ? (usage.monthly_cost / sortedBotUsage.length).toFixed(2)
-                      : '0.00'}
+                    ${formatCost(averageServiceCost)}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">
                     이번 결제 주기
@@ -495,7 +599,7 @@ export function BillingSettingsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {modelBreakdown.map((model, index) => (
+                  {modelCostDetails.map((model, index) => (
                     <div
                       key={`${model.provider}-${model.modelName}-${index}`}
                       className="flex items-center justify-between rounded-2xl border border-indigo-50 p-4 transition-colors hover:bg-indigo-50/60"
@@ -513,7 +617,7 @@ export function BillingSettingsPage() {
                       </div>
                       <div className="text-right ml-4">
                         <p className="text-lg font-semibold text-slate-900">
-                          ${model.totalCost.toFixed(2)}
+                          ${formatCost(model.computedCost)}
                         </p>
                         <p className="text-xs text-slate-500">
                           총 비용
@@ -558,7 +662,7 @@ export function BillingSettingsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-slate-900">
-                          ${bot.total_cost.toFixed(2)}
+                          ${formatCost(bot.computedCost)}
                         </p>
                         <p className="text-xs text-slate-500">
                           이번 주기
@@ -605,13 +709,16 @@ export function BillingSettingsPage() {
   return (
     <div className="flex h-screen bg-[#f7f8fb]">
       <div className="flex-1 flex flex-col min-w-0">
-        <TopNavigation
-          userName={userName}
-          userEmail={userEmail}
-          onHomeClick={() => navigate('/workspace/studio')}
-          onLogout={handleLogout}
-          showInlineLogo
-        />
+        <header className="sticky top-0 z-50 w-full backdrop-blur">
+          <TopNavigation
+            userName={userName}
+            userEmail={userEmail}
+            onHomeClick={() => navigate('/workspace/studio')}
+            onLogout={handleLogout}
+            contentClassName="px-20"
+            showWorkspaceTabs={false}
+          />
+        </header>
         <div className="flex-1 overflow-auto">
           {renderContent()}
         </div>

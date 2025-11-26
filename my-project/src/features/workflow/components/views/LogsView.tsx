@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2, CreditCard } from 'lucide-react';
 import { useBotStore } from '@/features/bot/stores/botStore';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Card } from '@/shared/components/card';
@@ -40,6 +40,7 @@ const DEFAULT_FILTERS: WorkflowLogFiltersType = {
 };
 
 const LogsView = () => {
+  const navigate = useNavigate();
   const botId = useBotStore((state) => state.selectedBotId);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(false);
@@ -169,9 +170,21 @@ const LogsView = () => {
     <div className="h-full w-full overflow-auto bg-gray-50 p-6">
       <div className="mx-auto flex h-full max-w-[60%] flex-col gap-6">
         <header>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">
-          Workflow Logs
-          </h1>
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold text-foreground">
+              Workflow Logs
+            </h1>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1 px-2 text-xs"
+              onClick={() => navigate('/billing-settings#daily-usage')}
+            >
+              <CreditCard className="h-3.5 w-3.5" />
+              총 비용
+            </Button>
+          </div>
           <p className="text-sm text-muted-foreground">
             상태, 기간, 키워드로 실행을 필터링하고 상세 패널에서 토큰 및 노드 타임라인을 확인하세요.
           </p>
